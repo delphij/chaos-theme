@@ -9,18 +9,12 @@ Renders prev/next post navigation within a section.
 <ul class="pager" aria-label="{{ T "paginationLabel" }}">
 {{ with .NextInSection -}}
 <li class="page-item page-prev">
-  <a class="page-prev" href="{{ .RelPermalink }}">
-    <span class="prev-text nav-default">← {{ .Title }}</span>
-    <span class="prev-text nav-mobile">←</span>
-  </a>
+  <a class="page-prev" href="{{ .RelPermalink }}">← {{ .Title }}</a>
 </li>
 {{ end }}
 {{ with .PrevInSection -}}
 <li class="page-item page-next">
-  <a class="page-next" href="{{ .RelPermalink }}">
-    <span class="next-text nav-default">{{ .Title }} →</span>
-    <span class="next-text nav-mobile">→</span>
-  </a>
+  <a class="page-next" href="{{ .RelPermalink }}">{{ .Title }} →</a>
 </li>
 {{ end }}
 </ul>
