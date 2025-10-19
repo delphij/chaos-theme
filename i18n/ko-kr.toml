@@ -1,0 +1,39 @@
+home = '홈'
+allPosts = '모든 게시물'
+categories = '카테고리'
+tags = '태그'
+caution = '주의'
+disclaimer = '면책 조항'
+important = '중요'
+note = '참고'
+tip = '팁'
+warning = '경고'
+historical = '과거 파일로 현실적인 의미가 없습니다'
+archives = '시간순 아카이브'
+
+# Navigation
+mainNavigation = '주 메뉴'
+feedsNavigation = '구독'
+atomFeed = 'Atom 피드'
+themeToggle = '라이트/다크 모드 전환'
+
+# Pagination
+paginationLabel = '페이지네이션'
+previousPage = '← 이전 페이지'
+nextPage = '다음 페이지 →'
+
+# Post summary
+readMore = '더 읽기…'
+joinDiscussion = '댓글 참여'
+
+# Reading stats
+readingStats = '이 글은 약 {{ .WordCount }} 자이며, 읽는 데 약 {{ .ReadingTime }} 분 소요됩니다'
+
+# Archives
+year = '년'
+month = '월'
+posts = '개'
+
+# Footer
+poweredBy = '이 사이트는 <a href="https://gohugo.io">Hugo</a>로 구축되었으며, 테마는 <a href="https://github.com/delphij/chaos-theme">Chaos</a>를 사용합니다.'
+remarkAttribution = '댓글 시스템은 <a href="https://remark42.com/">Remark42</a>를 사용합니다.'

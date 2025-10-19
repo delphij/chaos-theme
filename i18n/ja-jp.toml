@@ -1,0 +1,39 @@
+home = 'ホーム'
+allPosts = '全ての記事'
+categories = 'カテゴリー'
+tags = 'タグ'
+caution = '注意'
+disclaimer = '免責事項'
+important = '重要'
+note = '備考'
+tip = 'ヒント'
+warning = '警告'
+historical = '歴史的ファイル、現実的な意義はありません'
+archives = '時系列アーカイブ'
+
+# Navigation
+mainNavigation = 'メインナビゲーション'
+feedsNavigation = 'フィード'
+atomFeed = 'Atom フィード'
+themeToggle = 'ライト/ダークモード切替'
+
+# Pagination
+paginationLabel = 'ページネーション'
+previousPage = '← 前のページ'
+nextPage = '次のページ →'
+
+# Post summary
+readMore = '続きを読む…'
+joinDiscussion = 'コメントに参加'
+
+# Reading stats
+readingStats = 'この記事は約 {{ .WordCount }} 文字で、読むのに約 {{ .ReadingTime }} 分かかります'
+
+# Archives
+year = '年'
+month = '月'
+posts = '件'
+
+# Footer
+poweredBy = 'このサイトは <a href="https://gohugo.io">Hugo</a> で構築され、テーマは <a href="https://github.com/delphij/chaos-theme">Chaos</a> を使用しています。'
+remarkAttribution = 'コメントシステムには <a href="https://remark42.com/">Remark42</a> を使用しています。'
