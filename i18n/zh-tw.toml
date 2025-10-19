@@ -16,6 +16,7 @@ mainNavigation = '主導航'
 feedsNavigation = '訂閱'
 atomFeed = 'Atom 訂閱'
 themeToggle = '切換淺/深色模式'
+menuToggle = '切換選單'
 
 # Pagination
 paginationLabel = '分頁導航'

@@ -16,6 +16,7 @@ mainNavigation = 'メインナビゲーション'
 feedsNavigation = 'フィード'
 atomFeed = 'Atom フィード'
 themeToggle = 'ライト/ダークモード切替'
+menuToggle = 'メニュー切替'
 
 # Pagination
 paginationLabel = 'ページネーション'

@@ -1,5 +1,5 @@
 {{- /*
-Renders a menu for the given menu ID.
+Renders menu links for the given menu ID (without nav wrapper).
 
 Displays menu items defined in site configuration with proper ARIA labels
 and active state indicators using aria-current. Supports i18n via menu identifiers.
@@ -14,9 +14,7 @@ and active state indicators using aria-current. Supports i18n via menu identifie
 {{- $menuID := .menuID }}
 
 {{- with index site.Menus $menuID }}
-  <nav class="main-links" aria-label="{{ T "mainNavigation" }}">
-      {{- partial "inline/menu/walk.html" (dict "page" $page "menuEntries" .) }}
-  </nav>
+  {{- partial "inline/menu/walk.html" (dict "page" $page "menuEntries" .) }}
 {{- end }}
 
 {{- define "_partials/inline/menu/walk.html" }}
