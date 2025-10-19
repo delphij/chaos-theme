@@ -109,7 +109,7 @@ CSS is divided into logical sections:
 
 Example:
 ```javascript
-// Copyright 2025 The Hugo Authors. All rights reserved.
+// Copyright YYYY The Hugo Authors. All rights reserved.
 // Use of this source code is governed by an Apache-2.0
 // license that can be found in the LICENSE file.
 
@@ -232,7 +232,7 @@ git commit -m "chore: maintenance tasks"
 Example NOTICE entry:
 ```
 Library Name
-Copyright (c) YEAR Copyright Holder
+Copyright (c) YYYY Copyright Holder
 Licensed under the MIT License
 Location: static/_3p/libname/version/
 Website: https://example.com/
