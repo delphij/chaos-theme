@@ -17,6 +17,8 @@ feedsNavigation = 'Feeds'
 atomFeed = 'Atom Feed'
 themeToggle = 'Toggle light/dark mode'
 menuToggle = 'Toggle menu'
+tableOfContents = 'Table of Contents'
+tocToggle = 'Toggle table of contents'
 
 # Pagination
 paginationLabel = 'Pagination'

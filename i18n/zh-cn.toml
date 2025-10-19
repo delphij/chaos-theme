@@ -17,6 +17,8 @@ feedsNavigation = '订阅'
 atomFeed = 'Atom 订阅'
 themeToggle = '切换浅/深色模式'
 menuToggle = '切换菜单'
+tableOfContents = '目录'
+tocToggle = '切换目录'
 
 # Pagination
 paginationLabel = '分页导航'

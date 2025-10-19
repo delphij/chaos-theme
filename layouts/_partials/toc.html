@@ -1,0 +1,25 @@
+{{- /*
+Renders table of contents for article pages.
+
+Only displays if the article has headings (h2, h3, h4).
+Provides sticky sidebar on desktop, collapsible on tablet, and overlay on mobile.
+
+@context {page} page The current page.
+
+@example: {{ partial "toc.html" . }}
+*/}}
+
+{{- $toc := .TableOfContents }}
+{{- if and $toc (gt (len $toc) 100) }}
+<aside class="toc-wrapper" id="tocWrapper">
+  <button class="toc-toggle" id="tocToggle" aria-label="{{ T "tocToggle" }}" aria-expanded="false">
+    <span class="toc-icon">☰</span>
+  </button>
+  <nav class="toc overlay-blur" id="tableOfContents" aria-label="{{ T "tableOfContents" }}">
+    <h2 class="toc-title">{{ T "tableOfContents" }}</h2>
+    <div class="toc-content">
+      {{ $toc }}
+    </div>
+  </nav>
+</aside>
+{{- end }}

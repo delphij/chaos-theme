@@ -7,6 +7,7 @@ A minimalist Hugo theme designed for clarity, performance, and excellent Chinese
 - **Performance-focused**: Lightweight with minimal dependencies, no JavaScript frameworks
 - **Dark/Light Mode**: Automatic system preference detection with manual toggle
 - **Responsive Design**: Mobile-first layout with hamburger menu and glass-morphism effects
+- **Table of Contents**: Automatic TOC for article pages with sticky sidebar and active section highlighting
 - **Chinese Typography**: Modern CSS features for CJK text (text-autospace, hanging-punctuation, auto-phrase)
 - **Mathematics Support**: Built-in KaTeX integration for scientific content
 - **SEO Optimized**: Complete OpenGraph, Twitter Cards, and Schema.org support
@@ -263,6 +264,32 @@ On screens ≤600px, the navigation menu automatically switches to a hamburger m
 
 The menu includes all configured navigation items plus the RSS/Atom feed link.
 
+## Table of Contents
+
+Article pages automatically display a table of contents when the content has sufficient headings (h2, h3, h4):
+
+- **Desktop (>900px)**: Sticky sidebar on the right side
+  - Remains visible while scrolling
+  - Shows active section highlighting
+  - Positioned in a 3-column grid layout
+
+- **Tablet/Mobile (≤900px)**: Floating button with overlay
+  - Floating button in bottom-right corner
+  - Click to show/hide full-screen TOC
+  - Glass-morphism effect with backdrop blur
+  - Close by clicking outside, on a link, or pressing Escape
+
+**Active Section Highlighting**:
+- Uses Intersection Observer API for efficient scroll tracking
+- Current section highlighted in primary color
+- Smooth transitions between sections
+
+**Accessibility**:
+- Full keyboard navigation support
+- ARIA labels and states
+- Focus management on open/close
+- Screen reader compatible
+
 ## Internationalization
 
 The theme includes translations for:
@@ -287,13 +314,14 @@ other = "Join the discussion"
 
 The theme is optimized for performance:
 
-- **Minimal JavaScript**: ~3KB total (theme switching + mobile menu)
-- **CSS Bundling**: Minified and fingerprinted in production
+- **Minimal JavaScript**: ~3KB total (theme switching + mobile menu + TOC)
+- **CSS Optimization**: Shared utility classes for glass effects, minified and fingerprinted in production
 - **Partial Caching**: Header and footer cached per language
 - **Preconnect Links**: Early connection to comment server
 - **Lazy Loading**: Images load on-demand
 - **WebP Conversion**: Automatic modern format support
 - **Efficient Animations**: CSS-only transitions with backdrop-filter hardware acceleration
+- **Smart Scroll Tracking**: Intersection Observer instead of scroll events for TOC
 
 ## Browser Support
 
@@ -310,11 +338,11 @@ The theme is optimized for performance:
 ## Accessibility
 
 **WCAG 2.1 AA Compliant:**
-- Semantic HTML5 elements (`<nav>`, `<article>`, `<button>`)
+- Semantic HTML5 elements (`<nav>`, `<article>`, `<button>`, `<aside>`)
 - ARIA labels and states (`aria-label`, `aria-expanded`, `aria-current`)
 - Full keyboard navigation:
   - Tab/Shift+Tab for navigation
-  - Escape key closes mobile menu
+  - Escape key closes mobile menu and TOC overlay
   - Focus returns to trigger button on close
 - Focus indicators on all interactive elements
 - Alt text on all images

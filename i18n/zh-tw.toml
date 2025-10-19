@@ -17,6 +17,8 @@ feedsNavigation = '訂閱'
 atomFeed = 'Atom 訂閱'
 themeToggle = '切換淺/深色模式'
 menuToggle = '切換選單'
+tableOfContents = '目錄'
+tocToggle = '切換目錄'
 
 # Pagination
 paginationLabel = '分頁導航'

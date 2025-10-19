@@ -9,8 +9,9 @@ This is a minimalist Hugo theme designed for clarity, performance, and excellent
 - Accessible and semantic HTML with full i18n support (WCAG 2.1 AA)
 - Dark/light mode with system preference detection
 - Responsive mobile navigation with glass-morphism effects
-- Minimal JavaScript (~3KB for theme toggle + mobile menu)
-- Production-ready code quality
+- Automatic table of contents with sticky sidebar and active section highlighting
+- Minimal JavaScript (~3KB for theme toggle + mobile menu + TOC)
+- Production-ready code quality with optimized, reusable code patterns
 
 ## Commands
 
@@ -89,8 +90,13 @@ CSS is organized in sections:
 3. Base styles
 4. Layout
 5. Components
-6. Utilities
+6. Utilities (shared classes like `.overlay-blur`)
 7. Dark mode overrides
+
+**Optimization Pattern**: Use shared utility classes for repeated patterns:
+- `.overlay-blur`: Backdrop-filter with browser prefixes and `@supports` fallback
+- Applied to mobile menu and TOC overlays
+- Reduces code duplication and improves maintainability
 
 ### JavaScript Guidelines
 - Vanilla JavaScript only (no frameworks)
@@ -98,6 +104,10 @@ CSS is organized in sections:
 - Modern ES6+ features (const/let, arrow functions, template literals)
 - Error handling with try/catch for localStorage
 - Copyright header required (Apache 2.0)
+- **Optimization Pattern**: Create reusable helper functions for common patterns
+  - Example: `setupOverlayToggle()` consolidates toggle logic for menu and TOC
+  - Consolidate event listeners (single click-outside and Escape key handlers)
+  - Use Intersection Observer for scroll-based features instead of scroll events
 
 ### Internationalization (i18n)
 All text strings must be externalized:
@@ -173,22 +183,33 @@ chore: maintenance tasks
 - ✅ Proper Chinese typography (full-width punctuation, 「」 quotes)
 
 ### Performance
-- ✅ Minimal JavaScript (~3KB for theme toggle + mobile menu)
-- ✅ CSS bundled and minified in production
+- ✅ Minimal JavaScript (~3KB for theme toggle + mobile menu + TOC)
+- ✅ CSS bundled and minified in production with shared utility classes
 - ✅ Partial caching for header/footer
 - ✅ Responsive images with WebP
 - ✅ Lazy loading and async decoding
 - ✅ KaTeX loaded conditionally
 - ✅ Hardware-accelerated backdrop-filter for glass effects
+- ✅ Intersection Observer for efficient scroll tracking (TOC active highlighting)
+- ✅ Consolidated event listeners to reduce memory footprint
 
 ### Mobile Navigation
 - ✅ Hamburger menu for screens ≤600px
-- ✅ Glass-morphism effect with 12px backdrop blur
+- ✅ Glass-morphism effect with 12px backdrop blur (shared `.overlay-blur` class)
 - ✅ Absolute positioning (overlays content, doesn't push)
 - ✅ Browser fallback for unsupported backdrop-filter
 - ✅ Click outside, link click, and Escape key to close
 - ✅ Full keyboard accessibility with focus management
 - ✅ Consolidated navigation (main menu + RSS feed)
+
+### Table of Contents
+- ✅ Automatic TOC generation for article pages with sufficient headings
+- ✅ Desktop (>900px): Sticky sidebar with 3-column grid layout
+- ✅ Tablet/Mobile (≤900px): Floating button with full-screen overlay
+- ✅ Active section highlighting using Intersection Observer
+- ✅ Glass-morphism overlay effect (shared `.overlay-blur` class)
+- ✅ Reusable `setupOverlayToggle()` function for consistent behavior
+- ✅ Full keyboard navigation and ARIA support
 
 ### Licensing
 - ✅ Apache 2.0 license (LICENSE file)

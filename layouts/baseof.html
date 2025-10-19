@@ -7,10 +7,19 @@
   <header class="site-nav" role="banner">
     {{ partialCached "header.html" . site.Language.Lang }}
   </header>
-  <main class="container">
+  <main class="container {{ if .IsPage }}has-toc{{ end }}">
+    {{- if .IsPage }}
+    <div class="content-layout">
+      <article class="post" role="article">
+        {{ block "main" . }}{{ end }}
+      </article>
+      {{ partial "toc.html" . }}
+    </div>
+    {{- else }}
     <article class="post" role="article">
       {{ block "main" . }}{{ end }}
     </article>
+    {{- end }}
   </main>
   <footer class="site-foot">
     {{ partial "footer.html" . }}

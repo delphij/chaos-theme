@@ -75,43 +75,102 @@
   // Sync with Remark42 when it becomes ready
   window.addEventListener('REMARK42::ready', () => syncRemark42Theme(true), { once: true });
 
-  // Mobile menu toggle
-  const menuBtn = document.getElementById('menuToggle');
-  const mainNav = document.getElementById('mainNav');
+  // Reusable overlay toggle handler
+  function setupOverlayToggle(button, overlay, openClass) {
+    if (!button || !overlay) return;
 
-  if (menuBtn && mainNav) {
-    // Toggle menu open/closed
-    menuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();  // Prevent immediate close from document listener
-      const isOpen = mainNav.classList.toggle('menu-open');
-      menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    const closeOverlay = () => {
+      overlay.classList.remove(openClass);
+      button.setAttribute('aria-expanded', 'false');
+    };
+
+    // Toggle on button click
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = overlay.classList.toggle(openClass);
+      button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     });
 
-    // Close menu when clicking outside
+    // Close when clicking links inside overlay
+    overlay.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeOverlay);
+    });
+
+    return { overlay, button, openClass, closeOverlay };
+  }
+
+  // Setup mobile menu toggle
+  const menuOverlay = setupOverlayToggle(
+    document.getElementById('menuToggle'),
+    document.getElementById('mainNav'),
+    'menu-open'
+  );
+
+  // Setup TOC toggle
+  const tocOverlay = setupOverlayToggle(
+    document.getElementById('tocToggle'),
+    document.getElementById('tableOfContents'),
+    'toc-open'
+  );
+
+  // Consolidated click-outside and Escape key handlers
+  const overlays = [menuOverlay, tocOverlay].filter(Boolean);
+
+  if (overlays.length > 0) {
+    // Close overlays when clicking outside
     document.addEventListener('click', (e) => {
-      if (mainNav.classList.contains('menu-open') &&
-          !menuBtn.contains(e.target) &&
-          !mainNav.contains(e.target)) {
-        mainNav.classList.remove('menu-open');
-        menuBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-
-    // Close menu when a link is clicked
-    mainNav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        mainNav.classList.remove('menu-open');
-        menuBtn.setAttribute('aria-expanded', 'false');
+      overlays.forEach(({ overlay, button, closeOverlay }) => {
+        if (overlay.classList.contains(overlay.dataset.openClass || 'menu-open') ||
+            overlay.classList.contains('toc-open')) {
+          if (!button.contains(e.target) && !overlay.contains(e.target)) {
+            closeOverlay();
+          }
+        }
       });
     });
 
-    // Close menu on Escape key
+    // Close overlays on Escape key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && mainNav.classList.contains('menu-open')) {
-        mainNav.classList.remove('menu-open');
-        menuBtn.setAttribute('aria-expanded', 'false');
-        menuBtn.focus();  // Return focus to button for keyboard users
+      if (e.key === 'Escape') {
+        overlays.forEach(({ overlay, button, openClass, closeOverlay }) => {
+          if (overlay.classList.contains(openClass)) {
+            closeOverlay();
+            button.focus();
+          }
+        });
       }
     });
+  }
+
+  // Table of Contents - Active section highlighting
+  const toc = document.getElementById('tableOfContents');
+  if (toc) {
+
+    // Active section highlighting with Intersection Observer
+    const headings = document.querySelectorAll('article h2[id], article h3[id], article h4[id]');
+    const tocLinks = toc.querySelectorAll('a');
+
+    if (headings.length > 0 && tocLinks.length > 0) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const id = entry.target.getAttribute('id');
+          const tocLink = toc.querySelector(`a[href="#${id}"]`);
+
+          if (tocLink) {
+            if (entry.isIntersecting) {
+              // Remove active class from all links
+              tocLinks.forEach(link => link.classList.remove('active'));
+              // Add active class to current link
+              tocLink.classList.add('active');
+            }
+          }
+        });
+      }, {
+        rootMargin: '-80px 0px -80% 0px',  // Trigger when heading is near top
+        threshold: 0
+      });
+
+      headings.forEach(heading => observer.observe(heading));
+    }
   }
 })();

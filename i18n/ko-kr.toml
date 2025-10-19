@@ -17,6 +17,8 @@ feedsNavigation = '구독'
 atomFeed = 'Atom 피드'
 themeToggle = '라이트/다크 모드 전환'
 menuToggle = '메뉴 전환'
+tableOfContents = '목차'
+tocToggle = '목차 전환'
 
 # Pagination
 paginationLabel = '페이지네이션'

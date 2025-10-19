@@ -11,8 +11,10 @@ This document provides essential context for AI models and human contributors co
   * Accessible and semantic HTML with WCAG 2.1 AA compliance
   * Dark/light mode with system preference detection
   * Responsive mobile navigation with glass-morphism effects
+  * Automatic table of contents with sticky sidebar and active section highlighting
   * Full internationalization (en-US, zh-CN, zh-TW, ja-JP, ko-KR)
   * Mobile-first responsive design
+  * Optimized code patterns with reusable utilities
 
 ## 2. Core Technologies & Stack
 
@@ -106,7 +108,11 @@ CSS is divided into logical sections:
 * **Scope:** IIFE to avoid global pollution
 * **Error Handling:** try/catch for localStorage access
 * **Copyright:** Apache 2.0 header required (year 2025)
-* **Size:** Keep minimal (~2KB unminified)
+* **Size:** Keep minimal (~3KB unminified)
+* **Optimization:** Create reusable helper functions to reduce duplication
+  - Example: `setupOverlayToggle()` for consistent overlay behavior
+  - Consolidate event listeners (one click-outside handler, one Escape key handler)
+  - Use Intersection Observer API for scroll-based features (better performance than scroll events)
 
 Example:
 ```javascript
@@ -174,12 +180,14 @@ Chinese typography conventions:
 - No external CDN dependencies (except optional Remark42)
 
 ### Performance
-- Minimal JavaScript (~2KB)
-- CSS bundled and minified in production
+- Minimal JavaScript (~3KB with theme toggle + mobile menu + TOC)
+- CSS bundled and minified in production with shared utility classes (`.overlay-blur`)
 - Responsive images with srcset and WebP
 - Lazy loading on images
 - KaTeX loaded conditionally (only when math detected)
 - Partial caching for static components
+- Intersection Observer for efficient scroll tracking (TOC active section)
+- Consolidated event listeners to reduce memory usage
 
 ## 6. Development Workflow
 
