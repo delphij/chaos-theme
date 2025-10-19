@@ -7,10 +7,11 @@ This document provides essential context for AI models and human contributors co
 * **Primary Goal:** A minimalist, production-ready Hugo theme for personal blogs with excellent Chinese typography support
 * **Target Users:** Technical bloggers, developers, writers who value performance and accessibility
 * **Design Philosophy:**
-  * Fast-loading with minimal dependencies (~2KB JavaScript)
-  * Accessible and semantic HTML with WCAG AA compliance
+  * Fast-loading with minimal dependencies (~3KB JavaScript)
+  * Accessible and semantic HTML with WCAG 2.1 AA compliance
   * Dark/light mode with system preference detection
-  * Full internationalization (en-US, zh-CN, zh-TW)
+  * Responsive mobile navigation with glass-morphism effects
+  * Full internationalization (en-US, zh-CN, zh-TW, ja-JP, ko-KR)
   * Mobile-first responsive design
 
 ## 2. Core Technologies & Stack
@@ -51,7 +52,7 @@ Hugo compiles Markdown content into static HTML. The theme provides:
 /static/           Static assets (copied verbatim)
   _3p/             Vendored third-party dependencies
     katex/         Versioned KaTeX releases
-/i18n/             Translation files (en-US, zh-CN, zh-TW)
+/i18n/             Translation files (en-us, zh-cn, zh-tw, ja-jp, ko-kr)
 /config/           Configuration overrides (output formats, media types)
 ```
 

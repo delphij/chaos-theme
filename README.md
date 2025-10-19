@@ -6,12 +6,12 @@ A minimalist Hugo theme designed for clarity, performance, and excellent Chinese
 
 - **Performance-focused**: Lightweight with minimal dependencies, no JavaScript frameworks
 - **Dark/Light Mode**: Automatic system preference detection with manual toggle
-- **Responsive Design**: Mobile-first layout with optimized breakpoints
+- **Responsive Design**: Mobile-first layout with hamburger menu and glass-morphism effects
 - **Chinese Typography**: Modern CSS features for CJK text (text-autospace, hanging-punctuation, auto-phrase)
 - **Mathematics Support**: Built-in KaTeX integration for scientific content
 - **SEO Optimized**: Complete OpenGraph, Twitter Cards, and Schema.org support
-- **Accessible**: Semantic HTML with ARIA labels and keyboard navigation
-- **Multilingual**: i18n support for English, Simplified Chinese, and Traditional Chinese
+- **Accessible**: WCAG 2.1 AA compliant with keyboard navigation and screen reader support
+- **Multilingual**: i18n support for English, Simplified Chinese, Traditional Chinese, Japanese, and Korean
 
 ## Requirements
 
@@ -249,12 +249,28 @@ Configure in `config.toml`:
   home = ["HTML", "ATOM", "RSS"]
 ```
 
+## Mobile Navigation
+
+On screens ≤600px, the navigation menu automatically switches to a hamburger menu:
+
+- **Glass Effect**: Semi-transparent background with 12px backdrop blur
+- **Overlay Design**: Menu floats over content instead of pushing it down
+- **Smart Interactions**:
+  - Click hamburger icon (☰) to toggle menu
+  - Click outside or on a link to close
+  - Press Escape key to close
+- **Accessibility**: Full keyboard navigation with focus management
+
+The menu includes all configured navigation items plus the RSS/Atom feed link.
+
 ## Internationalization
 
 The theme includes translations for:
 - English (en-US)
 - Simplified Chinese (zh-CN)
 - Traditional Chinese (zh-TW)
+- Japanese (ja-JP)
+- Korean (ko-KR)
 
 Add custom translations in `i18n/` directory:
 
@@ -271,27 +287,39 @@ other = "Join the discussion"
 
 The theme is optimized for performance:
 
-- **Minimal JavaScript**: Only ~2KB for theme switching
+- **Minimal JavaScript**: ~3KB total (theme switching + mobile menu)
 - **CSS Bundling**: Minified and fingerprinted in production
 - **Partial Caching**: Header and footer cached per language
 - **Preconnect Links**: Early connection to comment server
 - **Lazy Loading**: Images load on-demand
 - **WebP Conversion**: Automatic modern format support
+- **Efficient Animations**: CSS-only transitions with backdrop-filter hardware acceleration
 
 ## Browser Support
 
-- Modern browsers (Chrome, Firefox, Safari, Edge)
-- Progressive enhancement for older browsers
-- Graceful degradation for unsupported CSS features
+**Full Features (Glass Effect):**
+- Chrome/Edge 76+
+- Safari 9+ (with -webkit-backdrop-filter)
+- Firefox 103+
+
+**Fallback Support:**
+- Firefox <103: Solid background instead of glass effect
+- Older browsers: Progressive enhancement with solid backgrounds
+- All core functionality works in IE11+ (though deprecated)
 
 ## Accessibility
 
-- Semantic HTML5 elements
-- ARIA labels for navigation
-- Keyboard navigation support
-- Focus indicators on interactive elements
+**WCAG 2.1 AA Compliant:**
+- Semantic HTML5 elements (`<nav>`, `<article>`, `<button>`)
+- ARIA labels and states (`aria-label`, `aria-expanded`, `aria-current`)
+- Full keyboard navigation:
+  - Tab/Shift+Tab for navigation
+  - Escape key closes mobile menu
+  - Focus returns to trigger button on close
+- Focus indicators on all interactive elements
 - Alt text on all images
-- Color contrast meets WCAG AA standards
+- Color contrast exceeds WCAG AA standards
+- Screen reader compatible
 
 ## Development
 

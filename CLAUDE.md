@@ -6,9 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 This is a minimalist Hugo theme designed for clarity, performance, and excellent Chinese typography support. Design philosophy:
 - Fast-loading with minimal dependencies (only KaTeX vendored)
-- Accessible and semantic HTML with full i18n support
+- Accessible and semantic HTML with full i18n support (WCAG 2.1 AA)
 - Dark/light mode with system preference detection
-- Minimal JavaScript (~2KB)
+- Responsive mobile navigation with glass-morphism effects
+- Minimal JavaScript (~3KB for theme toggle + mobile menu)
 - Production-ready code quality
 
 ## Commands
@@ -28,7 +29,7 @@ hugo --gc --minify          # Production build with cleanup and minification
 - **Languages**: Go Templates, HTML5, CSS3, vanilla JavaScript
 - **Asset Processing**: Hugo Pipes (bundling, minification, fingerprinting, SRI)
 - **Dependencies**: KaTeX 0.16.22 (vendored at `static/_3p/katex/0.16.22/`)
-- **i18n**: English, Simplified Chinese, Traditional Chinese
+- **i18n**: English, Simplified Chinese, Traditional Chinese, Japanese, Korean
 
 ### Directory Structure
 ```
@@ -49,9 +50,11 @@ hugo --gc --minify          # Production build with cleanup and minification
   _3p/                     # Third-party vendored dependencies
     katex/0.16.22/         # KaTeX with fonts
 /i18n/                     # Translation files
-  en-US.toml
+  en-us.toml
   zh-cn.toml
-  zh-TW.toml
+  zh-tw.toml
+  ja-jp.toml
+  ko-kr.toml
 /config/_default/          # Configuration overrides
 ```
 
@@ -118,13 +121,15 @@ In templates:
 - Navigation items
 - Error messages
 
-### Accessibility Requirements
+### Accessibility Requirements (WCAG 2.1 AA)
 - All images must have `alt` attributes
-- ARIA labels must be localized via i18n
-- Semantic HTML5 elements (`<header>`, `<main>`, `<article>`, `<nav>`)
-- `aria-current` for active states
-- Focus indicators visible
-- Color contrast meets WCAG AA
+- ARIA labels and states must be localized via i18n (`aria-label`, `aria-expanded`, `aria-current`)
+- Semantic HTML5 elements (`<header>`, `<main>`, `<article>`, `<nav>`, `<button>`)
+- Full keyboard navigation support (Tab, Shift+Tab, Escape)
+- Focus management (return focus to trigger on modal/menu close)
+- Focus indicators visible on all interactive elements
+- Color contrast exceeds WCAG AA standards
+- Screen reader compatible with proper ARIA attributes
 
 ### Security
 - Always escape template variables
@@ -164,16 +169,26 @@ chore: maintenance tasks
 ### Internationalization
 - ✅ Complete i18n coverage (no hardcoded text)
 - ✅ ARIA labels localized
-- ✅ Three languages supported (en-US, zh-CN, zh-TW)
+- ✅ Five languages supported (en-US, zh-CN, zh-TW, ja-JP, ko-KR)
 - ✅ Proper Chinese typography (full-width punctuation, 「」 quotes)
 
 ### Performance
-- ✅ Minimal JavaScript (~2KB)
+- ✅ Minimal JavaScript (~3KB for theme toggle + mobile menu)
 - ✅ CSS bundled and minified in production
 - ✅ Partial caching for header/footer
 - ✅ Responsive images with WebP
 - ✅ Lazy loading and async decoding
 - ✅ KaTeX loaded conditionally
+- ✅ Hardware-accelerated backdrop-filter for glass effects
+
+### Mobile Navigation
+- ✅ Hamburger menu for screens ≤600px
+- ✅ Glass-morphism effect with 12px backdrop blur
+- ✅ Absolute positioning (overlays content, doesn't push)
+- ✅ Browser fallback for unsupported backdrop-filter
+- ✅ Click outside, link click, and Escape key to close
+- ✅ Full keyboard accessibility with focus management
+- ✅ Consolidated navigation (main menu + RSS feed)
 
 ### Licensing
 - ✅ Apache 2.0 license (LICENSE file)
