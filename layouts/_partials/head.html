@@ -1,5 +1,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
 <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ printf "%s | %s" .Title site.Title }}{{ end }}</title>
+<meta name="description" content="{{ partial "_funcs/get-meta-description.html" . }}">
 {{ partialCached "head/css.html" . }}
-{{ partialCached "head/js.html" . }}
+{{ with .OutputFormats.Get "rss" -}}
+    {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+{{ end -}}
+{{ with .OutputFormats.Get "atom" -}}
+    {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+{{ end -}}
+{{ if and (eq .Kind "page") site.Params.remarkURL -}}
+<link rel="preconnect" href="{{ site.Params.remarkURL }}" crossorigin>
+{{ end -}}
+{{ partial "schema.html" . }}
+{{ partial "opengraph.html" . }}
+{{ partial "twitter_cards.html" . }}
+{{ $noop := .WordCount }}
+{{ $hasMath := .Page.Store.Get "hasMath" }}
+{{ if not $hasMath }}
+  {{ if or (eq .Kind "home") (eq .Kind "section") (eq .Kind "taxonomy") (eq .Kind "term") }}
+    {{ $checkPages := .Paginator.Pages }}
+    {{ range $checkPages }}
+      {{ $_ := .Summary }}
+      {{ if .Store.Get "hasMath" }}
+        {{ $hasMath = true }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+{{ if $hasMath }}
+<link href="/_3p/katex/0.16.22/katex.min.css" rel="stylesheet">
+{{ end }}

@@ -1,0 +1,39 @@
+home = 'Home'
+allPosts = 'All posts'
+categories = 'Categories'
+tags = 'Tags'
+caution = 'Caution'
+disclaimer = 'Disclaimer'
+important = 'Important'
+note = 'Note'
+tip = 'Tip'
+warning = 'Warning'
+historical = 'Historical'
+archives = 'Archives'
+
+# Navigation
+mainNavigation = 'Main navigation'
+feedsNavigation = 'Feeds'
+atomFeed = 'Atom Feed'
+themeToggle = 'Toggle light/dark mode'
+
+# Pagination
+paginationLabel = 'Pagination'
+previousPage = '← Previous'
+nextPage = 'Next →'
+
+# Post summary
+readMore = 'Read more…'
+joinDiscussion = 'Join discussion'
+
+# Reading stats
+readingStats = 'Approximately {{ .WordCount }} words, {{ .ReadingTime }} min read'
+
+# Archives
+year = ''
+month = ''
+posts = 'posts'
+
+# Footer
+poweredBy = 'Powered by <a href="https://gohugo.io">Hugo</a> with <a href="https://github.com/delphij/chaos-theme">Chaos</a> theme.'
+remarkAttribution = 'Comments powered by <a href="https://remark42.com/">Remark42</a>.'

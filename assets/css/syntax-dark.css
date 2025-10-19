@@ -1,0 +1,66 @@
+/* Generated using: hugo gen chromastyles --style=solarized-dark
+   Optimized: Structural CSS moved to main.css */
+
+/* Background */ html.dark .bg { color:#93a1a1;background-color:#002b36; }
+/* PreWrapper */ html.dark .chroma { color:#93a1a1;background-color:#002b36; }
+/* Other */ html.dark .chroma .x { color:#cb4b16 }
+/* LineHighlight */ html.dark .chroma .hl { background-color:#19404a }
+/* LineNumbersTable */ html.dark .chroma .lnt { color:#495050 }
+/* LineNumbers */ html.dark .chroma .ln { color:#495050 }
+/* Keyword */ html.dark .chroma .k { color:#719e07 }
+/* KeywordConstant */ html.dark .chroma .kc { color:#cb4b16 }
+/* KeywordDeclaration */ html.dark .chroma .kd { color:#268bd2 }
+/* KeywordNamespace */ html.dark .chroma .kn { color:#719e07 }
+/* KeywordPseudo */ html.dark .chroma .kp { color:#719e07 }
+/* KeywordReserved */ html.dark .chroma .kr { color:#268bd2 }
+/* KeywordType */ html.dark .chroma .kt { color:#dc322f }
+/* NameClass */ html.dark .chroma .nc { color:#268bd2 }
+/* NameConstant */ html.dark .chroma .no { color:#cb4b16 }
+/* NameDecorator */ html.dark .chroma .nd { color:#268bd2 }
+/* NameEntity */ html.dark .chroma .ni { color:#cb4b16 }
+/* NameException */ html.dark .chroma .ne { color:#cb4b16 }
+/* NameTag */ html.dark .chroma .nt { color:#268bd2 }
+/* NameBuiltin */ html.dark .chroma .nb { color:#b58900 }
+/* NameBuiltinPseudo */ html.dark .chroma .bp { color:#268bd2 }
+/* NameVariable */ html.dark .chroma .nv { color:#268bd2 }
+/* NameVariableClass */ html.dark .chroma .vc { color:#268bd2 }
+/* NameVariableGlobal */ html.dark .chroma .vg { color:#268bd2 }
+/* NameVariableInstance */ html.dark .chroma .vi { color:#268bd2 }
+/* NameVariableMagic */ html.dark .chroma .vm { color:#268bd2 }
+/* NameFunction */ html.dark .chroma .nf { color:#268bd2 }
+/* NameFunctionMagic */ html.dark .chroma .fm { color:#268bd2 }
+/* LiteralString */ html.dark .chroma .s { color:#2aa198 }
+/* LiteralStringAffix */ html.dark .chroma .sa { color:#2aa198 }
+/* LiteralStringBacktick */ html.dark .chroma .sb { color:#586e75 }
+/* LiteralStringChar */ html.dark .chroma .sc { color:#2aa198 }
+/* LiteralStringDelimiter */ html.dark .chroma .dl { color:#2aa198 }
+/* LiteralStringDouble */ html.dark .chroma .s2 { color:#2aa198 }
+/* LiteralStringEscape */ html.dark .chroma .se { color:#cb4b16 }
+/* LiteralStringInterpol */ html.dark .chroma .si { color:#2aa198 }
+/* LiteralStringOther */ html.dark .chroma .sx { color:#2aa198 }
+/* LiteralStringRegex */ html.dark .chroma .sr { color:#dc322f }
+/* LiteralStringSingle */ html.dark .chroma .s1 { color:#2aa198 }
+/* LiteralStringSymbol */ html.dark .chroma .ss { color:#2aa198 }
+/* LiteralNumber */ html.dark .chroma .m { color:#2aa198 }
+/* LiteralNumberBin */ html.dark .chroma .mb { color:#2aa198 }
+/* LiteralNumberFloat */ html.dark .chroma .mf { color:#2aa198 }
+/* LiteralNumberHex */ html.dark .chroma .mh { color:#2aa198 }
+/* LiteralNumberInteger */ html.dark .chroma .mi { color:#2aa198 }
+/* LiteralNumberIntegerLong */ html.dark .chroma .il { color:#2aa198 }
+/* LiteralNumberOct */ html.dark .chroma .mo { color:#2aa198 }
+/* Operator */ html.dark .chroma .o { color:#719e07 }
+/* OperatorWord */ html.dark .chroma .ow { color:#719e07 }
+/* Comment */ html.dark .chroma .c { color:#586e75 }
+/* CommentHashbang */ html.dark .chroma .ch { color:#586e75 }
+/* CommentMultiline */ html.dark .chroma .cm { color:#586e75 }
+/* CommentSingle */ html.dark .chroma .c1 { color:#586e75 }
+/* CommentSpecial */ html.dark .chroma .cs { color:#719e07 }
+/* CommentPreproc */ html.dark .chroma .cp { color:#719e07 }
+/* CommentPreprocFile */ html.dark .chroma .cpf { color:#719e07 }
+/* GenericDeleted */ html.dark .chroma .gd { color:#dc322f }
+/* GenericEmph */ html.dark .chroma .ge { font-style:italic }
+/* GenericError */ html.dark .chroma .gr { color:#dc322f;font-weight:bold }
+/* GenericHeading */ html.dark .chroma .gh { color:#cb4b16 }
+/* GenericInserted */ html.dark .chroma .gi { color:#719e07 }
+/* GenericStrong */ html.dark .chroma .gs { font-weight:bold }
+/* GenericSubheading */ html.dark .chroma .gu { color:#268bd2 }

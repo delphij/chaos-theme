@@ -1,0 +1,18 @@
+[mediaTypes."application/xslt+xml"]
+  suffixes = ["xsl"]
+
+[outputFormats.atomxsl]
+  mediaType = "application/xslt+xml"
+  baseName = "atom"
+  isPlainText = true
+  notAlternative = true
+
+[outputFormats.sitemapxsl]
+  mediaType = "application/xslt+xml"
+  baseName = "sitemap"
+  isPlainText = true
+  notAlternative = true
+
+[outputs]
+  home = ["HTML", "ATOM", "atomxsl", "sitemapxsl", "RSS", "REDIR"]
+

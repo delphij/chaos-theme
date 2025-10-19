@@ -1,22 +1,35 @@
 baseURL = 'https://example.org/'
-languageCode = 'en-US'
+languageCode = 'zh-cn'
+defaultContentLanguage = 'zh-cn'
 title = 'My New Hugo Site'
 
 [menus]
   [[menus.main]]
-    name = 'Home'
+    identifier = 'home'
     pageRef = '/'
     weight = 10
 
   [[menus.main]]
-    name = 'Posts'
-    pageRef = '/posts'
+    identifier = 'tags'
+    pageRef = '/tags'
     weight = 20
 
-  [[menus.main]]
-    name = 'Tags'
-    pageRef = '/tags'
-    weight = 30
+[markup.highlight]
+  noClasses = false
+
+[markup.goldmark.extensions.passthrough]
+  enable = true
+  [markup.goldmark.extensions.passthrough.delimiters]
+    block = [['$$', '$$']]
+    inline = [['\(', '\)']]
+
+[params]
+  # Remark42 comment system configuration (optional)
+  # Uncomment and configure these to enable the comment system
+  # remarkURL = "https://remark.example.com"
+  # remarkSiteId = "remark"
+  # remarkLocale = "zh"
+  # remarkNoFooter = "true"
 
 [module]
   [module.hugoVersion]

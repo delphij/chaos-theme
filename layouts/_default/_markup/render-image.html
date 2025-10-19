@@ -1,0 +1,124 @@
+{{/*
+  Responsive Image Template for Hugo
+  ---------------------------------
+  - Generates multiple sizes at optimal breakpoints
+  - Provides both 1x and 2x (HiDPI) versions
+  - Uses <picture> with WebP first (if not GIF), fallback to original format
+  - Serves original image for large viewports
+  - Properly matched viewport-to-image-size breakpoints
+  - Prevents upscaling by capping sizes to actual image width
+*/}}
+
+{{ $src := .Page.Resources.GetMatch (printf "%s" (.Destination | safeURL)) }}
+{{ $alt := .PlainText | safeHTML }}
+{{ $dest := .Destination }}
+
+{{/* Check if destination is a remote URL */}}
+{{ $isRemote := or (hasPrefix $dest "http://") (hasPrefix $dest "https://") }}
+
+{{ if $isRemote }}
+  {{/* Render remote image as simple img tag */}}
+  <a href="{{ $dest | safeURL }}">
+    <picture>
+      <img src="{{ $dest | safeURL }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
+    </picture>
+  </a>
+{{ else if $src }}
+
+  {{/* Decide target format: GIF stays GIF, everything else becomes WebP */}}
+  {{ $format := cond (eq $src.MediaType.SubType "gif") "" "webp" -}}
+
+  {{/*
+    Define base breakpoints optimized for article max-width: 1280px (effective ~1232px with padding)
+    Using 1232px as max image width for standard breakpoint and minimal waste
+    - 360: Small phones (portrait)
+    - 640: Large phones (portrait) / Small phones (landscape)
+    - 960: Tablets (portrait) / Phones (landscape)
+    - 1232: Effective article width (standard breakpoint)
+  */}}
+  {{ $baseWidths := slice 360 640 960 1232 }}
+
+  {{/* Use a scratchpad to hold generated images */}}
+  {{ $data := newScratch }}
+
+  {{/* Generate 1x and 2x versions for each base width */}}
+  {{ range $w := $baseWidths }}
+    {{/* Generate 1x version if source is large enough */}}
+    {{ if ge $src.Width $w }}
+      {{ $data.Set (printf "%d-1x" $w) ($src.Resize (printf "%dx %s" $w $format)) }}
+    {{ end }}
+    {{/* Generate 2x version if source is large enough */}}
+    {{ if ge $src.Width (mul $w 2) }}
+      {{ $data.Set (printf "%d-2x" $w) ($src.Resize (printf "%dx %s" (mul $w 2) $format)) }}
+    {{ end }}
+  {{ end }}
+
+  {{/* Build srcset with width descriptors - browser handles DPR automatically */}}
+  {{ $srcset := slice }}
+  {{ $largestProcessed := 0 }}
+
+  {{ range $w := $baseWidths }}
+    {{/* Add 1x version with width descriptor */}}
+    {{ with $img1 := $data.Get (printf "%d-1x" $w) }}
+      {{ $srcset = $srcset | append (printf "%s %dw" $img1.RelPermalink $w) }}
+      {{ $largestProcessed = $w }}
+    {{ end }}
+    {{/* Add 2x version with its actual width (2xbase) */}}
+    {{ with $img2 := $data.Get (printf "%d-2x" $w) }}
+      {{ $srcset = $srcset | append (printf "%s %dw" $img2.RelPermalink (mul $w 2)) }}
+      {{ $largestProcessed = mul $w 2 }}
+    {{ end }}
+  {{ end }}
+
+  {{/* If original is larger than our largest processed size, include it */}}
+  {{ if gt $src.Width $largestProcessed }}
+    {{ $original := $src }}
+    {{ if ne $format "" }}
+      {{ $original = $src.Resize (printf "%dx %s" $src.Width $format) }}
+    {{ end }}
+    {{ $srcset = $srcset | append (printf "%s %dw" $original.RelPermalink $src.Width) }}
+  {{ end }}
+
+  {{/* Build sizes attribute - cap each breakpoint to actual image width to prevent upscaling */}}
+  {{ $sizes := slice }}
+
+  {{/* Define viewport-to-size mappings */}}
+  {{ range $breakpoint := slice
+    (dict "maxWidth" 640 "size" 360)
+    (dict "maxWidth" 960 "size" 640)
+    (dict "maxWidth" 1280 "size" 960)
+  }}
+    {{/* Cap display size to actual image width */}}
+    {{ $displaySize := cond (le $src.Width .size) $src.Width .size }}
+    {{ $sizes = $sizes | append (printf "(max-width: %dpx) %dpx" .maxWidth $displaySize) }}
+  {{ end }}
+
+  {{/* Final fallback size - capped to actual width */}}
+  {{ $finalSize := cond (le $src.Width 1232) $src.Width 1232 }}
+  {{ $sizes = $sizes | append (printf "%dpx" $finalSize) }}
+
+  {{ $sizesAttr := delimit $sizes ", " }}
+
+  {{/* Extract the first generated image for <img src> fallback */}}
+  {{ $first := index $srcset 0 }}
+  {{ $firstParts := split $first " " }}
+  {{ $firstURL := index $firstParts 0 }}
+
+  <a href="{{ $src.RelPermalink }}">
+    <picture>
+      {{/* Modern format (WebP) if applicable */}}
+      {{ if ne $format "" }}
+        <source type="image/{{ $format }}"
+          srcset="{{ delimit $srcset ", " }}"
+          sizes="{{ $sizesAttr }}">
+      {{ end }}
+
+      {{/* Fallback <img>: ensures compatibility for old browsers */}}
+      <img src="{{ $firstURL }}"
+        srcset="{{ delimit $srcset ", " }}"
+        sizes="{{ $sizesAttr }}"
+        alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
+    </picture>
+  </a>
+
+{{ end }}

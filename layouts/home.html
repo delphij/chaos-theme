@@ -1,7 +1,8 @@
 {{ define "main" }}
   {{ .Content }}
-  {{ range site.RegularPages }}
-    <h2><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
-    {{ .Summary }}
+  {{ $paginator := .Paginate site.RegularPages }}
+  {{ range $paginator.Pages }}
+    {{ partial "post-summary.html" . }}
   {{ end }}
+  {{ partial "paginator.html" . }}
 {{ end }}

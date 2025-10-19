@@ -1,0 +1,20 @@
+{{- /*
+Renders a page header with title and content.
+
+@context {page} page The page context containing Title and Content.
+@param {bool} .translate Optional - if true, translate the title using T function.
+
+@example: {{ partial "page-header.html" . }}
+@example: {{ partial "page-header.html" (dict "page" . "translate" true) }}
+*/}}
+
+{{- $page := . -}}
+{{- $translate := false -}}
+
+{{- if reflect.IsMap . -}}
+  {{- $page = .page -}}
+  {{- $translate = .translate | default false -}}
+{{- end -}}
+
+<h1>{{- if $translate -}}{{ T $page.Title }}{{- else -}}{{ $page.Title }}{{- end -}}</h1>
+{{ $page.Content }}

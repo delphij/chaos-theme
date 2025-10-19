@@ -1,0 +1,22 @@
+{{ define "main" }}
+  {{ partial "page-header.html" . }}
+
+  {{ $posts := where site.RegularPages "Type" "posts" }}
+
+  {{ range $posts.GroupByDate "2006" }}
+    <h2>{{ .Key }}{{ T "year" }}</h2>
+    {{ range .Pages.GroupByDate "01" }}
+      {{ $year := (index .Pages 0).Date.Format "2006" }}
+      <h3>{{ $year }}{{ T "year" }} {{ .Key }}{{ T "month" }} ({{ len .Pages }} {{ T "posts" }})</h3>
+      <ul class="archive-list">
+        {{ range .Pages }}
+          <li>
+            <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          </li>
+        {{ end }}
+      </ul>
+    {{ end }}
+  {{ end }}
+{{ end }}
+

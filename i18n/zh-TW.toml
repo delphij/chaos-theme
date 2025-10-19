@@ -1,0 +1,39 @@
+home = '首頁'
+allPosts = '所有文章'
+categories = '分類'
+tags = '標籤'
+caution = '小心'
+disclaimer = '免責聲明'
+important = '重要'
+note = '注意'
+tip = '友情提示'
+warning = '警告'
+historical = '歷史文件已不具備現實意義'
+archives = '時序歸檔'
+
+# Navigation
+mainNavigation = '主導航'
+feedsNavigation = '訂閱'
+atomFeed = 'Atom 訂閱'
+themeToggle = '切換淺/深色模式'
+
+# Pagination
+paginationLabel = '分頁導航'
+previousPage = '← 上一頁'
+nextPage = '下一頁 →'
+
+# Post summary
+readMore = '閱讀全文…'
+joinDiscussion = '參與評論'
+
+# Reading stats
+readingStats = '本文約 {{ .WordCount }} 字，閱讀大致需要 {{ .ReadingTime }} 分鐘'
+
+# Archives
+year = '年'
+month = '月'
+posts = '篇'
+
+# Footer
+poweredBy = '本站使用 <a href="https://gohugo.io">Hugo</a> 構建，主題為 <a href="https://github.com/delphij/chaos-theme">Chaos</a>。'
+remarkAttribution = '評論系統採用 <a href="https://remark42.com/">Remark42</a>。'

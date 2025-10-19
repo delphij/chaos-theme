@@ -1,0 +1,10 @@
+{{- /*
+Returns the appropriate title for metadata (OpenGraph, Schema, Twitter Cards).
+
+@context {page} page The current page context.
+@returns {string} The plainified title.
+
+@example: {{ $title := partial "_funcs/get-meta-title.html" . }}
+*/}}
+
+{{- return (or .Title site.Title site.Params.title | plainify) -}}

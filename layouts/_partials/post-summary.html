@@ -1,0 +1,20 @@
+{{- /*
+Renders a post summary card for list pages.
+
+Displays post title, date, taxonomy links, summary text, and optional
+"Read more" or "Join discussion" links. Includes reading stats.
+
+@context {page} page The page context for the post.
+
+@example: {{ partial "post-summary.html" . }}
+*/}}
+
+<h1><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h1>
+<div class="meta">{{ partial "datetime.html" . }}{{ partial "taxonomy-links.html" . }}</div>
+{{ .Summary }}
+{{ if .Truncated }}
+  <a href="{{ .RelPermalink }}">{{ T "readMore" }}</a><span class="meta">({{ partial "reading-stats.html" . }})</span>
+{{ else }}
+  <a href="{{ .RelPermalink }}">{{ T "joinDiscussion" }}</a>
+{{ end }}
+

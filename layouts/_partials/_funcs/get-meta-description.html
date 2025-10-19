@@ -1,0 +1,30 @@
+{{- /*
+Returns the appropriate description for metadata (OpenGraph, Schema, Twitter Cards, and meta tags).
+
+Fallback order:
+1. Page .Description (from front matter)
+2. For homepage: site.Params.subtitle or site.Title
+3. Page .Summary (auto-generated or manual)
+4. For section pages: "Title - Site Title"
+5. Page .Title
+
+@context {page} page The current page context.
+@returns {string} The plainified and trimmed description.
+
+@example: {{ $description := partial "_funcs/get-meta-description.html" . }}
+*/}}
+
+{{- $description := "" -}}
+{{- if .Description -}}
+  {{- $description = .Description -}}
+{{- else if .IsHome -}}
+  {{- $description = site.Params.subtitle | default site.Title -}}
+{{- else if .Summary -}}
+  {{- $description = .Summary -}}
+{{- else if .IsSection -}}
+  {{- $description = printf "%s - %s" .Title site.Title -}}
+{{- else -}}
+  {{- $description = .Title -}}
+{{- end -}}
+{{- return ($description | plainify | htmlUnescape | replaceRE `[\n\r\t ]+` " " | strings.TrimSpace) -}}
+

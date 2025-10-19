@@ -1,1 +1,12 @@
-<p>Copyright {{ now.Year }}. All rights reserved.</p>
+{{- /*
+Renders the site footer with copyright information and theme attribution.
+
+Shows Remark42 attribution on individual article pages when Remark42 is enabled.
+
+@context {page} page The current page context.
+
+@example: {{ partial "footer.html" . }}
+*/}}
+
+{{ dateFormat "2006" now }} {{ with .Site.Copyright }} {{ . | markdownify | safeHTML }} | {{ end }} {{ T "poweredBy" | safeHTML }}{{ if and (eq .Kind "page") site.Params.remarkURL }} {{ T "remarkAttribution" | safeHTML }}{{ end }}
+{{ partialCached "foot/js.html" . }}

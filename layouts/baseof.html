@@ -4,13 +4,15 @@
   {{ partial "head.html" . }}
 </head>
 <body>
-  <header>
-    {{ partial "header.html" . }}
+  <header class="site-nav" role="banner">
+    {{ partialCached "header.html" . site.Language.Lang }}
   </header>
-  <main>
-    {{ block "main" . }}{{ end }}
+  <main class="container">
+    <article class="post" role="article">
+      {{ block "main" . }}{{ end }}
+    </article>
   </main>
-  <footer>
+  <footer class="site-foot">
     {{ partial "footer.html" . }}
   </footer>
 </body>

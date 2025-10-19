@@ -1,0 +1,71 @@
+/* Modern CSS Reset
+   Minimal reset targeting modern browsers (2024+)
+   Based on modern web standards, removing legacy IE/old Edge hacks
+   ========================================================================== */
+
+/* Use border-box globally */
+*,
+*::before,
+*::after{
+  box-sizing: border-box;
+}
+
+/* Remove default margins and padding */
+*{
+  margin: 0;
+  padding: 0;
+}
+
+/* HTML and body defaults */
+html{
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body{
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Media elements */
+img,
+picture,
+video,
+canvas,
+svg{
+  display: block;
+  max-width: 100%;
+}
+
+/* Form elements inherit fonts */
+input,
+button,
+textarea,
+select{
+  font: inherit;
+}
+
+/* Remove button styling */
+button{
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Improve text rendering */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6{
+  overflow-wrap: break-word;
+}
+
+/* Table defaults */
+table{
+  border-collapse: collapse;
+  border-spacing: 0;
+}

@@ -1,9 +1,18 @@
-{{- with resources.Get "css/main.css" }}
-  {{- if hugo.IsDevelopment }}
-    <link rel="stylesheet" href="{{ .RelPermalink }}">
-  {{- else }}
-    {{- with . | minify | fingerprint }}
-      <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+{{- $cssFiles := slice "css/normalize.css" "css/main.css" "css/syntax.css" "css/syntax-dark.css" -}}
+
+{{- if hugo.IsDevelopment }}
+  {{- range $cssFiles }}
+    {{- with resources.Get . }}
+      <link rel="stylesheet" href="{{ .RelPermalink }}"></link>
     {{- end }}
+  {{- end }}
+{{- else }}
+  {{- $cssResources := slice -}}
+  {{- range $cssFiles }}
+    {{- $cssResources = $cssResources | append (resources.Get .) -}}
+  {{- end -}}
+
+  {{- with $cssResources | resources.Concat "css/bundle.css" | minify | fingerprint }}
+    <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></link>
   {{- end }}
 {{- end }}

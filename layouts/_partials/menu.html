@@ -1,8 +1,11 @@
 {{- /*
 Renders a menu for the given menu ID.
 
-@context {page} page The current page.
-@context {string} menuID The menu ID.
+Displays menu items defined in site configuration with proper ARIA labels
+and active state indicators using aria-current. Supports i18n via menu identifiers.
+
+@param {page} .page The current page for active state detection.
+@param {string} .menuID The menu ID (e.g., "main").
 
 @example: {{ partial "menu.html" (dict "menuID" "main" "page" .) }}
 */}}
@@ -11,10 +14,8 @@ Renders a menu for the given menu ID.
 {{- $menuID := .menuID }}
 
 {{- with index site.Menus $menuID }}
-  <nav>
-    <ul>
+  <nav class="main-links" aria-label="{{ T "mainNavigation" }}">
       {{- partial "inline/menu/walk.html" (dict "page" $page "menuEntries" .) }}
-    </ul>
   </nav>
 {{- end }}
 
@@ -33,7 +34,6 @@ Renders a menu for the given menu ID.
         {{- $name = . }}
       {{- end }}
     {{- end }}
-    <li>
       <a
         {{- range $k, $v := $attrs }}
           {{- with $v }}
@@ -41,11 +41,5 @@ Renders a menu for the given menu ID.
           {{- end }}
         {{- end -}}
       >{{ $name }}</a>
-      {{- with .Children }}
-        <ul>
-          {{- partial "inline/menu/walk.html" (dict "page" $page "menuEntries" .) }}
-        </ul>
-      {{- end }}
-    </li>
   {{- end }}
 {{- end }}

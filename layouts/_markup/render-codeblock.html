@@ -1,0 +1,8 @@
+{{- $lineCount := len (split .Inner "\n") -}}
+{{- $linenos := cond (lt $lineCount 5) false true -}}
+{{- if isset .Attributes "linenos" -}}
+  {{- $linenos = .Attributes.linenos -}}
+{{- end -}}
+{{- $opts := merge .Options (dict "linenos" $linenos) -}}
+{{- $result := transform.HighlightCodeBlock . $opts -}}
+{{- $result.Wrapped -}}

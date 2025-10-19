@@ -1,0 +1,25 @@
+Chaos Hugo Theme
+Copyright 2024 The Hugo Authors
+
+This theme is derived from Hugo's built-in templates and examples.
+
+Hugo is licensed under the Apache License, Version 2.0.
+For more information about Hugo, visit https://gohugo.io/
+
+================================================================================
+
+This theme includes the following third-party software:
+
+KaTeX
+Copyright (c) 2013-2020 Khan Academy and other contributors
+Licensed under the MIT License
+Location: static/_3p/katex/0.16.22/
+See static/_3p/katex/0.16.22/LICENSE for full license text
+Website: https://katex.org/
+
+Remark42 embed script
+Copyright (c) 2021 Umputun
+Licensed under the MIT License
+Location: layouts/_partials/remark.html
+Website: https://remark42.com/
+The embed loader script is used to integrate the Remark42 commenting system.

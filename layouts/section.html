@@ -1,8 +1,12 @@
 {{ define "main" }}
-  <h1>{{ .Title }}</h1>
-  {{ .Content }}
-  {{ range .Pages }}
-    <h2><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
-    {{ .Summary }}
-  {{ end }}
+  {{ partial "page-header.html" (dict "page" . "translate" true) }}
+  {{ $pages := where .Site.RegularPages "Type" "in" .Site.Params.mainSections }}
+  {{ $paginator := .Paginate (where $pages "Params.hidden" "ne" true) }}
+  {{ range $paginator.Pages }}
+  {{- if (in (.Site.Params.excludedTypes | default (slice "page")) .Type) -}}
+  {{- else -}}
+    {{ partial "post-summary.html" . }}
+  {{- end -}}
+  {{- end -}}
+  {{ partial "paginator.html" . }}
 {{ end }}

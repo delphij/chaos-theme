@@ -1,0 +1,39 @@
+home = '首页'
+allPosts = '所有文章'
+categories = '分类'
+tags = '标签'
+caution = '小心'
+disclaimer = '免责声明'
+important = '重要'
+note = '注意'
+tip = '友情提示'
+warning = '警告'
+historical = '历史文件已不具备现实意义'
+archives = '时序归档'
+
+# Navigation
+mainNavigation = '主导航'
+feedsNavigation = '订阅'
+atomFeed = 'Atom 订阅'
+themeToggle = '切换浅/深色模式'
+
+# Pagination
+paginationLabel = '分页导航'
+previousPage = '← 上一页'
+nextPage = '下一页 →'
+
+# Post summary
+readMore = '阅读全文…'
+joinDiscussion = '参与评论'
+
+# Reading stats
+readingStats = '本文约 {{ .WordCount }} 字，阅读大致需要 {{ .ReadingTime }} 分钟'
+
+# Archives
+year = '年'
+month = '月'
+posts = '篇'
+
+# Footer
+poweredBy = '本站使用 <a href="https://gohugo.io">Hugo</a> 构建，主题为 <a href="https://github.com/delphij/chaos-theme">Chaos</a>。'
+remarkAttribution = '评论系统采用 <a href="https://remark42.com/">Remark42</a>。'

@@ -1,0 +1,18 @@
+{{- /*
+Renders page content with Ruby annotation support for East Asian typography.
+
+Ruby annotations are used to show pronunciation or meaning above/beside base text,
+commonly used in Chinese, Japanese, and Korean typography.
+
+Syntax:
+  [base]^{annotation}  or  [base]^(annotation)
+
+@context {page} page The page context containing Content.
+
+@example: {{ partial "content-plus-ruby.html" . }}
+*/}}
+
+{{ $content := .Content }}
+{{ $content = $content | replaceRE `\[([^\]]+)\]\^?\{([^}]+)\}` `<ruby><rb>$1</rb><rt>$2</rt></ruby>` }}
+{{ $content = $content | replaceRE `\[([^\]]+)\]\^\(([^)]+)\)` `<ruby><rb>$1</rb><rt>$2</rt></ruby>` }}
+{{ $content | safeHTML }}

@@ -1,0 +1,23 @@
+{{- /*
+Renders taxonomy links (categories and tags) for a post.
+
+Displays clickable category and tag links with appropriate separators.
+Categories appear first, followed by tags prefixed with '#'.
+
+@context {page} page The page context containing taxonomy parameters.
+
+@example: {{ partial "taxonomy-links.html" . }}
+*/}}
+
+{{- if ne .Type "page" -}}
+  {{- with .Params.categories -}}
+    {{- range . }}
+ | <a href="{{ "/categories/" | relLangURL }}{{ . | urlize }}">{{ . }}</a>
+    {{- end -}}
+  {{- end -}}
+  {{- with .Params.tags -}}
+    {{- range . }}
+ | <a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}">#{{ . }}</a>
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
