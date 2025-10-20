@@ -332,7 +332,7 @@ nav.main-links a:hover {
 /* 3-column layout for article pages */
 .content-layout {
   display: grid;
-  grid-template-columns: 1fr minmax(auto, 780px) 280px;
+  grid-template-columns: 1fr minmax(0, 780px) 280px;
   gap: 40px;
   align-items: start;
 }
@@ -340,6 +340,7 @@ nav.main-links a:hover {
 /* Article takes center column */
 article.post {
   grid-column: 2;
+  min-width: 0;                      /* Allow grid item to shrink below content size */
 }
 
 /* TOC wrapper in right column - sticky container */
