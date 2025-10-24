@@ -860,11 +860,8 @@ button:focus {
    ========================================================================== */
 
 /* Tablet breakpoint - Collapse 3-column layout to single column
-   Keep article width at 780px to match desktop for smooth transition */
+   Container max-width stays at 1280px; article grid already constrains content to 780px */
 @media (max-width: 1199px) {
-  :root {
-    --max-width: 780px;              /* Match desktop article column width (no sudden width change at breakpoint) */
-  }
 
   .nav-inner {
     padding: 10px 16px;
