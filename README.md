@@ -257,7 +257,8 @@ Configure in `config.toml`:
 The theme provides optimized print output for articles, ensuring a clean and readable experience:
 
 - **Print-Friendly Layout**: Automatically hides navigation, interactive elements, and other non-essential components for a clutter-free printout.
-- **Automatic Footnotes**: External links within the article are automatically converted into a numbered "References" section at the end of the printed document, preserving source attribution without cluttering the main content.
+- **Automatic Footnotes with Bidirectional Links**: External links within the article are automatically converted into a numbered "References" section at the end of the printed document. Each link in the text shows a clickable `[1]` reference, and each footnote includes a clickable `^` symbol that links back to the original reference (Wikipedia-style navigation).
+- **Smart Code Block Pagination**: Code blocks shorter than 14 lines stay together on one page. Longer blocks break naturally across pages with minimum 7 lines on each side, preventing awkward fragments while avoiding wasted blank space.
 - **Optimized Typography**: Adjusts font sizes, line spacing, and page breaks for optimal readability on paper.
 
 ## Mobile Navigation

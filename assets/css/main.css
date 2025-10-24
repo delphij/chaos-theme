@@ -1012,16 +1012,38 @@ button:focus {
     widows: 3;                       /* Prevent short widows with URLs */
   }
 
-  /* Improve heading breaks */
+  /* Improve heading breaks - avoid page breaks immediately after headings */
   h1, h2, h3 {
     page-break-after: avoid;
     break-after: avoid-page;
   }
 
-  /* Avoid breaking images and code blocks */
-  img, pre, blockquote {
+  /* Images and blockquotes should not break */
+  img, blockquote {
     page-break-inside: avoid;
     break-inside: avoid;
+  }
+
+  /* Code blocks - allow breaking for large blocks, but prefer keeping together */
+  pre, .highlight {
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+
+  /* Smart breaking for code blocks using orphan/widow control
+     - Blocks with < 14 lines will stay together (avoids wasted space)
+     - Blocks with >= 14 lines can break across pages
+     - Ensures minimum 7 lines on each side of break (prevents 1-2 line fragments) */
+  pre {
+    orphans: 7;
+    widows: 7;
+  }
+
+  /* Avoid breaking a code block immediately after a heading */
+  h1 + pre, h2 + pre, h3 + pre,
+  h1 + .highlight, h2 + .highlight, h3 + .highlight {
+    page-break-before: avoid;
+    break-before: avoid-page;
   }
 
   /* Remove link underlines for cleaner print */
@@ -1030,13 +1052,26 @@ button:focus {
     color: var(--text);
   }
 
-  /* Footnote superscript numbers - added by JavaScript */
+  /* Print footnote styling - External links converted to footnotes */
+
+  /* Footnote superscript reference numbers in text [1] [2] etc. */
   .print-footnote-ref {
     font-size: 0.75em;
     vertical-align: super;
     color: var(--primary);
     font-weight: 600;
     margin-left: 0.1em;
+    text-decoration: none;
+    border-bottom: 1px solid var(--primary);
+  }
+
+  /* Clickable footnote numbers in References section (1. 2. etc.) */
+  .print-footnote-backref {
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1px solid var(--primary);
+    margin-right: 0.5em;
   }
 
   /* Print references section */
