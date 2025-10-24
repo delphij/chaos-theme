@@ -4,10 +4,12 @@
   {{ partial "head.html" . }}
 </head>
 <body>
+  <a href="#main-content" class="skip-link">{{ T "skipToContent" }}</a>
+  <div id="theme-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   <header class="site-nav" role="banner">
     {{ partialCached "header.html" . site.Language.Lang }}
   </header>
-  <main class="container {{ if .IsPage }}has-toc{{ end }}">
+  <main id="main-content" class="container {{ if .IsPage }}has-toc{{ end }}">
     {{- if .IsPage }}
     <div class="content-layout">
       <article class="post" role="article">

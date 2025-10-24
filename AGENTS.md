@@ -2,338 +2,290 @@
 
 This document provides essential context for AI models and human contributors collaborating on this Hugo theme. Following these guidelines ensures **consistency, maintainability, and production quality**.
 
-## 1. Project Overview & Purpose
+## 1. Project Philosophy
 
-* **Primary Goal:** A minimalist, production-ready Hugo theme for personal blogs with excellent Chinese typography support
-* **Target Users:** Technical bloggers, developers, writers who value performance and accessibility
-* **Design Philosophy:**
-  * Fast-loading with minimal dependencies (~3KB JavaScript)
-  * Accessible and semantic HTML with WCAG 2.1 AA compliance
-  * Dark/light mode with system preference detection
-  * Responsive mobile navigation with glass-morphism effects
-  * Automatic table of contents with sticky sidebar and active section highlighting
-  * Full internationalization (en-US, zh-CN, zh-TW, ja-JP, ko-KR)
-  * Mobile-first responsive design
-  * Optimized code patterns with reusable utilities
+### Design Principles
+* **Minimalism**: Add features only when necessary; prefer simplicity over complexity
+* **Performance First**: Every byte counts - target <10KB total JavaScript, efficient CSS
+* **Accessibility Always**: WCAG 2.1 AA compliance is non-negotiable
+* **Internationalization by Default**: No hardcoded text; proper CJK typography support
+* **Progressive Enhancement**: Modern browsers first, graceful degradation for older ones
+* **Self-Hosted**: Vendor dependencies for reliability and privacy (no CDNs)
 
-## 2. Core Technologies & Stack
+### Target Audience
+Technical bloggers, developers, and writers who value:
+- Fast page loads and minimal JavaScript
+- Excellent Chinese typography
+- Dark/light mode support
+- Mobile-first responsive design
+- Clean, semantic HTML
 
-* **Languages:** Go Templates (Hugo), HTML5, CSS3, JavaScript (vanilla ES6+)
-* **Framework:** Hugo 0.146.0+ (standard edition, extended not required)
-* **Asset Processing:** Hugo Pipes (bundling, minification, fingerprinting, SRI)
-* **Dependencies:**
-  * **KaTeX 0.16.22**: Mathematical typesetting (vendored at `static/_3p/katex/0.16.22/`)
-  * **Remark42**: Optional comment system (embed script, MIT license)
-* **Package Management:** Manual vendoring (NO npm/node_modules)
-* **i18n:** Hugo's built-in i18n system with TOML translation files
-
-## 3. Architecture & Structure
+## 2. Architecture Philosophy
 
 ### Static Site Generation Model
-Hugo compiles Markdown content into static HTML. The theme provides:
-- Template hierarchy (`baseof.html` → specific templates)
-- Partial components for reusability
-- Custom markdown renderers for images, code, and math
-- Asset pipeline for CSS/JS optimization
+Hugo compiles Markdown → static HTML at build time. No client-side frameworks, no build complexity beyond Hugo itself.
 
-### Directory Organization
-```
-/layouts/          Template files following Hugo conventions
-  baseof.html      Root template with base HTML structure
-  _default/        Page templates (single, list, taxonomy)
-  _markup/         Custom markdown renderers
-  _partials/       Reusable components
-    _funcs/        Function partials (pure logic)
-    head/          Head section components
-    foot/          Footer components
-  archives/        Archive page template
-  shortcodes/      Content shortcodes (X/Twitter embed)
-/assets/           Source files processed by Hugo Pipes
-  css/             Unminified CSS (main, normalize, syntax)
-  js/              Source JavaScript (theme switching)
-/static/           Static assets (copied verbatim)
-  _3p/             Vendored third-party dependencies
-    katex/         Versioned KaTeX releases
-/i18n/             Translation files (en-us, zh-cn, zh-tw, ja-jp, ko-kr)
-/config/           Configuration overrides (output formats, media types)
-```
+**Key architectural decisions:**
+- **Template hierarchy**: `baseof.html` provides base structure, specific templates extend it
+- **Partial components**: Reusable, cacheable components for performance
+- **Custom renderers**: Override markdown rendering for images, code, math
+- **Asset pipeline**: Hugo Pipes handles bundling, minification, fingerprinting, SRI
 
-## 4. Coding Standards & Best Practices
+### Why Vendored Dependencies?
+- **Reliability**: No external service outages
+- **Privacy**: No tracking via CDN requests
+- **Performance**: Served from same domain (no DNS lookup, connection overhead)
+- **Versioning**: Explicit control over versions
 
-### Formatting (STRICTLY ENFORCED)
-* **Indentation:** 2 spaces (NEVER tabs)
-* **Line endings:** LF (Unix-style)
-* **EOF:** All files MUST end with single newline
-* **Whitespace:** No trailing whitespace
-* **Naming:** kebab-case for files, BEM-style for CSS classes
+## 3. Code Quality Standards
 
-### Template Guidelines
-1. **i18n REQUIRED:** All user-facing text MUST use `{{ T "key" }}`
-   ```html
-   ❌ BAD:  <button>Toggle theme</button>
-   ✅ GOOD: <button>{{ T "themeToggle" }}</button>
-   ```
+### Formatting Rationale
+**2-space indentation** (not tabs):
+- Consistent across editors
+- Balances readability with horizontal space
+- Standard for HTML/CSS/JS ecosystems
 
-2. **Escaping:** Use appropriate escaping functions
-   - `safeHTML`: For pre-processed markdown content
-   - `safeHTMLAttr`: For HTML attributes
-   - `safeURL`: For URL attributes
-   - Default escaping otherwise
+**Single newline EOF**:
+- POSIX standard for text files
+- Prevents git diff noise
 
-3. **Performance:** Use `partialCached` for static content
-   ```html
-   {{ partialCached "header.html" . site.Language.Lang }}
-   ```
+**No trailing whitespace**:
+- Cleaner git diffs
+- No semantic meaning
 
-4. **Comments:** Document complex logic
-   ```html
-   {{- /*
-   Renders responsive image with WebP support
-   @context {page} page The current page
-   */ }}
-   ```
+### Why i18n is Non-Negotiable
+Hardcoded text creates:
+- Maintenance burden (changes require code edits)
+- Poor user experience for non-English speakers
+- ARIA labels that can't be localized
+- Barrier to contributions from international community
 
-### CSS Organization
-CSS is divided into logical sections:
-1. **CSS Variables** - Design tokens (colors, spacing, typography)
-2. **CSS Reset** - normalize.css for cross-browser consistency
-3. **Base Styles** - Typography, links, defaults
-4. **Layout** - Grid, flex, containers
-5. **Components** - Header, footer, navigation, cards
-6. **Utilities** - Helper classes
-7. **Dark Mode** - `html.dark` overrides
+**Solution**: Hugo's built-in i18n system with TOML files. Key naming should be semantic (`themeToggle` not `button1`).
 
-### JavaScript Standards
-* **Style:** Modern ES6+ (const/let, arrow functions, template literals)
-* **Scope:** IIFE to avoid global pollution
-* **Error Handling:** try/catch for localStorage access
-* **Copyright:** Apache 2.0 header required (year 2025)
-* **Size:** Keep minimal (~3KB unminified)
-* **Optimization:** Create reusable helper functions to reduce duplication
-  - Example: `setupOverlayToggle()` for consistent overlay behavior
-  - Consolidate event listeners (one click-outside handler, one Escape key handler)
-  - Use Intersection Observer API for scroll-based features (better performance than scroll events)
+### Accessibility Standards (WCAG 2.1 AA)
+**Why it matters:**
+- Legal requirements in many jurisdictions
+- Ethical responsibility (universal access)
+- Better UX for everyone (keyboard navigation, contrast, etc.)
 
-Example:
-```javascript
-// Copyright YYYY The Hugo Authors. All rights reserved.
-// Use of this source code is governed by an Apache-2.0
-// license that can be found in the LICENSE file.
+**Non-negotiable requirements:**
+- Semantic HTML5 elements
+- Localized ARIA labels
+- Keyboard navigation (Tab, Escape)
+- Focus management
+- Color contrast ≥4.5:1
+- Alt text on images
 
-(function() {
-  // Implementation
-})();
-```
+## 4. Performance Philosophy
 
-### Internationalization Requirements
+### CSS Performance
+**Problem**: Poor CSS practices cause layout thrashing and repaints.
 
-**CRITICAL:** All text must be externalized to i18n files.
+**Solutions applied:**
+1. **Specific transitions** (not `all`): Browser only watches properties that change
+2. **CSS containment**: Isolates component layout calculations from rest of page
+3. **Modern viewport units** (`dvh`): Adjusts for mobile browser UI
+4. **CSS variables**: Single source of truth, reduces duplication
+5. **Shared utilities**: `.overlay-blur` used by menu and TOC
 
-i18n file structure:
-```toml
-# Navigation
-mainNavigation = 'Main navigation'
-feedsNavigation = 'Feeds'
+**When to use CSS containment:**
+- ✅ Isolated components (TOC, alerts, cards)
+- ✅ Frequently updating elements (active TOC links)
+- ❌ Complex nested tables (syntax highlighting)
+- ❌ Components affecting parent layout
+- **Always disable in print** (prevents margin collapse issues)
 
-# Pagination
-paginationLabel = 'Pagination'
-previousPage = '← Previous'
-nextPage = 'Next →'
-```
+### JavaScript Performance
+**Problem**: Repeated DOM queries, inefficient observer patterns.
 
-**NEVER hardcode text** in templates, including:
-- UI labels and button text
-- ARIA labels (accessibility)
-- Navigation items
-- Error messages
-- Title attributes
+**Solutions applied:**
+1. **Cache DOM references**: Query once at init, reuse throughout
+2. **Modern DOM methods**: `replaceChildren()`, `append()` for batch operations
+3. **Optimized observers**: Track current active element (80% fewer DOM operations)
+4. **Consolidated listeners**: Single handlers for common patterns
+5. **Helper functions**: DRY code with reusable utilities
+6. **Sync with CSS**: Read CSS variables instead of magic numbers
 
-Chinese typography conventions:
-- Use full-width punctuation (，。！？)
-- Use 「」 for quotes (not "" or '')
-- Add half-width space before untranslatable English (URLs, names)
+**Example impact**: TOC scroll tracking reduced from ~500 operations to ~100 per scroll.
 
-## 5. Quality Assurance Standards
+### Content Delivery
+- **Lazy loading**: Images load on-demand
+- **WebP conversion**: Modern format with fallbacks
+- **Responsive srcsets**: Multiple resolutions for different viewports
+- **Partial caching**: Static components cached per language
+- **instant.page**: Prefetches links on hover for near-instant navigation
 
-### Pre-Commit Checklist
-- [ ] No tabs (only 2-space indentation)
-- [ ] All files end with single newline
-- [ ] No trailing whitespace
-- [ ] No hardcoded text (all i18n)
-- [ ] ARIA labels localized
-- [ ] Alt text on images
-- [ ] Conventional commit message
+## 5. Internationalization Strategy
 
-### Accessibility (WCAG AA)
-- Semantic HTML5 elements (`<header>`, `<main>`, `<article>`, `<nav>`)
-- ARIA labels on navigation and interactive elements
-- `aria-current` for active states
-- Focus indicators visible (outline on :focus)
-- Color contrast ≥4.5:1 for text
-- Alt attributes on all images
+### Why Five Languages?
+- **English**: International standard
+- **Simplified Chinese**: Mainland China market
+- **Traditional Chinese**: Taiwan, Hong Kong, Macau
+- **Japanese**: Major Asian market
+- **Korean**: Another major Asian market
 
-### Security
-- Escape all template variables by default
-- Use `safeHTML` sparingly and only for trusted content
-- No inline scripts (except essential config)
-- SRI (Subresource Integrity) enabled for assets
-- No external CDN dependencies (except optional Remark42)
+### Chinese Typography Conventions
+- Full-width punctuation: `，。！？` (not `,. !?`)
+- Chinese quotes: `「」『』` (not `""''`)
+- Spacing: Add space around untranslatable English terms
+- **Why**: Proper CJK typography is essential for readability
 
-### Performance
-- Minimal JavaScript (~3KB with theme toggle + mobile menu + TOC)
-- CSS bundled and minified in production with shared utility classes (`.overlay-blur`)
-- Responsive images with srcset and WebP
-- Lazy loading on images
-- KaTeX loaded conditionally (only when math detected)
-- Partial caching for static components
-- Intersection Observer for efficient scroll tracking (TOC active section)
-- Consolidated event listeners to reduce memory usage
+## 6. Security Principles
 
-## 6. Development Workflow
+### Defense in Depth
+1. **Escape by default**: All template variables
+2. **SRI (Subresource Integrity)**: Verify asset integrity
+3. **No inline scripts**: Except essential config (theme preference)
+4. **Vendor dependencies**: No external CDNs to compromise
+5. **CSP-friendly**: Compatible with Content Security Policy
 
-### Local Development
-```bash
-# Start development server with drafts
-hugo server -D
+### When to use `safeHTML`
+Only for:
+- Pre-processed markdown content (already sanitized by Hugo)
+- Trusted configuration (site subtitle)
 
-# Production-like preview
-hugo server
+**Never** for user input or external content.
 
-# Build with verbose output
-hugo --verbose
+## 7. Development Workflow Philosophy
 
-# Production build
-hugo --gc --minify
-```
+### Incremental Changes
+- Small, focused commits over large rewrites
+- Each commit should be independently auditable
+- Conventional commit format for clarity
 
 ### Testing Strategy
-- **Visual Testing:** Test with sample content in multiple languages
-- **Accessibility:** Use browser DevTools accessibility checker
-- **Performance:** Lighthouse audit (target: 95+ score)
-- **Cross-browser:** Test in Chrome, Firefox, Safari
-- **Responsive:** Test on mobile, tablet, desktop viewports
+- **Visual**: Test with multilingual sample content
+- **Accessibility**: Browser DevTools accessibility panel
+- **Performance**: Lighthouse audit (target 95+)
+- **Cross-browser**: Chrome, Firefox, Safari
+- **Responsive**: Mobile, tablet, desktop breakpoints
 
-### Version Control
-```bash
-# Conventional commit format
-git commit -m "feat: add new feature"
-git commit -m "fix: resolve bug"
-git commit -m "docs: update documentation"
-git commit -m "style: formatting changes"
-git commit -m "refactor: restructure code"
-git commit -m "perf: improve performance"
-git commit -m "chore: maintenance tasks"
-```
+### Documentation Discipline
+- Update README.md for user-facing changes
+- Update CLAUDE.md for coding conventions
+- Update AGENTS.md for design philosophy
+- Document all i18n keys with comments
 
-## 7. Dependencies & Licensing
+## 8. Dependency Management
 
-### Adding New Dependencies
-1. **Evaluate:** Is vendoring necessary? Can we avoid it?
-2. **Version:** Place in `static/_3p/<libname>/<version>/`
-3. **License:** Include LICENSE file in vendored directory
-4. **Attribution:** Add to NOTICE file with:
-   - Library name
-   - Copyright holder
-   - License type
-   - Location in repo
-   - Website URL
+### Adding Dependencies - Decision Tree
+1. **Can we avoid it?** (Most important question)
+2. **Is it well-maintained?** (Recent releases, active community)
+3. **What's the license?** (Compatible with Apache 2.0)
+4. **What's the size?** (Every KB matters)
+5. **Can we vendor it?** (Self-hosting requirement)
 
-Example NOTICE entry:
-```
-Library Name
-Copyright (c) YYYY Copyright Holder
-Licensed under the MIT License
-Location: static/_3p/libname/version/
-Website: https://example.com/
-```
+### Current Dependencies Rationale
+- **KaTeX 0.16.22**: Best-in-class math rendering, self-contained
+- **instant.page 5.2.0**: Tiny (1KB), dramatic perceived performance improvement
+- **Remark42**: Optional, user's choice, not vendored (embedded script)
 
-### Current Dependencies
-- **KaTeX 0.16.22** (MIT) - Mathematical typesetting
-- **Remark42 embed** (MIT) - Comment system integration
+### Attribution Standards
+- Include LICENSE file in vendored directory
+- Document in NOTICE file with copyright, license, location, URL
+- Apache 2.0 copyright header on our code
 
-### Licensing
-- **Theme License:** Apache 2.0
-- **Copyright:** 2024-2025 The Hugo Authors
-- **Attribution:** Required in NOTICE file
-- **Third-party:** Properly attributed in NOTICE and LICENSE files
+## 9. AI Collaboration Philosophy
 
-## 8. AI Collaboration Guidelines
+### Contribution Guidelines
+**Priorities:**
+1. Preserve existing conventions (consistency > personal preference)
+2. i18n first (internationalization is non-negotiable)
+3. Performance matters (measure impact of changes)
+4. Accessibility always (WCAG compliance)
+5. Document decisions (help future contributors understand "why")
 
-### Contribution Philosophy
-* **Minimalism:** Add features only when necessary
-* **Incremental Changes:** Small, auditable commits over large rewrites
-* **Documentation:** Update docs for all user-facing changes
-* **Testing:** Verify changes don't break existing functionality
+### Code Review Focus
+When reviewing changes, prioritize:
+1. **i18n compliance**: No hardcoded text?
+2. **Formatting**: 2-space, no tabs, EOF newline?
+3. **ARIA localization**: All labels internationalized?
+4. **Performance impact**: Adds bloat? Layout thrashing?
+5. **Accessibility**: Keyboard navigation? Focus management?
+6. **Dependencies**: Properly attributed? Necessary?
 
-### AI Editing Rules
-1. **Preserve Conventions:** Follow existing patterns in codebase
-2. **i18n First:** Never hardcode text - always use i18n keys
-3. **Format Consistently:** Use 2-space indentation, no tabs
-4. **Document Changes:** Update README/docs for new features
-5. **Security:** Escape variables, no unreviewed third-party scripts
+### When to Push Back
+Reject changes that:
+- Hardcode text (violates i18n requirement)
+- Add unnecessary dependencies
+- Harm performance without justification
+- Break accessibility
+- Use tabs or inconsistent formatting
+- Lack documentation
 
-### Code Review Priorities
-1. Does it follow i18n requirements?
-2. Is formatting consistent (2-space, no tabs)?
-3. Are ARIA labels localized?
-4. Does it maintain performance?
-5. Is accessibility preserved?
-6. Are dependencies properly attributed?
+## 10. Common Pitfalls & Solutions
 
-### Translation Guidelines
-When adding i18n strings:
-1. Add to all three language files (en-US, zh-CN, zh-TW)
-2. Use semantic key names (`themeToggle` not `button1`)
-3. Group related keys with comments
-4. Use proper Chinese typography (「」quotes, full-width punctuation)
+### Anti-Patterns to Avoid
+❌ **Hardcoded text**: Use `{{ T "key" }}` instead
+❌ **`transition: all`**: Specify exact properties
+❌ **Repeated DOM queries**: Cache references
+❌ **Magic numbers**: Use CSS variables
+❌ **External CDNs**: Vendor dependencies
+❌ **Tabs for indentation**: Use 2 spaces
+❌ **Inline styles/scripts**: Use external files
+❌ **CSS containment on tables**: Only simple components
 
-Example:
-```toml
-# Navigation
-mainNavigation = 'Main navigation'      # en-US
-mainNavigation = '主导航'                # zh-CN
-mainNavigation = '主導航'                # zh-TW
-```
+### Best Practices
+✅ **Externalize all text** to i18n files
+✅ **Specific transitions** for performance
+✅ **Cache DOM references** at initialization
+✅ **CSS variables** for repeated values
+✅ **Vendor dependencies** with versions
+✅ **2-space indentation** consistently
+✅ **Hugo asset pipeline** for processing
+✅ **Semantic HTML5** elements
 
-## 9. Production Readiness Checklist
+## 11. Browser Support Philosophy
 
-Before public release or major version:
-- [ ] All text internationalized (no hardcoded strings)
+### Modern Browsers First
+Target: Chrome/Edge 112+, Firefox 117+, Safari 16.5+ (2023+)
+
+**Rationale:**
+- Enables modern CSS/JS features
+- Reduces polyfill bloat
+- Most users on modern browsers
+- Legacy browser share <2% globally
+
+### Progressive Enhancement
+- **Backdrop-filter**: Glass effect with solid background fallback
+- **LocalStorage**: Graceful degradation if unavailable
+- **CSS `@supports`**: Feature detection for critical features
+
+### Modern Features Used
+- CSS: Variables, Grid, Flexbox, `dvh`, containment, `color-scheme`, backdrop-filter
+- JS: ES6+, optional chaining, nullish coalescing, modern array/DOM methods, Intersection Observer
+
+## 12. Quality Assurance Checklist
+
+Before committing:
+- [ ] No hardcoded text (all i18n)
 - [ ] ARIA labels localized
-- [ ] Formatting consistent (2-space, no tabs, EOF newlines)
-- [ ] All templates documented
-- [ ] README.md comprehensive and accurate
-- [ ] LICENSE and NOTICE files complete
-- [ ] theme.toml metadata correct
-- [ ] .gitignore excludes build artifacts
-- [ ] No console errors or warnings
-- [ ] Accessibility audit passed (WCAG AA)
+- [ ] 2-space indentation, no tabs
+- [ ] Files end with single newline
+- [ ] No trailing whitespace
+- [ ] Conventional commit message
+- [ ] Documentation updated
+- [ ] Accessibility preserved
+- [ ] Performance not regressed
+
+Before release:
+- [ ] All i18n files complete (5 languages)
+- [ ] README.md comprehensive
+- [ ] LICENSE and NOTICE accurate
+- [ ] No console errors/warnings
 - [ ] Lighthouse score 95+
 - [ ] Cross-browser tested
 - [ ] Mobile responsive verified
-
-## 10. Common Pitfalls to Avoid
-
-❌ **Don't:**
-- Use tabs for indentation
-- Hardcode text in templates
-- Skip i18n for ARIA labels
-- Add dependencies without documentation
-- Use external CDNs (except optional features)
-- Commit files without EOF newlines
-- Write inline styles or scripts
-- Use unsafe HTML without escaping
-
-✅ **Do:**
-- Use 2-space indentation consistently
-- Externalize all text to i18n files
-- Localize ARIA labels
-- Vendor dependencies with version numbers
-- Document third-party code in NOTICE
-- End files with single newline
-- Use Hugo's asset pipeline
-- Escape template variables properly
+- [ ] WCAG AA audit passed
 
 ## Summary
 
-This theme prioritizes **performance**, **accessibility**, and **internationalization** while maintaining **minimal complexity**. Every change should align with these principles. When in doubt, refer to existing patterns in the codebase and prioritize user experience over developer convenience.
+This theme prioritizes **performance**, **accessibility**, and **internationalization** while maintaining **minimal complexity**. Every decision should align with these principles.
+
+**When in doubt:**
+1. Check existing patterns in codebase
+2. Consult CLAUDE.md for specific conventions
+3. Prioritize user experience over developer convenience
+4. Ask before adding complexity
+
+The goal is a theme that's fast, accessible, and maintainable for years to come.

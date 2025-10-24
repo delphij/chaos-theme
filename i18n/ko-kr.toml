@@ -12,10 +12,13 @@ historical = '과거 파일로 현실적인 의미가 없습니다'
 archives = '시간순 아카이브'
 
 # Navigation
+skipToContent = '본문으로 바로가기'
 mainNavigation = '주 메뉴'
 feedsNavigation = '구독'
 atomFeed = 'Atom 피드'
 themeToggle = '라이트/다크 모드 전환'
+themeLightMode = '라이트 모드 활성화됨'
+themeDarkMode = '다크 모드 활성화됨'
 menuToggle = '메뉴 전환'
 tableOfContents = '목차'
 tocToggle = '목차 전환'
@@ -31,6 +34,9 @@ joinDiscussion = '댓글 참여'
 
 # Reading stats
 readingStats = '이 글은 약 {{ .WordCount }} 자이며, 읽는 데 약 {{ .ReadingTime }} 분 소요됩니다'
+
+# Print references
+printReferences = '참고 문헌'
 
 # Archives
 year = '년'

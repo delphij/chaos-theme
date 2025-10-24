@@ -4,148 +4,90 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project Overview
 
-This is a minimalist Hugo theme designed for clarity, performance, and excellent Chinese typography support. Design philosophy:
-- Fast-loading with minimal dependencies (only KaTeX vendored)
-- Accessible and semantic HTML with full i18n support (WCAG 2.1 AA)
-- Dark/light mode with system preference detection
-- Responsive mobile navigation with glass-morphism effects
-- Automatic table of contents with sticky sidebar and active section highlighting
-- Minimal JavaScript (~3KB for theme toggle + mobile menu + TOC)
-- Production-ready code quality with optimized, reusable code patterns
+Minimalist Hugo theme for personal blogs with excellent Chinese typography support. Design philosophy: fast-loading, accessible (WCAG 2.1 AA), mobile-first, minimal dependencies (~3KB JavaScript total).
+
+**Key Features**: Dark/light mode, responsive mobile menu with glass effects, automatic table of contents, instant page navigation, full i18n (5 languages).
 
 ## Commands
 
-### Development
 ```bash
-hugo server -D              # Local dev server with drafts and live reload
-hugo server                 # Production preview without drafts
-hugo --verbose              # Build with verbose output
-hugo --gc --minify          # Production build with cleanup and minification
+hugo server -D              # Dev server with drafts
+hugo server                 # Production preview
+hugo --gc --minify          # Production build
 ```
 
 ## Architecture
 
 ### Technology Stack
-- **Hugo**: Static site generator (minimum version 0.146.0, standard edition)
+- **Hugo** 0.146.0+ (standard edition)
 - **Languages**: Go Templates, HTML5, CSS3, vanilla JavaScript
-- **Asset Processing**: Hugo Pipes (bundling, minification, fingerprinting, SRI)
-- **Dependencies**: KaTeX 0.16.22 (vendored at `static/_3p/katex/0.16.22/`)
-- **i18n**: English, Simplified Chinese, Traditional Chinese, Japanese, Korean
+- **Asset Processing**: Hugo Pipes (bundling, minification, SRI)
+- **Dependencies**: KaTeX 0.16.22, instant.page 5.2.0 (vendored in `static/_3p/`)
 
 ### Directory Structure
 ```
-/layouts/
-  baseof.html              # Root template
-  _default/                # Page templates (single, list, etc.)
-  _markup/                 # Markdown renderers (images, code, math)
-  _partials/               # Reusable components
-    _funcs/                # Function partials
-    head/                  # Head section components
-    foot/                  # Footer section components
-  archives/                # Archive page template
-  shortcodes/              # Hugo shortcodes
-/assets/
-  css/                     # Source CSS (processed by Hugo Pipes)
-  js/                      # Source JavaScript
-/static/
-  _3p/                     # Third-party vendored dependencies
-    katex/0.16.22/         # KaTeX with fonts
-/i18n/                     # Translation files
-  en-us.toml
-  zh-cn.toml
-  zh-tw.toml
-  ja-jp.toml
-  ko-kr.toml
-/config/_default/          # Configuration overrides
+/layouts/          Templates (baseof, _default, _markup, _partials, shortcodes)
+/assets/           Source CSS/JS (processed by Hugo Pipes)
+/static/_3p/       Vendored dependencies (versioned)
+/i18n/             Translation files (en-us, zh-cn, zh-tw, ja-jp, ko-kr)
+/config/           Configuration overrides
 ```
 
-### Custom Output Formats
-Defined in `config/_default/config.toml`:
-- ATOM feed with XSLT stylesheet
-- RSS feed
-- Sitemap with XSLT stylesheet
-- Redirect mapping format
+## Coding Standards
 
-## Coding Conventions
-
-### Formatting Standards
+### Formatting (Strictly Enforced)
 - **Indentation**: 2 spaces (NO tabs)
-- **Files**: kebab-case naming
-- **Classes**: BEM-style or semantic naming
-- **Line endings**: LF (Unix-style)
-- **EOF**: All files end with single newline
-- **Whitespace**: No trailing whitespace
+- **Line endings**: LF
+- **EOF**: Single newline
+- **Naming**: kebab-case files, BEM-style CSS classes
 
-### Template Best Practices
-1. **Consistent spacing**: Use `{{-` and `-}}` intentionally for whitespace control
+### Templates
+1. **i18n**: ALL user-facing text must use `{{ T "key" }}` (including ARIA labels)
 2. **Escaping**: Use `safeHTML`, `safeHTMLAttr`, `safeURL` appropriately
-3. **i18n**: All user-facing text must use `{{ T "key" }}` - NO hardcoded strings
-4. **Comments**: Use `{{- /* comment */ }}` for template documentation
-5. **Partials**: Cache when possible with `partialCached`
+3. **Performance**: Use `partialCached` for static content
+4. **Comments**: Document complex logic with `{{- /* comment */ }}`
 
-### CSS Organization
-CSS is organized in sections:
-1. CSS Variables (colors, spacing, typography)
-2. CSS Reset (normalize.css)
-3. Base styles
-4. Layout
-5. Components
-6. Utilities (shared classes like `.overlay-blur`)
-7. Dark mode overrides
+### CSS
+**Organization**: Variables → Reset → Base → Layout → Components → Utilities → Dark mode → Print
 
-**Optimization Pattern**: Use shared utility classes for repeated patterns:
-- `.overlay-blur`: Backdrop-filter with browser prefixes and `@supports` fallback
-- Applied to mobile menu and TOC overlays
-- Reduces code duplication and improves maintainability
+**Performance Rules**:
+- Specific transitions (NOT `transition: all`)
+- CSS containment on isolated components (`.toc`, `.alert`) - disable in print
+- Modern viewport units (`dvh` for mobile)
+- CSS variables for all repeated values
+- No hardcoded colors
 
-### JavaScript Guidelines
-- Vanilla JavaScript only (no frameworks)
-- IIFE to avoid global scope pollution
-- Modern ES6+ features (const/let, arrow functions, template literals)
-- Error handling with try/catch for localStorage
-- Copyright header required (Apache 2.0)
-- **Optimization Pattern**: Create reusable helper functions for common patterns
-  - Example: `setupOverlayToggle()` consolidates toggle logic for menu and TOC
-  - Consolidate event listeners (single click-outside and Escape key handlers)
-  - Use Intersection Observer for scroll-based features instead of scroll events
+### JavaScript
+- Vanilla ES6+ (const/let, arrow functions, IIFE scope)
+- Apache 2.0 copyright header required
+- Cache DOM references at initialization
+- Modern DOM methods (`replaceChildren`, `append`)
+- Helper functions for DRY patterns
+- Intersection Observer for scroll tracking
 
-### Internationalization (i18n)
-All text strings must be externalized:
+### Internationalization
+All text must be externalized to i18n files:
 ```toml
-# i18n/en-US.toml
+# i18n/en-us.toml
 readMore = 'Read more…'
 
 # i18n/zh-cn.toml
 readMore = '阅读全文…'
 ```
 
-In templates:
-```html
-{{ T "readMore" }}
-```
+**NEVER hardcode** UI labels, button text, ARIA labels, navigation items, or error messages.
 
-**NEVER hardcode text** - always use i18n keys for:
-- UI labels
-- Button text
-- ARIA labels
-- Navigation items
-- Error messages
-
-### Accessibility Requirements (WCAG 2.1 AA)
-- All images must have `alt` attributes
-- ARIA labels and states must be localized via i18n (`aria-label`, `aria-expanded`, `aria-current`)
+### Accessibility (WCAG 2.1 AA)
 - Semantic HTML5 elements (`<header>`, `<main>`, `<article>`, `<nav>`, `<button>`)
-- Full keyboard navigation support (Tab, Shift+Tab, Escape)
-- Focus management (return focus to trigger on modal/menu close)
-- Focus indicators visible on all interactive elements
-- Color contrast exceeds WCAG AA standards
-- Screen reader compatible with proper ARIA attributes
+- Localized ARIA labels and states
+- Full keyboard navigation (Tab, Escape)
+- Focus management and visible indicators
+- Alt text on all images
 
 ### Security
-- Always escape template variables
-- Use `safeHTML` only for pre-processed markdown
-- No inline scripts (except essential config)
+- Escape template variables by default
 - SRI enabled for CSS/JS
+- No inline scripts (except essential config)
 - No external CDN dependencies
 
 ### Dependencies
@@ -156,78 +98,44 @@ Third-party libraries:
 4. Prefer vendoring over CDNs
 
 ### Commit Messages
-Follow Conventional Commits:
+Conventional Commits format:
 ```
-feat: add new feature
+feat: add feature
 fix: resolve bug
 docs: update documentation
-style: formatting changes
-refactor: code restructuring
+style: formatting
+refactor: restructure code
 perf: performance improvement
-chore: maintenance tasks
+chore: maintenance
 ```
 
-## Best Practices Established
+## Performance Optimizations
 
-### Code Quality
-- ✅ Consistent 2-space indentation (no tabs)
-- ✅ All templates end with single newline
-- ✅ Multi-line attributes use 2-space continuation
-- ✅ No trailing whitespace
-- ✅ Copyright headers on JavaScript files
+### CSS
+- Shared utility classes (`.overlay-blur`)
+- CSS containment on isolated components
+- Specific transition properties
+- Dynamic viewport units (`dvh`)
+- CSS variables for theming
 
-### Internationalization
-- ✅ Complete i18n coverage (no hardcoded text)
-- ✅ ARIA labels localized
-- ✅ Five languages supported (en-US, zh-CN, zh-TW, ja-JP, ko-KR)
-- ✅ Proper Chinese typography (full-width punctuation, 「」 quotes)
+### JavaScript
+- Cached DOM references (~80% fewer queries)
+- Optimized IntersectionObserver (tracks current active element)
+- Consolidated event listeners
+- Modern DOM methods for batch operations
+- Syncs with CSS variables
 
-### Performance
-- ✅ Minimal JavaScript (~3KB for theme toggle + mobile menu + TOC)
-- ✅ CSS bundled and minified in production with shared utility classes
-- ✅ Partial caching for header/footer
-- ✅ Responsive images with WebP
-- ✅ Lazy loading and async decoding
-- ✅ KaTeX loaded conditionally
-- ✅ Hardware-accelerated backdrop-filter for glass effects
-- ✅ Intersection Observer for efficient scroll tracking (TOC active highlighting)
-- ✅ Consolidated event listeners to reduce memory footprint
-
-### Mobile Navigation
-- ✅ Hamburger menu for screens ≤600px
-- ✅ Glass-morphism effect with 12px backdrop blur (shared `.overlay-blur` class)
-- ✅ Absolute positioning (overlays content, doesn't push)
-- ✅ Browser fallback for unsupported backdrop-filter
-- ✅ Click outside, link click, and Escape key to close
-- ✅ Full keyboard accessibility with focus management
-- ✅ Consolidated navigation (main menu + RSS feed)
-
-### Table of Contents
-- ✅ Automatic TOC generation for article pages with sufficient headings
-- ✅ Desktop (>900px): Sticky sidebar with 3-column grid layout
-- ✅ Tablet/Mobile (≤900px): Floating button with full-screen overlay
-- ✅ Active section highlighting using Intersection Observer
-- ✅ Glass-morphism overlay effect (shared `.overlay-blur` class)
-- ✅ Reusable `setupOverlayToggle()` function for consistent behavior
-- ✅ Full keyboard navigation and ARIA support
-
-### Licensing
-- ✅ Apache 2.0 license (LICENSE file)
-- ✅ Proper attribution (NOTICE file)
-- ✅ Third-party licenses included (KaTeX, Remark42)
-- ✅ Copyright headers where appropriate
-
-### Theme Distribution
-- ✅ theme.toml with metadata
-- ✅ Comprehensive README.md
-- ✅ Clean .gitignore
-- ✅ Example configuration in hugo.toml
+### Content
+- Partial caching (header/footer)
+- Lazy loading images with WebP
+- Conditional KaTeX loading
+- instant.page prefetching
 
 ## Important Notes
 
-- The theme is production-ready and follows Hugo best practices
-- All features are documented in README.md
-- Custom markdown rendering in `layouts/_markup/` handles code blocks, images, and math
-- Remark42 comment system is optional and configurable
-- Theme uses partialCached for performance optimization
-- Responsive image rendering is comprehensive (124 lines) but necessary for optimal performance
+- Theme is production-ready following Hugo best practices
+- All features documented in README.md
+- Custom markdown rendering in `layouts/_markup/`
+- Remark42 comment system optional
+- Responsive image rendering comprehensive but necessary
+- For detailed rationale and quality standards, see AGENTS.md

@@ -12,10 +12,13 @@ historical = '歴史的ファイル、現実的な意義はありません'
 archives = '時系列アーカイブ'
 
 # Navigation
+skipToContent = 'メインコンテンツへスキップ'
 mainNavigation = 'メインナビゲーション'
 feedsNavigation = 'フィード'
 atomFeed = 'Atom フィード'
 themeToggle = 'ライト/ダークモード切替'
+themeLightMode = 'ライトモードが有効になりました'
+themeDarkMode = 'ダークモードが有効になりました'
 menuToggle = 'メニュー切替'
 tableOfContents = '目次'
 tocToggle = '目次の切替'
@@ -31,6 +34,9 @@ joinDiscussion = 'コメントに参加'
 
 # Reading stats
 readingStats = 'この記事は約 {{ .WordCount }} 文字で、読むのに約 {{ .ReadingTime }} 分かかります'
+
+# Print references
+printReferences = '参考文献'
 
 # Archives
 year = '年'

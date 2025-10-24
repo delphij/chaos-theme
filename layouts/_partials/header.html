@@ -5,10 +5,10 @@
     <span class="subtitle">{{ .Site.Params.Subtitle | markdownify }}</span>
     {{- end -}}
   </a>
-  <button class="menu-toggle" id="menuToggle" aria-label="{{ T "menuToggle" }}" aria-expanded="false">☰</button>
+  <button class="btn-icon menu-toggle" id="menuToggle" aria-label="{{ T "menuToggle" }}" aria-expanded="false">☰</button>
   <nav class="main-links overlay-blur" id="mainNav" aria-label="{{ T "mainNavigation" }}">
     {{- partial "menu.html" (dict "menuID" "main" "page" .) }}
     <a href="{{ "atom.xml" | absURL }}" title="{{ T "atomFeed" }}" rel="alternate" type="application/atom+xml">RSS</a>
   </nav>
-  <button class="theme-toggle" id="themeToggle" aria-label="{{ T "themeToggle" }}">🌙</button>
+  <button class="btn-icon theme-toggle" id="themeToggle" aria-label="{{ T "themeToggle" }}">🌙</button>
 </div>

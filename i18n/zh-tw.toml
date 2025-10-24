@@ -12,10 +12,13 @@ historical = '歷史文件已不具備現實意義'
 archives = '時序歸檔'
 
 # Navigation
+skipToContent = '跳轉到主要內容'
 mainNavigation = '主導航'
 feedsNavigation = '訂閱'
 atomFeed = 'Atom 訂閱'
 themeToggle = '切換淺/深色模式'
+themeLightMode = '已啟用淺色模式'
+themeDarkMode = '已啟用深色模式'
 menuToggle = '切換選單'
 tableOfContents = '目錄'
 tocToggle = '切換目錄'
@@ -31,6 +34,9 @@ joinDiscussion = '參與評論'
 
 # Reading stats
 readingStats = '本文約 {{ .WordCount }} 字，閱讀大致需要 {{ .ReadingTime }} 分鐘'
+
+# Print references
+printReferences = '參考文獻'
 
 # Archives
 year = '年'

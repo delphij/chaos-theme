@@ -2,6 +2,7 @@
 <meta name="viewport" content="width=device-width">
 <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ printf "%s | %s" .Title site.Title }}{{ end }}</title>
 <meta name="description" content="{{ partial "_funcs/get-meta-description.html" . }}">
+<link rel="canonical" href="{{ .Permalink }}">
 {{ partialCached "head/css.html" . }}
 {{ with .OutputFormats.Get "rss" -}}
     {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
@@ -31,3 +32,13 @@
 {{ if $hasMath }}
 <link href="/_3p/katex/0.16.22/katex.min.css" rel="stylesheet">
 {{ end }}
+{{- /* i18n strings for JavaScript */ -}}
+<script>
+  window.i18n = {
+    themeLightMode: {{ T "themeLightMode" }},
+    themeDarkMode: {{ T "themeDarkMode" }},
+    printReferences: {{ T "printReferences" }}
+  };
+</script>
+{{- /* instant.page for link prefetching - improves perceived performance */ -}}
+<script src="/_3p/instantpage/5.2.0/instantpage.min.js" type="module"></script>

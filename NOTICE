@@ -23,3 +23,11 @@ Licensed under the MIT License
 Location: layouts/_partials/remark.html
 Website: https://remark42.com/
 The embed loader script is used to integrate the Remark42 commenting system.
+
+instant.page
+Copyright (c) 2019-2023 Alexandre Dieulot
+Licensed under the MIT License
+Location: static/_3p/instantpage/5.2.0/
+See static/_3p/instantpage/5.2.0/LICENSE for full license text
+Website: https://instant.page/
+Prefetches pages on hover/touch to improve perceived performance.

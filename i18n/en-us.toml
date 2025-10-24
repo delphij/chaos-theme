@@ -12,10 +12,13 @@ historical = 'Historical'
 archives = 'Archives'
 
 # Navigation
+skipToContent = 'Skip to main content'
 mainNavigation = 'Main navigation'
 feedsNavigation = 'Feeds'
 atomFeed = 'Atom Feed'
 themeToggle = 'Toggle light/dark mode'
+themeLightMode = 'Light mode enabled'
+themeDarkMode = 'Dark mode enabled'
 menuToggle = 'Toggle menu'
 tableOfContents = 'Table of Contents'
 tocToggle = 'Toggle table of contents'
@@ -31,6 +34,9 @@ joinDiscussion = 'Join discussion'
 
 # Reading stats
 readingStats = 'Approximately {{ .WordCount }} words, {{ .ReadingTime }} min read'
+
+# Print references
+printReferences = 'References'
 
 # Archives
 year = ''
