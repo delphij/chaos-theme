@@ -1,6 +1,6 @@
-home = '홈'
+home = '메인'
 allPosts = '모든 게시물'
-categories = '카테고리'
+categories = '분류'
 tags = '태그'
 caution = '주의'
 disclaimer = '면책 조항'
@@ -9,7 +9,7 @@ note = '참고'
 tip = '팁'
 warning = '경고'
 historical = '과거 파일로 현실적인 의미가 없습니다'
-archives = '시간순 아카이브'
+archives = '보관'
 
 # Navigation
 skipToContent = '본문으로 바로가기'

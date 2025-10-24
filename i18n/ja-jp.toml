@@ -1,6 +1,6 @@
-home = 'ホーム'
+home = 'トップ'
 allPosts = '全ての記事'
-categories = 'カテゴリー'
+categories = '分類'
 tags = 'タグ'
 caution = '注意'
 disclaimer = '免責事項'
@@ -9,7 +9,7 @@ note = '備考'
 tip = 'ヒント'
 warning = '警告'
 historical = '歴史的ファイル、現実的な意義はありません'
-archives = '時系列アーカイブ'
+archives = '一覧'
 
 # Navigation
 skipToContent = 'メインコンテンツへスキップ'

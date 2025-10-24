@@ -9,7 +9,7 @@ note = '注意'
 tip = '友情提示'
 warning = '警告'
 historical = '历史文件已不具备现实意义'
-archives = '时序归档'
+archives = '归档'
 
 # Navigation
 skipToContent = '跳转到主要内容'
