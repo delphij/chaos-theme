@@ -989,6 +989,11 @@ button:focus {
     display: none !important;
   }
 
+  /* Hide reading stats (word count/read time) - redundant with page numbers */
+  .reading-stats {
+    display: none !important;
+  }
+
   /* Reset container for full-width printing */
   .container {
     max-width: 100%;

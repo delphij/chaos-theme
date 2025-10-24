@@ -1,7 +1,7 @@
 {{ define "main" }}
   <h1>{{ .Title }}</h1>
 
-  <div class="meta">{{ partial "datetime.html" . }} • {{ partial "reading-stats.html" . }}{{ partial "taxonomy-links.html" . }}</div>
+  <div class="meta">{{ partial "datetime.html" . }}<span class="reading-stats"> • {{ partial "reading-stats.html" . }}</span>{{ partial "taxonomy-links.html" . }}</div>
   {{- partial "content-plus-ruby.html" . -}}
   <div id="print-references" class="print-only"></div>
   {{- partial "remark.html" . -}}
