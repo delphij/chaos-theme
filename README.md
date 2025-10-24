@@ -279,12 +279,13 @@ The menu includes all configured navigation items plus the RSS/Atom feed link.
 
 Article pages automatically display a table of contents when the content has sufficient headings (h2, h3, h4):
 
-- **Desktop (>900px)**: Sticky sidebar on the right side
+- **Desktop (≥1200px)**: Sticky sidebar on the right side
   - Remains visible while scrolling
   - Shows active section highlighting
   - Positioned in a 3-column grid layout
+  - When TOC is absent, balanced spacing with equal left/right margins
 
-- **Tablet/Mobile (≤900px)**: Floating button with overlay
+- **Tablet/Mobile (<1200px)**: Floating button with overlay
   - Floating button in bottom-right corner
   - Click to show/hide full-screen TOC
   - Glass-morphism effect with backdrop blur

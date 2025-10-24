@@ -42,7 +42,7 @@
   --alert-caution-border: #8844AA;   /* Caution border */
 
   /* Layout dimensions - Spacing and container widths */
-  --max-width: 1280px;               /* Maximum content width */
+  --max-width: 1280px;               /* Maximum container width for header/footer/nav (accommodates 780px article + 280px TOC + gaps) */
   --gutter: 24px;                    /* Horizontal padding */
   --nav-height: 80px;                /* Sticky navigation height for scroll offsets */
   --radius: 10px;                    /* Border radius for cards */
@@ -376,12 +376,25 @@ nav.main-links a:hover {
    Desktop: right sidebar, Tablet: collapsible top, Mobile: overlay.
    ========================================================================== */
 
-/* 3-column layout for article pages */
+/* 3-column layout for article pages
+   Article column: 780px max width provides optimal line length for readability
+   - Accommodates ~72-76 character code blocks (76 chars × 8.4px/char ≈ 640px + padding)
+   - Provides comfortable reading width for prose (~85-95 characters at 16px)
+   TOC column: 280px for navigation
+   Left column: flexible spacing */
 .content-layout {
   display: grid;
   grid-template-columns: 1fr minmax(0, 780px) 280px;
   gap: 40px;
   align-items: start;
+}
+
+/* When no TOC present on desktop, make right column equal to left for balanced spacing
+   Breakpoint calculation: 780px article + 280px TOC + 40px gap + ~100px left padding ≈ 1200px minimum */
+@media (min-width: 1200px) {
+  .content-layout:not(:has(.toc-wrapper)) {
+    grid-template-columns: 1fr minmax(0, 780px) 1fr;
+  }
 }
 
 /* Article takes center column */
@@ -650,15 +663,15 @@ pre {
   border: 0;
 }
 
-/* Line number table - Horizontal scroll container */
+/* Line number table - Horizontal scroll container with hanging indent */
 .chroma .lntable {
   border-spacing: 0;
   padding: 0;
-  margin: 0;
+  margin: 0 0 0 -3em;                /* Shift left so line numbers hang in margin */
   border: 0;
   overflow-x: auto;
   display: block;
-  max-width: 100%;
+  max-width: 100%;                   /* Keep code column at original width */
 }
 
 /* Line numbers - Unselectable with consistent spacing */
@@ -667,8 +680,8 @@ pre {
   white-space: pre;
   -webkit-user-select: none;
   user-select: none;
-  margin-right: 0.4em;
-  padding: 0 0.4em 0 0.4em;
+  margin-right: 0;               /* Reduced gap between numbers and code */
+  padding: 0 0 0 0.4em;
 }
 
 /* Code lines - Flex layout for alignment */
@@ -676,9 +689,21 @@ pre {
   display: flex;
 }
 
-/* Line number column spacing */
-.highlight .lntable .lntd:first-child {
-  padding-right: 8px;
+/* Line number column - page background for hanging indent effect
+   Apply to column, pre element, and line number elements
+   Works for both screen and print (var(--bg) adapts automatically) */
+.highlight .lntable .lntd:first-child,
+.highlight .lntable .lntd:first-child pre,
+.chroma .lntd:first-child,
+.chroma .lntd:first-child pre,
+.chroma .lnt,
+.chroma .ln {
+  background: var(--bg);
+}
+
+.highlight .lntable .lntd:first-child,
+.chroma .lntd:first-child {
+  padding-right: 0;
 }
 
 /* ==========================================================================
@@ -821,10 +846,11 @@ button:focus {
    Adjusts layout, typography, and navigation for smaller screens.
    ========================================================================== */
 
-/* Tablet breakpoint - Narrower content width */
-@media (max-width: 900px) {
+/* Tablet breakpoint - Collapse 3-column layout to single column
+   Keep article width at 780px to match desktop for smooth transition */
+@media (max-width: 1199px) {
   :root {
-    --max-width: 680px;
+    --max-width: 780px;              /* Match desktop article column width (no sudden width change at breakpoint) */
   }
 
   .nav-inner {
@@ -1175,7 +1201,7 @@ button:focus {
     border: none;
     border-spacing: 0;
     border-collapse: collapse;
-    margin: 0;
+    margin: 0 0 0 -3em;              /* Hanging indent for print too */
     padding: 0;
     width: 100%;
   }
@@ -1201,14 +1227,11 @@ button:focus {
     vertical-align: top;
   }
 
-  /* Line numbers column spacing */
-  .chroma .lntd:first-child {
-    padding-right: 8px;
-  }
+  /* Line number column padding already set in main styles */
 
-  /* Remove borders and spacing from all Chroma inner elements */
-  .chroma .lntd pre,
-  .chroma .lntd code,
+  /* Remove borders and spacing from code column elements only */
+  .chroma .lntd:not(:first-child) pre,
+  .chroma .lntd:not(:first-child) code,
   .chroma code {
     background: transparent;
     border: none;
