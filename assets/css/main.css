@@ -223,7 +223,8 @@ nav.main-links a {
   border-bottom: none;
 }
 
-/* Lists - Minimal left padding with tabular numerals for alignment */
+/* Lists - Minimal left padding with tabular numerals for alignment
+   Uses hanging indent: list markers appear in the margin, not in text area */
 ul,
 ol {
   margin: 1em 0;                      /* Consistent spacing before and after lists */
@@ -231,7 +232,7 @@ ol {
 }
 
 ul {
-  padding-left: 15px;                 /* Minimal padding for bullets */
+  padding-left: 15px;                 /* Minimal padding for hanging bullets */
 }
 
 /* ==========================================================================
@@ -994,11 +995,11 @@ button:focus {
     display: none !important;
   }
 
-  /* Reset container for full-width printing */
+  /* Reset container for full-width printing with page margins */
   .container {
     max-width: 100%;
     margin: 0;
-    padding: 0;
+    padding: 0 0.5in;                /* Horizontal padding to prevent clipping hanging list markers */
   }
 
   /* Remove grid layout for article pages */
