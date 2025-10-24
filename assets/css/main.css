@@ -27,7 +27,6 @@
   --table-stripe: #F2F2F2;           /* Alternating table row background */
   --blockquote-fg: #444444;          /* Blockquote text color */
   --border: 1px solid rgba(0,0,0,0.06); /* Subtle border for light mode */
-  --bg-translucent: rgba(250, 250, 250, 0.85); /* Semi-transparent background */
 
   /* Alert colors - Semantic color system for different message types */
   --alert-note-bg: #F0F4FF;          /* Note/Historical background */
@@ -93,7 +92,6 @@ html.dark {
   --table-stripe: #242424;           /* Darker stripe for tables */
   --blockquote-fg: #CCCCCC;          /* Lighter quote text */
   --border: 1px solid rgba(255,255,255,0.04); /* Subtle dark border */
-  --bg-translucent: rgba(28, 28, 28, 0.85); /* Semi-transparent background */
 
   /* Alert colors adapted for dark mode with higher contrast */
   --alert-note-bg: #1E2A40;
@@ -344,14 +342,13 @@ nav.main-links a:hover {
   background: transparent;
 }
 
-/* Shared overlay styles for modals and dropdowns */
+/* Shared overlay styles for modals and dropdowns - consistent with header glass effect */
 .overlay-blur {
-  background: var(--bg-translucent);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 
-/* Fallback for browsers without backdrop-filter */
+/* Fallback for browsers without backdrop-filter - use solid background for readability */
 @supports not (backdrop-filter: blur(12px)) {
   .overlay-blur {
     background: var(--bg);
@@ -663,15 +660,23 @@ pre {
   border: 0;
 }
 
-/* Line number table - Horizontal scroll container with hanging indent */
+/* Line number table - Horizontal scroll container with hanging indent on desktop only */
 .chroma .lntable {
   border-spacing: 0;
   padding: 0;
-  margin: 0 0 0 -3em;                /* Shift left so line numbers hang in margin */
+  margin: 0;
   border: 0;
   overflow-x: auto;
   display: block;
   max-width: 100%;                   /* Keep code column at original width */
+}
+
+/* Hanging indent for line numbers on desktop (≥1200px) where there's space
+   On smaller screens, line numbers stay inline to prevent cutoff */
+@media (min-width: 1200px) {
+  .chroma .lntable {
+    margin: 0 0 0 -3em;              /* Shift left so line numbers hang in margin */
+  }
 }
 
 /* Line numbers - Unselectable with consistent spacing */
@@ -701,9 +706,17 @@ pre {
   background: var(--bg);
 }
 
+/* Line number column spacing - depends on hanging indent */
 .highlight .lntable .lntd:first-child,
 .chroma .lntd:first-child {
-  padding-right: 0;
+  padding-right: 1em;                /* Default spacing for inline layout on small screens */
+}
+
+@media (min-width: 1200px) {
+  .highlight .lntable .lntd:first-child,
+  .chroma .lntd:first-child {
+    padding-right: 0;                /* Minimal gap with hanging indent on desktop */
+  }
 }
 
 /* ==========================================================================
