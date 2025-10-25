@@ -358,5 +358,63 @@ def main():
     return 0 if success else 1
 
 
+# Module Interface for auxmark
+# =============================================================================
+
+def fetch_tweet_cached(
+    tweet_id: str,
+    data_dir: Path,
+    site_root: Path | None = None,
+    defang: bool = True,
+    cache_max_age_days: int = 30,
+    force_refresh: bool = False
+) -> bool:
+    """
+    Fetch and cache a tweet (module-friendly interface).
+
+    This function is designed to be called by the auxmark tweet_downloader module.
+    It checks cache age and only fetches if needed.
+
+    Args:
+        tweet_id: The tweet ID to fetch
+        data_dir: Path to data directory (e.g., site_root/data/x_embeds)
+        site_root: Path to Hugo site root (for language detection)
+        defang: Remove scripts and tracking (default: True)
+        cache_max_age_days: Maximum age of cache in days (default: 30)
+        force_refresh: Force re-fetch even if cache exists (default: False)
+
+    Returns:
+        True if successful (cached or fetched), False otherwise
+    """
+    from datetime import datetime, timedelta
+
+    json_path = data_dir / f'{tweet_id}.json'
+
+    # Check if cache exists and is fresh
+    if json_path.exists() and not force_refresh:
+        try:
+            age = datetime.now() - datetime.fromtimestamp(json_path.stat().st_mtime)
+            if age < timedelta(days=cache_max_age_days):
+                # Cache is fresh, skip
+                return True
+        except Exception:
+            # If we can't check age, proceed to fetch
+            pass
+
+    # Detect language if site_root provided
+    lang = None
+    if site_root:
+        lang = detect_hugo_language(site_root)
+
+    # Fetch and save
+    return process_single_tweet(
+        tweet_id,
+        data_dir,
+        defang=defang,
+        lang=lang,
+        force=force_refresh
+    )
+
+
 if __name__ == '__main__':
     sys.exit(main())
