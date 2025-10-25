@@ -9,20 +9,30 @@
 {{- end -}}
 
 {{- define "render-simple-x" -}}
-  {{- $dnt := site.Config.Privacy.X.EnableDNT }}
-  {{- $url := printf "https://x.com/%v/status/%v" .user .id -}}
-  {{- $query := querify "url" $url "dnt" $dnt "omit_script" true -}}
-  {{- $request := printf "https://publish.x.com/oembed?%s" $query -}}
-  {{- with try (resources.GetRemote $request) -}}
-    {{- with .Err -}}
-      {{- warnidf "shortcode-x-simple-getremote" "The %q shortcode was unable to retrieve the remote data: %s. See %s" $.ctx.Name . $.ctx.Position -}}
-    {{- else with .Value -}}
-      {{- if not site.Config.Services.X.DisableInlineCSS }}
-        {{- template "__h_simple_x_css" (dict "ctx" $.ctx) }}
-      {{- end }}
-      {{- (. | transform.Unmarshal).html | safeHTML -}}
-    {{- else -}}
-      {{- warnidf "shortcode-x-simple-getremote" "The %q shortcode was unable to retrieve the remote data. See %s" $.ctx.Name $.ctx.Position -}}
+  {{- $cachedFile := printf "data/x_embeds/%s.html" .id -}}
+  {{- if fileExists $cachedFile -}}
+    {{/* Use cached version - no scripts, no tracking */}}
+    {{- if not site.Config.Services.X.DisableInlineCSS }}
+      {{- template "__h_simple_x_css" (dict "ctx" $.ctx) }}
+    {{- end }}
+    {{- readFile $cachedFile | safeHTML -}}
+  {{- else -}}
+    {{/* Fallback to live fetch if cache doesn't exist */}}
+    {{- $dnt := site.Config.Privacy.X.EnableDNT }}
+    {{- $url := printf "https://x.com/%v/status/%v" .user .id -}}
+    {{- $query := querify "url" $url "dnt" $dnt "omit_script" true -}}
+    {{- $request := printf "https://publish.x.com/oembed?%s" $query -}}
+    {{- with try (resources.GetRemote $request) -}}
+      {{- with .Err -}}
+        {{- warnidf "shortcode-x-simple-getremote" "The %q shortcode was unable to retrieve the remote data: %s. See %s" $.ctx.Name . $.ctx.Position -}}
+      {{- else with .Value -}}
+        {{- if not site.Config.Services.X.DisableInlineCSS }}
+          {{- template "__h_simple_x_css" (dict "ctx" $.ctx) }}
+        {{- end }}
+        {{- (. | transform.Unmarshal).html | safeHTML -}}
+      {{- else -}}
+        {{- warnidf "shortcode-x-simple-getremote" "The %q shortcode was unable to retrieve the remote data. See %s" $.ctx.Name $.ctx.Position -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

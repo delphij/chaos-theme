@@ -207,6 +207,35 @@ Embed X/Twitter posts:
 {{< x user="username" id="1234567890" >}}
 ```
 
+**Privacy-Enhanced Caching** (Recommended):
+
+To avoid live API calls and remove tracking scripts, pre-cache tweets using the included tool:
+
+```bash
+# Fetch and cache a single tweet (removes scripts, no tracking)
+python3 themes/chaos/tools/fetch_x_embed.py https://x.com/username/status/1234567890
+
+# Or use just the tweet ID
+python3 themes/chaos/tools/fetch_x_embed.py 1234567890
+
+# Batch process from a file (one URL or ID per line)
+python3 themes/chaos/tools/fetch_x_embed.py --batch tweets.txt
+
+# Refresh an existing cached tweet
+python3 themes/chaos/tools/fetch_x_embed.py --refresh 1234567890
+```
+
+Cached files are stored in `data/x_embeds/` and automatically used by the shortcode when available. The tool sanitizes HTML by removing:
+- All `<script>` tags (no tracking, no external dependencies)
+- Event handlers (`onclick`, `onload`, etc.)
+- Iframes and embeds (marked as comments for review)
+
+Benefits:
+- **Privacy**: No client-side requests to X, no tracking
+- **Performance**: Faster page loads, works offline
+- **Reliability**: Content survives if tweets are deleted
+- **Version control**: Cached content can be committed to git
+
 ## Customization
 
 ### Syntax Highlighting
