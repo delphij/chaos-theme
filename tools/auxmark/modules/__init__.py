@@ -19,8 +19,10 @@ auxmark modules package.
 Contains all available modules for processing markdown files.
 """
 
+from .image_localizer import ImageLocalizerModule
 from .tweet_downloader import TweetDownloaderModule
 
 __all__ = [
+    "ImageLocalizerModule",
     "TweetDownloaderModule",
 ]

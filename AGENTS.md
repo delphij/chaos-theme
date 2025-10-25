@@ -185,6 +185,39 @@ Only for:
 - Document in NOTICE file with copyright, license, location, URL
 - Apache 2.0 copyright header on our code
 
+### Python Tools (auxmark and utilities)
+
+**Design Philosophy:**
+- **Modularity**: Plugin architecture for extensibility (see `tools/auxmark/modules/`)
+- **Git-aware**: Tools should respect git state and integrate with version control
+- **Testing first**: Comprehensive test suites using temporary directories
+- **Dry-run mode**: All tools must support `--dry-run` to preview changes
+- **Verbose logging**: `--verbose` flag for debugging and transparency
+
+**Key Best Practices:**
+1. **Use `git mv` for file operations** instead of `shutil.move()` when moving tracked files
+   - Git recognizes it as a rename operation (better history)
+   - Example: Converting `post.md` → `post/index.md` for Hugo page bundles
+   - Fallback gracefully if git command fails
+
+2. **Track state carefully in multi-pass operations**
+   - When expanding files (e.g., EXPAND action in auxmark), mark **old paths** as processed
+   - Queue **new paths** for processing
+   - Example: Mark `post.md` as processed, queue `post/index.md` for next iteration
+
+3. **Test coverage requirements**
+   - Dry-run mode validation
+   - Git-aware file scanning (only tracked files)
+   - Module selection and filtering
+   - Actual execution with real downloads/operations
+   - Error handling and edge cases
+
+4. **Error handling patterns**
+   - Log warnings to stderr, continue processing other files
+   - Return non-zero exit codes on critical failures
+   - Provide clear, actionable error messages
+   - Use subprocess error handling for git operations
+
 ## 9. AI Collaboration Philosophy
 
 ### Contribution Guidelines
@@ -234,6 +267,7 @@ Reject changes that:
 ✅ **2-space indentation** consistently
 ✅ **Hugo asset pipeline** for processing
 ✅ **Semantic HTML5** elements
+✅ **Git mv for file operations** (Python tools: prefer `git mv` over `shutil.move()` for better history tracking)
 
 ## 11. Browser Support Philosophy
 

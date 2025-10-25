@@ -81,11 +81,18 @@ Run specific modules:
 3. **Probe**: Each module checks if it's interested in a line
 4. **Action**: Module returns one of:
    - `IGNORE` - Not interested
-   - `TAG` - Process later
-   - `TAG_WITH_PREPROCESS` - Download/fetch first, then process
-   - `EXPAND` - Convert `file.md` → `file/index.md` (page bundle)
+   - `TAG` - Process later (postprocessing only)
+   - `TAG_WITH_PREPROCESS_ONLY` - Download/fetch only, no rewrite
+   - `TAG_WITH_PREPROCESS_AND_POSTPROCESS` - Download first, then rewrite
+   - `EXPAND` - Convert `file.md` → `file/index.md` using `git mv` (Hugo page bundle)
 5. **Preprocess**: Execute async jobs (downloads, API calls)
 6. **Postprocess**: Rewrite files if needed
+
+**Note on EXPAND action**: When a file is expanded from `post.md` to `post/index.md`, the tool:
+- Uses `git mv` for better history tracking (git recognizes it as a rename)
+- Marks the old path (`post.md`) as processed to skip it if encountered again
+- Queues the new path (`post/index.md`) for normal processing
+- Discards any pending jobs for the old path (requeued for new path)
 
 ### Module Architecture
 
@@ -97,14 +104,27 @@ class MyModule(BaseModule):
     regex = re.compile(r".*")  # Pattern to match lines
 
     def probe(self, file_path, line_no, line):
-        """Return (Action, metadata) for this line"""
+        """
+        Return (Action, metadata) for this line.
+        Metadata is passed to preprocess/postprocess methods.
+        """
 
     def preprocess(self, job):
-        """Execute async work (download, fetch)"""
+        """
+        Execute async work (download, fetch, API calls).
+        Job contains: file_path, line_no, line, metadata.
+        Returns: True if successful, False otherwise.
+        """
 
-    def postprocess(self, file_path):
-        """Rewrite file if needed"""
+    def postprocess(self, file_path, line_no, line, metadata):
+        """
+        Rewrite a single line (line-oriented postprocessing).
+        Receives original line and metadata from probe phase.
+        Returns: Modified line (or original if no changes).
+        """
 ```
+
+**Key Design**: Postprocessing is **line-oriented**, not file-oriented. Modules receive and return individual lines, making it easier to handle multiple matches per line (e.g., multiple images in one line).
 
 ## Examples
 

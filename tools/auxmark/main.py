@@ -23,7 +23,7 @@ import argparse
 import sys
 
 from . import ModuleRegistry, Processor, find_git_root, scan_markdown_files
-from .modules import TweetDownloaderModule
+from .modules import ImageLocalizerModule, TweetDownloaderModule
 
 
 def main() -> int:
@@ -71,6 +71,7 @@ Phase 1: Hardcoded module registration (tweet_downloader only)
         print(f"[auxmark] Git root: {git_root}")
 
     # Register modules (hardcoded for Phase 1)
+    ModuleRegistry.register(ImageLocalizerModule)
     ModuleRegistry.register(TweetDownloaderModule)
 
     if args.verbose:
@@ -83,6 +84,7 @@ Phase 1: Hardcoded module registration (tweet_downloader only)
 
         # Allow short names (e.g., "tweet" for "tweet_downloader")
         module_map = {
+            'image': 'image_localizer',
             'tweet': 'tweet_downloader',
         }
 

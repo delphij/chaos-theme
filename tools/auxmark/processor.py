@@ -20,7 +20,7 @@ Handles file scanning, line-by-line processing, expand operations,
 preprocessing jobs, and post-processing.
 """
 
-import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -78,14 +78,23 @@ class Processor:
             # Create directory
             new_dir.mkdir(parents=True, exist_ok=True)
 
-            # Move file
-            shutil.move(str(file_path), str(new_file))
+            # Move file using git mv for better history tracking
+            result = subprocess.run(
+                ['git', 'mv', str(file_path), str(new_file)],
+                capture_output=True,
+                text=True,
+                check=True
+            )
 
             self.log(f"Expanded successfully: {new_file}")
-            self.expanded_files.add(new_file)
+            # Mark old file as expanded so it won't be processed again in this run
+            self.expanded_files.add(file_path)
 
             return new_file
 
+        except subprocess.CalledProcessError as e:
+            print(f"Error expanding {file_path}: git mv failed: {e.stderr}", file=sys.stderr)
+            return None
         except Exception as e:
             print(f"Error expanding {file_path}: {e}", file=sys.stderr)
             return None
@@ -99,9 +108,10 @@ class Processor:
         Args:
             file_path: Path to markdown file
         """
-        # Skip if already expanded
+        # Skip if this file was already processed and expanded in this run
+        # (the old path after moving to index.md)
         if file_path in self.expanded_files:
-            self.log(f"Skipping already-expanded file: {file_path}")
+            self.log(f"Skipping file that was moved during expansion: {file_path}")
             return
 
         self.log(f"Processing: {file_path}")

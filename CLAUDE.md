@@ -109,6 +109,17 @@ perf: performance improvement
 chore: maintenance
 ```
 
+### Python Tools (auxmark and utilities)
+- **Git integration**: Use `git mv` instead of `shutil.move()` for file operations when appropriate
+  - Better history tracking (git recognizes renames vs delete+add)
+  - Example: When converting `post.md` → `post/index.md` (Hugo page bundle expansion)
+- **Testing**: All tools should include comprehensive test suites
+  - Use temporary directories for testing
+  - Test both dry-run and actual execution modes
+  - Verify git-aware file scanning
+- **Error handling**: Graceful degradation with informative error messages
+- **Module architecture**: Follow plugin pattern for extensibility (see `tools/auxmark/`)
+
 ## Performance Optimizations
 
 ### CSS
