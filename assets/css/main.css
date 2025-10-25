@@ -244,6 +244,11 @@ ul {
   padding: 0 var(--gutter);
 }
 
+/* Remove padding when container has grid layout - grid handles its own spacing */
+.container:has(.content-layout) {
+  padding: 0;
+}
+
 /* Account for sticky header when jumping to anchors */
 #main-content {
   scroll-margin-top: var(--nav-height); /* Offset for sticky navigation */
@@ -373,39 +378,38 @@ nav.main-links a:hover {
    Desktop: right sidebar, Tablet: collapsible top, Mobile: overlay.
    ========================================================================== */
 
-/* 3-column layout for article pages
-   Article column: 780px max width provides optimal line length for readability
-   - Accommodates ~72-76 character code blocks (76 chars × 8.4px/char ≈ 640px + padding)
-   - Provides comfortable reading width for prose (~85-95 characters at 16px)
-   TOC column: 280px for navigation
-   Left column: flexible spacing */
+/* 2-column layout for article pages - wider article when there's room for TOC
+   Article column: 960px on wide viewports (more space = wider article)
+   - Comfortable reading width when TOC is present
+   TOC column: Fixed at 280px
+   Grid has gutter padding for consistent left edge with index pages
+   Minimum viewport: 24px + 960px + 40px + 280px + 24px = 1328px */
 .content-layout {
   display: grid;
-  grid-template-columns: 1fr minmax(0, 780px) 280px;
+  grid-template-columns: 960px 280px;
   gap: 40px;
   align-items: start;
+  padding: 0 var(--gutter);
 }
 
-/* When no TOC present on desktop, make right column equal to left for balanced spacing
-   Breakpoint calculation: 780px article + 280px TOC + 40px gap + ~100px left padding ≈ 1200px minimum */
-@media (min-width: 1200px) {
-  .content-layout:not(:has(.toc-wrapper)) {
-    grid-template-columns: 1fr minmax(0, 780px) 1fr;
-  }
-}
-
-/* Article takes center column */
+/* Article takes first column */
 article.post {
-  grid-column: 2;
-  min-width: 0;                      /* Allow grid item to shrink below content size */
+  grid-column: 1;
 }
 
-/* TOC wrapper in right column - sticky container */
+/* Remove top margin from first heading to match index page vertical alignment
+   Grid prevents margin collapse, so we manually remove it */
+.content-layout article.post > :first-child {
+  margin-top: 0;
+}
+
+/* TOC wrapper in second column - sticky container, max 280px */
 .toc-wrapper {
-  grid-column: 3;
+  grid-column: 2;
   position: sticky;
   top: var(--nav-height);            /* Below sticky header */
   align-self: start;                 /* Start at top of grid */
+  max-width: 280px;                  /* Constrain TOC width */
   max-height: calc(100dvh - 100px);  /* Dynamic viewport height for mobile */
 }
 
@@ -671,9 +675,9 @@ pre {
   max-width: 100%;                   /* Keep code column at original width */
 }
 
-/* Hanging indent for line numbers on desktop (≥1200px) where there's space
+/* Hanging indent for line numbers on desktop (≥1360px) where there's space
    On smaller screens, line numbers stay inline to prevent cutoff */
-@media (min-width: 1200px) {
+@media (min-width: 1360px) {
   .chroma .lntable {
     margin: 0 0 0 -3em;              /* Shift left so line numbers hang in margin */
   }
@@ -694,25 +698,25 @@ pre {
   display: flex;
 }
 
-/* Line number column - page background for hanging indent effect
-   Apply to column, pre element, and line number elements
-   Works for both screen and print (var(--bg) adapts automatically) */
-.highlight .lntable .lntd:first-child,
-.highlight .lntable .lntd:first-child pre,
-.chroma .lntd:first-child,
-.chroma .lntd:first-child pre,
-.chroma .lnt,
-.chroma .ln {
-  background: var(--bg);
-}
-
 /* Line number column spacing - depends on hanging indent */
 .highlight .lntable .lntd:first-child,
 .chroma .lntd:first-child {
   padding-right: 1em;                /* Default spacing for inline layout on small screens */
 }
 
-@media (min-width: 1200px) {
+/* Desktop: Hanging indent for line numbers */
+@media (min-width: 1360px) {
+  /* Line number column - page background for hanging indent effect
+     Apply to column, pre element, and line number elements to cover gap from negative margin */
+  .highlight .lntable .lntd:first-child,
+  .highlight .lntable .lntd:first-child pre,
+  .chroma .lntd:first-child,
+  .chroma .lntd:first-child pre,
+  .chroma .lnt,
+  .chroma .ln {
+    background: var(--bg);
+  }
+
   .highlight .lntable .lntd:first-child,
   .chroma .lntd:first-child {
     padding-right: 0;                /* Minimal gap with hanging indent on desktop */
@@ -859,9 +863,9 @@ button:focus {
    Adjusts layout, typography, and navigation for smaller screens.
    ========================================================================== */
 
-/* Tablet breakpoint - Collapse 3-column layout to single column
-   Container max-width stays at 1280px; article grid already constrains content to 780px */
-@media (max-width: 1199px) {
+/* Tablet breakpoint - Collapse 2-column layout to single column
+   Container max-width stays at 1280px; article grid constrains content to 780px */
+@media (max-width: 1359px) {
 
   .nav-inner {
     padding: 10px 16px;
@@ -871,14 +875,11 @@ button:focus {
     font-size: 24px;
   }
 
-  /* TOC: Switch to mobile overlay behavior on tablet */
+  /* TOC: Switch to mobile overlay behavior on tablet
+     Single column, article narrower when space is limited (max 780px for optimal code display) */
   .content-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 780px);
     gap: 24px;
-  }
-
-  article.post {
-    grid-column: 1;
   }
 
   /* TOC: Use mobile overlay behavior on tablet */
@@ -911,7 +912,6 @@ button:focus {
   }
 
   .toc-wrapper {
-    grid-column: 1;
     position: relative;
     top: 0;
     max-height: none;
