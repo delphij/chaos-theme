@@ -1267,6 +1267,11 @@ button:focus {
     padding: 0;
   }
 
+  /* Syntax highlighting for print
+     Light theme (syntax.css) naturally applies to print media.
+     Dark theme (syntax-dark.css) is scoped to @media screen, so it doesn't apply to print.
+     This ensures all users get readable light-themed code when printing. */
+
   /* Reset background colors */
   body {
     background: white;

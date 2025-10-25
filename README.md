@@ -212,8 +212,8 @@ Embed X/Twitter posts:
 ### Syntax Highlighting
 
 The theme includes built-in syntax highlighting themes:
-- Light mode: Solarized Light
-- Dark mode: Solarized Dark
+- Light mode: GitHub
+- Dark mode: GitHub Dark
 
 Configure in `config.toml`:
 
@@ -259,6 +259,7 @@ The theme provides optimized print output for articles, ensuring a clean and rea
 - **Print-Friendly Layout**: Automatically hides navigation, interactive elements, and other non-essential components for a clutter-free printout.
 - **Automatic Footnotes with Bidirectional Links**: External links within the article are automatically converted into a numbered "References" section at the end of the printed document. Each link in the text shows a clickable `[1]` reference, and each footnote includes a clickable `^` symbol that links back to the original reference (Wikipedia-style navigation).
 - **Smart Code Block Pagination**: Code blocks shorter than 14 lines stay together on one page. Longer blocks break naturally across pages with minimum 7 lines on each side, preventing awkward fragments while avoiding wasted blank space.
+- **GitHub Syntax Highlighting**: Code blocks use GitHub's color scheme for print, optimized for both color and monochrome printers. All colors meet WCAG AA contrast standards for excellent readability.
 - **Optimized Typography**: Adjusts font sizes, line spacing, and page breaks for optimal readability on paper.
 
 ## Mobile Navigation
