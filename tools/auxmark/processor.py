@@ -24,7 +24,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from .core import Action, BaseModule, Job
+from .core import Action, BaseModule, Job, PostprocessLine
 
 
 class Processor:
@@ -130,11 +130,18 @@ class Processor:
                     continue
 
                 elif action == Action.TAG:
-                    module.todo_files.add(file_path)
+                    # Line needs postprocessing only
+                    pp_line = PostprocessLine(
+                        file_path=file_path,
+                        line_no=line_no,
+                        line=line,
+                        metadata=metadata
+                    )
+                    module.postprocess_lines.append(pp_line)
                     self.log(f"  [{module.name}] Tagged for post-processing")
 
-                elif action == Action.TAG_WITH_PREPROCESS:
-                    module.todo_files.add(file_path)
+                elif action == Action.TAG_WITH_PREPROCESS_ONLY:
+                    # Line needs preprocessing only, no postprocessing
                     job = Job(
                         file_path=file_path,
                         line_no=line_no,
@@ -143,7 +150,26 @@ class Processor:
                         metadata=metadata
                     )
                     module.jobs.append(job)
-                    self.log(f"  [{module.name}] Tagged with preprocessing job")
+                    self.log(f"  [{module.name}] Tagged with preprocessing only")
+
+                elif action == Action.TAG_WITH_PREPROCESS_AND_POSTPROCESS:
+                    # Line needs both preprocessing and postprocessing
+                    job = Job(
+                        file_path=file_path,
+                        line_no=line_no,
+                        line=line,
+                        module_name=module.name,
+                        metadata=metadata
+                    )
+                    module.jobs.append(job)
+                    pp_line = PostprocessLine(
+                        file_path=file_path,
+                        line_no=line_no,
+                        line=line,
+                        metadata=metadata
+                    )
+                    module.postprocess_lines.append(pp_line)
+                    self.log(f"  [{module.name}] Tagged with preprocessing and post-processing")
 
                 elif action == Action.EXPAND:
                     file_needs_expand = True
@@ -154,11 +180,12 @@ class Processor:
         if file_needs_expand:
             new_file = self.expand_file(file_path)
             if new_file and not self.dry_run:
-                # Discard preprocessing jobs for old file path
+                # Discard preprocessing jobs and postprocess lines for old file path
                 for module in self.modules:
                     module.jobs = [j for j in module.jobs if j.file_path != file_path]
-                    if file_path in module.todo_files:
-                        module.todo_files.remove(file_path)
+                    module.postprocess_lines = [
+                        pp for pp in module.postprocess_lines if pp.file_path != file_path
+                    ]
                 self.log(f"  Discarded jobs for old path, will requeue: {new_file}")
                 # Requeue the new file for processing
                 self.files_to_process.append(new_file)
@@ -206,34 +233,72 @@ class Processor:
 
     def run_postprocessing(self) -> None:
         """
-        Run post-processing for all modules.
+        Run post-processing for all modules (line-oriented).
 
-        Each module receives its TODO files for final processing.
+        Algorithm:
+        1. Group postprocess_lines by file
+        2. For each file:
+           - Read all lines
+           - Build lookup: line_no -> list of (module, metadata)
+           - Process lines: call module.postprocess() for tagged lines
+           - Write to temp file and replace original atomically
         """
-        total_files = sum(len(m.todo_files) for m in self.modules)
-        if total_files == 0:
+        # Group postprocess_lines by file
+        files_to_process: dict[Path, list[tuple[BaseModule, PostprocessLine]]] = {}
+
+        for module in self.modules:
+            for pp_line in module.postprocess_lines:
+                if pp_line.file_path not in files_to_process:
+                    files_to_process[pp_line.file_path] = []
+                files_to_process[pp_line.file_path].append((module, pp_line))
+
+        if not files_to_process:
             self.log("No post-processing needed")
             return
 
-        self.log(f"Running post-processing on {total_files} files...")
+        total_lines = sum(len(v) for v in files_to_process.values())
+        self.log(f"Running post-processing on {len(files_to_process)} files ({total_lines} lines)...")
 
-        for module in self.modules:
-            if not module.todo_files:
+        # Process each file
+        for file_path, tagged_lines in files_to_process.items():
+            self.log(f"Post-processing: {file_path} ({len(tagged_lines)} lines)")
+
+            if self.dry_run:
+                print(f"[DRY-RUN] Would post-process {len(tagged_lines)} lines in {file_path}")
                 continue
 
-            self.log(f"[{module.name}] Post-processing {len(module.todo_files)} files...")
+            try:
+                # Read file
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
 
-            for file_path in module.todo_files:
-                if self.dry_run:
-                    print(f"[DRY-RUN] Would run post-processing: {file_path}")
-                    continue
+                # Build lookup: line_no -> list of (module, metadata)
+                line_map: dict[int, list[tuple[BaseModule, dict]]] = {}
+                for module, pp_line in tagged_lines:
+                    if pp_line.line_no not in line_map:
+                        line_map[pp_line.line_no] = []
+                    line_map[pp_line.line_no].append((module, pp_line.metadata))
 
-                try:
-                    success = module.postprocess(file_path)
-                    if not success:
-                        print(f"Post-processing failed for {file_path}", file=sys.stderr)
-                except Exception as e:
-                    print(f"Error in post-processing {file_path}: {e}", file=sys.stderr)
+                # Process lines
+                new_lines = []
+                for line_no, line in enumerate(lines):
+                    if line_no in line_map:
+                        # Line is tagged - call each module's postprocess
+                        for module, metadata in line_map[line_no]:
+                            line = module.postprocess(file_path, line_no, line, metadata)
+                            self.log(f"  [{module.name}] Rewrote line {line_no}")
+                    new_lines.append(line)
+
+                # Write to temp file and replace atomically
+                temp_file = file_path.with_suffix('.tmp')
+                with open(temp_file, 'w', encoding='utf-8') as f:
+                    f.writelines(new_lines)
+                temp_file.replace(file_path)
+
+                self.log(f"  ✓ Updated: {file_path}")
+
+            except Exception as e:
+                print(f"Error in post-processing {file_path}: {e}", file=sys.stderr)
 
         self.log("Post-processing complete")
 

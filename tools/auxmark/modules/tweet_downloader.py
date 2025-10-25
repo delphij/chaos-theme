@@ -478,13 +478,13 @@ class TweetDownloaderModule(BaseModule):
             if not tweet_id:
                 return (Action.IGNORE, {})
 
-            # Request preprocessing
+            # Request preprocessing only (no postprocessing needed)
             metadata = {
                 'user': user,
                 'tweet_id': tweet_id
             }
 
-            return (Action.TAG_WITH_PREPROCESS, metadata)
+            return (Action.TAG_WITH_PREPROCESS_ONLY, metadata)
 
         return (Action.IGNORE, {})
 

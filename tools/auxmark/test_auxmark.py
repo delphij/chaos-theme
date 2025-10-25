@@ -172,7 +172,7 @@ def test_dry_run():
             return False
 
         # Count detected tweets
-        tweet_count = stdout.count("[tweet_downloader] Tagged with preprocessing job")
+        tweet_count = stdout.count("[tweet_downloader] Tagged with preprocessing only")
         if tweet_count != 3:
             print(f"✗ FAILED: Expected 3 tweets, found {tweet_count}")
             return False
@@ -242,7 +242,7 @@ def test_file_scanning():
             return False
 
         # Should still find only 3 tweets (not the untracked one)
-        tweet_count = stdout.count("[tweet_downloader] Tagged with preprocessing job")
+        tweet_count = stdout.count("[tweet_downloader] Tagged with preprocessing only")
         if tweet_count != 3:
             print(f"✗ FAILED: Expected 3 tweets (ignoring untracked), found {tweet_count}")
             return False

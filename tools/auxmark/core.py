@@ -28,10 +28,11 @@ from typing import Any
 
 class Action(Enum):
     """Actions that modules can return from probe()."""
-    IGNORE = auto()              # Not interested in this line
-    TAG = auto()                 # File should be processed later
-    TAG_WITH_PREPROCESS = auto() # File needs preprocessing + later processing
-    EXPAND = auto()              # Convert file.md -> file/index.md
+    IGNORE = auto()                              # Not interested in this line
+    TAG = auto()                                 # Line needs postprocessing only
+    TAG_WITH_PREPROCESS_ONLY = auto()            # Line needs preprocessing only, no postprocessing
+    TAG_WITH_PREPROCESS_AND_POSTPROCESS = auto() # Line needs both preprocessing and postprocessing
+    EXPAND = auto()                              # Convert file.md -> file/index.md
 
 
 @dataclass
@@ -41,6 +42,15 @@ class Job:
     line_no: int
     line: str
     module_name: str
+    metadata: dict[str, Any]
+
+
+@dataclass
+class PostprocessLine:
+    """Represents a line tagged for postprocessing."""
+    file_path: Path
+    line_no: int
+    line: str
     metadata: dict[str, Any]
 
 
@@ -62,7 +72,7 @@ class BaseModule:
     def __init__(self, config: dict[str, Any] | None = None):
         """Initialize module with optional configuration."""
         self.config = config or {}
-        self.todo_files: set[Path] = set()
+        self.postprocess_lines: list[PostprocessLine] = []
         self.jobs: list[Job] = []
 
     def probe(self, file_path: Path, line_no: int, line: str) -> tuple[Action, dict[str, Any]]:
@@ -92,17 +102,20 @@ class BaseModule:
         """
         return True
 
-    def postprocess(self, file_path: Path) -> bool:
+    def postprocess(self, file_path: Path, line_no: int, line: str, metadata: dict[str, Any]) -> str:
         """
-        Post-process a file (typically rewriting).
+        Rewrite a single line (line-oriented postprocessing).
 
         Args:
-            file_path: Path to the file to process
+            file_path: Path to file being processed
+            line_no: Line number (0-indexed)
+            line: Original line content
+            metadata: Context data from probe phase
 
         Returns:
-            True if successful, False otherwise
+            Rewritten line (or original if no changes needed)
         """
-        return True
+        return line
 
 
 class ModuleRegistry:
