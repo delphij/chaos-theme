@@ -371,6 +371,9 @@ The theme is optimized for performance with modern best practices:
 - Older browsers: Progressive enhancement with solid backgrounds
 - All core functionality works in IE11+ (though deprecated)
 
+**Known Limitations:**
+- Chrome/Edge: CJK line-breaking rules not applied to inline math formulas. Chinese punctuation may appear at line start after KaTeX formulas. Works correctly in Safari and Firefox.
+
 ## Accessibility
 
 **WCAG 2.1 AA Compliant:**

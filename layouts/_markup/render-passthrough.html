@@ -3,7 +3,9 @@
   {{- with .Err }}
     {{- errorf "Unable to render mathematical markup to HTML using the transform.ToMath function. The KaTeX display engine threw the following error: %s: see %s." . $.Position }}
   {{- else }}
+    {{- if eq $.Type "inline" }}<span class="math-inline">{{- end }}
     {{- .Value }}
+    {{- if eq $.Type "inline" }}</span>{{- end }}
     {{- $.Page.Store.Set "hasMath" true }}
   {{- end }}
 {{- end -}}

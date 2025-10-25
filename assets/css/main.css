@@ -806,6 +806,19 @@ strong {
   text-emphasis-position: under;     /* Position below for horizontal text */
 }
 
+/* Inline math wrapper - Prevent line breaks before following punctuation
+   Works in Safari with CJK line-breaking rules; known limitation in Chrome
+   The wrapper treats the formula as an atomic inline unit for line-breaking */
+.math-inline {
+  display: inline-block;             /* Atomic inline unit - works with Safari's CJK line-break rules */
+}
+
+/* Insert word joiner after inline math to prevent line break before punctuation
+   Provides additional protection in Safari; Chrome doesn't respect this for CJK */
+.math-inline::after {
+  content: '\2060';                  /* Word joiner (U+2060) */
+}
+
 /* ==========================================================================
    ACCESSIBILITY
    Focus states and keyboard navigation support.
@@ -1050,7 +1063,12 @@ button:focus {
   .container {
     max-width: 100%;
     margin: 0;
-    padding: 0 0.5in;                /* Horizontal padding to prevent clipping hanging list markers */
+    padding: 0;
+  }
+
+  /* Article pages: minimal padding to prevent clipping hanging list markers */
+  .container:has(.content-layout) {
+    padding: 0 var(--gutter);        /* 24px - enough for hanging list numbers without excessive margins */
   }
 
   /* Remove grid layout for article pages */
