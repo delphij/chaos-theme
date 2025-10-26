@@ -35,12 +35,21 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  auxmark                    # Process all markdown files
-  auxmark --verbose          # Show detailed progress
-  auxmark --dry-run          # Show what would be done without doing it
-  auxmark --module tweet     # Run only tweet_downloader module
+  auxmark                           # Process all markdown files with all modules
+  auxmark --verbose                 # Show detailed progress
+  auxmark --dry-run                 # Preview changes without modifying files
+  auxmark --module image            # Run only image_localizer module
+  auxmark --module tweet,image      # Run specific modules
+  auxmark --workers 8               # Use 8 concurrent workers
+  auxmark --config .auxmark.toml    # Use custom config file
 
-Phase 1: Hardcoded module registration (tweet_downloader only)
+Available modules:
+  - image_localizer: Download and localize remote images to WebP
+  - tweet_downloader: Cache X/Twitter embeds locally
+
+Configuration:
+  Create .auxmark.toml in your Hugo site root to customize behavior.
+  See .auxmark.toml.example in the theme directory for details.
         """
     )
 
