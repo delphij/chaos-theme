@@ -1,0 +1,29 @@
+# Example configuration file for auxmark tool
+# Place this file as .auxmark.toml in your Hugo site root (alongside hugo.toml)
+# or in your theme directory (themes/chaos/.auxmark.toml)
+
+[general]
+verbose = false
+dry_run = false
+
+[modules.image_localizer]
+enabled = true
+convert_to_webp = true        # Convert JPG/PNG to lossless WebP
+max_retries = 3               # Number of download retry attempts
+retry_delay = 1.0             # Initial retry delay in seconds
+retry_backoff = 2.0           # Backoff multiplier (1s → 2s → 4s)
+timeout = 30                  # Download timeout in seconds
+
+[modules.tweet_downloader]
+enabled = true
+cache_max_age_days = 30       # Re-download tweets older than this
+defang = true                 # Remove scripts from cached HTML
+lang = "auto"                 # Language for embeds ("auto" detects from Hugo config)
+data_dir = "data/x_embeds"    # Cache directory relative to site root
+max_retries = 3
+retry_delay = 1.0
+timeout = 30
+
+[worker]
+max_workers = 4               # Number of concurrent download workers
+rate_limit_delay = 1.0        # Minimum delay between requests to same domain (seconds)

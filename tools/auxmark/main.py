@@ -21,8 +21,10 @@ Main CLI entrypoint for the auxmark tool.
 
 import argparse
 import sys
+from pathlib import Path
 
 from . import ModuleRegistry, Processor, find_git_root, scan_markdown_files
+from .config import load_config
 from .modules import ImageLocalizerModule, TweetDownloaderModule
 
 
@@ -58,6 +60,12 @@ Phase 1: Hardcoded module registration (tweet_downloader only)
         action='store_true',
         help='Show what would be done without making changes'
     )
+    parser.add_argument(
+        '--config',
+        type=str,
+        help='Path to config file (default: auto-discover .auxmark.toml)',
+        default=None
+    )
 
     args = parser.parse_args()
 
@@ -69,6 +77,27 @@ Phase 1: Hardcoded module registration (tweet_downloader only)
 
     if args.verbose:
         print(f"[auxmark] Git root: {git_root}")
+
+    # Load configuration
+    config_path = Path(args.config) if args.config else None
+    config = load_config(config_path=config_path, git_root=git_root)
+
+    if args.verbose:
+        if config_path:
+            print(f"[auxmark] Loaded config from: {config_path}")
+        elif args.config is None:
+            from .config import find_config_file
+            found_config = find_config_file(git_root)
+            if found_config:
+                print(f"[auxmark] Loaded config from: {found_config}")
+            else:
+                print("[auxmark] No config file found, using defaults")
+
+    # CLI arguments override config file
+    if args.verbose:
+        config['general']['verbose'] = True
+    if args.dry_run:
+        config['general']['dry_run'] = True
 
     # Register modules (hardcoded for Phase 1)
     ModuleRegistry.register(ImageLocalizerModule)
@@ -124,8 +153,8 @@ Phase 1: Hardcoded module registration (tweet_downloader only)
     if args.verbose:
         print(f"[auxmark] Found {len(files)} markdown files")
 
-    # Instantiate modules
-    modules = ModuleRegistry.instantiate_all()
+    # Instantiate modules with configuration
+    modules = ModuleRegistry.instantiate_all(config)
 
     # Create processor
     processor = Processor(modules, verbose=args.verbose, dry_run=args.dry_run)

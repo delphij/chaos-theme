@@ -62,15 +62,57 @@ python3 themes/chaos/tools/auxmark.py --verbose
 # Run specific module only
 python3 themes/chaos/tools/auxmark.py --module tweet
 
+# Use custom config file
+python3 themes/chaos/tools/auxmark.py --config /path/to/.auxmark.toml
+
 # Combine options
 python3 themes/chaos/tools/auxmark.py --verbose --dry-run
 ```
+
+### Configuration File
+
+Create `.auxmark.toml` in your Hugo site root (alongside `hugo.toml` or `config.toml`) to customize module behavior:
+
+```toml
+[general]
+verbose = false
+dry_run = false
+
+[modules.image_localizer]
+enabled = true
+convert_to_webp = true
+max_retries = 3
+retry_delay = 1.0
+retry_backoff = 2.0
+timeout = 30
+
+[modules.tweet_downloader]
+enabled = true
+cache_max_age_days = 30
+defang = true
+lang = "auto"
+data_dir = "data/x_embeds"
+
+[worker]
+max_workers = 4
+rate_limit_delay = 1.0
+```
+
+**Config file discovery order:**
+1. Hugo site root (e.g., `/path/to/site/.auxmark.toml`)
+2. Theme directory (e.g., `/path/to/site/themes/chaos/.auxmark.toml`)
+3. Built-in defaults
+
+**Note:** Command-line options (`--verbose`, `--dry-run`) always override config file settings.
+
+See `.auxmark.toml.example` in the theme directory for a complete example with comments.
 
 ### Module Selection
 
 Run specific modules:
 - `--module tweet` - Tweet downloader only
-- Multiple modules (future): `--module tweet,image`
+- `--module image` - Image localizer only
+- `--module tweet,image` - Both modules
 
 ## How It Works
 

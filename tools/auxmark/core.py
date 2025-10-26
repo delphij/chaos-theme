@@ -152,13 +152,14 @@ class ModuleRegistry:
         Instantiate all registered modules.
 
         Args:
-            config: Optional configuration dict
+            config: Optional configuration dict (full config with 'modules' key)
 
         Returns:
             List of instantiated module objects
         """
         modules = []
         for module_class in cls._modules.values():
-            module_config = (config or {}).get(module_class.name, {})
+            # Get module-specific config from config['modules'][module_name]
+            module_config = (config or {}).get('modules', {}).get(module_class.name, {})
             modules.append(module_class(module_config))
         return modules
