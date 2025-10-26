@@ -399,8 +399,9 @@ Relative image (should be ignored):
             return False
 
         # Should have 2 preprocessing jobs (one per line, even though line 2 has 2 images)
-        job_count = stdout.count("[image_localizer] Processing 2 jobs")
-        if job_count != 1:
+        # Check for new worker pool message format
+        has_preprocessing = "Running 2 preprocessing jobs" in stdout
+        if not has_preprocessing:
             print(f"✗ FAILED: Expected 2 preprocessing jobs (one per line)")
             print(f"STDOUT:\n{stdout}")
             return False
@@ -454,9 +455,11 @@ date = 2024-01-06T12:00:00Z
             print("✗ FAILED: Non-zero return code")
             return False
 
-        # Should have preprocessing job
-        if "[image_localizer] Processing 1 jobs" not in stdout:
+        # Should have preprocessing job (check for new worker pool message format)
+        has_job = "Running 1 preprocessing" in stdout or "[image_localizer] Processing 1 jobs" in stdout
+        if not has_job:
             print("✗ FAILED: No preprocessing jobs found")
+            print(f"STDOUT:\n{stdout}")
             return False
 
         # Should mention postprocessing

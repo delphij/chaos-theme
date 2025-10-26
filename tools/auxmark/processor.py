@@ -25,12 +25,20 @@ import sys
 from pathlib import Path
 
 from .core import Action, BaseModule, Job, PostprocessLine
+from .worker import RateLimitedWorkerPool
 
 
 class Processor:
     """Main processor for auxmark tool."""
 
-    def __init__(self, modules: list[BaseModule], verbose: bool = False, dry_run: bool = False):
+    def __init__(
+        self,
+        modules: list[BaseModule],
+        verbose: bool = False,
+        dry_run: bool = False,
+        max_workers: int = 4,
+        rate_limit_delay: float = 1.0
+    ):
         """
         Initialize processor.
 
@@ -38,10 +46,14 @@ class Processor:
             modules: List of active modules
             verbose: Enable verbose logging
             dry_run: Don't modify files
+            max_workers: Maximum number of concurrent workers
+            rate_limit_delay: Minimum delay between requests to same domain (seconds)
         """
         self.modules = modules
         self.verbose = verbose
         self.dry_run = dry_run
+        self.max_workers = max_workers
+        self.rate_limit_delay = rate_limit_delay
         self.expanded_files: set[Path] = set()
         self.files_to_process: list[Path] = []
 
@@ -202,42 +214,70 @@ class Processor:
 
     def run_preprocessing(self) -> None:
         """
-        Run preprocessing jobs for all modules.
+        Run preprocessing jobs for all modules using worker pool.
 
-        Phase 1: Single-threaded execution.
+        Uses multi-threaded execution with per-domain rate limiting.
         """
         total_jobs = sum(len(m.jobs) for m in self.modules)
         if total_jobs == 0:
             self.log("No preprocessing jobs to run")
             return
 
-        self.log(f"Running {total_jobs} preprocessing jobs (single-threaded)...")
+        if self.max_workers == 1:
+            self.log(f"Running {total_jobs} preprocessing jobs (single-threaded)...")
+        else:
+            self.log(f"Running {total_jobs} preprocessing jobs ({self.max_workers} workers, rate limit: {self.rate_limit_delay}s/domain)...")
 
         completed = 0
         failed = 0
 
-        for module in self.modules:
-            if not module.jobs:
-                continue
-
-            self.log(f"[{module.name}] Processing {len(module.jobs)} jobs...")
-
-            for job in module.jobs:
-                if self.dry_run:
+        # Dry-run mode: just log what would be done
+        if self.dry_run:
+            for module in self.modules:
+                for job in module.jobs:
                     print(f"[DRY-RUN] Would run preprocessing: {job.file_path}:{job.line_no}")
                     completed += 1
+            self.log(f"Preprocessing complete: {completed} jobs (dry-run)")
+            return
+
+        # Use worker pool for actual execution
+        with RateLimitedWorkerPool(
+            max_workers=self.max_workers,
+            rate_limit_delay=self.rate_limit_delay,
+            verbose=self.verbose
+        ) as pool:
+            # Submit all jobs and collect futures
+            futures = []
+            job_info = []  # Track (future, module, job) for error reporting
+
+            for module in self.modules:
+                if not module.jobs:
                     continue
 
+                self.log(f"[{module.name}] Processing {len(module.jobs)} jobs...")
+
+                for job in module.jobs:
+                    future = pool.submit_job(job, module)
+                    futures.append(future)
+                    job_info.append((future, module, job))
+
+            # Wait for all jobs to complete and collect results
+            for future, module, job in job_info:
                 try:
-                    success = module.preprocess(job)
+                    success = future.result()
                     if success:
                         completed += 1
                     else:
                         failed += 1
-                        print(f"Preprocessing failed for {job.file_path}:{job.line_no}", file=sys.stderr)
                 except Exception as e:
                     failed += 1
-                    print(f"Error in preprocessing {job.file_path}:{job.line_no}: {e}", file=sys.stderr)
+                    print(
+                        f"Error in preprocessing {job.file_path}:{job.line_no}: {e}",
+                        file=sys.stderr
+                    )
+                    if self.verbose:
+                        import traceback
+                        traceback.print_exc()
 
         self.log(f"Preprocessing complete: {completed} succeeded, {failed} failed")
 

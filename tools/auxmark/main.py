@@ -66,6 +66,12 @@ Phase 1: Hardcoded module registration (tweet_downloader only)
         help='Path to config file (default: auto-discover .auxmark.toml)',
         default=None
     )
+    parser.add_argument(
+        '--workers',
+        type=int,
+        help='Number of concurrent workers (default: 4, use 1 for single-threaded)',
+        default=None
+    )
 
     args = parser.parse_args()
 
@@ -156,8 +162,23 @@ Phase 1: Hardcoded module registration (tweet_downloader only)
     # Instantiate modules with configuration
     modules = ModuleRegistry.instantiate_all(config)
 
+    # Get worker pool configuration
+    worker_config = config.get('worker', {})
+    max_workers = worker_config.get('max_workers', 4)
+    rate_limit_delay = worker_config.get('rate_limit_delay', 1.0)
+
+    # CLI argument overrides config
+    if args.workers is not None:
+        max_workers = args.workers
+
     # Create processor
-    processor = Processor(modules, verbose=args.verbose, dry_run=args.dry_run)
+    processor = Processor(
+        modules,
+        verbose=args.verbose,
+        dry_run=args.dry_run,
+        max_workers=max_workers,
+        rate_limit_delay=rate_limit_delay
+    )
 
     # Process all files
     try:
