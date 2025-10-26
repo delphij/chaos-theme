@@ -58,6 +58,8 @@ class ImageLocalizerModule(BaseModule):
         self.convert_to_webp = config.get('convert_to_webp', True) if config else True
         self.max_retries = config.get('max_retries', 3) if config else 3
         self.retry_delay = config.get('retry_delay', 1.0) if config else 1.0
+        self.retry_backoff = config.get('retry_backoff', 2.0) if config else 2.0
+        self.timeout = config.get('timeout', 30) if config else 30
 
     def probe(self, file_path: Path, line_no: int, line: str) -> tuple[Action, dict[str, Any]]:
         """
@@ -141,6 +143,29 @@ class ImageLocalizerModule(BaseModule):
 
         return all_success
 
+    def _should_retry_error(self, error: Exception) -> bool:
+        """
+        Determine if an error should trigger a retry.
+
+        Args:
+            error: The exception that occurred
+
+        Returns:
+            True if should retry, False for permanent errors
+        """
+        # Always retry network errors and timeouts
+        if isinstance(error, (error.URLError, TimeoutError)):
+            # Check if it's an HTTPError with specific status code
+            if isinstance(error, error.HTTPError):
+                # Retry on server errors and rate limiting
+                if error.code in (429, 500, 502, 503, 504):
+                    return True
+                # Don't retry client errors (likely permanent)
+                if 400 <= error.code < 500:
+                    return False
+            return True
+        return False
+
     def _download_and_convert(
         self,
         url: str,
@@ -172,21 +197,51 @@ class ImageLocalizerModule(BaseModule):
             ext in ('.jpg', '.jpeg', '.png', '.gif')
         )
 
-        # Download with retry
+        # Download with retry and exponential backoff
         image_data = None
         delay = self.retry_delay
+        last_error = None
+
         for attempt in range(self.max_retries):
             try:
-                with request.urlopen(url, timeout=30) as response:
+                with request.urlopen(url, timeout=self.timeout) as response:
                     image_data = response.read()
+                    if attempt > 0:
+                        print(f"  ✓ Successfully downloaded {url} on attempt {attempt + 1}", file=sys.stderr)
                     break
             except (error.URLError, error.HTTPError, TimeoutError) as e:
-                if attempt < self.max_retries - 1:
-                    print(f"Download attempt {attempt + 1} failed: {e}, retrying...", file=sys.stderr)
+                last_error = e
+
+                # Determine if we should retry
+                should_retry = self._should_retry_error(e)
+
+                # Format error message
+                error_msg = str(e)
+                if isinstance(e, error.HTTPError):
+                    error_msg = f"HTTP {e.code}: {e.reason}"
+
+                if attempt < self.max_retries - 1 and should_retry:
+                    # Retry with backoff
+                    print(
+                        f"  ⚠ Attempt {attempt + 1}/{self.max_retries} failed: {error_msg}",
+                        file=sys.stderr
+                    )
+                    print(f"    Retrying in {delay:.1f}s...", file=sys.stderr)
                     time.sleep(delay)
-                    delay *= 2  # Exponential backoff
+                    delay *= self.retry_backoff
+                elif not should_retry:
+                    # Permanent error, don't retry
+                    print(
+                        f"  ✗ Permanent error ({error_msg}), not retrying",
+                        file=sys.stderr
+                    )
+                    return False
                 else:
-                    print(f"Download failed after {self.max_retries} attempts: {e}", file=sys.stderr)
+                    # All retries exhausted
+                    print(
+                        f"  ✗ Download failed after {self.max_retries} attempts: {error_msg}",
+                        file=sys.stderr
+                    )
                     return False
 
         if image_data is None:

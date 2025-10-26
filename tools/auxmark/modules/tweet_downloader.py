@@ -205,15 +205,29 @@ def extract_tweet_id(input_str: str) -> str | None:
     return None
 
 
-def fetch_oembed(tweet_id: str, defang: bool = True, lang: str | None = None) -> dict | None:
+def fetch_oembed(
+    tweet_id: str,
+    defang: bool = True,
+    lang: str | None = None,
+    max_retries: int = 3,
+    retry_delay: float = 1.0,
+    retry_backoff: float = 2.0,
+    timeout: int = 30
+) -> dict | None:
     """
-    Fetch oEmbed data from X's public API.
+    Fetch oEmbed data from X's public API with retry logic.
 
     Args:
         tweet_id: The tweet ID to fetch
         defang: If True, request omit_script to avoid receiving script tags
         lang: X language code (e.g., 'en', 'zh-cn')
+        max_retries: Maximum number of retry attempts
+        retry_delay: Initial delay between retries (seconds)
+        retry_backoff: Multiplier for exponential backoff
+        timeout: Request timeout in seconds
     """
+    import time
+
     tweet_url = f'https://x.com/i/status/{tweet_id}'
 
     # Build query parameters
@@ -229,20 +243,62 @@ def fetch_oembed(tweet_id: str, defang: bool = True, lang: str | None = None) ->
     query = parse.urlencode(params)
     oembed_url = f'https://publish.x.com/oembed?{query}'
 
-    try:
-        with request.urlopen(oembed_url, timeout=10) as response:
-            if response.status == 200:
-                data = json.loads(response.read().decode('utf-8'))
-                return data
-            else:
-                print(f"Error: HTTP {response.status}", file=sys.stderr)
+    delay = retry_delay
+    last_error = None
+
+    for attempt in range(max_retries):
+        try:
+            with request.urlopen(oembed_url, timeout=timeout) as response:
+                if response.status == 200:
+                    data = json.loads(response.read().decode('utf-8'))
+                    if attempt > 0:
+                        print(f"  ✓ Successfully fetched tweet {tweet_id} on attempt {attempt + 1}", file=sys.stderr)
+                    return data
+                else:
+                    last_error = f"HTTP {response.status}"
+
+                    # Determine if we should retry based on status code
+                    should_retry = response.status in (429, 500, 502, 503, 504)
+
+                    if attempt < max_retries - 1 and should_retry:
+                        print(f"  ⚠ Attempt {attempt + 1}/{max_retries} failed: {last_error}", file=sys.stderr)
+                        print(f"    Retrying in {delay:.1f}s...", file=sys.stderr)
+                        time.sleep(delay)
+                        delay *= retry_backoff
+                    elif not should_retry:
+                        print(f"  ✗ Permanent error ({last_error}), not retrying", file=sys.stderr)
+                        return None
+                    else:
+                        print(f"  ✗ Failed after {max_retries} attempts: {last_error}", file=sys.stderr)
+                        return None
+
+        except (error.URLError, error.HTTPError) as e:
+            last_error = str(e)
+            if isinstance(e, error.HTTPError):
+                last_error = f"HTTP {e.code}: {e.reason}"
+
+            # Determine if we should retry
+            should_retry = True
+            if isinstance(e, error.HTTPError) and 400 <= e.code < 500 and e.code != 429:
+                should_retry = False  # Client errors are permanent
+
+            if attempt < max_retries - 1 and should_retry:
+                print(f"  ⚠ Attempt {attempt + 1}/{max_retries} failed: {last_error}", file=sys.stderr)
+                print(f"    Retrying in {delay:.1f}s...", file=sys.stderr)
+                time.sleep(delay)
+                delay *= retry_backoff
+            elif not should_retry:
+                print(f"  ✗ Permanent error ({last_error}), not retrying", file=sys.stderr)
                 return None
-    except error.URLError as e:
-        print(f"Error fetching oEmbed data: {e}", file=sys.stderr)
-        return None
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON response: {e}", file=sys.stderr)
-        return None
+            else:
+                print(f"  ✗ Failed after {max_retries} attempts: {last_error}", file=sys.stderr)
+                return None
+
+        except json.JSONDecodeError as e:
+            print(f"  ✗ Error decoding JSON response: {e}", file=sys.stderr)
+            return None
+
+    return None
 
 
 def sanitize_html(html: str) -> str:
@@ -279,7 +335,11 @@ def process_single_tweet(
     site_root: Path | None = None,
     defang: bool = True,
     lang: str | None = None,
-    force: bool = False
+    force: bool = False,
+    max_retries: int = 3,
+    retry_delay: float = 1.0,
+    retry_backoff: float = 2.0,
+    timeout: int = 30
 ) -> bool:
     """
     Process a single tweet URL or ID.
@@ -291,6 +351,10 @@ def process_single_tweet(
         defang: Remove scripts and tracking
         lang: Language code (auto-detected if None and site_root provided)
         force: Force refresh even if cached
+        max_retries: Maximum number of retry attempts
+        retry_delay: Initial delay between retries (seconds)
+        retry_backoff: Multiplier for exponential backoff
+        timeout: Request timeout in seconds
 
     Returns:
         True if successful, False otherwise
@@ -313,7 +377,15 @@ def process_single_tweet(
             print(f"Detected Hugo languageCode -> X lang: {lang}")
 
     print(f"Fetching tweet {tweet_id}...")
-    oembed_data = fetch_oembed(tweet_id, defang=defang, lang=lang)
+    oembed_data = fetch_oembed(
+        tweet_id,
+        defang=defang,
+        lang=lang,
+        max_retries=max_retries,
+        retry_delay=retry_delay,
+        retry_backoff=retry_backoff,
+        timeout=timeout
+    )
 
     if oembed_data:
         save_embed_data(tweet_id, oembed_data, data_dir, defang)
@@ -367,7 +439,11 @@ def fetch_tweet_cached(
     site_root: Path | None = None,
     defang: bool = True,
     cache_max_age_days: int = 30,
-    force_refresh: bool = False
+    force_refresh: bool = False,
+    max_retries: int = 3,
+    retry_delay: float = 1.0,
+    retry_backoff: float = 2.0,
+    timeout: int = 30
 ) -> bool:
     """
     Fetch and cache a tweet (module-friendly interface).
@@ -382,6 +458,10 @@ def fetch_tweet_cached(
         defang: Remove scripts and tracking (default: True)
         cache_max_age_days: Maximum age of cache in days (default: 30)
         force_refresh: Force re-fetch even if cache exists (default: False)
+        max_retries: Maximum number of retry attempts
+        retry_delay: Initial delay between retries (seconds)
+        retry_backoff: Multiplier for exponential backoff
+        timeout: Request timeout in seconds
 
     Returns:
         True if successful (cached or fetched), False otherwise
@@ -406,7 +486,11 @@ def fetch_tweet_cached(
         site_root=site_root,
         defang=defang,
         lang=None,  # Will be auto-detected
-        force=force_refresh
+        force=force_refresh,
+        max_retries=max_retries,
+        retry_delay=retry_delay,
+        retry_backoff=retry_backoff,
+        timeout=timeout
     )
 
 
@@ -432,6 +516,10 @@ class TweetDownloaderModule(BaseModule):
         # Configuration defaults
         self.cache_max_age_days = self.config.get('cache_max_age_days', 30)
         self.defang = self.config.get('defang', True)
+        self.max_retries = self.config.get('max_retries', 3)
+        self.retry_delay = self.config.get('retry_delay', 1.0)
+        self.retry_backoff = self.config.get('retry_backoff', 2.0)
+        self.timeout = self.config.get('timeout', 30)
 
         # Detect paths
         self.git_root = self._find_git_root()
@@ -512,7 +600,11 @@ class TweetDownloaderModule(BaseModule):
                 site_root=self.git_root,
                 defang=self.defang,
                 cache_max_age_days=self.cache_max_age_days,
-                force_refresh=False
+                force_refresh=False,
+                max_retries=self.max_retries,
+                retry_delay=self.retry_delay,
+                retry_backoff=self.retry_backoff,
+                timeout=self.timeout
             )
 
             if success:
