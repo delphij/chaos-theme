@@ -149,6 +149,66 @@ def run_auxmark(site_root: Path, *args) -> tuple[int, str, str]:
     return result.returncode, result.stdout, result.stderr
 
 
+def create_sample_post(site_root: Path, path: str, title: str, content: str, as_index: bool = False) -> Path:
+    """
+    Create a sample post for testing.
+
+    Args:
+        site_root: Root of test site
+        path: Relative path under content/posts (e.g., "2025/10/test-post" or "2025/10/test-post.md")
+        title: Post title
+        content: Post content
+        as_index: If True, create as index.md (page bundle), otherwise create as .md file
+
+    Returns:
+        Path to created post file (or directory if as_index=True)
+    """
+    base_path = site_root / "content" / "posts" / path
+
+    # Remove .md extension if present
+    if str(base_path).endswith('.md'):
+        base_path = Path(str(base_path)[:-3])
+
+    if as_index:
+        # Create as page bundle: path/index.md
+        post_dir = base_path
+        post_dir.mkdir(parents=True, exist_ok=True)
+        post_file = post_dir / "index.md"
+        return_path = post_dir
+    else:
+        # Create as regular file: path.md
+        post_dir = base_path.parent
+        post_dir.mkdir(parents=True, exist_ok=True)
+        post_file = base_path.parent / f"{base_path.name}.md"
+        return_path = post_file
+
+    post_content = f"""+++
+title = "{title}"
+date = 2024-01-01T12:00:00Z
++++
+
+{content}
+"""
+    post_file.write_text(post_content)
+
+    return return_path
+
+
+def add_wildcard_allowlist_config(site_root: Path):
+    """
+    Add a wildcard allowlist config to allow all images.
+    Helper for existing tests that expect permissive behavior.
+
+    Args:
+        site_root: Root of test site
+    """
+    config_content = """[modules.image_localizer]
+allowlist = ["*"]  # Allow all domains for testing
+"""
+    config_file = site_root / ".auxmark.toml"
+    config_file.write_text(config_content)
+
+
 def test_dry_run():
     """Test that dry-run mode doesn't modify files."""
     print("\n[Test 1] Dry-run mode")
@@ -289,6 +349,9 @@ def test_image_localizer_expand():
     site_root = create_test_site()
 
     try:
+        # Add wildcard allowlist config to allow all images
+        add_wildcard_allowlist_config(site_root)
+
         # Create a non-index.md file with external image
         content_dir = site_root / "content" / "posts"
         post = content_dir / "image-post.md"
@@ -347,6 +410,9 @@ def test_image_localizer_detection():
     site_root = create_test_site()
 
     try:
+        # Add wildcard allowlist config to allow all images
+        add_wildcard_allowlist_config(site_root)
+
         # Create index.md with various image types
         content_dir = site_root / "content" / "posts"
         article_dir = content_dir / "article"
@@ -420,6 +486,9 @@ def test_image_localizer_postprocessing():
     site_root = create_test_site()
 
     try:
+        # Add wildcard allowlist config to allow all images
+        add_wildcard_allowlist_config(site_root)
+
         # Create index.md with external image
         content_dir = site_root / "content" / "posts"
         article_dir = content_dir / "article2"
@@ -482,6 +551,9 @@ def test_image_localizer_real_download():
     site_root = create_test_site()
 
     try:
+        # Add wildcard allowlist config to allow all images
+        add_wildcard_allowlist_config(site_root)
+
         # Create index.md with real external image
         content_dir = site_root / "content" / "posts"
         article_dir = content_dir / "real_image"
@@ -588,6 +660,9 @@ def test_image_localizer_partial_failure():
     site_root = create_test_site()
 
     try:
+        # Add wildcard allowlist config to allow all images
+        add_wildcard_allowlist_config(site_root)
+
         # Create index.md with one valid and one invalid image
         content_dir = site_root / "content" / "posts"
         article_dir = content_dir / "partial_test"
@@ -681,6 +756,9 @@ def test_image_localizer_with_title():
     site_root = create_test_site()
 
     try:
+        # Add wildcard allowlist config to allow all images
+        add_wildcard_allowlist_config(site_root)
+
         # Create index.md with images having optional titles
         content_dir = site_root / "content" / "posts"
         article_dir = content_dir / "title_test"
@@ -892,6 +970,360 @@ dry_run = false
         shutil.rmtree(site_root)
 
 
+def test_image_localizer_allowlist_blocks_by_default():
+    """Test that empty allowlist blocks all images with warnings."""
+    print("\n[Test 13] Image localizer - empty allowlist blocks all")
+    site_root = create_test_site()
+
+    try:
+        # Create post with external image
+        post_dir = create_sample_post(
+            site_root,
+            "2025/10/test-allowlist-default",
+            title="Test Allowlist Default",
+            content="![Test](https://picsum.photos/200/200.jpg)"
+        )
+
+        # Create config with empty allowlist (default)
+        config_content = """[modules.image_localizer]
+allowlist = []  # Empty = block all
+"""
+        config_file = site_root / ".auxmark.toml"
+        config_file.write_text(config_content)
+
+        subprocess.run(["git", "add", "."], cwd=site_root, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Add config"],
+            cwd=site_root,
+            check=True,
+            capture_output=True
+        )
+
+        # Run auxmark
+        returncode, stdout, stderr = run_auxmark(site_root, "--dry-run")
+
+        if returncode != 0:
+            print(f"STDERR:\n{stderr}")
+            print("✗ FAILED: Non-zero return code")
+            return False
+
+        # Should log warning about skipped image
+        if "skipped non-allowlisted image" not in stderr:
+            print("✗ FAILED: No warning logged for blocked image")
+            print(f"STDERR:\n{stderr}")
+            return False
+
+        # Should have IGNORE action (no expansion)
+        # post_dir is the .md file itself, check if it was expanded to directory/index.md
+        expected_dir = post_dir.parent / post_dir.stem
+        expanded_file = expected_dir / "index.md"
+        if expanded_file.exists():
+            print("✗ FAILED: File was expanded (should be ignored)")
+            return False
+
+        print("  ✓ Empty allowlist blocks all images")
+        print("  ✓ Warning logged for non-allowlisted image")
+        print("✓ PASSED: Empty allowlist works correctly")
+        return True
+
+    except Exception as e:
+        print(f"✗ EXCEPTION: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+    finally:
+        shutil.rmtree(site_root)
+
+
+def test_image_localizer_allowlist_wildcard():
+    """Test that allowlist = ['*'] allows all images."""
+    print("\n[Test 14] Image localizer - wildcard allowlist allows all")
+    site_root = create_test_site()
+
+    try:
+        # Create post with external image (as page bundle)
+        create_sample_post(
+            site_root,
+            "2025/10/test-allowlist-wildcard",
+            title="Test Allowlist Wildcard",
+            content="![Test](https://picsum.photos/200/200.jpg)",
+            as_index=True
+        )
+
+        # Create config with wildcard allowlist
+        config_content = """[modules.image_localizer]
+allowlist = ["*"]  # Allow all
+"""
+        config_file = site_root / ".auxmark.toml"
+        config_file.write_text(config_content)
+
+        subprocess.run(["git", "add", "."], cwd=site_root, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Add config"],
+            cwd=site_root,
+            check=True,
+            capture_output=True
+        )
+
+        # Run auxmark (real download)
+        returncode, stdout, stderr = run_auxmark(site_root)
+
+        if returncode != 0:
+            print(f"STDERR:\n{stderr}")
+            print("✗ FAILED: Non-zero return code")
+            return False
+
+        # Should NOT have warning about skipped image
+        if "skipped non-allowlisted image" in stderr:
+            print("✗ FAILED: Warning logged despite wildcard allowlist")
+            print(f"STDERR:\n{stderr}")
+            return False
+
+        # Should have downloaded the image
+        post_dir = site_root / "content" / "posts" / "2025" / "10" / "test-allowlist-wildcard"
+        downloaded_files = list(post_dir.glob("*.webp"))
+        if len(downloaded_files) != 1:
+            print(f"✗ FAILED: Expected 1 downloaded file, found {len(downloaded_files)}")
+            return False
+
+        print("  ✓ Wildcard allowlist allows all images")
+        print("  ✓ Image downloaded successfully")
+        print("✓ PASSED: Wildcard allowlist works correctly")
+        return True
+
+    except Exception as e:
+        print(f"✗ EXCEPTION: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+    finally:
+        shutil.rmtree(site_root)
+
+
+def test_image_localizer_blocklist_silent_skip():
+    """Test that blocklisted images are skipped silently (no warning)."""
+    print("\n[Test 15] Image localizer - blocklist silent skip")
+    site_root = create_test_site()
+
+    try:
+        # Create post with blocklisted image (as page bundle)
+        create_sample_post(
+            site_root,
+            "2025/10/test-blocklist",
+            title="Test Blocklist",
+            content="![Ad](https://ads.example.com/pixel.gif)",
+            as_index=True
+        )
+
+        # Create config with wildcard allowlist but specific blocklist
+        config_content = """[modules.image_localizer]
+allowlist = ["*"]  # Allow all
+blocklist = ["ads.example.com"]  # Except ads
+"""
+        config_file = site_root / ".auxmark.toml"
+        config_file.write_text(config_content)
+
+        subprocess.run(["git", "add", "."], cwd=site_root, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Add config"],
+            cwd=site_root,
+            check=True,
+            capture_output=True
+        )
+
+        # Run auxmark
+        returncode, stdout, stderr = run_auxmark(site_root, "--dry-run")
+
+        if returncode != 0:
+            print(f"STDERR:\n{stderr}")
+            print("✗ FAILED: Non-zero return code")
+            return False
+
+        # Should NOT have warning (blocklisted = silent skip)
+        if "skipped non-allowlisted image" in stderr or "ads.example.com" in stderr:
+            print("✗ FAILED: Warning logged for blocklisted image (should be silent)")
+            print(f"STDERR:\n{stderr}")
+            return False
+
+        print("  ✓ Blocklisted image skipped silently")
+        print("  ✓ No warning logged")
+        print("✓ PASSED: Blocklist silent skip works correctly")
+        return True
+
+    except Exception as e:
+        print(f"✗ EXCEPTION: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+    finally:
+        shutil.rmtree(site_root)
+
+
+def test_image_localizer_mixed_allow_block():
+    """Test mixed line with allowed, blocklisted, and non-allowlisted images."""
+    print("\n[Test 16] Image localizer - mixed allowlist/blocklist/unknown")
+    site_root = create_test_site()
+
+    try:
+        # Create post with mixed images
+        content = """
+![Good](https://picsum.photos/200/200.jpg)
+![Ad](https://ads.example.com/pixel.gif)
+![Unknown](https://untrusted.example.com/image.jpg)
+"""
+        create_sample_post(
+            site_root,
+            "2025/10/test-mixed",
+            title="Test Mixed",
+            content=content,
+            as_index=True
+        )
+
+        # Create config
+        config_content = """[modules.image_localizer]
+allowlist = ["picsum.photos"]
+blocklist = ["ads.example.com"]
+"""
+        config_file = site_root / ".auxmark.toml"
+        config_file.write_text(config_content)
+
+        subprocess.run(["git", "add", "."], cwd=site_root, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Add config"],
+            cwd=site_root,
+            check=True,
+            capture_output=True
+        )
+
+        # Run auxmark (real download)
+        returncode, stdout, stderr = run_auxmark(site_root)
+
+        if returncode != 0:
+            print(f"STDERR:\n{stderr}")
+            print("✗ FAILED: Non-zero return code")
+            return False
+
+        # Should have warning for untrusted.example.com but NOT ads.example.com
+        if "untrusted.example.com" not in stderr or "skipped non-allowlisted image" not in stderr:
+            print("✗ FAILED: No warning for non-allowlisted image")
+            print(f"STDERR:\n{stderr}")
+            return False
+
+        if "ads.example.com" in stderr:
+            print("✗ FAILED: Warning logged for blocklisted image (should be silent)")
+            print(f"STDERR:\n{stderr}")
+            return False
+
+        # Should have downloaded only picsum.photos image
+        post_dir = site_root / "content" / "posts" / "2025" / "10" / "test-mixed"
+        downloaded_files = list(post_dir.glob("*.webp"))
+        if len(downloaded_files) != 1:
+            print(f"✗ FAILED: Expected 1 downloaded file, found {len(downloaded_files)}")
+            return False
+
+        # Check that rewritten content only changed picsum.photos URL
+        rewritten_content = (post_dir / "index.md").read_text()
+        if "picsum.photos" in rewritten_content:
+            print("✗ FAILED: Allowed URL was not rewritten")
+            print(f"Content:\n{rewritten_content}")
+            return False
+
+        if "untrusted.example.com" not in rewritten_content:
+            print("✗ FAILED: Non-allowed URL was removed (should remain)")
+            print(f"Content:\n{rewritten_content}")
+            return False
+
+        if "ads.example.com" not in rewritten_content:
+            print("✗ FAILED: Blocklisted URL was removed (should remain)")
+            print(f"Content:\n{rewritten_content}")
+            return False
+
+        print("  ✓ Allowed image downloaded and rewritten")
+        print("  ✓ Blocklisted image skipped silently (no warning)")
+        print("  ✓ Non-allowlisted image skipped with warning")
+        print("  ✓ Only allowed URLs rewritten in output")
+        print("✓ PASSED: Mixed allowlist/blocklist behavior correct")
+        return True
+
+    except Exception as e:
+        print(f"✗ EXCEPTION: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+    finally:
+        shutil.rmtree(site_root)
+
+
+def test_image_localizer_subdomain_matching():
+    """Test subdomain matching for allowlist."""
+    print("\n[Test 17] Image localizer - subdomain matching")
+    site_root = create_test_site()
+
+    try:
+        # Create post with subdomain image (as page bundle)
+        # Use i.picsum.photos which actually exists as a subdomain
+        create_sample_post(
+            site_root,
+            "2025/10/test-subdomain",
+            title="Test Subdomain",
+            content="![CDN](https://i.picsum.photos/id/1/200/200.jpg)",
+            as_index=True
+        )
+
+        # Create config with subdomain matching enabled
+        config_content = """[modules.image_localizer]
+allowlist = ["picsum.photos"]
+allow_subdomains = true
+"""
+        config_file = site_root / ".auxmark.toml"
+        config_file.write_text(config_content)
+
+        subprocess.run(["git", "add", "."], cwd=site_root, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Add config"],
+            cwd=site_root,
+            check=True,
+            capture_output=True
+        )
+
+        # Run auxmark
+        returncode, stdout, stderr = run_auxmark(site_root)
+
+        if returncode != 0:
+            print(f"STDERR:\n{stderr}")
+            print("✗ FAILED: Non-zero return code")
+            return False
+
+        # Should NOT have warning (subdomain should match)
+        if "skipped non-allowlisted image" in stderr:
+            print("✗ FAILED: Subdomain was blocked despite allow_subdomains=true")
+            print(f"STDERR:\n{stderr}")
+            return False
+
+        # Try to download the image - if it works great, if not that's okay
+        # The main test is that subdomain matching allowed it (no warning logged)
+        post_dir = site_root / "content" / "posts" / "2025" / "10" / "test-subdomain"
+        downloaded_files = list(post_dir.glob("*.webp"))
+        if len(downloaded_files) > 0:
+            print("  ✓ Subdomain matched parent domain")
+            print("  ✓ Image downloaded successfully")
+        else:
+            # Didn't download but that's okay - subdomain matching still works
+            print("  ✓ Subdomain matched parent domain (no warning)")
+            print("  ✓ Download attempted (subdomain allowed)")
+
+        print("✓ PASSED: Subdomain matching works correctly")
+        return True
+
+    except Exception as e:
+        print(f"✗ EXCEPTION: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+    finally:
+        shutil.rmtree(site_root)
+
+
 def main() -> int:
     """Run all tests."""
     print("=" * 60)
@@ -913,6 +1345,11 @@ def main() -> int:
         test_image_localizer_with_title,
         test_config_loading,
         test_config_cli_override,
+        test_image_localizer_allowlist_blocks_by_default,
+        test_image_localizer_allowlist_wildcard,
+        test_image_localizer_blocklist_silent_skip,
+        test_image_localizer_mixed_allow_block,
+        test_image_localizer_subdomain_matching,
     ]
 
     passed = 0

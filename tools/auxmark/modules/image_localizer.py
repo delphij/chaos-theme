@@ -26,8 +26,10 @@ Features:
 - Handles naming conflicts with incrementing suffixes
 - Retry with exponential backoff
 - Line-oriented postprocessing to rewrite URLs
+- Domain allowlist/blocklist filtering
 """
 
+import logging
 import re
 import sys
 import time
@@ -36,6 +38,9 @@ from typing import Any
 from urllib import error, parse, request
 
 from ..core import Action, BaseModule, Job
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Try to import Pillow for WebP conversion
 try:
@@ -62,16 +67,137 @@ class ImageLocalizerModule(BaseModule):
         self.retry_backoff = config.get('retry_backoff', 2.0) if config else 2.0
         self.timeout = config.get('timeout', 30) if config else 30
 
+        # Domain filtering
+        self.allowlist = config.get('allowlist', []) if config else []
+        self.allow_subdomains = config.get('allow_subdomains', False) if config else False
+        self.blocklist = config.get('blocklist', []) if config else []
+        self.block_subdomains = config.get('block_subdomains', False) if config else False
+
+    def _extract_host(self, url: str) -> str | None:
+        """
+        Extract and normalize hostname from URL.
+
+        Args:
+            url: Full URL to extract host from
+
+        Returns:
+            Lowercase hostname, or None if extraction fails
+        """
+        try:
+            parsed = parse.urlparse(url)
+            host = parsed.hostname  # Handles port, IPv6, user:pass@
+            if host:
+                return host.lower()
+            return None
+        except Exception:
+            return None
+
+    def _is_domain_allowlisted(self, host: str) -> bool:
+        """
+        Check if host matches allowlist.
+
+        Args:
+            host: Normalized hostname (lowercase)
+
+        Returns:
+            True if host is allowlisted
+        """
+        # Special case: ["*"] means allow all
+        if self.allowlist == ["*"]:
+            return True
+
+        # Empty allowlist = block all
+        if not self.allowlist:
+            return False
+
+        host = host.lower()
+
+        for allowed_domain in self.allowlist:
+            allowed_domain = allowed_domain.lower()
+
+            # Exact match
+            if host == allowed_domain:
+                return True
+
+            # Subdomain match (if enabled)
+            if self.allow_subdomains and host.endswith(f".{allowed_domain}"):
+                return True
+
+        return False
+
+    def _is_domain_blocklisted(self, host: str) -> bool:
+        """
+        Check if host matches blocklist.
+
+        Args:
+            host: Normalized hostname (lowercase)
+
+        Returns:
+            True if host is blocklisted
+        """
+        # Empty blocklist = nothing blocked
+        if not self.blocklist:
+            return False
+
+        host = host.lower()
+
+        for blocked_domain in self.blocklist:
+            blocked_domain = blocked_domain.lower()
+
+            # Exact match
+            if host == blocked_domain:
+                return True
+
+            # Subdomain match (if enabled)
+            if self.block_subdomains and host.endswith(f".{blocked_domain}"):
+                return True
+
+        return False
+
+    def _check_domain_policy(self, url: str) -> tuple[bool, str]:
+        """
+        Check if URL should be processed based on allowlist/blocklist.
+
+        Args:
+            url: Full URL to check
+
+        Returns:
+            Tuple of (should_process, reason):
+            - (False, "blocklisted") - on blocklist, skip silently
+            - (False, "not_allowlisted") - not on allowlist, skip with warning
+            - (False, "invalid_url") - URL parsing failed
+            - (True, "allowed") - on allowlist, process normally
+        """
+        host = self._extract_host(url)
+        if not host:
+            return (False, "invalid_url")
+
+        # Step 1: Check blocklist first (highest priority)
+        if self._is_domain_blocklisted(host):
+            return (False, "blocklisted")
+
+        # Step 2: Check allowlist
+        if self._is_domain_allowlisted(host):
+            return (True, "allowed")
+
+        # Step 3: Not allowlisted
+        return (False, "not_allowlisted")
+
     def probe(self, file_path: Path, line_no: int, line: str) -> tuple[Action, dict[str, Any]]:
         """
         Detect external images in Markdown line.
 
         Supports Markdown image syntax: ![alt](url) or ![alt](url "title")
 
+        Applies domain allowlist/blocklist filtering:
+        - Allowlisted images: processed normally
+        - Blocklisted images: skipped silently
+        - Non-allowlisted images: skipped with warning
+
         Returns:
-            - EXPAND if file needs to become page bundle
-            - TAG_WITH_PREPROCESS_AND_POSTPROCESS if file is already expanded
-            - IGNORE if no external images found
+            - EXPAND if file needs to become page bundle (and at least one image is allowed)
+            - TAG_WITH_PREPROCESS_AND_POSTPROCESS if file is already expanded (and at least one image is allowed)
+            - IGNORE if no external images found or no images are allowlisted
         """
         # Find all Markdown images in line
         images = []
@@ -94,15 +220,39 @@ class ImageLocalizerModule(BaseModule):
 
             # Check if URL is external
             if url.startswith(('http://', 'https://')):
+                # Check domain policy (allowlist/blocklist)
+                should_process, reason = self._check_domain_policy(url)
+
+                # Log warning for non-allowlisted images (but not blocklisted ones)
+                if not should_process and reason == "not_allowlisted":
+                    logger.warning(
+                        "ImageLocalizer: skipped non-allowlisted image in %s:%d -> %s (not allowlisted)",
+                        file_path, line_no, url
+                    )
+
+                # Note: blocklisted images are skipped silently (no warning)
+
                 images.append({
                     'url': url,
                     'alt_text': alt_text,
                     'title': title,  # Preserve title if present
-                    'local_filename': None  # Will be set during preprocessing
+                    'allowed': should_process,  # True only if domain is allowlisted
+                    'skip_reason': reason,  # "allowed", "blocklisted", "not_allowlisted", "invalid_url"
+                    'local_filename': None,  # Will be set during preprocessing
+                    'success': False
                 })
 
         if not images:
             return (Action.IGNORE, {})
+
+        # Check if any image is allowed
+        has_allowed = any(img['allowed'] for img in images)
+
+        # If no allowed images, return IGNORE
+        if not has_allowed:
+            return (Action.IGNORE, {})
+
+        # At least one allowed image - proceed with EXPAND or TAG
 
         # Check if file needs to be expanded to page bundle
         if file_path.name != 'index.md':
@@ -120,6 +270,7 @@ class ImageLocalizerModule(BaseModule):
         Downloads each image, converts static formats to WebP, and saves
         to the same directory as the Markdown file.
 
+        Only processes images that are allowlisted (allowed=True).
         Each image's success status is tracked independently in metadata.
         """
         images = job.metadata.get('images', [])
@@ -131,6 +282,10 @@ class ImageLocalizerModule(BaseModule):
 
         all_success = True
         for img_data in images:
+            # Skip non-allowlisted images (blocklisted or not on allowlist)
+            if not img_data.get('allowed', False):
+                continue  # Don't attempt download
+
             url = img_data['url']
             success = self._download_and_convert(url, target_dir, img_data)
             # Track success per-URL

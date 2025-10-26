@@ -85,6 +85,11 @@ max_retries = 3
 retry_delay = 1.0
 retry_backoff = 2.0
 timeout = 30
+# Domain filtering
+allowlist = []  # Empty = block all; ["*"] = allow all; or specific domains
+allow_subdomains = false
+blocklist = []
+block_subdomains = false
 
 [modules.tweet_downloader]
 enabled = true
@@ -106,6 +111,58 @@ rate_limit_delay = 1.0
 **Note:** Command-line options (`--verbose`, `--dry-run`) always override config file settings.
 
 See `.auxmark.toml.example` in the theme directory for a complete example with comments.
+
+#### Domain Allowlist and Blocklist
+
+The `image_localizer` module supports domain filtering to control which external images are downloaded:
+
+**Configuration options:**
+- `allowlist`: List of allowed domains (default: `[]` blocks all)
+- `allow_subdomains`: If `true`, subdomains match parent domain (default: `false`)
+- `blocklist`: List of domains to skip silently (default: `[]`)
+- `block_subdomains`: If `true`, apply subdomain matching to blocklist (default: `false`)
+
+**Behavior:**
+- **Allowlisted images**: Downloaded and localized normally
+- **Blocklisted images**: Skipped silently (no warnings)
+- **Non-allowlisted images**: Skipped with warning logged
+- **Mixed lines**: Processes allowed images only, warns about non-allowlisted ones
+- **Blocklist precedence**: Blocklist takes precedence over allowlist
+
+**Examples:**
+
+```toml
+# Conservative (default): Block all external images
+[modules.image_localizer]
+allowlist = []
+
+# Permissive: Allow all external images
+[modules.image_localizer]
+allowlist = ["*"]
+
+# Selective: Only download from trusted domains
+[modules.image_localizer]
+allowlist = ["cdn.mysite.com", "assets.example.org"]
+allow_subdomains = true  # Also allows *.cdn.mysite.com
+
+# Filter ads: Allow all except known trackers
+[modules.image_localizer]
+allowlist = ["*"]
+blocklist = ["ads.tracker.com", "analytics.third-party.com"]
+```
+
+**Example markdown with mixed domains:**
+
+```markdown
+![Allowed](https://cdn.mysite.com/image.jpg)
+![Ad](https://ads.tracker.com/pixel.gif)
+![Unknown](https://untrusted.com/image.jpg)
+```
+
+With `allowlist = ["cdn.mysite.com"]` and `blocklist = ["ads.tracker.com"]`:
+- First image: ✓ Downloaded and localized
+- Second image: ⊘ Silently skipped (blocklisted)
+- Third image: ⚠ Warning logged, URL unchanged (not allowlisted)
 
 ### Module Selection
 

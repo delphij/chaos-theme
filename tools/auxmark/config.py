@@ -48,6 +48,11 @@ DEFAULT_CONFIG = {
             'retry_delay': 1.0,
             'retry_backoff': 2.0,
             'timeout': 30,
+            # Domain filtering
+            'allowlist': [],  # Empty = block all; ["*"] = allow all; or specific domains
+            'allow_subdomains': False,
+            'blocklist': [],  # Known-bad domains to skip silently
+            'block_subdomains': False,
         },
         'tweet_downloader': {
             'enabled': True,

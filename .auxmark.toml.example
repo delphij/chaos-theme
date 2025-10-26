@@ -14,6 +14,18 @@ retry_delay = 1.0             # Initial retry delay in seconds
 retry_backoff = 2.0           # Backoff multiplier (1s → 2s → 4s)
 timeout = 30                  # Download timeout in seconds
 
+# Domain filtering - control which external images are downloaded
+allowlist = []                # Empty = block all; ["*"] = allow all; or specific domains
+allow_subdomains = false      # If true, "cdn.example.com" matches "example.com"
+blocklist = []                # Known-bad domains to skip silently (no warnings)
+block_subdomains = false      # If true, apply subdomain matching to blocklist too
+
+# Example configurations:
+# Conservative (default): allowlist = []  → blocks all external images
+# Permissive: allowlist = ["*"]  → allows all external images
+# Selective: allowlist = ["mycdn.com", "assets.mysite.org"]  → only trusted domains
+# Filter ads: allowlist = ["*"], blocklist = ["ads.example.com", "tracker.net"]
+
 [modules.tweet_downloader]
 enabled = true
 cache_max_age_days = 30       # Re-download tweets older than this
