@@ -30,10 +30,20 @@ from .modules import ImageLocalizerModule, TweetDownloaderModule
 
 def main() -> int:
     """Main entrypoint for auxmark CLI."""
+    # Register modules first so we can build help text dynamically
+    ModuleRegistry.register(ImageLocalizerModule)
+    ModuleRegistry.register(TweetDownloaderModule)
+
+    # Build dynamic module list for help text
+    module_lines = []
+    for module_class in ModuleRegistry.get_all().values():
+        module_lines.append(f"  - {module_class.name}: {module_class.description}")
+    modules_help = "\n".join(module_lines)
+
     parser = argparse.ArgumentParser(
         description="Auxiliary Markdown processing tool for Hugo sites",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+        epilog=f"""
 Examples:
   auxmark                           # Process all markdown files with all modules
   auxmark --verbose                 # Show detailed progress
@@ -44,8 +54,7 @@ Examples:
   auxmark --config .auxmark.toml    # Use custom config file
 
 Available modules:
-  - image_localizer: Download and localize remote images to WebP
-  - tweet_downloader: Cache X/Twitter embeds locally
+{modules_help}
 
 Configuration:
   Create .auxmark.toml in your Hugo site root to customize behavior.
@@ -113,10 +122,6 @@ Configuration:
         config['general']['verbose'] = True
     if args.dry_run:
         config['general']['dry_run'] = True
-
-    # Register modules (hardcoded for Phase 1)
-    ModuleRegistry.register(ImageLocalizerModule)
-    ModuleRegistry.register(TweetDownloaderModule)
 
     if args.verbose:
         print(f"[auxmark] Registered modules: {list(ModuleRegistry.get_all().keys())}")

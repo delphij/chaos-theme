@@ -60,6 +60,7 @@ class BaseModule:
 
     Modules should inherit this class and implement:
     - name: Unique module identifier
+    - description: Human-readable description of what the module does
     - regex: Pattern to match lines (use .* for match-all, optimize later)
     - probe(): Analyze line and return Action
     - preprocess(): Optional preprocessing (download, fetch, etc.)
@@ -67,6 +68,7 @@ class BaseModule:
     """
 
     name: str = "base"
+    description: str = "Base module (override this)"
     regex: re.Pattern = re.compile(".*")
 
     def __init__(self, config: dict[str, Any] | None = None):

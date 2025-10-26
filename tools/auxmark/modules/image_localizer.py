@@ -50,6 +50,7 @@ class ImageLocalizerModule(BaseModule):
     """Module to download and localize external images in Markdown files."""
 
     name = "image_localizer"
+    description = "Download and localize remote images to WebP"
     regex = re.compile(r'!\[(.*?)\]\((.*?)\)')
 
     def __init__(self, config: dict[str, Any] | None = None):

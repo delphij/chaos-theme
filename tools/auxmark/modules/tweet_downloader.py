@@ -503,6 +503,7 @@ class TweetDownloaderModule(BaseModule):
     """Module for downloading and caching X/Twitter embeds."""
 
     name = "tweet_downloader"
+    description = "Cache X/Twitter embeds locally"
     # Use .* for now, optimize later
     regex = re.compile(r".*")
 
