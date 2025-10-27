@@ -637,6 +637,7 @@ blockquote ul {
    Inline code (not in pre) keeps body font size */
 pre {
   font-size: var(--small-size);
+  hanging-punctuation: none;         /* Disable for monospace code blocks */
 }
 
 /* Code block wrapper - Scroll container for wide code */
