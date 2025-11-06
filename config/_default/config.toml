@@ -1,5 +1,15 @@
+# Media type definitions
+[mediaTypes."application/atom+xml"]
+  suffixes = ["xml"]
+
 [mediaTypes."application/xslt+xml"]
   suffixes = ["xsl"]
+
+# Output format definitions
+[outputFormats.ATOM]
+  mediaType = "application/atom+xml"
+  baseName = "atom"
+  name = "ATOM"
 
 [outputFormats.atomxsl]
   mediaType = "application/xslt+xml"
@@ -13,6 +23,12 @@
   isPlainText = true
   notAlternative = true
 
+[outputFormats.REDIR]
+  mediaType = "text/plain"
+  baseName = "redirects"
+  isPlainText = true
+  notAlternative = true
+
+# Output configuration for different page kinds
 [outputs]
   home = ["HTML", "ATOM", "atomxsl", "sitemapxsl", "RSS", "REDIR"]
-
