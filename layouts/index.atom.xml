@@ -5,7 +5,7 @@
 {{- end -}}
 {{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
 {{ "<?" | safeHTML }}xml-stylesheet type="text/xsl" href="{{ "atom.xsl" | absURL }}"{{ "?>" | safeHTML }}
-<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="{{ .Site.LanguageCode }}">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="{{ .Site.Language.Locale }}">
   <title>{{ .Site.Title }}</title>
   {{- with .Site.Params.Subtitle }}
   <subtitle>{{ . }}</subtitle>
@@ -27,10 +27,10 @@
   {{- end }}
   <updated>{{ dateFormat "2006-01-02T15:04:05Z" now.UTC | safeHTML }}</updated>
   {{- with .OutputFormats.Get "ATOM" }}
-  {{ printf `<link rel="self" type="%s" href="%s" hreflang="%s"/>` .MediaType.Type .Permalink $.Site.LanguageCode | safeHTML }}
+  {{ printf `<link rel="self" type="%s" href="%s" hreflang="%s"/>` .MediaType.Type .Permalink $.Site.Language.Locale | safeHTML }}
   {{- end }}
   {{- range .AlternativeOutputFormats }}
-  {{ printf `<link rel="alternate" type="%s" href="%s" hreflang="%s"/>` .MediaType.Type .Permalink $.Site.LanguageCode | safeHTML }}
+  {{ printf `<link rel="alternate" type="%s" href="%s" hreflang="%s"/>` .MediaType.Type .Permalink $.Site.Language.Locale | safeHTML }}
   {{- end }}
   {{- range first 25 $pages }}
   <entry>
