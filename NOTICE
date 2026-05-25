@@ -13,8 +13,8 @@ This theme includes the following third-party software:
 KaTeX
 Copyright (c) 2013-2020 Khan Academy and other contributors
 Licensed under the MIT License
-Location: static/_3p/katex/0.16.22/
-See static/_3p/katex/0.16.22/LICENSE for full license text
+Location: static/_3p/katex/0.17.0/
+See static/_3p/katex/0.17.0/LICENSE for full license text
 Website: https://katex.org/
 
 Remark42 embed script

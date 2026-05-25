@@ -22,7 +22,7 @@ hugo --gc --minify          # Production build
 - **Hugo** 0.146.0+ (standard edition)
 - **Languages**: Go Templates, HTML5, CSS3, vanilla JavaScript
 - **Asset Processing**: Hugo Pipes (bundling, minification, SRI)
-- **Dependencies**: KaTeX 0.16.22, instant.page 5.2.0 (vendored in `static/_3p/`)
+- **Dependencies**: KaTeX 0.17.0, instant.page 5.2.0 (vendored in `static/_3p/`)
 
 ### Directory Structure
 ```
