@@ -6,7 +6,7 @@
 
 @media screen {
   /* Background */ html.dark .bg { color:#e6edf3;background-color:#0d1117; }
-  /* PreWrapper */ html.dark .chroma { color:#e6edf3;background-color:#0d1117; }
+  /* PreWrapper */ html.dark .chroma { color:#e6edf3;background-color:#0d1117;-webkit-text-size-adjust:none; }
   /* Error */ html.dark .chroma .err { color:#f85149 }
   /* LineHighlight */ html.dark .chroma .hl { background-color:#6e7681 }
   /* LineNumbersTable */ html.dark .chroma .lnt { color:#737679 }
@@ -39,9 +39,11 @@
   /* Constants and Labels - cyan bold */
   html.dark .chroma .no,  /* NameConstant */
   html.dark .chroma .nl,  /* NameLabel */
-  html.dark .chroma .gh,  /* GenericHeading */
-  html.dark .chroma .gu   /* GenericSubheading */
+  html.dark .chroma .gh   /* GenericHeading */
   { color:#79c0ff;font-weight:bold }
+
+  /* GenericSubheading - cyan, no bold (upstream change) */
+  html.dark .chroma .gu { color:#79c0ff }
 
   /* Functions and Decorators - purple bold */
   html.dark .chroma .nf,  /* NameFunction */
@@ -94,7 +96,8 @@
 
   /* Operators - red bold */
   html.dark .chroma .o,   /* Operator */
-  html.dark .chroma .ow   /* OperatorWord */
+  html.dark .chroma .ow,  /* OperatorWord */
+  html.dark .chroma .or   /* OperatorReserved */
   { color:#ff7b72;font-weight:bold }
 
   /* Comments - gray italic */
@@ -126,6 +129,17 @@
   html.dark .chroma .ge { font-style:italic } /* GenericEmph */
   html.dark .chroma .gs { font-weight:bold } /* GenericStrong */
   html.dark .chroma .gl { text-decoration:underline } /* GenericUnderline */
+
+  /* Names and Punctuation - must override light theme's near-black (#1f2328) */
+  html.dark .chroma .p,   /* Punctuation */
+  html.dark .chroma .na,  /* NameAttribute */
+  html.dark .chroma .nx   /* NameOther */
+  { color:#e6edf3 }
+
+  /* NameBuiltin - light theme sets purple, dark should use cyan */
+  html.dark .chroma .nb,  /* NameBuiltin */
+  html.dark .chroma .bp   /* NameBuiltinPseudo */
+  { color:#79c0ff }
 
   /* TextWhitespace */
   html.dark .chroma .w { color:#6e7681 }

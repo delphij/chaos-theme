@@ -2,8 +2,8 @@
    Consolidated duplicate color rules for smaller file size
    Structural styles (lntable, lntd, lnlinks, line, lnt, ln) in main.css */
 
-/* Background */ .bg { background-color:#fff; }
-/* PreWrapper */ .chroma { background-color:#fff; }
+/* Background */ .bg { background-color:#f7f7f7; }
+/* PreWrapper */ .chroma { background-color:#f7f7f7;-webkit-text-size-adjust:none; }
 /* Error */ .chroma .err { color:#f6f8fa;background-color:#82071e }
 /* LineHighlight */ .chroma .hl { background-color:#e5e5e5 }
 /* LineNumbersTable */ .chroma .lnt { color:#7f7f7f }
@@ -51,6 +51,7 @@
 /* Operators, Numbers, Constants - GitHub blue */
 .chroma .o,   /* Operator */
 .chroma .ow,  /* OperatorWord */
+.chroma .or,  /* OperatorReserved */
 .chroma .m,   /* LiteralNumber */
 .chroma .mb,  /* LiteralNumberBin */
 .chroma .mf,  /* LiteralNumberFloat */
