@@ -15,4 +15,10 @@ Syntax:
 {{ $content := .Content }}
 {{ $content = $content | replaceRE `\[([^\]]+)\]\^?\{([^}]+)\}` `<ruby><rb>$1</rb><rt>$2</rt></ruby>` }}
 {{ $content = $content | replaceRE `\[([^\]]+)\]\^\(([^)]+)\)` `<ruby><rb>$1</rb><rt>$2</rt></ruby>` }}
+
+{{/* Strip ASCII spaces between CJK characters and Latin/digits during build */}}
+{{ $cjk := `[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{3000}-\x{303f}\x{ff00}-\x{ffef}]` }}
+{{ $content = $content | replaceRE (printf `(%s)\s+([a-zA-Z0-9])` $cjk) "$1$2" }}
+{{ $content = $content | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" }}
+
 {{ $content | safeHTML }}

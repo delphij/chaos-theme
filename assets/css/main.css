@@ -508,10 +508,16 @@ article.post {
 
   /* Chinese typography enhancements for professional text layout
      - text-align: justify - Creates aligned character grids (standard in Chinese)
+     - text-autospace: Automatic spacing between CJK and Latin characters
      - text-spacing-trim: Optimizes CJK punctuation spacing (Chrome 133+, Safari 18.2+)
+     - text-spacing: Standard shorthand for CJK spacing and trimming
+     - font-feature-settings: "chws" 1 - Enables OpenType Contextual Half-width Spacing for adjacent CJK punctuation
      - line-break: strict - Enforces strict CJK line-breaking rules */
   text-align: justify;
-  text-spacing-trim: space-all;
+  text-autospace: normal;
+  text-spacing-trim: normal;
+  text-spacing: auto-spaces normal;
+  font-feature-settings: "chws" 1;
   line-break: strict;
 }
 
