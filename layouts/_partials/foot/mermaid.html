@@ -1,0 +1,58 @@
+{{- $noop := .WordCount -}}
+{{- $hasMermaid := .Page.Store.Get "hasMermaid" -}}
+{{- if not $hasMermaid -}}
+  {{- if or (eq .Kind "home") (eq .Kind "section") (eq .Kind "taxonomy") (eq .Kind "term") -}}
+    {{- if .Paginator -}}
+      {{- range .Paginator.Pages -}}
+        {{- $_ := .Summary -}}
+        {{- if .Store.Get "hasMermaid" -}}
+          {{- $hasMermaid = true -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if $hasMermaid -}}
+<script src="/_3p/mermaid/11.4.1/mermaid.min.js" defer></script>
+<script>
+  function renderMermaid() {
+    if (typeof mermaid === "undefined") return;
+    var isDark = document.documentElement.classList.contains("dark");
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "loose",
+      theme: isDark ? "dark" : "default"
+    });
+    var nodes = document.querySelectorAll("pre.mermaid");
+    nodes.forEach(function(el, i) {
+      var code = el.getAttribute("data-original-code");
+      if (!code) {
+        code = el.textContent.trim();
+        el.setAttribute("data-original-code", code);
+      }
+      var id = "mermaid-diagram-" + i;
+      try {
+        mermaid.render(id, code).then(function(res) {
+          el.innerHTML = res.svg;
+        }).catch(function(err) {
+          console.error("Mermaid render error:", err);
+        });
+      } catch (e) {
+        console.error("Mermaid render exception:", e);
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMermaid();
+
+    var btn = document.getElementById("themeToggle");
+    if (btn) {
+      btn.addEventListener("click", function() {
+        setTimeout(renderMermaid, 50);
+      });
+    }
+  });
+</script>
+{{- end -}}

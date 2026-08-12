@@ -31,3 +31,12 @@ Location: static/_3p/instantpage/5.2.0/
 See static/_3p/instantpage/5.2.0/LICENSE for full license text
 Website: https://instant.page/
 Prefetches pages on hover/touch to improve perceived performance.
+
+Mermaid
+Copyright (c) 2014 - present Knut Sveidqvist
+Licensed under the MIT License
+Location: static/_3p/mermaid/11.4.1/
+See static/_3p/mermaid/11.4.1/LICENSE for full license text
+Website: https://mermaid.js.org/
+Generation of diagram and flowchart from text.
+

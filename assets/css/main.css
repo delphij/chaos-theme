@@ -731,6 +731,33 @@ pre {
 }
 
 /* ==========================================================================
+   COMPONENTS - MERMAID DIAGRAMS
+   Clean container layout for Mermaid SVG flowcharts.
+   Theme rendering (light/dark) is managed dynamically by Mermaid JS.
+   ========================================================================== */
+
+pre.mermaid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent !important;
+  border: none !important;
+  padding: 1.5rem 0;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+  font-family: inherit;
+}
+
+
+
+
+
+/* ==========================================================================
    COMPONENTS - PAGINATION
    Previous/next navigation for paginated content.
    Flexbox layout with space-between alignment.
