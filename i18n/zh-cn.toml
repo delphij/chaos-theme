@@ -1,5 +1,6 @@
 home = '首页'
 allPosts = '所有文章'
+posts = '所有文章'
 categories = '分类'
 tags = '标签'
 caution = '小心'
@@ -41,7 +42,7 @@ printReferences = '参考文献'
 # Archives
 year = '年'
 month = '月'
-posts = '篇'
+postsCount = '篇'
 
 # Footer
 poweredBy = '本站使用 <a href="https://gohugo.io">Hugo</a> 构建，主题为 <a href="https://github.com/delphij/chaos-theme">Chaos</a>。'

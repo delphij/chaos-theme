@@ -7,7 +7,7 @@
     <h2>{{ .Key }}{{ T "year" }}</h2>
     {{ range .Pages.GroupByDate "01" }}
       {{ $year := (index .Pages 0).Date.Format "2006" }}
-      <h3>{{ $year }}{{ T "year" }} {{ .Key }}{{ T "month" }} ({{ len .Pages }} {{ T "posts" }})</h3>
+      <h3>{{ $year }}{{ T "year" }} {{ .Key }}{{ T "month" }} ({{ len .Pages }} {{ T "postsCount" }})</h3>
       <ul class="archive-list">
         {{ range .Pages }}
           <li>

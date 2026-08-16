@@ -1,5 +1,6 @@
 home = 'Home'
 allPosts = 'All posts'
+posts = 'All posts'
 categories = 'Categories'
 tags = 'Tags'
 caution = 'Caution'
@@ -41,7 +42,7 @@ printReferences = 'References'
 # Archives
 year = ''
 month = ''
-posts = 'posts'
+postsCount = 'posts'
 
 # Footer
 poweredBy = 'Powered by <a href="https://gohugo.io">Hugo</a> with <a href="https://github.com/delphij/chaos-theme">Chaos</a> theme.'

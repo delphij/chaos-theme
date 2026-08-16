@@ -1,0 +1,23 @@
+{{- /*
+Returns the display title for a page.
+
+Hugo derives list page titles from the section or taxonomy name
+(e.g. "tags", "categories", "posts") without localization. For section
+and taxonomy pages, translate the title when a matching i18n key exists
+(lowercased, so it works regardless of capitalizeListTitles); otherwise
+return the title unchanged. Term and regular pages are never translated.
+
+@context {page} page The page to resolve the title for.
+
+@returns {string} The localized display title.
+
+@example: {{ partial "_funcs/get-page-title.html" . }}
+*/}}
+
+{{- $title := .Title -}}
+{{- if in (slice "section" "taxonomy") .Kind -}}
+  {{- with T (lower $title) -}}
+    {{- $title = . -}}
+  {{- end -}}
+{{- end -}}
+{{- return $title -}}

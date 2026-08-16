@@ -1,5 +1,6 @@
 home = '메인'
 allPosts = '모든 게시물'
+posts = '모든 게시물'
 categories = '분류'
 tags = '태그'
 caution = '주의'
@@ -41,7 +42,7 @@ printReferences = '참고 문헌'
 # Archives
 year = '년'
 month = '월'
-posts = '개'
+postsCount = '개'
 
 # Footer
 poweredBy = '이 사이트는 <a href="https://gohugo.io">Hugo</a>로 구축되었으며, 테마는 <a href="https://github.com/delphij/chaos-theme">Chaos</a>를 사용합니다.'

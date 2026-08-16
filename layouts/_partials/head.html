@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
-<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ printf "%s | %s" .Title site.Title }}{{ end }}</title>
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ printf "%s | %s" (partial "_funcs/get-page-title.html" .) site.Title }}{{ end }}</title>
 <meta name="description" content="{{ partial "_funcs/get-meta-description.html" . }}">
 <link rel="canonical" href="{{ .Permalink }}">
 {{ partialCached "head/css.html" . }}

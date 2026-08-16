@@ -1,5 +1,5 @@
 {{ define "main" }}
-  {{ partial "page-header.html" (dict "page" . "translate" true) }}
+  {{ partial "page-header.html" . }}
   {{ $pages := where .Site.RegularPages "Type" "in" .Site.Params.mainSections }}
   {{ $paginator := .Paginate (where $pages "Params.hidden" "ne" true) }}
   {{ range $paginator.Pages }}

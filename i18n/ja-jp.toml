@@ -1,5 +1,6 @@
 home = 'トップ'
 allPosts = '全ての記事'
+posts = '全ての記事'
 categories = '分類'
 tags = 'タグ'
 caution = '注意'
@@ -41,7 +42,7 @@ printReferences = '参考文献'
 # Archives
 year = '年'
 month = '月'
-posts = '件'
+postsCount = '件'
 
 # Footer
 poweredBy = 'このサイトは <a href="https://gohugo.io">Hugo</a> で構築され、テーマは <a href="https://github.com/delphij/chaos-theme">Chaos</a> を使用しています。'
