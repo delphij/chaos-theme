@@ -1,0 +1,19 @@
+{{- /*
+Sidebar for /archives/ page.
+Provides sticky Year & Month timeline jump navigation.
+*/}}
+{{ $posts := where site.RegularPages "Type" "posts" }}
+<aside class="home-sidebar toc-wrapper" aria-label="{{ T `archivesYearNav` }}">
+  <div class="sidebar-card">
+    <div class="sidebar-widget">
+      <h2 class="sidebar-widget-title">{{ T "yearQuickJump" }}</h2>
+      <ul class="sidebar-year-list">
+        {{ range $posts.GroupByDate "2006" }}
+        <li>
+          <a class="sidebar-year-item" href="#year-{{ .Key }}" title="{{ T `yearPostCount` (dict `Year` .Key `Count` (len .Pages)) }}">{{ T "yearLabel" (dict "Year" .Key) }}<span class="count-pill">{{ len .Pages }}</span></a>
+        </li>
+        {{ end }}
+      </ul>
+    </div>
+  </div>
+</aside>

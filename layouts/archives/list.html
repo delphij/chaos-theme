@@ -1,22 +1,35 @@
 {{ define "main" }}
-  {{ partial "page-header.html" . }}
+  <div class="page-title-group">
+    <h1 class="page-title">{{ partial "_funcs/get-page-title.html" . }}</h1>
+    {{ $posts := where site.RegularPages "Type" "posts" }}
+    <p class="page-subtitle">{{ T "archivesSummary" (dict "Count" (len $posts)) }}</p>
+  </div>
 
-  {{ $posts := where site.RegularPages "Type" "posts" }}
-
-  {{ range $posts.GroupByDate "2006" }}
-    <h2>{{ .Key }}{{ T "year" }}</h2>
-    {{ range .Pages.GroupByDate "01" }}
-      {{ $year := (index .Pages 0).Date.Format "2006" }}
-      <h3>{{ $year }}{{ T "year" }} {{ .Key }}{{ T "month" }} ({{ len .Pages }} {{ T "postsCount" }})</h3>
-      <ul class="archive-list">
-        {{ range .Pages }}
-          <li>
-            <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
-            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-          </li>
-        {{ end }}
-      </ul>
+  <div class="archive-timeline">
+    {{ range $posts.GroupByDate "2006" }}
+      <div class="archive-year-section" id="year-{{ .Key }}">
+        <div class="archive-year-header">
+          <h2 class="archive-year-title">{{ T "yearLabel" (dict "Year" .Key) }}</h2>
+          <span class="count-pill">{{ len .Pages }}</span>
+        </div>
+        <div class="archive-post-list">
+          {{ range .Pages }}
+            <div class="archive-post-row">
+              <time class="archive-date" datetime="{{ .Date.Format "2006-01-02" }}">
+                <span class="archive-date-full">{{ .Date.Format "2006-01-02" }}</span>
+                <span class="archive-date-short">{{ .Date.Format "01-02" }}</span>
+              </time>
+              <a class="archive-post-title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+              {{ with .Params.categories }}
+                {{ range first 1 . }}
+                  <a class="archive-cat-label" href="{{ "/categories/" | relLangURL }}{{ . | urlize }}" title="{{ T `categoryTitle` (dict `Name` .) }}">{{ . }}</a>
+                {{ end }}
+              {{ end }}
+            </div>
+          {{ end }}
+        </div>
+      </div>
     {{ end }}
-  {{ end }}
+  </div>
 {{ end }}
 

@@ -9,12 +9,18 @@ Displays post title, date, taxonomy links, summary text, and optional
 @example: {{ partial "post-summary.html" . }}
 */}}
 
-<h1><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h1>
-<div class="meta">{{ partial "datetime.html" . }}{{ partial "taxonomy-links.html" . }}</div>
-{{ .Summary }}
-{{ if .Truncated }}
-  <a href="{{ .RelPermalink }}">{{ T "readMore" }}</a><span class="meta">({{ partial "reading-stats.html" . }})</span>
-{{ else }}
-  <a href="{{ .RelPermalink }}">{{ T "joinDiscussion" }}</a>
-{{ end }}
+<article class="post-entry" role="article">
+  <h2 class="post-title"><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
+  <div class="meta">{{ partial "datetime.html" . }}{{ partial "taxonomy-links.html" . }}</div>
+  <div class="post-summary-content">
+    {{ .Summary }}
+  </div>
+  <div class="post-more">
+  {{ if .Truncated }}
+    <a class="read-more" href="{{ .RelPermalink }}" aria-label="{{ T `readMoreAbout` (dict `Title` .LinkTitle) }}">{{ T "readMore" }}</a><span class="meta"> ({{ partial "reading-stats.html" . }})</span>
+  {{ else }}
+    <a class="read-more" href="{{ .RelPermalink }}" aria-label="{{ T `joinDiscussionAbout` (dict `Title` .LinkTitle) }}">{{ T "joinDiscussion" }}</a>
+  {{ end }}
+  </div>
+</article>
 

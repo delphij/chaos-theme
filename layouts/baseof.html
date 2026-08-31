@@ -9,7 +9,7 @@
   <header class="site-nav" role="banner">
     {{ partialCached "header.html" . site.Language.Lang }}
   </header>
-  <main id="main-content" class="container {{ if .IsPage }}has-toc{{ end }}">
+  <main id="main-content" class="container {{ if .IsPage }}has-toc{{ else }}has-sidebar{{ end }}" tabindex="-1">
     {{- if .IsPage }}
     <div class="content-layout">
       <article class="post" role="article">
@@ -18,9 +18,12 @@
       {{ partial "toc.html" . }}
     </div>
     {{- else }}
-    <article class="post" role="article">
-      {{ block "main" . }}{{ end }}
-    </article>
+    <div class="content-layout">
+      <div class="post-list">
+        {{ block "main" . }}{{ end }}
+      </div>
+      {{ partial "sidebar.html" . }}
+    </div>
     {{- end }}
   </main>
   <footer class="site-foot">

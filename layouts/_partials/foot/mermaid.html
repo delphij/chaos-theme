@@ -14,7 +14,7 @@
 {{- end -}}
 
 {{- if $hasMermaid -}}
-<script src="/_3p/mermaid/11.4.1/mermaid.min.js" defer></script>
+<script src="{{ "/_3p/mermaid/11.4.1/mermaid.min.js" | relURL }}" defer></script>
 <script>
   function renderMermaid() {
     if (typeof mermaid === "undefined") return;
@@ -22,7 +22,13 @@
     mermaid.initialize({
       startOnLoad: false,
       securityLevel: "loose",
-      theme: isDark ? "dark" : "default"
+      theme: isDark ? "dark" : "neutral",
+      themeVariables: {
+        fontFamily: "inherit",
+        edgeLabelBackground: isDark ? "#222222" : "#FFFFFF",
+        primaryTextColor: isDark ? "#E6EDF3" : "#222222",
+        textColor: isDark ? "#E6EDF3" : "#222222"
+      }
     });
     var nodes = document.querySelectorAll("pre.mermaid");
     nodes.forEach(function(el, i) {

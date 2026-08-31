@@ -1,0 +1,19 @@
+{{- /*
+Sidebar for /categories/ taxonomy page.
+Provides quick access to popular tags.
+*/}}
+<aside class="home-sidebar toc-wrapper" aria-label="{{ T `tagsOverview` }}">
+  <div class="sidebar-card">
+    <div class="sidebar-widget">
+      <h2 class="sidebar-widget-title">{{ T "popularTags" }}</h2>
+      <div class="sidebar-tags-cloud">
+        {{ range first 24 site.Taxonomies.tags.ByCount }}
+        <a class="sidebar-tag-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">#{{ .Page.LinkTitle }}</a>
+        {{ end }}
+      </div>
+      <div class="sidebar-widget-footer">
+        <a class="sidebar-more-link" href="{{ "/tags/" | relLangURL }}">{{ T "allTagsLink" (dict "Count" (len site.Taxonomies.tags)) }}</a>
+      </div>
+    </div>
+  </div>
+</aside>

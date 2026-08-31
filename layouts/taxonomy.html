@@ -1,6 +1,72 @@
 {{ define "main" }}
-  {{ partial "page-header.html" . }}
-  {{ range .Data.Terms.ByCount }}
-    <h2><a href="{{ .Page.RelPermalink }}">{{ .Page.LinkTitle }}</a> ({{ .Count }})</h2>
-  {{ end }}
+  {{- if eq .Data.Plural "categories" -}}
+    <div class="page-title-group">
+      <h1 class="page-title">{{ partial "_funcs/get-page-title.html" . }}</h1>
+    </div>
+
+    <div class="categories-list">
+      {{ range .Data.Terms.ByCount }}
+        <a class="taxonomy-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">
+          <span class="taxonomy-name">{{ .Page.LinkTitle }}</span>
+          <span class="count-pill">{{ .Count }}</span>
+        </a>
+      {{ end }}
+    </div>
+
+  {{- else if eq .Data.Plural "tags" -}}
+    <div class="page-title-group">
+      <h1 class="page-title">{{ partial "_funcs/get-page-title.html" . }}</h1>
+    </div>
+
+    <div class="tags-section" id="hot-tags">
+      <h2 class="tags-section-heading">{{ T "popularTags" }}</h2>
+      <div class="tags-flat-wrap">
+        {{ range first 24 .Data.Terms.ByCount }}
+          <a class="tag-flat-item hot" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }}<span class="count-pill">{{ .Count }}</span></a>
+        {{ end }}
+      </div>
+    </div>
+
+    <div class="tags-section">
+      <h2 class="tags-section-heading">{{ T "allTagsAZ" }}</h2>
+      <div class="tags-az-container">
+        {{ $letters := slice "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" "#" }}
+        {{ range $letters }}
+          {{ $letter := . }}
+          {{ $matchingTerms := slice }}
+          {{ range $.Data.Terms.Alphabetical }}
+            {{ $firstChar := upper (substr .Page.LinkTitle 0 1) }}
+            {{ if and (ne $letter "#") (eq $firstChar $letter) }}
+              {{ $matchingTerms = $matchingTerms | append . }}
+            {{ else if and (eq $letter "#") (not (findRE "^[A-Za-z]" .Page.LinkTitle)) }}
+              {{ $matchingTerms = $matchingTerms | append . }}
+            {{ end }}
+          {{ end }}
+
+          {{ if gt (len $matchingTerms) 0 }}
+            {{ $id := cond (eq $letter "#") "tag-letter-other" (printf "tag-letter-%s" $letter) }}
+            <div class="tag-letter-group" id="{{ $id }}">
+              <div class="tag-letter-heading">{{ $letter }}</div>
+              <div class="tags-flat-wrap">
+                {{ range $matchingTerms }}
+                  <a class="tag-flat-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }}<span class="count-pill">{{ .Count }}</span></a>
+                {{ end }}
+              </div>
+            </div>
+          {{ end }}
+        {{ end }}
+      </div>
+    </div>
+
+  {{- else -}}
+    {{ partial "page-header.html" . }}
+    <div class="categories-list">
+      {{ range .Data.Terms.ByCount }}
+        <a class="taxonomy-item" href="{{ .Page.RelPermalink }}">
+          <span class="taxonomy-name">{{ .Page.LinkTitle }}</span>
+          <span class="count-pill">{{ .Count }}</span>
+        </a>
+      {{ end }}
+    </div>
+  {{- end -}}
 {{ end }}

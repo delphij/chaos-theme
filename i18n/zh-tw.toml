@@ -1,5 +1,4 @@
 home = '首頁'
-allPosts = '所有文章'
 posts = '所有文章'
 categories = '分類'
 tags = '標籤'
@@ -15,7 +14,6 @@ archives = '存檔'
 # Navigation
 skipToContent = '跳轉到主要內容'
 mainNavigation = '主導航'
-feedsNavigation = '訂閱'
 atomFeed = 'Atom 訂閱'
 themeToggle = '切換淺/深色模式'
 themeLightMode = '已啟用淺色模式'
@@ -39,11 +37,79 @@ readingStats = '本文約 {{ .WordCount }} 字，閱讀大致需要 {{ .ReadingT
 # Print references
 printReferences = '參考文獻'
 
-# Archives
-year = '年'
-month = '月'
-postsCount = '篇'
-
 # Footer
 poweredBy = '本站使用 <a href="https://gohugo.io">Hugo</a> 構建，主題為 <a href="https://github.com/delphij/chaos-theme">Chaos</a>。'
 remarkAttribution = '評論系統採用 <a href="https://remark42.com/">Remark42</a>。'
+
+# Theme toggle, feeds and post navigation
+feedLabel = 'RSS'
+themeToggleToDark = '切換到深色模式'
+themeToggleToLight = '切換到淺色模式'
+readMoreAbout = '閱讀全文：{{ .Title }}'
+joinDiscussionAbout = '參與評論：{{ .Title }}'
+newerPost = '← {{ .Title }}'
+olderPost = '{{ .Title }} →'
+newerPostLabel = '較新文章：{{ .Title }}'
+olderPostLabel = '較早文章：{{ .Title }}'
+
+# Sidebar navigation
+browsingGuide = '瀏覽導引'
+coreCategories = '核心分類'
+popularTags = '熱門標籤'
+tagsOverview = '標籤速覽'
+tagsAlphabetNav = '標籤字母導覽'
+alphabetIndex = '字母快速索引'
+allTagsAZ = '全部標籤 (A-Z)'
+allCategoriesLink = '全部分類 ({{ .Count }}) →'
+allTagsLink = '全部標籤 ({{ .Count }}) →'
+categoryTitle = '分類：{{ .Name }}'
+tagTitle = '標籤：{{ .Name }}'
+
+# Archives
+archivesYearNav = '歸檔年份導覽'
+yearQuickJump = '年份快速直達'
+yearLabel = '{{ .Year }} 年'
+
+# Atom feed stylesheet
+visitBlogHome = '← 造訪部落格首頁'
+feedPageTitle = 'Web Feed (Atom 訂閱源)'
+feedIntro = '這是一個 <strong>Atom</strong> 格式的網站訂閱源。如果您使用的是支援 RSS/Atom 的瀏覽器或擴充功能，可以直接在此檢視文章預覽。'
+feedSubscribeHelp = '要訂閱 <strong>{{ .Title }}</strong> 的最新內容，請將下方位址複製並加入您的 RSS 閱讀器（{{ .Readers }}）中：'
+feedLatestPosts = '最新文章列表'
+feedReadMore = '在網站閱讀全文並參與討論 →'
+feedUrlLabel = 'Feed URL'
+copyFeedUrl = '複製訂閱位址'
+feedUrlCopied = '訂閱位址已複製到剪貼簿。'
+feedUrlCopyFailed = '無法自動複製，請手動選取上方的位址並複製。'
+listSeparator = '、'
+
+# Sitemap stylesheet
+sitemapPageTitle = 'XML Sitemap (網站地圖)'
+sitemapIntro = '這是為搜尋引擎與索引爬蟲產生的標準 XML 網站地圖。目前共收錄 <strong>{{ .Count }}</strong> 個公開頁面。'
+sitemapFilterToolbar = '分類開關工具列'
+sitemapFilterLabel = '分類開關：'
+sitemapToggleType = '點擊顯示/隱藏{{ .Type }}'
+sitemapOnlyType = '點擊僅檢視{{ .Type }}（再次點擊恢復全部）'
+sitemapVisibleCount = '目前顯示：{{ .Visible }} / {{ .Total }} 個頁面'
+sitemapHint = '提示：點擊上方分類按鈕可開啟/關閉，點擊表格內徽章可僅檢視該類，點擊表頭可切換排序'
+sitemapColumnPath = '頁面路徑 (Path)'
+sitemapColumnLastModified = '最後更新時間 (Last Modified)'
+sitemapAllHidden = '已隱藏所有分類的內容，請點擊上方分類按鈕開啟顯示。'
+sortByPath = '按路徑排序'
+sortByPathAscending = '按路徑排序（目前升冪）'
+sortByPathDescending = '按路徑排序（目前降冪）'
+sortByTime = '按更新時間排序'
+sortByTimeAscending = '按更新時間排序（目前升冪）'
+sortByTimeDescending = '按更新時間排序（目前降冪）'
+contentTypePost = '文章'
+contentTypePage = '頁面'
+
+# Pluralised messages (must stay last: TOML tables capture every key below them)
+[termPostCount]
+  other = '{{ .Name }}（{{ .Count }} 篇文章）'
+
+[yearPostCount]
+  other = '{{ .Year }} 年（{{ .Count }} 篇文章）'
+
+[archivesSummary]
+  other = '依時間軸收錄全站共 {{ .Count }} 篇技術文章與日誌。'

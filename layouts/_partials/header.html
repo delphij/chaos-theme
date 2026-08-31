@@ -1,14 +1,14 @@
 <div class="nav-inner">
-  <a class="brand" href="{{ .Site.BaseURL }}">
-    <span class="main-title">{{ .Site.Title }}</span>
-    {{- if isset .Site.Params "subtitle" -}}
-    <span class="subtitle">{{ .Site.Params.Subtitle | markdownify }}</span>
+  <a class="brand" href="{{ site.BaseURL }}">
+    <span class="main-title">{{ site.Title }}</span>
+    {{- with site.Params.subtitle -}}
+    <span class="subtitle">{{ . | markdownify }}</span>
     {{- end -}}
   </a>
   <button class="btn-icon menu-toggle" id="menuToggle" aria-label="{{ T "menuToggle" }}" aria-expanded="false">☰</button>
   <nav class="main-links overlay-blur" id="mainNav" aria-label="{{ T "mainNavigation" }}">
     {{- partial "menu.html" (dict "menuID" "main" "page" .) }}
-    <a href="{{ "atom.xml" | absURL }}" title="{{ T "atomFeed" }}" rel="alternate" type="application/atom+xml">RSS</a>
+    <a href="{{ "atom.xml" | absURL }}" title="{{ T "atomFeed" }}" rel="alternate" type="application/atom+xml">{{ T "feedLabel" }}</a>
   </nav>
   <button class="btn-icon theme-toggle" id="themeToggle" aria-label="{{ T "themeToggle" }}">🌙</button>
 </div>

@@ -1,0 +1,19 @@
+{{- /*
+Dispatcher partial to select the appropriate contextual sidebar.
+- Article pages: Table of Contents (TOC)
+- /categories/ : Categories Overview Sidebar
+- /tags/       : Tags A-Z Jump Navigation Sidebar
+- /archives/   : Archives Year Timeline Sidebar
+- Home & other : Homepage / Global Browsing Guide Sidebar
+*/}}
+{{- if .IsPage -}}
+  {{ partial "toc.html" . }}
+{{- else if and (eq .Kind "taxonomy") (eq .Data.Plural "categories") -}}
+  {{ partial "categories-sidebar.html" . }}
+{{- else if and (eq .Kind "taxonomy") (eq .Data.Plural "tags") -}}
+  {{ partial "tags-sidebar.html" . }}
+{{- else if or (eq .Section "archives") (eq .Type "archives") -}}
+  {{ partial "archives-sidebar.html" . }}
+{{- else -}}
+  {{ partial "home-sidebar.html" . }}
+{{- end -}}

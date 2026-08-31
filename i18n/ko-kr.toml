@@ -1,5 +1,4 @@
 home = '메인'
-allPosts = '모든 게시물'
 posts = '모든 게시물'
 categories = '분류'
 tags = '태그'
@@ -15,7 +14,6 @@ archives = '보관'
 # Navigation
 skipToContent = '본문으로 바로가기'
 mainNavigation = '주 메뉴'
-feedsNavigation = '구독'
 atomFeed = 'Atom 피드'
 themeToggle = '라이트/다크 모드 전환'
 themeLightMode = '라이트 모드 활성화됨'
@@ -39,11 +37,79 @@ readingStats = '이 글은 약 {{ .WordCount }} 자이며, 읽는 데 약 {{ .Re
 # Print references
 printReferences = '참고 문헌'
 
-# Archives
-year = '년'
-month = '월'
-postsCount = '개'
-
 # Footer
 poweredBy = '이 사이트는 <a href="https://gohugo.io">Hugo</a>로 구축되었으며, 테마는 <a href="https://github.com/delphij/chaos-theme">Chaos</a>를 사용합니다.'
 remarkAttribution = '댓글 시스템은 <a href="https://remark42.com/">Remark42</a>를 사용합니다.'
+
+# Theme toggle, feeds and post navigation
+feedLabel = 'RSS'
+themeToggleToDark = '다크 모드로 전환'
+themeToggleToLight = '라이트 모드로 전환'
+readMoreAbout = '전문 읽기: {{ .Title }}'
+joinDiscussionAbout = '댓글 참여: {{ .Title }}'
+newerPost = '← {{ .Title }}'
+olderPost = '{{ .Title }} →'
+newerPostLabel = '최신 글: {{ .Title }}'
+olderPostLabel = '이전 글: {{ .Title }}'
+
+# Sidebar navigation
+browsingGuide = '둘러보기'
+coreCategories = '주요 분류'
+popularTags = '인기 태그'
+tagsOverview = '태그 한눈에 보기'
+tagsAlphabetNav = '태그 알파벳 탐색'
+alphabetIndex = '알파벳 색인'
+allTagsAZ = '전체 태그 (A-Z)'
+allCategoriesLink = '전체 분류 ({{ .Count }}) →'
+allTagsLink = '전체 태그 ({{ .Count }}) →'
+categoryTitle = '분류: {{ .Name }}'
+tagTitle = '태그: {{ .Name }}'
+
+# Archives
+archivesYearNav = '아카이브 연도 탐색'
+yearQuickJump = '연도 바로가기'
+yearLabel = '{{ .Year }}년'
+
+# Atom feed stylesheet
+visitBlogHome = '← 블로그 홈으로'
+feedPageTitle = 'Web Feed (Atom 피드)'
+feedIntro = '이 페이지는 <strong>Atom</strong> 형식의 웹 피드입니다. RSS/Atom을 지원하는 브라우저나 확장 프로그램을 사용 중이라면 여기에서 바로 글 미리보기를 볼 수 있습니다.'
+feedSubscribeHelp = '<strong>{{ .Title }}</strong>의 최신 글을 구독하려면 아래 주소를 복사해 RSS 리더({{ .Readers }})에 추가하세요:'
+feedLatestPosts = '최신 글 목록'
+feedReadMore = '사이트에서 전문 읽고 토론 참여하기 →'
+feedUrlLabel = 'Feed URL'
+copyFeedUrl = '피드 URL 복사'
+feedUrlCopied = '피드 URL을 클립보드에 복사했습니다.'
+feedUrlCopyFailed = '자동으로 복사하지 못했습니다. 위 주소를 선택해 직접 복사해 주세요.'
+listSeparator = ', '
+
+# Sitemap stylesheet
+sitemapPageTitle = 'XML Sitemap (사이트맵)'
+sitemapIntro = '검색 엔진과 크롤러를 위해 생성된 표준 XML 사이트맵입니다. 현재 <strong>{{ .Count }}</strong>개의 공개 페이지가 포함되어 있습니다.'
+sitemapFilterToolbar = '유형 필터 도구 모음'
+sitemapFilterLabel = '유형 필터:'
+sitemapToggleType = '{{ .Type }} 표시/숨기기'
+sitemapOnlyType = '{{ .Type }}만 보기 (다시 누르면 전체 보기)'
+sitemapVisibleCount = '현재 표시: {{ .Visible }} / {{ .Total }}개 페이지'
+sitemapHint = '팁: 위 버튼으로 유형을 켜고 끌 수 있고, 표 안의 배지를 누르면 해당 유형만, 열 제목을 누르면 정렬이 바뀝니다'
+sitemapColumnPath = '페이지 경로 (Path)'
+sitemapColumnLastModified = '마지막 수정 시각 (Last Modified)'
+sitemapAllHidden = '모든 유형이 숨겨져 있습니다. 위 버튼으로 표시를 켜 주세요.'
+sortByPath = '경로순 정렬'
+sortByPathAscending = '경로순 정렬 (현재 오름차순)'
+sortByPathDescending = '경로순 정렬 (현재 내림차순)'
+sortByTime = '수정 시각순 정렬'
+sortByTimeAscending = '수정 시각순 정렬 (현재 오름차순)'
+sortByTimeDescending = '수정 시각순 정렬 (현재 내림차순)'
+contentTypePost = '글'
+contentTypePage = '페이지'
+
+# Pluralised messages (must stay last: TOML tables capture every key below them)
+[termPostCount]
+  other = '{{ .Name }} ({{ .Count }}개의 글)'
+
+[yearPostCount]
+  other = '{{ .Year }}년 ({{ .Count }}개의 글)'
+
+[archivesSummary]
+  other = '사이트 전체의 글 {{ .Count }}개를 시간순으로 모았습니다.'

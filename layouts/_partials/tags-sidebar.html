@@ -1,0 +1,24 @@
+{{- /*
+Sidebar for /tags/ taxonomy page.
+Provides A-Z letter jump navigation matching the TOC style.
+*/}}
+<aside class="home-sidebar toc-wrapper" aria-label="{{ T `tagsAlphabetNav` }}">
+  <div class="sidebar-card">
+    <div class="sidebar-widget">
+      <h2 class="sidebar-widget-title">{{ T "alphabetIndex" }}</h2>
+      <div class="sidebar-tag-nav">
+        <a class="sidebar-nav-jump" href="#hot-tags">{{ T "popularTags" }}</a>
+        <div class="sidebar-az-grid">
+          {{ $letters := slice "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" "#" }}
+          {{ range $letters }}
+            {{ $id := cond (eq . "#") "tag-letter-other" (printf "tag-letter-%s" .) }}
+            <a class="sidebar-az-item" href="#{{ $id }}">{{ . }}</a>
+          {{ end }}
+        </div>
+      </div>
+      <div class="sidebar-widget-footer">
+        <a class="sidebar-more-link" href="{{ "/categories/" | relLangURL }}">{{ T "allCategoriesLink" (dict "Count" (len site.Taxonomies.categories)) }}</a>
+      </div>
+    </div>
+  </div>
+</aside>

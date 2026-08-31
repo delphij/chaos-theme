@@ -1,5 +1,4 @@
 home = 'Home'
-allPosts = 'All posts'
 posts = 'All posts'
 categories = 'Categories'
 tags = 'Tags'
@@ -15,7 +14,6 @@ archives = 'Archives'
 # Navigation
 skipToContent = 'Skip to main content'
 mainNavigation = 'Main navigation'
-feedsNavigation = 'Feeds'
 atomFeed = 'Atom Feed'
 themeToggle = 'Toggle light/dark mode'
 themeLightMode = 'Light mode enabled'
@@ -39,11 +37,82 @@ readingStats = 'Approximately {{ .WordCount }} words, {{ .ReadingTime }} min rea
 # Print references
 printReferences = 'References'
 
-# Archives
-year = ''
-month = ''
-postsCount = 'posts'
-
 # Footer
 poweredBy = 'Powered by <a href="https://gohugo.io">Hugo</a> with <a href="https://github.com/delphij/chaos-theme">Chaos</a> theme.'
 remarkAttribution = 'Comments powered by <a href="https://remark42.com/">Remark42</a>.'
+
+# Theme toggle, feeds and post navigation
+feedLabel = 'RSS'
+themeToggleToDark = 'Switch to dark mode'
+themeToggleToLight = 'Switch to light mode'
+readMoreAbout = 'Read more: {{ .Title }}'
+joinDiscussionAbout = 'Join discussion: {{ .Title }}'
+newerPost = '← {{ .Title }}'
+olderPost = '{{ .Title }} →'
+newerPostLabel = 'Newer post: {{ .Title }}'
+olderPostLabel = 'Older post: {{ .Title }}'
+
+# Sidebar navigation
+browsingGuide = 'Browsing guide'
+coreCategories = 'Main categories'
+popularTags = 'Popular tags'
+tagsOverview = 'Tags at a glance'
+tagsAlphabetNav = 'Tag alphabet navigation'
+alphabetIndex = 'Alphabetical index'
+allTagsAZ = 'All tags (A-Z)'
+allCategoriesLink = 'All categories ({{ .Count }}) →'
+allTagsLink = 'All tags ({{ .Count }}) →'
+categoryTitle = 'Category: {{ .Name }}'
+tagTitle = 'Tag: {{ .Name }}'
+
+# Archives
+archivesYearNav = 'Archive year navigation'
+yearQuickJump = 'Jump to year'
+yearLabel = '{{ .Year }}'
+
+# Atom feed stylesheet
+visitBlogHome = '← Visit the blog'
+feedPageTitle = 'Web Feed (Atom)'
+feedIntro = 'This is an <strong>Atom</strong> web feed. If your browser or an extension supports RSS/Atom, you can preview the posts right here.'
+feedSubscribeHelp = 'To follow <strong>{{ .Title }}</strong>, copy the address below into your RSS reader ({{ .Readers }}):'
+feedLatestPosts = 'Latest posts'
+feedReadMore = 'Read the full post and join the discussion →'
+feedUrlLabel = 'Feed URL'
+copyFeedUrl = 'Copy feed URL'
+feedUrlCopied = 'Feed URL copied to clipboard.'
+feedUrlCopyFailed = 'Could not copy automatically. Please select the address above and copy it manually.'
+listSeparator = ', '
+
+# Sitemap stylesheet
+sitemapPageTitle = 'XML Sitemap'
+sitemapIntro = 'This is a standard XML sitemap generated for search engines and crawlers. It currently lists <strong>{{ .Count }}</strong> public pages.'
+sitemapFilterToolbar = 'Content type filters'
+sitemapFilterLabel = 'Filters:'
+sitemapToggleType = 'Show or hide {{ .Type }}'
+sitemapOnlyType = 'Show only {{ .Type }} (click again to show all)'
+sitemapVisibleCount = 'Showing {{ .Visible }} / {{ .Total }} pages'
+sitemapHint = 'Tip: use the buttons above to toggle types, click a badge in the table to isolate one type, or click a column header to sort.'
+sitemapColumnPath = 'Page path (Path)'
+sitemapColumnLastModified = 'Last modified'
+sitemapAllHidden = 'All content types are hidden. Use the buttons above to show content again.'
+sortByPath = 'Sort by path'
+sortByPathAscending = 'Sort by path (currently ascending)'
+sortByPathDescending = 'Sort by path (currently descending)'
+sortByTime = 'Sort by last modified'
+sortByTimeAscending = 'Sort by last modified (currently ascending)'
+sortByTimeDescending = 'Sort by last modified (currently descending)'
+contentTypePost = 'Posts'
+contentTypePage = 'Pages'
+
+# Pluralised messages (must stay last: TOML tables capture every key below them)
+[termPostCount]
+  one = '{{ .Name }} ({{ .Count }} post)'
+  other = '{{ .Name }} ({{ .Count }} posts)'
+
+[yearPostCount]
+  one = '{{ .Year }} ({{ .Count }} post)'
+  other = '{{ .Year }} ({{ .Count }} posts)'
+
+[archivesSummary]
+  one = '{{ .Count }} post from across the site, in chronological order.'
+  other = '{{ .Count }} posts from across the site, in chronological order.'

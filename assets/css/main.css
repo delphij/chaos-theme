@@ -12,21 +12,24 @@
      Primary brand colors with Japanese traditional color names */
   --bg: #FAFAFA;                    /* Page background */
   --surface: #FFFFFF;                /* Card/panel surfaces */
-  --text: #222222;                   /* Body text */
-  --heading: #111111;                /* Headings and titles */
-  --muted: #6B6B6B;                  /* Secondary text, captions */
+  --text: #222222;                   /* Body text (15.3:1 contrast on #FAFAFA) */
+  --heading: #111111;                /* Headings and titles (18.2:1 contrast on #FAFAFA) */
+  --muted: #545454;                  /* Secondary text, captions (5.8:1 contrast on #FAFAFA) */
   --primary: #A23E48;                /* 红緋 Hi-iro (primary brand color) */
+  --primary-fg: #FFFFFF;             /* High contrast text on primary in light mode (6.2:1) */
   --accent: #2E5A88;                 /* 瑠璃色 Ruri-iro (accent color) */
-  --paper: #F2E8D5;                  /* 和纸感 (paper texture background) */
+  --paper: #F0E6D2;                  /* 和纸感 (paper texture background) */
 
-  /* Links - Distinct blue palette for accessibility */
-  --link: #0066CC;                   /* Default link color */
-  --link-hover: #004C99;             /* Link hover state */
+  /* Links - High contrast accessible blue palette (7.2:1 on #FAFAFA, WCAG AAA) */
+  --link: #0050A5;                   /* Default link color */
+  --link-hover: #003875;             /* Link hover state */
 
   /* UI elements - Borders and backgrounds */
   --table-stripe: #F2F2F2;           /* Alternating table row background */
-  --blockquote-fg: #444444;          /* Blockquote text color */
-  --border: 1px solid rgba(0,0,0,0.06); /* Subtle border for light mode */
+  --blockquote-fg: #333333;          /* Blockquote text color */
+  --border: 1px solid rgba(0,0,0,0.1); /* Subtle border for light mode */
+  --pill-border: rgba(0, 0, 0, 0.06);          /* Count pill border, resting */
+  --pill-border-active: rgba(162, 62, 72, 0.25); /* Count pill border, hover/active */
 
   /* Alert colors - Semantic color system for different message types */
   --alert-note-bg: #F0F4FF;          /* Note/Historical background */
@@ -41,7 +44,8 @@
   --alert-caution-border: #8844AA;   /* Caution border */
 
   /* Layout dimensions - Spacing and container widths */
-  --max-width: 1280px;               /* Maximum container width for header/footer/nav (accommodates 780px article + 280px TOC + gaps) */
+  --max-width: 1280px;               /* Maximum container width for header/footer/nav */
+  --content-width: 780px;            /* Optimal measure for CJK reading (35-45 chars per line) */
   --gutter: 24px;                    /* Horizontal padding */
   --nav-height: 80px;                /* Sticky navigation height for scroll offsets */
   --radius: 10px;                    /* Border radius for cards */
@@ -67,9 +71,9 @@
   --z-modal: 60;                     /* Floating buttons (TOC toggle) */
   --z-top: 100;                      /* Top layer (skip link, announcements) */
 
-  /* Focus styles - Consistent keyboard navigation indicators */
-  --focus-outline: 3px solid rgba(100, 160, 255, 0.18);
-  --focus-offset: 2px;
+  /* Focus styles - High contrast for keyboard navigation accessibility (WCAG 2.4.11) */
+  --focus-outline: 2px solid var(--primary);
+  --focus-offset: 3px;
 }
 
 /* Dark mode variables
@@ -81,17 +85,21 @@ html.dark {
 
   --bg: #1C1C1C;                     /* Dark background */
   --surface: #222222;                /* Elevated surfaces */
-  --text: #EAEAEA;                   /* Light text on dark */
-  --heading: #FFFFFF;                /* High-contrast headings */
-  --muted: #A8A8A8;                  /* Muted text */
+  --text: #E6EDF3;                   /* Light text on dark (14.2:1 contrast) */
+  --heading: #FFFFFF;                /* High-contrast headings (17.5:1 contrast) */
+  --muted: #A8A8A8;                  /* Muted text (7.0:1 contrast on #1C1C1C) */
   --primary: #FF6F61;                /* 珊瑚橙 (coral orange) */
+  --primary-fg: #1C1C1C;             /* High contrast text on primary in dark mode (8.4:1) */
   --accent: #8AB4F8;                 /* Lighter blue for dark mode */
   --paper: #2A2A2A;                  /* Subtle background variation */
-  --link: #4DA6FF;                   /* Brighter link for contrast */
-  --link-hover: #80C1FF;             /* Link hover in dark mode */
+  --link: #66B3FF;                   /* Brighter link meeting WCAG AAA (7.8:1 contrast) */
+  --link-hover: #99CCFF;             /* Link hover in dark mode */
   --table-stripe: #242424;           /* Darker stripe for tables */
   --blockquote-fg: #CCCCCC;          /* Lighter quote text */
-  --border: 1px solid rgba(255,255,255,0.04); /* Subtle dark border */
+  --border: 1px solid rgba(255,255,255,0.1); /* Subtle dark border */
+  --pill-border: rgba(255, 255, 255, 0.08);
+  --pill-border-active: rgba(255, 111, 97, 0.3);
+  --focus-outline: 2px solid #66B3FF;
 
   /* Alert colors adapted for dark mode with higher contrast */
   --alert-note-bg: #1E2A40;
@@ -127,8 +135,8 @@ html {
 body {
   height: 100%;                      /* Full viewport height */
 
-  /* Font stack: Noto Sans SC for Chinese, then system fonts as fallback */
-  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif;
+  /* Font stack: Noto Sans SC for Chinese, with high quality CJK system font fallbacks */
+  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   background: var(--bg);
   color: var(--text);
   font-size: var(--font-size-base);
@@ -156,15 +164,19 @@ body {
 /* Headings - Shared styles for all heading levels */
 h1,
 h2,
-h3 {
+h3,
+h4,
+h5,
+h6 {
   color: var(--heading);
   font-weight: 700;
+  line-height: 1.35;
 }
 
 /* H1 - Page and article titles */
 h1 {
   font-size: var(--h1-size);
-  margin: 12px 0 10px;
+  margin: 16px 0 12px;
   font-weight: 800;
   letter-spacing: -0.01em;           /* Tighter spacing for large text */
 }
@@ -172,18 +184,18 @@ h1 {
 /* H2 - Major section headings */
 h2 {
   font-size: var(--h2-size);
-  margin: 20px 0 8px;
+  margin: 24px 0 10px;
 }
 
 /* H3 - Sub-section headings */
 h3 {
   font-size: var(--h3-size);
-  margin: 16px 0 6px;
+  margin: 18px 0 8px;
 }
 
 /* Paragraphs - Body text with orphan/widow control for better typography */
 p {
-  margin: 0 0 1em;
+  margin: 0 0 1.25em;
   orphans: 2;                        /* Minimum 2 lines at bottom of column */
   widows: 2;                         /* Minimum 2 lines at top of column */
 }
@@ -193,7 +205,7 @@ a {
   color: var(--link);
   text-decoration: none;
   border-bottom: 1px dotted var(--link);
-  transition: border-color var(--transition-fast), color var(--transition-fast);
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
 }
 
 a:hover {
@@ -203,22 +215,94 @@ a:hover {
 }
 
 /* Link focus state for keyboard navigation accessibility */
-a:focus {
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
   outline: var(--focus-outline);
   outline-offset: var(--focus-offset);
 }
 
-/* Link variants - Plain links without underline for navigation */
+/* High Contrast Mode support */
+@media (forced-colors: active) {
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* Link variants - Plain links without underline for navigation
+   All non-article links share this reset to avoid repeating border-bottom: none
+   throughout individual component styles. */
 .link-plain,
 .brand,
-nav.main-links a {
+.post-entry .post-title a,
+.toc-content a,
+.toc-inline-content a,
+nav.main-links a,
+.skip-link,
+.sidebar-cat-item,
+.sidebar-tag-item,
+.sidebar-more-link,
+.sidebar-nav-jump,
+.sidebar-az-item,
+.sidebar-year-item,
+.taxonomy-item,
+.tag-flat-item,
+.archive-post-title,
+.archive-cat-label {
   border-bottom: none;
   text-decoration: none;
 }
 
 .link-plain:hover,
-.brand:hover {
+.brand:hover,
+.post-entry .post-title a:hover,
+.toc-content a:hover,
+.toc-inline-content a:hover,
+nav.main-links a:hover,
+.skip-link:hover,
+.sidebar-cat-item:hover,
+.sidebar-tag-item:hover,
+.sidebar-more-link:hover,
+.sidebar-nav-jump:hover,
+.sidebar-az-item:hover,
+.sidebar-year-item:hover,
+.taxonomy-item:hover,
+.tag-flat-item:hover,
+.archive-post-title:hover,
+.archive-cat-label:hover {
   border-bottom: none;
+}
+
+/* Navigation item highlight - Shared resting transition and hover treatment for
+   every "row" style link (sidebar entries, taxonomy items, TOC links). Declared
+   once here so the individual components only carry their own resting colors. */
+.sidebar-cat-item,
+.sidebar-tag-item,
+.sidebar-nav-jump,
+.sidebar-az-item,
+.sidebar-year-item,
+.taxonomy-item,
+.tag-flat-item,
+.toc-content a,
+.toc-inline-content a {
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.sidebar-cat-item:hover,
+.sidebar-tag-item:hover,
+.sidebar-nav-jump:hover,
+.sidebar-az-item:hover,
+.sidebar-year-item:hover,
+.taxonomy-item:hover,
+.tag-flat-item:hover,
+.toc-content a:hover,
+.toc-inline-content a:hover {
+  color: var(--primary);
+  background: var(--paper);
 }
 
 /* Lists - Minimal left padding with tabular numerals for alignment
@@ -234,7 +318,7 @@ ul {
 }
 
 /* ==========================================================================
-   LAYOUT - CONTAINER
+   LAYOUT - CONTAINER & POST LIST
    Main content container with responsive max-width and horizontal padding.
    ========================================================================== */
 
@@ -247,6 +331,107 @@ ul {
 /* Remove padding when container has grid layout - grid handles its own spacing */
 .container:has(.content-layout) {
   padding: 0;
+}
+
+/* Post list container for list pages (homepage, sections, tags) */
+.post-list {
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+/* Post entry summary cards */
+.post-entry {
+  margin-bottom: 44px;
+  padding-bottom: 32px;
+  border-bottom: var(--border);
+}
+
+.post-entry:last-child {
+  border-bottom: none;
+  margin-bottom: 24px;
+  padding-bottom: 0;
+}
+
+.post-entry .post-title {
+  font-size: var(--h1-size);
+  margin: 0 0 10px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.post-entry .post-title a {
+  color: var(--heading);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.post-entry .post-title a:hover {
+  color: var(--primary);
+}
+
+.post-summary-content {
+  margin: 14px 0;
+  line-height: var(--line-height);
+  color: var(--text);
+}
+
+.post-more {
+  margin-top: 14px;
+}
+
+.read-more {
+  font-weight: 600;
+  color: var(--link);
+  border-bottom: 1px dotted var(--link);
+}
+
+.read-more:hover {
+  color: var(--link-hover);
+  border-bottom-style: solid;
+}
+
+/* Taxonomy Links (Categories & Tags as clean badges) */
+.taxo-link {
+  display: inline-block;
+  box-sizing: border-box;
+  color: var(--text);
+  background: var(--paper);
+  font-size: var(--small-size);
+  border: var(--border);
+  text-decoration: none;
+  padding: 1px 7px;
+  border-radius: var(--radius-sm);
+  margin: 1px 4px 1px 0;
+  vertical-align: middle;
+  line-height: 1.4;
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.taxo-link:hover {
+  color: var(--primary-fg);
+  background-color: var(--primary);
+  border-color: var(--primary);
+  text-decoration: none;
+}
+
+.cat-link {
+  font-weight: 600;
+  color: var(--primary);
+  background-color: #FDF0ED;
+  border-color: rgba(162, 62, 72, 0.25);
+  margin-right: 6px;
+}
+
+html.dark .cat-link {
+  background-color: rgba(255, 111, 97, 0.15);
+  border-color: rgba(255, 111, 97, 0.3);
+  color: var(--primary);
+}
+
+.tag-link {
+  font-weight: 400;
+  color: var(--muted);
 }
 
 /* Account for sticky header when jumping to anchors */
@@ -283,12 +468,13 @@ h6[id] {
 
 /* Navigation inner container - Flexbox layout for brand and menu */
 .nav-inner {
-  max-width: calc(var(--max-width) + 2 * var(--gutter));
+  max-width: var(--max-width);
   margin: 0 auto;
   padding: 12px var(--gutter);
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 /* Brand/logo - Site name with optional subtitle */
@@ -299,47 +485,70 @@ h6[id] {
   display: flex;
   align-items: baseline;
   gap: 10px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .brand .subtitle {
   font-size: var(--small-size);
   color: var(--muted);
   margin-left: 6px;
-  font-weight: 500;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 440px;
 }
 
 .main-title {
   font-size: var(--h3-size);
+  white-space: nowrap;
 }
 
 /* Navigation links - Right-aligned menu items */
 nav.main-links {
   margin-left: auto;                 /* Push to right side */
   display: flex;
-  gap: 14px;
+  gap: 8px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 nav.main-links a {
   color: var(--muted);
   font-weight: 600;
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
 }
 
 nav.main-links a:hover {
   color: var(--primary);
+  background: var(--paper);
 }
 
-/* Base icon button styles - Shared by theme toggle and menu toggle */
+/* Base icon button styles - Minimum 44x44px touch target (WCAG 2.5.5) */
 .btn-icon {
   border: 0;
   cursor: pointer;
   font-weight: 600;
-  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
   border-radius: var(--radius-md);
+  font-size: 18px;
+  color: var(--heading);
+  background: transparent;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .btn-icon:hover {
   background: var(--paper);
+  color: var(--primary);
 }
 
 /* Theme toggle button - Dark/light mode switcher */
@@ -378,23 +587,22 @@ nav.main-links a:hover {
    Desktop: right sidebar, Tablet: collapsible top, Mobile: overlay.
    ========================================================================== */
 
-/* 2-column layout for article pages - wider article when there's room for TOC
-   Article column: 960px on wide viewports (more space = wider article)
-   - Comfortable reading width when TOC is present
-   TOC column: Fixed at 280px
-   Grid has gutter padding for consistent left edge with index pages
-   Minimum viewport: 24px + 960px + 40px + 280px + 24px = 1328px */
+/* 2-column layout for article pages
+   Article column: max var(--content-width) (780px)
+   TOC column: Fixed at 280px */
 .content-layout {
   display: grid;
-  grid-template-columns: 960px 280px;
-  gap: 40px;
+  grid-template-columns: var(--content-width) 280px;
+  gap: 48px;
   align-items: start;
+  justify-content: center;
   padding: 0 var(--gutter);
 }
 
 /* Article takes first column */
 article.post {
   grid-column: 1;
+  max-width: var(--content-width);
 }
 
 /* Remove top margin from first heading to match index page vertical alignment
@@ -457,17 +665,9 @@ article.post {
 
 .toc-content a {
   color: var(--muted);
-  text-decoration: none;
-  border-bottom: none;
   display: block;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: var(--radius-sm);
-  transition: color var(--transition-fast), background var(--transition-fast);
-}
-
-.toc-content a:hover {
-  color: var(--primary);
-  background: var(--paper);
 }
 
 /* Active section highlighting */
@@ -477,9 +677,517 @@ article.post {
   background: var(--paper);
 }
 
-/* TOC toggle button - hidden on desktop */
+/* TOC toggle button - floating action button on tablet/mobile */
 .toc-toggle {
   display: none;
+}
+
+.toc-toggle svg {
+  display: block;
+}
+
+.toc-toggle .toc-icon-open {
+  display: block;
+}
+
+.toc-toggle .toc-icon-close {
+  display: none;
+}
+
+.toc-toggle[aria-expanded="true"] .toc-icon-open {
+  display: none;
+}
+
+.toc-toggle[aria-expanded="true"] .toc-icon-close {
+  display: block;
+}
+
+/* ==========================================================================
+   LAYOUT - HOMEPAGE & LIST SIDEBAR
+   Browsing guide sidebar matching TOC sticky layout and design tokens.
+   ========================================================================== */
+
+.home-sidebar {
+  grid-column: 2;
+  position: sticky;
+  top: var(--nav-height);
+  align-self: start;
+  max-width: 280px;
+  max-height: calc(100dvh - 100px);
+}
+
+.sidebar-card {
+  max-height: calc(100dvh - 100px);
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  contain: layout style;
+}
+
+.sidebar-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-widget-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--heading);
+  margin: 0;
+  padding-bottom: 6px;
+  border-bottom: var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-cat-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sidebar-cat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.sidebar-cat-name {
+  font-weight: 500;
+}
+
+.sidebar-tags-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+
+.sidebar-tag-item {
+  font-size: 12.5px;
+  color: var(--muted);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+}
+
+.sidebar-widget-footer {
+  text-align: right;
+  margin-top: 4px;
+}
+
+.sidebar-more-link {
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 500;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar-more-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Unified Global Count Pill Component */
+.count-pill {
+  font-family: var(--font-mono), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--muted);
+  border: 1px solid var(--pill-border);
+  flex-shrink: 0;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Pill highlight follows its parent row's hover / active state */
+.taxonomy-item:hover .count-pill,
+.tag-flat-item:hover .count-pill,
+.sidebar-cat-item:hover .count-pill,
+.sidebar-year-item:hover .count-pill,
+.sidebar-year-item.active .count-pill {
+  background: var(--surface);
+  color: var(--primary);
+  border-color: var(--pill-border-active);
+}
+
+/* Sidebar A-Z Index */
+.sidebar-tag-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-nav-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.sidebar-az-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.sidebar-az-item {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 3px 0;
+  border-radius: var(--radius-sm);
+}
+
+.sidebar-year-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-year-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.sidebar-nav-jump.active,
+.sidebar-az-item.active,
+.sidebar-year-item.active {
+  color: var(--primary);
+  font-weight: 600;
+  background: var(--paper);
+}
+
+/* ==========================================================================
+   LAYOUT & COMPONENTS - PAGE HEADERS & SPECIAL INDEX PAGES
+   Styles for /categories/, /tags/, and /archives/
+   ========================================================================== */
+
+.page-title-group {
+  margin: 0 0 28px 0;
+  padding-bottom: 16px;
+  border-bottom: var(--border);
+}
+
+.page-title {
+  font-size: var(--h1-size);
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--heading);
+}
+
+.page-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 1. Category Items List (/categories/) */
+.categories-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 16px;
+  margin-bottom: 32px;
+  width: 100%;
+}
+
+.taxonomy-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+
+.taxonomy-name {
+  font-size: 14.5px;
+  color: inherit;
+}
+
+/* 2. Tags Index & Alphabetical Library (/tags/) */
+.tags-section {
+  margin-bottom: 32px;
+  scroll-margin-top: calc(var(--nav-height) + 16px);
+}
+
+.tags-section-heading {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--heading);
+  margin: 0 0 14px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-bottom: 6px;
+  border-bottom: var(--border);
+}
+
+.tags-flat-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.tag-flat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  background: transparent;
+}
+
+.tag-flat-item.hot {
+  font-weight: 600;
+}
+
+.tags-az-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tag-letter-group {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  scroll-margin-top: calc(var(--nav-height) + 16px);
+  padding-top: 4px;
+}
+
+.tag-letter-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+  width: 20px;
+  line-height: 1.5;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+/* 3. Archives Timeline (/archives/) */
+.archive-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.archive-year-section {
+  scroll-margin-top: calc(var(--nav-height) + 16px);
+}
+
+.archive-year-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: var(--border);
+}
+
+.archive-year-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--heading);
+}
+
+.archive-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.archive-post-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.archive-post-row:hover {
+  background-color: var(--paper);
+}
+
+.archive-date {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+  flex-shrink: 0;
+  width: 82px;
+  letter-spacing: -0.2px;
+}
+
+.archive-date-short {
+  display: none;
+}
+
+.archive-post-title {
+  font-size: 14.5px;
+  color: var(--text);
+  flex: 1;
+  line-height: 1.45;
+  transition: color var(--transition-fast);
+}
+
+.archive-post-row:hover .archive-post-title {
+  color: var(--primary);
+}
+
+.archive-cat-label {
+  font-size: 12px;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.archive-cat-label:hover {
+  color: var(--primary);
+}
+
+@media (max-width: 600px) {
+  .archive-date {
+    width: 44px;
+  }
+  .archive-date-full {
+    display: none;
+  }
+  .archive-date-short {
+    display: inline;
+  }
+}
+
+/* ==========================================================================
+   COMPONENTS - INLINE TABLE OF CONTENTS (<details>)
+   Collapsible table of contents embedded in articles for smaller screens.
+   Hidden on desktop (>= 1360px) where the sticky sidebar TOC is visible.
+   ========================================================================== */
+
+.toc-inline {
+  display: none;
+  margin: 18px 0 24px;
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: border-color var(--transition-fast);
+}
+
+.toc-inline[open] {
+  border-color: var(--primary);
+}
+
+.toc-inline-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  min-height: 44px;
+  box-sizing: border-box;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--heading);
+  background: var(--paper);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.toc-inline-summary::-webkit-details-marker {
+  display: none;
+}
+
+.toc-inline-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toc-inline-icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.toc-inline-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  transition: transform var(--transition-fast);
+}
+
+.toc-inline[open] .toc-inline-chevron {
+  transform: rotate(180deg);
+}
+
+.toc-inline-content {
+  padding: 14px 18px;
+  border-top: var(--border);
+  font-size: var(--small-size);
+  line-height: 1.6;
+}
+
+.toc-inline-content nav {
+  font-size: 14px;
+}
+
+.toc-inline-content ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.toc-inline-content ul ul {
+  padding-left: 16px;
+  margin-top: 4px;
+}
+
+.toc-inline-content li {
+  margin: 5px 0;
+}
+
+.toc-inline-content a {
+  color: var(--text);
+  display: block;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
 }
 
 /* ==========================================================================
@@ -521,11 +1229,12 @@ article.post {
   line-break: strict;
 }
 
-/* Article metadata - Post date, reading time, etc. */
-article .meta {
+/* Article and summary metadata - Post date, reading time, tags */
+.meta {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--small-size);
   margin-bottom: 8px;
+  line-height: 1.6;
 }
 
 /* ==========================================================================
@@ -753,9 +1462,11 @@ pre.mermaid {
   font-family: inherit;
 }
 
-
-
-
+.mermaid .edgeLabel p,
+.mermaid .edgeLabel span,
+.mermaid .labelBkg {
+  color: var(--text) !important;
+}
 
 /* ==========================================================================
    COMPONENTS - PAGINATION
@@ -766,8 +1477,9 @@ pre.mermaid {
 .pager {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin: 28px 0;
+  align-items: center;
+  gap: 16px;
+  margin: 36px 0;
   padding: 0;
 }
 
@@ -779,19 +1491,27 @@ pre.mermaid {
   padding: 0;
 }
 
-/* Pagination links - Button-style with border */
+/* Pagination links - Button-style with minimum 44px touch target (WCAG 2.5.5) */
 .pager a {
-  display: inline-block;
-  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 18px;
   border-radius: var(--radius-lg);
-  font-weight: 700;
+  font-weight: 600;
   border: var(--border);
+  border-bottom: var(--border);
   color: var(--heading);
+  background: var(--surface);
+  text-decoration: none;
+  transition: all var(--transition-fast);
 }
 
 .pager a:hover {
   background: var(--paper);
   color: var(--primary);
+  border-color: var(--primary);
 }
 
 /* Pagination alignment - Previous left, next right */
@@ -881,7 +1601,7 @@ strong {
   position: absolute;
   top: -100%;                        /* Completely off-screen */
   left: 0;
-  padding: 8px 16px;                 /* Maintained for smooth transition */
+  padding: 10px 18px;                /* Maintained for smooth transition */
   z-index: var(--z-top);
   transition: top var(--transition-fast), opacity var(--transition-fast);
   opacity: 0;                        /* Invisible by default */
@@ -891,15 +1611,9 @@ strong {
   top: 0;
   opacity: 1;
   background: var(--primary);        /* Visual styles only when focused */
-  color: var(--surface);
+  color: var(--primary-fg);
   font-weight: 600;
   border-radius: 0 0 var(--radius-sm) 0;
-  border-bottom: none;
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-offset);
-}
-
-button:focus {
   outline: var(--focus-outline);
   outline-offset: var(--focus-offset);
 }
@@ -910,28 +1624,35 @@ button:focus {
    Adjusts layout, typography, and navigation for smaller screens.
    ========================================================================== */
 
-/* Tablet breakpoint - Collapse 2-column layout to single column
-   Container max-width stays at 1280px; article grid constrains content to 780px */
+/* Tablet breakpoint - Collapse 2-column layout to single column (<= 1359px) */
 @media (max-width: 1359px) {
 
   .nav-inner {
-    padding: 10px 16px;
+    padding: 10px var(--gutter);
   }
 
-  article h1 {
-    font-size: 24px;
-  }
-
-  /* TOC: Switch to mobile overlay behavior on tablet
-     Single column, article narrower when space is limited (max 780px for optimal code display) */
+  /* Single column centered article on tablet */
   .content-layout {
-    grid-template-columns: minmax(0, 780px);
-    gap: 24px;
+    display: block;
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
   }
 
-  /* TOC: Use mobile overlay behavior on tablet */
-  .toc-toggle {
+  article.post {
+    max-width: 100%;
+  }
+
+  /* Show inline collapsible TOC at article top on smaller screens */
+  .toc-inline {
     display: block;
+  }
+
+  /* TOC: Switch to mobile overlay behavior on tablet */
+  .toc-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     position: fixed;
     bottom: 24px;
     right: 24px;
@@ -939,29 +1660,28 @@ button:focus {
     height: 48px;
     border-radius: 50%;
     background: var(--primary);
-    color: white;
+    color: var(--primary-fg);
     border: none;
     cursor: pointer;
-    font-size: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     z-index: var(--z-modal);
     transition: transform var(--transition-normal), box-shadow var(--transition-normal);
   }
 
   .toc-toggle:hover {
-    transform: scale(1.1);
+    transform: scale(1.08);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   }
 
-  .toc-toggle .toc-icon {
-    display: block;
-    line-height: 1;
+  .home-sidebar {
+    display: none;
   }
 
   .toc-wrapper {
     position: relative;
     top: 0;
     max-height: none;
+    grid-column: auto;
   }
 
   .toc {
@@ -978,7 +1698,6 @@ button:focus {
     border: 0;
     border-top: var(--border);
     border-radius: 0;
-    /* Note: backdrop-filter from .overlay-blur class */
   }
 
   .toc.toc-open {
@@ -986,41 +1705,61 @@ button:focus {
   }
 }
 
-/* Mobile breakpoint - Full width, hamburger menu */
-@media (max-width: 600px) {
+/* Intermediate Tablet breakpoint - Constrain subtitle (<= 960px) */
+@media (max-width: 960px) {
+  .brand .subtitle {
+    max-width: 220px;
+  }
+}
+
+/* Mobile & Small Tablet breakpoint - Hamburger menu & compact layout (<= 768px) */
+@media (max-width: 768px) {
   :root {
     --max-width: 100%;
+    --gutter: 16px;
+    --h1-size: 24px;
+    --h2-size: 20px;
+    --h3-size: 17px;
   }
 
   .nav-inner {
+    padding: 8px var(--gutter);
     gap: 8px;
-    position: relative;              /* For absolute positioning of menu */
+    position: relative;
   }
 
   /* Brand comes first, takes remaining space */
   .brand {
     font-size: 16px;
-    flex: 1;                         /* Take remaining space */
+    flex: 1;
+    min-width: 0;
   }
 
-  /* Show hamburger menu button on mobile - positioned before theme toggle */
+  /* Hide subtitle on mobile / small tablets */
+  .brand .subtitle {
+    display: none;
+  }
+
+  /* Show hamburger menu toggle on mobile */
   .menu-toggle {
-    display: block;
+    display: inline-flex;
   }
 
   /* Hide main navigation by default on mobile */
   nav.main-links {
     display: none;
     flex-direction: column;
-    position: absolute;              /* Overlay instead of pushing content */
-    top: 100%;                       /* Position below nav-inner */
+    position: absolute;
+    top: 100%;
     left: 0;
     right: 0;
-    gap: 8px;
-    padding: 12px var(--gutter);
+    gap: 4px;
+    padding: 16px var(--gutter);
+    background: var(--surface);
     border-top: var(--border);
-    z-index: var(--z-overlay);       /* Above content, below modals */
-    /* Note: backdrop-filter from .overlay-blur class */
+    border-bottom: var(--border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: var(--z-overlay);
   }
 
   /* Show navigation when menu is open */
@@ -1030,19 +1769,19 @@ button:focus {
 
   /* Stack navigation links vertically on mobile */
   nav.main-links a {
-    padding: 8px 12px;
+    padding: 12px 16px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  nav.main-links a:hover {
-    color: var(--primary);
+  article h1 {
+    font-size: 24px;
   }
 
-  /* Hide subtitle on mobile to save space */
-  .brand .subtitle {
-    display: none;
+  .post-entry .post-title {
+    font-size: 22px;
   }
-
-  /* TOC styles inherited from tablet breakpoint */
 }
 
 /* ==========================================================================
@@ -1082,6 +1821,7 @@ button:focus {
   .menu-toggle,
   .toc-toggle,
   .toc-wrapper,
+  .toc-inline,
   .pager,
   #remark42,
   button {

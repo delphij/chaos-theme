@@ -3,6 +3,7 @@ Renders taxonomy links (categories and tags) for a post.
 
 Displays clickable category and tag links with appropriate separators.
 Categories appear first, followed by tags prefixed with '#'.
+Duplicate tags that match category names are automatically filtered out.
 
 @context {page} page The page context containing taxonomy parameters.
 
@@ -10,14 +11,17 @@ Categories appear first, followed by tags prefixed with '#'.
 */}}
 
 {{- if ne .Type "page" -}}
+  {{- $categories := .Params.categories | default slice -}}
   {{- with .Params.categories -}}
     {{- range . }}
- | <a href="{{ "/categories/" | relLangURL }}{{ . | urlize }}">{{ . }}</a>
+ <a class="taxo-link cat-link" href="{{ "/categories/" | relLangURL }}{{ . | urlize }}" title="{{ T `categoryTitle` (dict `Name` .) }}">{{ . }}</a>
     {{- end -}}
   {{- end -}}
   {{- with .Params.tags -}}
     {{- range . }}
- | <a href="{{ "/tags/" | relLangURL }}{{ . | urlize }}">#{{ . }}</a>
+      {{- if not (in $categories .) }}
+ <a class="taxo-link tag-link" href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" title="{{ T `tagTitle` (dict `Name` .) }}">#{{ . }}</a>
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

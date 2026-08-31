@@ -36,7 +36,10 @@
     const isDark = theme === THEME_DARK;
     root.classList.toggle(THEME_DARK, isDark);
     btn.textContent = isDark ? '☀️' : '🌙';
-    btn.setAttribute('aria-label', `Switch to ${toggleTheme(theme)} mode`);
+    // Describe the action the button will perform next. Keep the server-rendered
+    // label if the i18n bridge is unavailable rather than replacing it with English.
+    const nextLabel = isDark ? window.i18n?.themeToggleToLight : window.i18n?.themeToggleToDark;
+    if (nextLabel) btn.setAttribute('aria-label', nextLabel);
   }
 
   // Announce theme change to screen readers (only for users who likely care about visual themes)
@@ -171,44 +174,46 @@
     });
   }
 
-  // Table of Contents - Active section highlighting
-  const toc = document.getElementById('tableOfContents');
-  if (toc) {
+  // ScrollSpy - Active section highlighting with IntersectionObserver
+  // Reused across Article TOC, /tags/ A-Z navigation, and /archives/ timeline
+  function setupScrollSpy(navContainer, targetSelector) {
+    if (!navContainer) return;
+    const targets = document.querySelectorAll(targetSelector);
+    if (targets.length === 0) return;
 
-    // Active section highlighting with Intersection Observer
-    const headings = document.querySelectorAll('article h2[id], article h3[id], article h4[id]');
-    const tocLinks = toc.querySelectorAll('a');
+    let currentActive = null;
+    const navHeight = getComputedStyle(root).getPropertyValue('--nav-height').trim() || '80px';
 
-    if (headings.length > 0 && tocLinks.length > 0) {
-      // Track currently active link for efficient updates
-      let currentActive = null;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const id = entry.target.id;
+        if (!id) return;
+        const navLink = navContainer.querySelector(`a[href="#${CSS.escape(id)}"]`);
 
-      // Get nav height from CSS variable for consistent offset
-      const navHeight = getComputedStyle(root).getPropertyValue('--nav-height').trim();
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const id = entry.target.getAttribute('id');
-          const tocLink = toc.querySelector(`a[href="#${id}"]`);
-
-          if (tocLink && entry.isIntersecting) {
-            // Remove active class only from previously active link
-            if (currentActive && currentActive !== tocLink) {
-              currentActive.classList.remove('active');
-            }
-            // Add active class to current link
-            tocLink.classList.add('active');
-            currentActive = tocLink;
+        if (navLink && entry.isIntersecting) {
+          if (currentActive && currentActive !== navLink) {
+            currentActive.classList.remove('active');
           }
-        });
-      }, {
-        rootMargin: `-${navHeight} 0px -80% 0px`,  // Use CSS variable for offset
-        threshold: 0
+          navLink.classList.add('active');
+          currentActive = navLink;
+        }
       });
+    }, {
+      rootMargin: `-${navHeight} 0px -70% 0px`,
+      threshold: 0
+    });
 
-      headings.forEach(heading => observer.observe(heading));
-    }
+    targets.forEach(target => observer.observe(target));
   }
+
+  // 1. Table of Contents in Articles
+  setupScrollSpy(document.getElementById('tableOfContents'), 'article h2[id], article h3[id], article h4[id]');
+
+  // 2. A-Z Tag Navigation on Tags page
+  setupScrollSpy(document.querySelector('.sidebar-tag-nav'), '#hot-tags, .tag-letter-group[id]');
+
+  // 3. Year Timeline Navigation on Archives page
+  setupScrollSpy(document.querySelector('.sidebar-year-list'), '.archive-year-section[id]');
 
   // Print footnotes - Convert external links to footnotes
   let originalContent = '';

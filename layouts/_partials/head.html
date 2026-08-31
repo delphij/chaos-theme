@@ -5,10 +5,10 @@
 <link rel="canonical" href="{{ .Permalink }}">
 {{ partialCached "head/css.html" . }}
 {{ with .OutputFormats.Get "rss" -}}
-    {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+    {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
 {{ end -}}
 {{ with .OutputFormats.Get "atom" -}}
-    {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+    {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
 {{ end -}}
 {{ if and (eq .Kind "page") site.Params.remarkURL -}}
 <link rel="preconnect" href="{{ site.Params.remarkURL }}" crossorigin>
@@ -30,15 +30,17 @@
   {{ end }}
 {{ end }}
 {{ if $hasMath }}
-<link href="/_3p/katex/0.17.0/katex.min.css" rel="stylesheet">
+<link href="{{ "/_3p/katex/0.17.0/katex.min.css" | relURL }}" rel="stylesheet">
 {{ end }}
 {{- /* i18n strings for JavaScript */ -}}
 <script>
   window.i18n = {
     themeLightMode: {{ T "themeLightMode" }},
     themeDarkMode: {{ T "themeDarkMode" }},
-    printReferences: {{ T "printReferences" }}
+    printReferences: {{ T "printReferences" }},
+    themeToggleToDark: {{ T "themeToggleToDark" }},
+    themeToggleToLight: {{ T "themeToggleToLight" }}
   };
 </script>
 {{- /* instant.page for link prefetching - improves perceived performance */ -}}
-<script src="/_3p/instantpage/5.2.0/instantpage.min.js" type="module"></script>
+<script src="{{ "/_3p/instantpage/5.2.0/instantpage.min.js" | relURL }}" type="module"></script>

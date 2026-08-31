@@ -1,12 +1,11 @@
 {{ define "main" }}
   {{ partial "page-header.html" . }}
-  {{ $pages := where .Site.RegularPages "Type" "in" .Site.Params.mainSections }}
+  {{ $pages := where site.RegularPages "Type" "in" site.Params.mainSections }}
   {{ $paginator := .Paginate (where $pages "Params.hidden" "ne" true) }}
   {{ range $paginator.Pages }}
-  {{- if (in (.Site.Params.excludedTypes | default (slice "page")) .Type) -}}
-  {{- else -}}
-    {{ partial "post-summary.html" . }}
-  {{- end -}}
-  {{- end -}}
+    {{- if not (in (site.Params.excludedTypes | default (slice "page")) .Type) -}}
+      {{ partial "post-summary.html" . }}
+    {{- end -}}
+  {{ end }}
   {{ partial "paginator.html" . }}
 {{ end }}

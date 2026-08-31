@@ -1,5 +1,4 @@
 home = 'トップ'
-allPosts = '全ての記事'
 posts = '全ての記事'
 categories = '分類'
 tags = 'タグ'
@@ -15,7 +14,6 @@ archives = '一覧'
 # Navigation
 skipToContent = 'メインコンテンツへスキップ'
 mainNavigation = 'メインナビゲーション'
-feedsNavigation = 'フィード'
 atomFeed = 'Atom フィード'
 themeToggle = 'ライト/ダークモード切替'
 themeLightMode = 'ライトモードが有効になりました'
@@ -39,11 +37,79 @@ readingStats = 'この記事は約 {{ .WordCount }} 文字で、読むのに約 
 # Print references
 printReferences = '参考文献'
 
-# Archives
-year = '年'
-month = '月'
-postsCount = '件'
-
 # Footer
 poweredBy = 'このサイトは <a href="https://gohugo.io">Hugo</a> で構築され、テーマは <a href="https://github.com/delphij/chaos-theme">Chaos</a> を使用しています。'
 remarkAttribution = 'コメントシステムには <a href="https://remark42.com/">Remark42</a> を使用しています。'
+
+# Theme toggle, feeds and post navigation
+feedLabel = 'RSS'
+themeToggleToDark = 'ダークモードに切り替える'
+themeToggleToLight = 'ライトモードに切り替える'
+readMoreAbout = '続きを読む：{{ .Title }}'
+joinDiscussionAbout = 'コメントする：{{ .Title }}'
+newerPost = '← {{ .Title }}'
+olderPost = '{{ .Title }} →'
+newerPostLabel = '新しい記事：{{ .Title }}'
+olderPostLabel = '古い記事：{{ .Title }}'
+
+# Sidebar navigation
+browsingGuide = '閲覧ガイド'
+coreCategories = '主なカテゴリー'
+popularTags = '人気のタグ'
+tagsOverview = 'タグ一覧'
+tagsAlphabetNav = 'タグのアルファベットナビゲーション'
+alphabetIndex = 'アルファベット索引'
+allTagsAZ = 'すべてのタグ (A-Z)'
+allCategoriesLink = 'すべてのカテゴリー ({{ .Count }}) →'
+allTagsLink = 'すべてのタグ ({{ .Count }}) →'
+categoryTitle = 'カテゴリー：{{ .Name }}'
+tagTitle = 'タグ：{{ .Name }}'
+
+# Archives
+archivesYearNav = 'アーカイブの年別ナビゲーション'
+yearQuickJump = '年へジャンプ'
+yearLabel = '{{ .Year }} 年'
+
+# Atom feed stylesheet
+visitBlogHome = '← ブログのトップへ'
+feedPageTitle = 'Web Feed (Atom フィード)'
+feedIntro = 'これは <strong>Atom</strong> 形式のウェブフィードです。RSS/Atom に対応したブラウザーや拡張機能をお使いの場合は、このページで記事のプレビューを確認できます。'
+feedSubscribeHelp = '<strong>{{ .Title }}</strong> の最新情報を購読するには、下記のアドレスをコピーして RSS リーダー（{{ .Readers }}）に追加してください：'
+feedLatestPosts = '最新の記事'
+feedReadMore = 'サイトで全文を読んでコメントする →'
+feedUrlLabel = 'Feed URL'
+copyFeedUrl = 'フィード URL をコピー'
+feedUrlCopied = 'フィード URL をクリップボードにコピーしました。'
+feedUrlCopyFailed = '自動でコピーできませんでした。上のアドレスを選択して手動でコピーしてください。'
+listSeparator = '、'
+
+# Sitemap stylesheet
+sitemapPageTitle = 'XML Sitemap (サイトマップ)'
+sitemapIntro = 'これは検索エンジンとクローラー向けに生成された標準の XML サイトマップです。現在 <strong>{{ .Count }}</strong> 件の公開ページを収録しています。'
+sitemapFilterToolbar = '種類フィルターのツールバー'
+sitemapFilterLabel = '種類フィルター：'
+sitemapToggleType = '{{ .Type }}の表示/非表示を切り替え'
+sitemapOnlyType = '{{ .Type }}のみ表示（もう一度クリックで全件に戻る）'
+sitemapVisibleCount = '表示中：{{ .Visible }} / {{ .Total }} 件のページ'
+sitemapHint = 'ヒント：上のボタンで種類の表示を切り替え、表内のバッジでその種類のみ表示、見出しのクリックで並べ替えができます'
+sitemapColumnPath = 'ページのパス (Path)'
+sitemapColumnLastModified = '最終更新日時 (Last Modified)'
+sitemapAllHidden = 'すべての種類が非表示です。上のボタンで表示を有効にしてください。'
+sortByPath = 'パスで並べ替え'
+sortByPathAscending = 'パスで並べ替え（現在は昇順）'
+sortByPathDescending = 'パスで並べ替え（現在は降順）'
+sortByTime = '最終更新日時で並べ替え'
+sortByTimeAscending = '最終更新日時で並べ替え（現在は昇順）'
+sortByTimeDescending = '最終更新日時で並べ替え（現在は降順）'
+contentTypePost = '記事'
+contentTypePage = 'ページ'
+
+# Pluralised messages (must stay last: TOML tables capture every key below them)
+[termPostCount]
+  other = '{{ .Name }}（{{ .Count }} 件の記事）'
+
+[yearPostCount]
+  other = '{{ .Year }} 年（{{ .Count }} 件の記事）'
+
+[archivesSummary]
+  other = 'サイト全体の記事 {{ .Count }} 件を時系列で収録しています。'
