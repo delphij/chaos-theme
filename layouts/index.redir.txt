@@ -1,3 +1,5 @@
+/posts /archives/;
+/posts/ /archives/;
 {{- range $p := site.Pages -}}
 {{- range .Aliases -}}
 {{- printf "%s %s;\n" . $p.RelPermalink -}}

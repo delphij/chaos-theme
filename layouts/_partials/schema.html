@@ -78,11 +78,23 @@ Generates Schema.org structured data in JSON-LD format.
 {{- if not .IsHome -}}
   {{- $breadcrumbs := slice (dict "@type" "ListItem" "position" 1 "name" site.Title "item" site.BaseURL) -}}
   {{- $pos := 2 -}}
-  {{- with .Section -}}
-    {{- $secPage := site.GetPage (printf "/%s" .) -}}
-    {{- if $secPage -}}
-      {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" (partial "_funcs/get-page-title.html" $secPage) "item" $secPage.Permalink) -}}
-      {{- $pos = add $pos 1 -}}
+  {{- if eq .Section "posts" -}}
+    {{- $archivePage := site.GetPage "/archives" -}}
+    {{- $archiveTitle := T "archives" | default "Archives" -}}
+    {{- $archiveURL := "/archives/" | absLangURL -}}
+    {{- with $archivePage -}}
+      {{- $archiveTitle = partial "_funcs/get-page-title.html" . -}}
+      {{- $archiveURL = .Permalink -}}
+    {{- end -}}
+    {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" $archiveTitle "item" $archiveURL) -}}
+    {{- $pos = add $pos 1 -}}
+  {{- else -}}
+    {{- with .Section -}}
+      {{- $secPage := site.GetPage (printf "/%s" .) -}}
+      {{- if $secPage -}}
+        {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" (partial "_funcs/get-page-title.html" $secPage) "item" $secPage.Permalink) -}}
+        {{- $pos = add $pos 1 -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
   {{- if .IsPage -}}

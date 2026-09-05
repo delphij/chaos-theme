@@ -12,7 +12,7 @@ are correctly registered.
 {{- $paginator := false -}}
 {{- if .IsHome -}}
   {{- $paginator = .Paginate site.RegularPages -}}
-{{- else if eq .Kind "section" -}}
+{{- else if and (eq .Kind "section") (ne .Section "posts") -}}
   {{- $pages := where site.RegularPages "Type" "in" site.Params.mainSections -}}
   {{- $paginator = .Paginate (where $pages "Params.hidden" "ne" true) -}}
 {{- else if eq .Kind "term" -}}
