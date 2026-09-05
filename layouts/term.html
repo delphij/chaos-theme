@@ -1,7 +1,6 @@
 {{ define "main" }}
   {{ partial "page-header.html" . }}
-  {{ $paginator := .Paginate .Pages }}
-  {{ range $paginator.Pages }}
+  {{ range .Paginator.Pages }}
     {{ partial "post-summary.html" . }}
   {{ end }}
   {{ partial "paginator.html" . }}

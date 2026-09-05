@@ -1,56 +1,101 @@
-{{- with partial "_funcs/get-meta-title.html" . }}
-  <meta itemprop="name" content="{{ . }}">
-{{- end }}
-
-{{- with partial "_funcs/get-meta-description.html" . }}
-  <meta itemprop="description" content="{{ . }}">
-{{- end }}
-
-{{- $ISO8601 := "2006-01-02T15:04:05-07:00" }}
-{{- with .PublishDate }}
-  <meta itemprop="datePublished" {{ .Format $ISO8601 | printf "content=%q" | safeHTMLAttr }}>
-{{- end }}
-
-{{- with .Lastmod }}
-  <meta itemprop="dateModified" {{ .Format $ISO8601 | printf "content=%q" | safeHTMLAttr }}>
-{{- end }}
-
-{{- with .WordCount }}
-  <meta itemprop="wordCount" content="{{ . }}">
-{{- end }}
-
-{{- $images := partial "_funcs/get-page-images" . }}
-{{- range first 6 $images }}
-  <meta itemprop="image" content="{{ .Permalink }}">
-{{- end }}
-
 {{- /*
-Keywords precedence:
+Generates Schema.org structured data in JSON-LD format.
+- WebSite schema for homepage
+- BlogPosting schema for article pages
+- BreadcrumbList schema for non-home pages
 
-1. Use "keywords" term page titles.
-2. Use "keywords" from front matter if "keywords" is not a taxonomy.
-3. Use "tags" term page titles.
-4. Use term page titles from all taxonomies.
-
+@context {page} page The current page context.
+@example: {{ partial "schema.html" . }}
 */}}
-{{- $keywords := slice }}
-{{- range .GetTerms "keywords" }}
-  {{- $keywords = $keywords | append .Title }}
-{{- else }}
-  {{- with .Keywords }}
-    {{- $keywords = . }}
-  {{- else }}
-    {{- range .GetTerms "tags" }}
-      {{- $keywords = $keywords | append .Title }}
-    {{- else }}
-      {{- range $taxonomy, $_ := site.Taxonomies }}
-        {{- range $.GetTerms $taxonomy }}
-          {{- $keywords = $keywords | append .Title }}
-        {{- end }}
-      {{- end }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- with $keywords }}
-  <meta itemprop="keywords" content="{{ delimit . `,` }}">
+
+{{- $author := false -}}
+{{- with site.Params.author.name -}}
+  {{- $author = dict "@type" "Person" "name" . -}}
+  {{- with site.Params.author.url -}}
+    {{- $author = merge $author (dict "url" .) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if .IsHome -}}
+  {{- $website := dict
+    "@context" "https://schema.org"
+    "@type" "WebSite"
+    "name" site.Title
+    "url" site.BaseURL
+    "description" (partial "_funcs/get-meta-description.html" .)
+    "inLanguage" (site.Language.Locale | default "zh-CN")
+  -}}
+  {{- if $author -}}
+    {{- $website = merge $website (dict "author" $author) -}}
+  {{- end -}}
+<script type="application/ld+json">
+{{ $website | jsonify (dict "indent" "  ") | safeJS }}
+</script>
+{{- end -}}
+
+{{- if .IsPage -}}
+  {{- $ISO8601 := "2006-01-02T15:04:05-07:00" -}}
+  {{- $images := partial "_funcs/get-page-images.html" . -}}
+  {{- $keywords := slice -}}
+  {{- range .GetTerms "tags" -}}
+    {{- $keywords = $keywords | append .Page.Title -}}
+  {{- end -}}
+  {{- range .GetTerms "categories" -}}
+    {{- $keywords = $keywords | append .Page.Title -}}
+  {{- end -}}
+  {{- $article := dict
+    "@context" "https://schema.org"
+    "@type" "BlogPosting"
+    "headline" (partial "_funcs/get-meta-title.html" .)
+    "description" (partial "_funcs/get-meta-description.html" .)
+    "mainEntityOfPage" (dict "@type" "WebPage" "@id" .Permalink)
+    "url" .Permalink
+    "inLanguage" (site.Language.Locale | default "zh-CN")
+  -}}
+  {{- with .PublishDate -}}
+    {{- $article = merge $article (dict "datePublished" (.Format $ISO8601)) -}}
+  {{- end -}}
+  {{- with .Lastmod -}}
+    {{- $article = merge $article (dict "dateModified" (.Format $ISO8601)) -}}
+  {{- end -}}
+  {{- with .WordCount -}}
+    {{- $article = merge $article (dict "wordCount" .) -}}
+  {{- end -}}
+  {{- if gt (len $keywords) 0 -}}
+    {{- $article = merge $article (dict "keywords" $keywords) -}}
+  {{- end -}}
+  {{- if gt (len $images) 0 -}}
+    {{- $article = merge $article (dict "image" $images) -}}
+  {{- end -}}
+  {{- if $author -}}
+    {{- $article = merge $article (dict "author" $author "publisher" (dict "@type" "Person" "name" site.Params.author.name)) -}}
+  {{- end -}}
+<script type="application/ld+json">
+{{ $article | jsonify (dict "indent" "  ") | safeJS }}
+</script>
+{{- end -}}
+
+{{- if not .IsHome -}}
+  {{- $breadcrumbs := slice (dict "@type" "ListItem" "position" 1 "name" site.Title "item" site.BaseURL) -}}
+  {{- $pos := 2 -}}
+  {{- with .Section -}}
+    {{- $secPage := site.GetPage (printf "/%s" .) -}}
+    {{- if $secPage -}}
+      {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" (partial "_funcs/get-page-title.html" $secPage) "item" $secPage.Permalink) -}}
+      {{- $pos = add $pos 1 -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if .IsPage -}}
+    {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" .Title "item" .Permalink) -}}
+  {{- end -}}
+  {{- if gt (len $breadcrumbs) 1 -}}
+    {{- $breadcrumbList := dict
+      "@context" "https://schema.org"
+      "@type" "BreadcrumbList"
+      "itemListElement" $breadcrumbs
+    -}}
+<script type="application/ld+json">
+{{ $breadcrumbList | jsonify (dict "indent" "  ") | safeJS }}
+</script>
+  {{- end -}}
 {{- end -}}

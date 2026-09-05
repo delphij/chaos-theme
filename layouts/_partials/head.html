@@ -1,8 +1,46 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
-<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ printf "%s | %s" (partial "_funcs/get-page-title.html" .) site.Title }}{{ end }}</title>
-<meta name="description" content="{{ partial "_funcs/get-meta-description.html" . }}">
-<link rel="canonical" href="{{ .Permalink }}">
+{{- $isPaginated := or .IsHome (in (slice "section" "term") .Kind) -}}
+{{- $pagNumber := 1 -}}
+{{- if $isPaginated -}}
+  {{- with .Paginator -}}
+    {{- $pagNumber = .PageNumber -}}
+  {{- end -}}
+{{- end -}}
+{{- $pageSuffix := "" -}}
+{{- if gt $pagNumber 1 -}}
+  {{- $pageSuffix = printf " (%s)" (T "pageNumber" (dict "Number" $pagNumber)) -}}
+{{- end -}}
+{{- $pageTitle := "" -}}
+{{- if .IsHome -}}
+  {{- $pageTitle = site.Title -}}
+{{- else -}}
+  {{- $pageTitle = printf "%s | %s" (partial "_funcs/get-page-title.html" .) site.Title -}}
+{{- end -}}
+<title>{{ printf "%s%s" $pageTitle $pageSuffix }}</title>
+<meta name="description" content="{{ printf "%s%s" (partial "_funcs/get-meta-description.html" .) $pageSuffix }}">
+{{- $robots := "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" -}}
+{{- if or .Params.noindex (eq .Kind "404") -}}
+  {{- $robots = "noindex, nofollow" -}}
+{{- else if .Params.robots -}}
+  {{- $robots = .Params.robots -}}
+{{- end -}}
+<meta name="robots" content="{{ $robots }}">
+{{- $canonicalURL := .Permalink -}}
+{{- if and $isPaginated (gt $pagNumber 1) -}}
+  {{- $canonicalURL = .Paginator.URL | absURL -}}
+{{- end -}}
+<link rel="canonical" href="{{ $canonicalURL }}">
+{{- if $isPaginated -}}
+  {{- with .Paginator -}}
+    {{- if .HasPrev -}}
+      <link rel="prev" href="{{ .Prev.URL | absURL }}">
+    {{- end -}}
+    {{- if .HasNext -}}
+      <link rel="next" href="{{ .Next.URL | absURL }}">
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
 {{ partialCached "head/css.html" . }}
 {{ with .OutputFormats.Get "rss" -}}
     {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
@@ -19,12 +57,13 @@
 {{ $noop := .WordCount }}
 {{ $hasMath := .Page.Store.Get "hasMath" }}
 {{ if not $hasMath }}
-  {{ if or (eq .Kind "home") (eq .Kind "section") (eq .Kind "taxonomy") (eq .Kind "term") }}
-    {{ $checkPages := .Paginator.Pages }}
-    {{ range $checkPages }}
-      {{ $_ := .Summary }}
-      {{ if .Store.Get "hasMath" }}
-        {{ $hasMath = true }}
+  {{ if or (eq .Kind "home") (eq .Kind "section") (eq .Kind "term") }}
+    {{ with .Paginator }}
+      {{ range .Pages }}
+        {{ $_ := .Summary }}
+        {{ if .Store.Get "hasMath" }}
+          {{ $hasMath = true }}
+        {{ end }}
       {{ end }}
     {{ end }}
   {{ end }}

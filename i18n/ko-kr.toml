@@ -104,6 +104,14 @@ sortByTimeDescending = '수정 시각순 정렬 (현재 내림차순)'
 contentTypePost = '글'
 contentTypePage = '페이지'
 
+# SEO, pagination and 404
+lastModified = '최종 수정'
+lastModifiedTitle = '{{ .Date }}에 수정됨'
+pageNumber = '{{ .Number }} 페이지'
+pageNotFound = '페이지를 찾을 수 없습니다'
+pageNotFoundDesc = '요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.'
+backToHome = '홈으로 돌아가기'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }} ({{ .Count }}개의 글)'

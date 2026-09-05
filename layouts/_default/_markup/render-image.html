@@ -99,11 +99,6 @@
 
   {{ $sizesAttr := delimit $sizes ", " }}
 
-  {{/* Extract the first generated image for <img src> fallback */}}
-  {{ $first := index $srcset 0 }}
-  {{ $firstParts := split $first " " }}
-  {{ $firstURL := index $firstParts 0 }}
-
   <a href="{{ $src.RelPermalink }}">
     <picture>
       {{/* Modern format (WebP) if applicable */}}
@@ -114,9 +109,11 @@
       {{ end }}
 
       {{/* Fallback <img>: ensures compatibility for old browsers */}}
-      <img src="{{ $firstURL }}"
+      <img src="{{ $src.RelPermalink }}"
         srcset="{{ delimit $srcset ", " }}"
         sizes="{{ $sizesAttr }}"
+        width="{{ $src.Width }}"
+        height="{{ $src.Height }}"
         alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
     </picture>
   </a>

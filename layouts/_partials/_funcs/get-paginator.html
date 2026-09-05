@@ -1,0 +1,21 @@
+{{- /*
+Initializes or returns the paginator for paginated list pages.
+
+Must be called before .Paginator is accessed elsewhere, so that
+custom collections (such as site.RegularPages on the homepage)
+are correctly registered.
+
+@context {page} page The page context.
+@returns {paginator} The initialized paginator object, or false for non-paginated pages.
+*/}}
+
+{{- $paginator := false -}}
+{{- if .IsHome -}}
+  {{- $paginator = .Paginate site.RegularPages -}}
+{{- else if eq .Kind "section" -}}
+  {{- $pages := where site.RegularPages "Type" "in" site.Params.mainSections -}}
+  {{- $paginator = .Paginate (where $pages "Params.hidden" "ne" true) -}}
+{{- else if eq .Kind "term" -}}
+  {{- $paginator = .Paginate .Pages -}}
+{{- end -}}
+{{- return $paginator -}}

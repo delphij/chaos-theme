@@ -1,8 +1,7 @@
 {{ define "main" }}
   <h1 class="sr-only">{{ site.Title }}</h1>
   {{ .Content }}
-  {{ $paginator := .Paginate site.RegularPages }}
-  {{ range $paginator.Pages }}
+  {{ range .Paginator.Pages }}
     {{ partial "post-summary.html" . }}
   {{ end }}
   {{ partial "paginator.html" . }}

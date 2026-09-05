@@ -9,3 +9,8 @@ Renders a formatted datetime element.
 {{- $dateMachine := .Date | time.Format "2006-01-02T15:04:05-07:00" -}}
 {{- $dateHuman := .Date | time.Format "2006-01-02 15:04" -}}
 <time datetime="{{ $dateMachine }}">{{ $dateHuman }}</time>
+{{- if and .IsPage (not .Lastmod.IsZero) (gt (.Lastmod.Sub .Date).Hours 24) -}}
+  {{- $modMachine := .Lastmod | time.Format "2006-01-02T15:04:05-07:00" -}}
+  {{- $modHuman := .Lastmod | time.Format "2006-01-02 15:04" -}}
+  <span class="date-modified">（{{ T "lastModified" }}：<time datetime="{{ $modMachine }}">{{ $modHuman }}</time>）</span>
+{{- end -}}

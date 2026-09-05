@@ -1,7 +1,7 @@
-{{- $images := partial "_funcs/get-page-images" . }}
+{{- $images := partial "_funcs/get-page-images.html" . }}
 {{- with index $images 0 }}
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="{{ .Permalink }}">
+  <meta name="twitter:image" content="{{ . }}">
 {{- else }}
   <meta name="twitter:card" content="summary">
 {{- end }}
@@ -14,7 +14,6 @@
   <meta name="twitter:description" content="{{ . }}">
 {{- end }}
 
-{{- $twitterSite := "" }}
 {{- with site.Params.social }}
   {{- if reflect.IsMap . }}
     {{- with .twitter }}
@@ -25,4 +24,12 @@
       <meta name="twitter:site" content="{{ $content }}">
     {{- end }}
   {{- end }}
+{{- end }}
+
+{{- with or site.Params.author.twitter site.Params.social.twitter }}
+  {{- $creator := . }}
+  {{- if not (strings.HasPrefix . "@") }}
+    {{- $creator = printf "@%v" . }}
+  {{- end }}
+  <meta name="twitter:creator" content="{{ $creator }}">
 {{- end }}

@@ -104,6 +104,14 @@ sortByTimeDescending = 'Sort by last modified (currently descending)'
 contentTypePost = 'Posts'
 contentTypePage = 'Pages'
 
+# SEO, pagination and 404
+lastModified = 'Last updated'
+lastModifiedTitle = 'Updated on {{ .Date }}'
+pageNumber = 'Page {{ .Number }}'
+pageNotFound = 'Page Not Found'
+pageNotFoundDesc = 'Sorry, the page you are looking for does not exist or has been moved.'
+backToHome = 'Back to Home'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   one = '{{ .Name }} ({{ .Count }} post)'

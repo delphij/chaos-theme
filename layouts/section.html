@@ -1,7 +1,6 @@
 {{ define "main" }}
   {{ partial "page-header.html" . }}
-  {{ $pages := where site.RegularPages "Type" "in" site.Params.mainSections }}
-  {{ $paginator := .Paginate (where $pages "Params.hidden" "ne" true) }}
+  {{ $paginator := .Paginator }}
   {{ range $paginator.Pages }}
     {{- if not (in (site.Params.excludedTypes | default (slice "page")) .Type) -}}
       {{ partial "post-summary.html" . }}

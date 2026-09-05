@@ -104,6 +104,14 @@ sortByTimeDescending = '按更新時間排序（目前降冪）'
 contentTypePost = '文章'
 contentTypePage = '頁面'
 
+# SEO, pagination and 404
+lastModified = '最後修改'
+lastModifiedTitle = '更新於 {{ .Date }}'
+pageNumber = '第 {{ .Number }} 頁'
+pageNotFound = '找不到頁面'
+pageNotFoundDesc = '抱歉，您訪問的頁面不存在或已被移除。'
+backToHome = '返回首頁'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }}（{{ .Count }} 篇文章）'

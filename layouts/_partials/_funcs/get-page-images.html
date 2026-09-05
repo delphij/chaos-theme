@@ -1,0 +1,33 @@
+{{- /*
+Returns a slice of absolute URLs for page images, with site-level fallbacks.
+
+Search order:
+1. Front matter "images" param
+2. Page bundle image resources matching "feature*", "cover*", "thumbnail*", or first image
+3. Site params "defaultImage" or "images"
+
+@context {page} page The page context.
+@returns {slice} Slice of absolute URL strings.
+@example: {{ $images := partial "_funcs/get-page-images.html" . }}
+*/}}
+
+{{- $images := slice -}}
+{{- with .Params.images -}}
+  {{- range . -}}
+    {{- $images = $images | append (. | absURL) -}}
+  {{- end -}}
+{{- end -}}
+{{- if eq (len $images) 0 -}}
+  {{- with .Resources.ByType "image" -}}
+    {{- $featured := .GetMatch "{*feature*,*cover*,*thumbnail*}" -}}
+    {{- with or $featured (index . 0) -}}
+      {{- $images = $images | append .Permalink -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if eq (len $images) 0 -}}
+  {{- with or site.Params.defaultImage (index site.Params.images 0) -}}
+    {{- $images = $images | append (. | absURL) -}}
+  {{- end -}}
+{{- end -}}
+{{- return $images -}}
