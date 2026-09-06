@@ -4,7 +4,7 @@
 {{- $pages = $pages | first $limit -}}
 {{- end -}}
 {{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
-{{ "<?" | safeHTML }}xml-stylesheet type="text/xsl" href="{{ "atom.xsl" | relURL }}"{{ "?>" | safeHTML }}
+{{ "<?" | safeHTML }}xml-stylesheet type="text/xsl" href="{{ "feed.xsl" | relURL }}"{{ "?>" | safeHTML }}
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="{{ site.Language.Locale }}">
   <title>{{ site.Title }}</title>
   {{- with site.Params.subtitle }}

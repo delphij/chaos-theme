@@ -42,10 +42,10 @@
   {{- end -}}
 {{- end -}}
 {{ partialCached "head/css.html" . }}
-{{ with .OutputFormats.Get "rss" -}}
+{{ with or (.OutputFormats.Get "rss") (site.Home.OutputFormats.Get "rss") -}}
     {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
 {{ end -}}
-{{ with .OutputFormats.Get "atom" -}}
+{{ with or (.OutputFormats.Get "atom") (site.Home.OutputFormats.Get "atom") -}}
     {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
 {{ end -}}
 {{ if and (eq .Kind "page") site.Params.remarkURL -}}

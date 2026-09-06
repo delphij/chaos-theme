@@ -1,6 +1,9 @@
 /posts /archives/;
 /posts/ /archives/;
-{{- range $p := site.Pages -}}
+/atom.xsl /feed.xsl;
+/rss.xsl /feed.xsl;
+{{ range $p := site.Pages -}}
+
 {{- range .Aliases -}}
 {{- printf "%s %s;\n" . $p.RelPermalink -}}
 {{- end -}}

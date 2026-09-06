@@ -11,15 +11,15 @@
   baseName = "atom"
   name = "ATOM"
 
-[outputFormats.atomxsl]
-  mediaType = "application/xslt+xml"
-  baseName = "atom"
-  isPlainText = true
-  notAlternative = true
-
 [outputFormats.sitemapxsl]
   mediaType = "application/xslt+xml"
   baseName = "sitemap"
+  isPlainText = true
+  notAlternative = true
+
+[outputFormats.feedxsl]
+  mediaType = "application/xslt+xml"
+  baseName = "feed"
   isPlainText = true
   notAlternative = true
 
@@ -31,4 +31,10 @@
 
 # Output configuration for different page kinds
 [outputs]
-  home = ["HTML", "ATOM", "atomxsl", "sitemapxsl", "RSS", "REDIR"]
+  home = ["HTML", "ATOM", "sitemapxsl", "RSS", "feedxsl", "REDIR"]
+  section = ["HTML"]
+  taxonomy = ["HTML"]
+  term = ["HTML"]
+
+
+
