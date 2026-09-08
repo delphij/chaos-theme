@@ -5,14 +5,18 @@ Must be called before .Paginator is accessed elsewhere, so that
 custom collections (such as site.RegularPages on the homepage)
 are correctly registered.
 
+Sections whose layout renders a complete listing of its own are skipped:
+paginating them would emit one identical full-size page per pager entry.
+
 @context {page} page The page context.
 @returns {paginator} The initialized paginator object, or false for non-paginated pages.
 */}}
 
+{{- $unpaginatedSections := slice "posts" "archives" -}}
 {{- $paginator := false -}}
 {{- if .IsHome -}}
   {{- $paginator = .Paginate site.RegularPages -}}
-{{- else if and (eq .Kind "section") (ne .Section "posts") -}}
+{{- else if and (eq .Kind "section") (not (in $unpaginatedSections .Section)) -}}
   {{- $pages := where site.RegularPages "Type" "in" site.Params.mainSections -}}
   {{- $paginator = .Paginate (where $pages "Params.hidden" "ne" true) -}}
 {{- else if eq .Kind "term" -}}

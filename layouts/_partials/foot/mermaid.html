@@ -1,7 +1,9 @@
 {{- $noop := .WordCount -}}
 {{- $hasMermaid := .Page.Store.Get "hasMermaid" -}}
 {{- if not $hasMermaid -}}
-  {{- if or (eq .Kind "home") (eq .Kind "section") (eq .Kind "taxonomy") (eq .Kind "term") -}}
+  {{- /* Taxonomy list pages render terms, never post content, and touching
+         .Paginator there would paginate the term list into identical pages. */ -}}
+  {{- if or (eq .Kind "home") (eq .Kind "section") (eq .Kind "term") -}}
     {{- if .Paginator -}}
       {{- range .Paginator.Pages -}}
         {{- $_ := .Summary -}}
