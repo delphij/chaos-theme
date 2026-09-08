@@ -6,6 +6,10 @@ Search order:
 2. Page bundle image resources matching "feature*", "cover*", "thumbnail*", or first image
 3. Site params "defaultImage" or "images"
 
+Bundle images are served as a derivative capped at 1200px rather than as the
+source file, both because social cards do not need more and because it keeps
+the source unreferenced (see build.publishResources).
+
 @context {page} page The page context.
 @returns {slice} Slice of absolute URL strings.
 @example: {{ $images := partial "_funcs/get-page-images.html" . }}
@@ -21,7 +25,12 @@ Search order:
   {{- with .Resources.ByType "image" -}}
     {{- $featured := .GetMatch "{*feature*,*cover*,*thumbnail*}" -}}
     {{- with or $featured (index . 0) -}}
-      {{- $images = $images | append .Permalink -}}
+      {{- $card := . -}}
+      {{- if ne .MediaType.SubType "gif" -}}
+        {{- $width := cond (gt .Width 1200) 1200 .Width -}}
+        {{- $card = .Resize (printf "%dx webp" $width) -}}
+      {{- end -}}
+      {{- $images = $images | append $card.Permalink -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

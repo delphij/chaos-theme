@@ -4,7 +4,9 @@
   - Generates multiple sizes at optimal breakpoints
   - Provides both 1x and 2x (HiDPI) versions
   - Uses <picture> with WebP first (if not GIF), fallback to original format
-  - Serves original image for large viewports
+  - Links and falls back to a full-width derivative, never to the untouched
+    source file, so pages can set build.publishResources = false and keep
+    the source out of the published site
   - Properly matched viewport-to-image-size breakpoints
   - Prevents upscaling by capping sizes to actual image width
 */}}
@@ -53,30 +55,59 @@
     {{ end }}
   {{ end }}
 
-  {{/* Build srcset with width descriptors - browser handles DPR automatically */}}
+  {{/*
+    Build srcset with width descriptors - browser handles DPR automatically.
+    Track the widest derivative as we go; it becomes the link target and the
+    <img> fallback below.
+  */}}
   {{ $srcset := slice }}
-  {{ $largestProcessed := 0 }}
+  {{ $largest := "" }}
+  {{ $largestWidth := 0 }}
 
   {{ range $w := $baseWidths }}
     {{/* Add 1x version with width descriptor */}}
     {{ with $img1 := $data.Get (printf "%d-1x" $w) }}
       {{ $srcset = $srcset | append (printf "%s %dw" $img1.RelPermalink $w) }}
-      {{ $largestProcessed = $w }}
+      {{ if gt $w $largestWidth }}
+        {{ $largest = $img1 }}
+        {{ $largestWidth = $w }}
+      {{ end }}
     {{ end }}
     {{/* Add 2x version with its actual width (2xbase) */}}
     {{ with $img2 := $data.Get (printf "%d-2x" $w) }}
       {{ $srcset = $srcset | append (printf "%s %dw" $img2.RelPermalink (mul $w 2)) }}
-      {{ $largestProcessed = mul $w 2 }}
+      {{ if gt (mul $w 2) $largestWidth }}
+        {{ $largest = $img2 }}
+        {{ $largestWidth = mul $w 2 }}
+      {{ end }}
     {{ end }}
   {{ end }}
 
   {{/* If original is larger than our largest processed size, include it */}}
-  {{ if gt $src.Width $largestProcessed }}
+  {{ if gt $src.Width $largestWidth }}
     {{ $original := $src }}
     {{ if ne $format "" }}
       {{ $original = $src.Resize (printf "%dx %s" $src.Width $format) }}
     {{ end }}
     {{ $srcset = $srcset | append (printf "%s %dw" $original.RelPermalink $src.Width) }}
+    {{ $largest = $original }}
+    {{ $largestWidth = $src.Width }}
+  {{ end }}
+
+  {{/*
+    Link target and <img> fallback. Always a full-resolution derivative, so the
+    source file itself is never referenced. Animated GIFs are the exception:
+    resizing would flatten the animation, so $largest is the source there.
+  */}}
+  {{ $display := or $largest $src }}
+
+  {{/*
+    Old browsers without WebP support read the <img>, so when the source is not
+    already WebP give them a same-format derivative instead of $display.
+  */}}
+  {{ $fallback := $display }}
+  {{ if and (ne $format "") (ne $src.MediaType.SubType $format) }}
+    {{ $fallback = $src.Resize (printf "%dx" $src.Width) }}
   {{ end }}
 
   {{/* Build sizes attribute - cap each breakpoint to actual image width to prevent upscaling */}}
@@ -99,7 +130,7 @@
 
   {{ $sizesAttr := delimit $sizes ", " }}
 
-  <a href="{{ $src.RelPermalink }}">
+  <a href="{{ $display.RelPermalink }}">
     <picture>
       {{/* Modern format (WebP) if applicable */}}
       {{ if ne $format "" }}
@@ -109,7 +140,7 @@
       {{ end }}
 
       {{/* Fallback <img>: ensures compatibility for old browsers */}}
-      <img src="{{ $src.RelPermalink }}"
+      <img src="{{ $fallback.RelPermalink }}"
         srcset="{{ delimit $srcset ", " }}"
         sizes="{{ $sizesAttr }}"
         width="{{ $src.Width }}"
