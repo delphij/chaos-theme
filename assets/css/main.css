@@ -240,7 +240,6 @@ input:focus-visible,
 .brand,
 .post-entry .post-title a,
 .toc-content a,
-.toc-inline-content a,
 nav.main-links a,
 .skip-link,
 .sidebar-cat-item,
@@ -261,7 +260,6 @@ nav.main-links a,
 .brand:hover,
 .post-entry .post-title a:hover,
 .toc-content a:hover,
-.toc-inline-content a:hover,
 nav.main-links a:hover,
 .skip-link:hover,
 .sidebar-cat-item:hover,
@@ -287,8 +285,7 @@ nav.main-links a:hover,
 .sidebar-year-item,
 .taxonomy-item,
 .tag-flat-item,
-.toc-content a,
-.toc-inline-content a {
+.toc-content a {
   transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
@@ -299,8 +296,7 @@ nav.main-links a:hover,
 .sidebar-year-item:hover,
 .taxonomy-item:hover,
 .tag-flat-item:hover,
-.toc-content a:hover,
-.toc-inline-content a:hover {
+.toc-content a:hover {
   color: var(--primary);
   background: var(--paper);
 }
@@ -1093,102 +1089,7 @@ article.post {
   }
 }
 
-/* ==========================================================================
-   COMPONENTS - INLINE TABLE OF CONTENTS (<details>)
-   Collapsible table of contents embedded in articles for smaller screens.
-   Hidden on desktop (>= 1360px) where the sticky sidebar TOC is visible.
-   ========================================================================== */
 
-.toc-inline {
-  display: none;
-  margin: 18px 0 24px;
-  background: var(--surface);
-  border: var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  transition: border-color var(--transition-fast);
-}
-
-.toc-inline[open] {
-  border-color: var(--primary);
-}
-
-.toc-inline-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  min-height: 44px;
-  box-sizing: border-box;
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--heading);
-  background: var(--paper);
-  cursor: pointer;
-  user-select: none;
-  list-style: none;
-}
-
-.toc-inline-summary::-webkit-details-marker {
-  display: none;
-}
-
-.toc-inline-header {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toc-inline-icon {
-  color: var(--primary);
-  flex-shrink: 0;
-}
-
-.toc-inline-chevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  transition: transform var(--transition-fast);
-}
-
-.toc-inline[open] .toc-inline-chevron {
-  transform: rotate(180deg);
-}
-
-.toc-inline-content {
-  padding: 14px 18px;
-  border-top: var(--border);
-  font-size: var(--small-size);
-  line-height: 1.6;
-}
-
-.toc-inline-content nav {
-  font-size: 14px;
-}
-
-.toc-inline-content ul {
-  list-style: none;
-  margin: 0;
-  padding-left: 0;
-}
-
-.toc-inline-content ul ul {
-  padding-left: 16px;
-  margin-top: 4px;
-}
-
-.toc-inline-content li {
-  margin: 5px 0;
-}
-
-.toc-inline-content a {
-  color: var(--text);
-  display: block;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-}
 
 /* ==========================================================================
    LAYOUT - FOOTER
@@ -1693,11 +1594,6 @@ strong {
     max-width: 100%;
   }
 
-  /* Show inline collapsible TOC at article top on smaller screens */
-  .toc-inline {
-    display: block;
-  }
-
   /* TOC: Switch to mobile overlay behavior on tablet */
   .toc-toggle {
     display: inline-flex;
@@ -1871,7 +1767,6 @@ strong {
   .menu-toggle,
   .toc-toggle,
   .toc-wrapper,
-  .toc-inline,
   .pager,
   #remark42,
   button {

@@ -15,12 +15,8 @@ Supports optional tag limit for summary cards.
 {{- $page := . -}}
 {{- $limit := 0 -}}
 {{- if reflect.IsMap . -}}
-  {{- with .page -}}
-    {{- $page = . -}}
-  {{- end -}}
-  {{- with .limit -}}
-    {{- $limit = . -}}
-  {{- end -}}
+  {{- $page = .page -}}
+  {{- $limit = .limit | default 0 -}}
 {{- end -}}
 
 {{- if and $page (ne $page.Type "page") -}}
