@@ -4,23 +4,40 @@ Renders taxonomy links (categories and tags) for a post.
 Displays clickable category and tag links with appropriate separators.
 Categories appear first, followed by tags prefixed with '#'.
 Duplicate tags that match category names are automatically filtered out.
+Supports optional tag limit for summary cards.
 
-@context {page} page The page context containing taxonomy parameters.
+@context {page|map} page The page context or dict with "page" and optional "limit".
 
 @example: {{ partial "taxonomy-links.html" . }}
+@example: {{ partial "taxonomy-links.html" (dict "page" . "limit" 3) }}
 */}}
 
-{{- if ne .Type "page" -}}
-  {{- $categories := .Params.categories | default slice -}}
-  {{- with .Params.categories -}}
+{{- $page := . -}}
+{{- $limit := 0 -}}
+{{- if reflect.IsMap . -}}
+  {{- with .page -}}
+    {{- $page = . -}}
+  {{- end -}}
+  {{- with .limit -}}
+    {{- $limit = . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if and $page (ne $page.Type "page") -}}
+  {{- $categories := $page.Params.categories | default slice -}}
+  {{- with $page.Params.categories -}}
     {{- range . }}
  <a class="taxo-link cat-link" href="{{ "/categories/" | relLangURL }}{{ . | urlize }}" title="{{ T `categoryTitle` (dict `Name` .) }}">{{ . }}</a>
     {{- end -}}
   {{- end -}}
-  {{- with .Params.tags -}}
+  {{- with $page.Params.tags -}}
+    {{- $count := 0 -}}
     {{- range . }}
       {{- if not (in $categories .) }}
+        {{- if or (le $limit 0) (lt $count $limit) }}
  <a class="taxo-link tag-link" href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" title="{{ T `tagTitle` (dict `Name` .) }}">#{{ . }}</a>
+          {{- $count = add $count 1 -}}
+        {{- end }}
       {{- end -}}
     {{- end -}}
   {{- end -}}

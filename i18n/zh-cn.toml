@@ -113,6 +113,8 @@ pageNumber = '第 {{ .Number }} 页'
 pageNotFound = '页面未找到'
 pageNotFoundDesc = '抱歉，您访问的页面不存在或已被移除。'
 backToHome = '返回首页'
+copyCode = '复制'
+copiedCode = '已复制'
 
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]

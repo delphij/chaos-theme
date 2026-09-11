@@ -113,6 +113,8 @@ pageNumber = '{{ .Number }} ページ'
 pageNotFound = 'ページが見つかりません'
 pageNotFoundDesc = 'お探しのページは存在しないか、移動された可能性があります。'
 backToHome = 'トップページに戻る'
+copyCode = 'コピー'
+copiedCode = 'コピーしました'
 
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
