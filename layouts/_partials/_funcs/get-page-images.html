@@ -5,6 +5,7 @@ Search order:
 1. Front matter "images" param
 2. Page bundle image resources matching "feature*", "cover*", "thumbnail*", or first image
 3. Site params "defaultImage" or "images"
+4. Theme default fallback image ("/images/default-card.png")
 
 Bundle images are served as a derivative capped at 1200px rather than as the
 source file, both because social cards do not need more and because it keeps
@@ -38,5 +39,8 @@ the source unreferenced (see build.publishResources).
   {{- with or site.Params.defaultImage (index site.Params.images 0) -}}
     {{- $images = $images | append (. | absURL) -}}
   {{- end -}}
+{{- end -}}
+{{- if eq (len $images) 0 -}}
+  {{- $images = $images | append ("/images/default-card.png" | absURL) -}}
 {{- end -}}
 {{- return $images -}}
