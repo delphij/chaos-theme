@@ -1126,12 +1126,14 @@ article.post {
 
   /* Chinese typography enhancements for professional text layout
      - text-align: justify - Creates aligned character grids (standard in Chinese)
+     - text-wrap: pretty - Avoids orphan characters and balances line breaks
      - text-autospace: Automatic spacing between CJK and Latin characters
      - text-spacing-trim: Optimizes CJK punctuation spacing (Chrome 133+, Safari 18.2+)
      - text-spacing: Standard shorthand for CJK spacing and trimming
      - font-feature-settings: "chws" 1 - Enables OpenType Contextual Half-width Spacing for adjacent CJK punctuation
      - line-break: strict - Enforces strict CJK line-breaking rules */
   text-align: justify;
+  text-wrap: pretty;
   text-autospace: normal;
   text-spacing-trim: normal;
   text-spacing: auto-spaces normal;
@@ -1520,6 +1522,11 @@ strong {
   text-emphasis-position: under;     /* Position below for horizontal text */
 }
 
+/* TODO: Improve CJK emphasis (em) styling.
+   In Chinese typography, browser default faux-italic causes stroke distortion.
+   Consider proper font fallback (e.g. KaiTi for CJK while preserving italic for Latin)
+   or alternative emphasis styles. */
+
 /* Inline math wrapper - Prevent line breaks before following punctuation
    Works in Safari with CJK line-breaking rules; known limitation in Chrome
    The wrapper treats the formula as an atomic inline unit for line-breaking */
@@ -1746,6 +1753,12 @@ strong {
    ========================================================================== */
 
 @media print {
+  /* Physical page setup: standard document margins */
+  @page {
+    size: auto;
+    margin: 20mm 15mm;
+  }
+
   /* Force light mode colors and Chinese print typography standards */
   :root {
     color-scheme: light;
@@ -1825,6 +1838,21 @@ strong {
   img, blockquote {
     page-break-inside: avoid;
     break-inside: avoid;
+  }
+
+  /* Tables - Prevent row split across pages and repeat header on each printed page */
+  table {
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
   }
 
   /* Code blocks - allow breaking for large blocks, but prefer keeping together */
