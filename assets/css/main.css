@@ -10,19 +10,19 @@
 
   /* Color palette - Light mode
      Primary brand colors with Japanese traditional color names */
-  --bg: #FAFAFA;                    /* Page background */
-  --surface: #FFFFFF;                /* Card/panel surfaces */
-  --text: #222222;                   /* Body text (15.3:1 contrast on #FAFAFA) */
-  --heading: #111111;                /* Headings and titles (18.2:1 contrast on #FAFAFA) */
-  --muted: #545454;                  /* Secondary text, captions (5.8:1 contrast on #FAFAFA) */
-  --primary: #A23E48;                /* 红緋 Hi-iro (primary brand color) */
-  --primary-fg: #FFFFFF;             /* High contrast text on primary in light mode (6.2:1) */
-  --accent: #2E5A88;                 /* 瑠璃色 Ruri-iro (accent color) */
-  --paper: #F0E6D2;                  /* 和纸感 (paper texture background) */
+  --bg: #FAFAFA;                    /* 白練 Shiro-neri (page background) */
+  --surface: #FFFFFF;               /* 純白 Junpaku (card/panel surfaces) */
+  --text: #222222;                  /* 墨 Sumi (body text, 15.3:1 contrast on #FAFAFA) */
+  --heading: #111111;               /* 漆黑 Shikkoku (headings and titles, 18.2:1 contrast) */
+  --muted: #545454;                 /* 墨灰 Sumi-hai (secondary text, captions, 5.8:1 contrast) */
+  --primary: #A23E48;               /* 红緋 Hi-iro (primary brand color) */
+  --primary-fg: #FFFFFF;            /* High contrast text on primary in light mode (6.2:1) */
+  --accent: #2E5A88;                /* 瑠璃色 Ruri-iro (accent color) */
+  --paper: #F0E6D2;                 /* 生成色 Kinari-iro (paper texture background) */
 
   /* Links - High contrast accessible blue palette (7.2:1 on #FAFAFA, WCAG AAA) */
-  --link: #0050A5;                   /* Default link color */
-  --link-hover: #003875;             /* Link hover state */
+  --link: #0050A5;                  /* Default link color */
+  --link-hover: #003875;            /* Link hover state */
 
   /* UI elements - Borders and backgrounds */
   --table-stripe: #F2F2F2;           /* Alternating table row background */
@@ -99,7 +99,7 @@ html.dark {
   --border: 1px solid rgba(255,255,255,0.1); /* Subtle dark border */
   --pill-border: rgba(255, 255, 255, 0.08);
   --pill-border-active: rgba(255, 111, 97, 0.3);
-  --focus-outline: 2px solid #66B3FF;
+  --focus-outline: 2px solid var(--link);
 
   /* Alert colors adapted for dark mode with higher contrast */
   --alert-note-bg: #1E2A40;
@@ -120,6 +120,11 @@ html.dark {
    Sets up font stack, smoothing, and Chinese typography features.
    ========================================================================== */
 
+/* Enable cross-document view transitions for smooth page navigation */
+@view-transition {
+  navigation: auto;
+}
+
 html {
   height: 100%;                      /* Full viewport height */
   scroll-behavior: smooth;           /* Smooth scrolling for anchor links */
@@ -127,6 +132,10 @@ html {
 
 /* Respect user's motion preferences */
 @media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
   html {
     scroll-behavior: auto;           /* Instant scrolling for reduced motion */
   }

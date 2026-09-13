@@ -31,6 +31,10 @@
   {{- $canonicalURL = .Paginator.URL | absURL -}}
 {{- end -}}
 <link rel="canonical" href="{{ $canonicalURL }}">
+{{- $licenseURL := site.Params.licenseURL | default "https://creativecommons.org/licenses/by-nc/4.0/" -}}
+{{- with $licenseURL -}}
+<link rel="license" href="{{ . }}">
+{{- end -}}
 {{- if $isPaginated -}}
   {{- with .Paginator -}}
     {{- if .HasPrev -}}
@@ -76,12 +80,40 @@
   window.i18n = {
     themeLightMode: {{ T "themeLightMode" }},
     themeDarkMode: {{ T "themeDarkMode" }},
+    themeAutoMode: {{ T "themeAutoMode" }},
     printReferences: {{ T "printReferences" }},
     themeToggleToDark: {{ T "themeToggleToDark" }},
     themeToggleToLight: {{ T "themeToggleToLight" }},
+    themeToggleToAuto: {{ T "themeToggleToAuto" }},
     copyCode: {{ T "copyCode" }},
     copiedCode: {{ T "copiedCode" }}
   };
 </script>
-{{- /* instant.page for link prefetching - improves perceived performance */ -}}
-<script src="{{ "/_3p/instantpage/5.2.0/instantpage.min.js" | relURL }}" type="module"></script>
+{{- /* Speculation Rules API for native prerendering (modern browsers) */ -}}
+<script type="speculationrules">
+{
+  "prerender": [
+    {
+      "where": {
+        "and": [
+          { "href_matches": "/*" },
+          { "not": { "href_matches": "/archives*" } },
+          { "not": { "href_matches": "/feed.xsl" } },
+          { "not": { "href_matches": "/*.xml" } },
+          { "not": { "selector_matches": "[target=_blank]" } }
+        ]
+      },
+      "eagerness": "moderate"
+    }
+  ]
+}
+</script>
+{{- /* Fallback to instant.page for older browsers lacking speculation rules support */ -}}
+<script type="module">
+  if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('speculationrules')) {
+    const script = document.createElement('script');
+    script.src = {{ "/_3p/instantpage/5.2.0/instantpage.min.js" | relURL }};
+    script.type = 'module';
+    document.head.appendChild(script);
+  }
+</script>

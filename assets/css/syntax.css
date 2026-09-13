@@ -5,7 +5,7 @@
 /* Background */ .bg { background-color:#f7f7f7; }
 /* PreWrapper */ .chroma { background-color:#f7f7f7;-webkit-text-size-adjust:none; }
 /* Error */ .chroma .err { color:#f6f8fa;background-color:#82071e }
-/* LineHighlight */ .chroma .hl { background-color:#e5e5e5 }
+/* LineHighlight */ .chroma .hl { background-color:#dedede }
 /* LineNumbersTable */ .chroma .lnt { color:#7f7f7f }
 /* LineNumbers */ .chroma .ln { color:#7f7f7f }
 

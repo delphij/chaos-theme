@@ -5,15 +5,17 @@ A minimalist Hugo theme designed for clarity, performance, and excellent Chinese
 ## Features
 
 - **Performance-focused**: Lightweight with minimal dependencies, no JavaScript frameworks
-- **Dark/Light Mode**: Automatic system preference detection with manual toggle
+- **Dark/Light/Auto Mode**: Three-state toggle (🌓 Auto / ☀️ Light / 🌙 Dark) with live real-time OS preference synchronization
+- **Japanese Traditional Color Palette**: Crafted with classical 和色 (*Wairo*) aesthetics — 白練 (*Shiro-neri*), 墨 (*Sumi*), 红緋 (*Hi-iro*), 瑠璃色 (*Ruri-iro*), and 生成色 (*Kinari-iro*) — balancing paper-like tranquility with WCAG AAA accessibility
 - **Responsive Design**: Mobile-first layout with hamburger menu and glass-morphism effects
 - **Table of Contents**: Automatic TOC for article pages with sticky sidebar and active section highlighting
-- **Instant Page Transitions**: Near-instant navigation with link prefetching via [instant.page](https://instant.page/)
+- **Instant Page Transitions & Prerendering**: Native 0ms navigation via W3C Speculation Rules API with fallback to [instant.page](https://instant.page/)
+- **View Transitions**: Native cross-document transitions between pages via CSS `@view-transition`
 - **Print-Ready Articles**: Automatic conversion of external links to footnotes for clean, readable printouts
 - **Chinese Typography**: Modern CSS features for CJK text (text-autospace, hanging-punctuation, auto-phrase)
 - **Mathematics Support**: Built-in KaTeX integration for scientific content
-- **SEO Optimized**: Complete OpenGraph, Twitter Cards, and Schema.org support
-- **Accessible**: WCAG 2.1 AA compliant with skip-to-content links, ARIA labels, and screen reader announcements
+- **SEO & Licensing**: Complete OpenGraph, Twitter Cards, Schema.org and machine-readable CC licensing support
+- **Accessible**: WCAG 2.1 AA compliant with skip-to-content links, ARIA labels, screen reader announcements, and reduced-motion support
 - **Multilingual**: i18n support for English, Simplified Chinese, Traditional Chinese, Japanese, and Korean
 
 ## Requirements
@@ -236,6 +238,28 @@ Benefits:
 - **Reliability**: Content survives if tweets are deleted
 - **Version control**: Cached content can be committed to git
 
+## Design System & Aesthetics
+
+Chaos draws inspiration from Japanese editorial minimalism and traditional papercraft (*Washi* / 和紙), blending Eastern understatement with the crisp typography demanded by in-depth systems engineering essays.
+
+### Color Palette (和色 *Wairo*)
+
+The light mode palette is mapped to classical Japanese colors, pairing organic tones with high-contrast text to exceed WCAG 2.1 AAA accessibility standards:
+
+| CSS Variable | Value | Japanese Name | Role & Intent |
+| :--- | :--- | :--- | :--- |
+| `--bg` | `#FAFAFA` | 白練 (*Shiro-neri*) | Soft, unbleached off-white base that eliminates harsh screen glare |
+| `--surface` | `#FFFFFF` | 純白 (*Junpaku*) | Crisp panel surfaces providing subtle elevation |
+| `--text` | `#222222` | 墨 (*Sumi*) | Deep soot-black ink for long-form reading (15.3:1 contrast) |
+| `--heading` | `#111111` | 漆黑 (*Shikkoku*) | Pitch-black lacquer tone for section headings (18.2:1 contrast) |
+| `--muted` | `#545454` | 墨灰 (*Sumi-hai*) | Muted graphite for metadata, timestamps, and captions (5.8:1 contrast) |
+| `--primary` | `#A23E48` | 红緋 (*Hi-iro*) | Deep scarlet accent inspired by cinnabar seal paste and lacquerware |
+| `--accent` | `#2E5A88` | 瑠璃色 (*Ruri-iro*) | Lapis lazuli blue for blockquote borders and secondary markers |
+| `--paper` | `#F0E6D2` | 生成色 (*Kinari-iro*) | Unbleached washi tone for table headers, active sidebar jumps, and collapsible TOC |
+| `--link` | `#0050A5` | 藍濃 (*Ai-nō*) | Distinct high-contrast blue meeting WCAG AAA (7.2:1 contrast) |
+
+In Dark Mode, the palette transitions into a restful midnight theme anchored on `#1C1C1C` with warm coral orange (`#FF6F61` 珊瑚橙) highlights and soft charcoal paper surfaces (`#2A2A2A`).
+
 ## Customization
 
 ### Syntax Highlighting
@@ -364,7 +388,8 @@ other = "Join the discussion"
 The theme is optimized for performance with modern best practices:
 
 ### Page Load & Navigation
-- **Instant Page Transitions**: Integrates [instant.page](https://instant.page/) 5.2.0 for near-instant navigation by prefetching links on hover
+- **Instant Prerendering**: Integrates W3C Speculation Rules API for native 0ms background prerendering, with seamless fallback to [instant.page](https://instant.page/) 5.2.0 on older browsers
+- **View Transitions**: Native cross-document view transitions (`@view-transition { navigation: auto; }`) for smooth app-like page transitions without JavaScript router overhead
 - **Minimal JavaScript**: ~3KB total for all features (theme switching + mobile menu + TOC)
 - **Partial Caching**: Header and footer cached per language for faster rendering
 - **Preconnect Links**: Early connection to external services (comment server)

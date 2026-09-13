@@ -15,6 +15,7 @@ Generates Schema.org structured data in JSON-LD format.
     {{- $author = merge $author (dict "url" .) -}}
   {{- end -}}
 {{- end -}}
+{{- $licenseURL := site.Params.licenseURL | default "https://creativecommons.org/licenses/by-nc/4.0/" -}}
 
 {{- if .IsHome -}}
   {{- $website := dict
@@ -27,6 +28,9 @@ Generates Schema.org structured data in JSON-LD format.
   -}}
   {{- if $author -}}
     {{- $website = merge $website (dict "author" $author) -}}
+  {{- end -}}
+  {{- with $licenseURL -}}
+    {{- $website = merge $website (dict "license" .) -}}
   {{- end -}}
 <script type="application/ld+json">
 {{ $website | jsonify (dict "indent" "  ") | safeJS }}
@@ -69,6 +73,9 @@ Generates Schema.org structured data in JSON-LD format.
   {{- end -}}
   {{- if $author -}}
     {{- $article = merge $article (dict "author" $author "publisher" (dict "@type" "Person" "name" site.Params.author.name)) -}}
+  {{- end -}}
+  {{- with $licenseURL -}}
+    {{- $article = merge $article (dict "license" .) -}}
   {{- end -}}
 <script type="application/ld+json">
 {{ $article | jsonify (dict "indent" "  ") | safeJS }}
