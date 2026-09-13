@@ -29,6 +29,13 @@
   isPlainText = true
   notAlternative = true
 
+[outputFormats.SECURITY]
+  mediaType = "text/plain"
+  baseName = "security"
+  isPlainText = true
+  notAlternative = true
+  path = ".well-known"
+
 # Output configuration for different page kinds
 [outputs]
   home = ["HTML", "ATOM", "sitemapxsl", "RSS", "feedxsl", "REDIR"]

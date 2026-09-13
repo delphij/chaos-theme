@@ -1,0 +1,71 @@
+{{- $lines := slice -}}
+{{- $sec := site.Params.security -}}
+{{- if or $sec.enable $sec.contact site.Params.author.email -}}
+  {{- /* Contact (RFC 9116 Section 2.5.3: MUST be present) */ -}}
+  {{- if $sec.contact -}}
+    {{- if reflect.IsSlice $sec.contact -}}
+      {{- range $sec.contact -}}
+        {{- $lines = $lines | append (printf "Contact: %s" .) -}}
+      {{- end -}}
+    {{- else -}}
+      {{- $lines = $lines | append (printf "Contact: %s" $sec.contact) -}}
+    {{- end -}}
+  {{- else if site.Params.author.email -}}
+    {{- $lines = $lines | append (printf "Contact: mailto:%s" site.Params.author.email) -}}
+  {{- end -}}
+
+  {{- /* Expires (RFC 9116 Section 2.5.5: MUST be present, RFC 3339) */ -}}
+  {{- $expires := $sec.expires -}}
+  {{- if not $expires -}}
+    {{- $expires = now.UTC.AddDate 1 0 0 | time.Format "2006-01-02T15:04:05.000Z" -}}
+  {{- end -}}
+  {{- $lines = $lines | append (printf "Expires: %s" $expires) -}}
+
+  {{- /* Preferred-Languages (RFC 9116 Section 2.5.8) */ -}}
+  {{- if $sec.languages -}}
+    {{- if reflect.IsSlice $sec.languages -}}
+      {{- $lines = $lines | append (printf "Preferred-Languages: %s" (delimit $sec.languages ", ")) -}}
+    {{- else -}}
+      {{- $lines = $lines | append (printf "Preferred-Languages: %s" $sec.languages) -}}
+    {{- end -}}
+  {{- else if site.LanguageCode -}}
+    {{- $lines = $lines | append (printf "Preferred-Languages: %s" site.LanguageCode) -}}
+  {{- end -}}
+
+  {{- /* Canonical (RFC 9116 Section 2.5.2) */ -}}
+  {{- $canonical := $sec.canonical | default (printf "/.well-known/security.txt" | absURL) -}}
+  {{- $lines = $lines | append (printf "Canonical: %s" $canonical) -}}
+
+  {{- /* Encryption (RFC 9116 Section 2.5.4) */ -}}
+  {{- with $sec.encryption -}}
+    {{- if reflect.IsSlice . -}}
+      {{- range . -}}
+        {{- $lines = $lines | append (printf "Encryption: %s" .) -}}
+      {{- end -}}
+    {{- else -}}
+      {{- $lines = $lines | append (printf "Encryption: %s" .) -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* Policy (RFC 9116 Section 2.5.7) */ -}}
+  {{- with $sec.policy -}}
+    {{- $lines = $lines | append (printf "Policy: %s" .) -}}
+  {{- end -}}
+
+  {{- /* Acknowledgments (RFC 9116 Section 2.5.1) */ -}}
+  {{- with $sec.acknowledgments -}}
+    {{- if reflect.IsSlice . -}}
+      {{- range . -}}
+        {{- $lines = $lines | append (printf "Acknowledgments: %s" .) -}}
+      {{- end -}}
+    {{- else -}}
+      {{- $lines = $lines | append (printf "Acknowledgments: %s" .) -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* Hiring (RFC 9116 Section 2.5.6) */ -}}
+  {{- with $sec.hiring -}}
+    {{- $lines = $lines | append (printf "Hiring: %s" .) -}}
+  {{- end -}}
+{{- end -}}
+{{ delimit $lines "\n" }}

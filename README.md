@@ -273,12 +273,18 @@ The theme provides multiple output formats:
 - **RSS**: RSS 2.0 feed
 - **Sitemap**: XML sitemap with XSLT
 - **Redirects**: Redirect mapping for aliases
+- **Security.txt**: RFC 9116 security vulnerability disclosure metadata (`/.well-known/security.txt`)
 
 Configure in `config.toml`:
 
 ```toml
 [outputs]
-  home = ["HTML", "ATOM", "RSS"]
+  home = ["HTML", "ATOM", "RSS", "SECURITY"]
+
+[params.security]
+  enable = true
+  contact = "mailto:security@example.com"
+  languages = "zh, en"
 ```
 
 ## Printing
