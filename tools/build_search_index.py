@@ -75,6 +75,10 @@ def parse_frontmatter(content: str):
     fm_raw, body = fm_match.groups()
     meta = {}
 
+    def parse_bool(key: str) -> bool:
+        m = re.search(rf'^(?:{key})\s*[:=]\s*(true|false)\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
+        return m.group(1).lower() == "true" if m else False
+
     # Extract title
     m = re.search(r'^(?:title)\s*[:=]\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
     if m:
@@ -87,11 +91,20 @@ def parse_frontmatter(content: str):
         meta["date"] = d.split("T")[0]
 
     # Extract draft
-    m = re.search(r'^(?:draft)\s*[:=]\s*(true|false)\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
-    if m:
-        meta["draft"] = m.group(1).lower() == "true"
-    else:
-        meta["draft"] = False
+    meta["draft"] = parse_bool("draft")
+
+    # Extract noindex / private (Tier 3: completely exclude from search engines and on-site search)
+    m_robots = re.search(r'^(?:robots)\s*[:=]\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
+    has_noindex_robots = bool(m_robots and "noindex" in m_robots.group(1).lower())
+    meta["noindex"] = parse_bool("noindex") or parse_bool("private") or has_noindex_robots
+
+    # Extract searchHidden / search_hidden / search = false (Tier 2: exclude from on-site search only)
+    m_search = re.search(r'^(?:search)\s*[:=]\s*(true|false)\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
+    search_disabled = bool(m_search and m_search.group(1).lower() == "false")
+    meta["search_hidden"] = parse_bool("searchHidden") or parse_bool("search_hidden") or search_disabled
+
+    # Extract deprecated / outdated (Tier 1: penalize search score and mark badge)
+    meta["deprecated"] = parse_bool("deprecated") or parse_bool("outdated")
 
     # Extract description
     m = re.search(r'^(?:description)\s*[:=]\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
@@ -210,6 +223,8 @@ def main():
         meta, body = parse_frontmatter(content)
         if meta.get("draft", False):
             continue
+        if meta.get("noindex", False) or meta.get("search_hidden", False):
+            continue
 
         title = meta.get("title", "")
         if not title:
@@ -236,6 +251,7 @@ def main():
             "tags": tags,
             "categories": categories,
             "clean_body": clean_body,
+            "deprecated": meta.get("deprecated", False),
         })
 
     # Sort posts chronologically: newer posts first
@@ -246,7 +262,7 @@ def main():
 
     for post in parsed_posts:
         doc_id = len(docs)
-        docs.append({
+        doc_entry = {
             "id": doc_id,
             "title": post["title"],
             "url": post["url"],
@@ -254,7 +270,10 @@ def main():
             "summary": post["summary"],
             "tags": post["tags"],
             "categories": post["categories"],
-        })
+        }
+        if post.get("deprecated"):
+            doc_entry["deprecated"] = True
+        docs.append(doc_entry)
 
         # Tokenize fields
         doc_tokens = set()

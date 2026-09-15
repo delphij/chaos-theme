@@ -127,6 +127,7 @@ searchLoading = '正在載入索引…'
 searchError = '索引載入失敗'
 searchNav = '移動'
 searchOpen = '開啟'
+searchDeprecated = '已過時'
 
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]

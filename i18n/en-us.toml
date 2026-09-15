@@ -127,6 +127,7 @@ searchLoading = 'Loading search index…'
 searchError = 'Failed to load search index'
 searchNav = 'Navigate'
 searchOpen = 'Open'
+searchDeprecated = 'Deprecated'
 
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]

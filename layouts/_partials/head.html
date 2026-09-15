@@ -20,7 +20,7 @@
 <title>{{ printf "%s%s" $pageTitle $pageSuffix }}</title>
 <meta name="description" content="{{ printf "%s%s" (partial "_funcs/get-meta-description.html" .) $pageSuffix }}">
 {{- $robots := "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" -}}
-{{- if or .Params.noindex (eq .Kind "404") -}}
+{{- if or .Params.noindex .Params.private (eq .Kind "404") -}}
   {{- $robots = "noindex, nofollow" -}}
 {{- else if .Params.robots -}}
   {{- $robots = .Params.robots -}}

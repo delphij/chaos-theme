@@ -127,6 +127,7 @@ searchLoading = '인덱스 불러오는 중…'
 searchError = '인덱스 불러오기에 실패했습니다'
 searchNav = '이동'
 searchOpen = '열기'
+searchDeprecated = '오래됨'
 
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]

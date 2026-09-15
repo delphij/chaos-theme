@@ -111,6 +111,11 @@ description = 'SEO meta description'
 categories = ['Category1']
 tags = ['tag1', 'tag2']
 series = 'Series Name'                 # For grouping related posts
+
+# Indexing & Deprecation controls (optional)
+deprecated = false                     # Set true to demote in on-site search and display [Deprecated] badge
+searchHidden = false                   # Set true to exclude from on-site search (search engines unaffected)
+noindex = false                        # Set true to exclude from search engines, on-site search, and sitemap
 +++
 ```
 
@@ -265,6 +270,11 @@ Chaos provides a zero-dependency, privacy-preserving client-side full-text searc
    - **Zero npm / Bundlers**: 100% native HTML5 `<dialog>` and Vanilla JavaScript (~1.5 KB minified).
    - **Keyboard Friendly**: Press `/` anywhere on the page to open search, `ArrowUp`/`ArrowDown` to navigate results, `Enter` to open, and `Esc` to close.
    - **Lazy Loading**: Index data is loaded asynchronously only on the first user interaction.
+
+4. **Search & Indexing Controls (Front Matter)**:
+   - `deprecated = true`: Marks the post as outdated. It remains indexed, but its relevance score is demoted (0.25x multiplier) so fresh content ranks first, and a localized `[Deprecated]` badge is displayed beside the title in search results. (Alias: `outdated = true`).
+   - `searchHidden = true`: Excludes the post from the local search index (`search-index.json`), while leaving external search engine indexing and `sitemap.xml` intact. (Aliases: `search_hidden = true`, `search = false`).
+   - `noindex = true`: Fully hides the post from on-site search and search engines; omits the post from `sitemap.xml` and outputs `<meta name="robots" content="noindex, nofollow">`. (Alias: `private = true`).
 
 ## Design System & Aesthetics
 

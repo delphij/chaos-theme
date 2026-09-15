@@ -127,6 +127,7 @@ searchLoading = 'インデックスを読み込み中…'
 searchError = 'インデックスの読み込みに失敗しました'
 searchNav = '移動'
 searchOpen = '開く'
+searchDeprecated = '古い情報'
 
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]

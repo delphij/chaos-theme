@@ -6,7 +6,7 @@ Only rendered when site.Params.search.enable is true.
 {{- with resources.Get "search-index.json" -}}
   {{- $indexURL = (. | resources.Fingerprint).RelPermalink -}}
 {{- end -}}
-<dialog id="searchDialog" class="search-dialog overlay-blur" aria-modal="true" aria-label="{{ T "search" }}" data-index-url="{{ $indexURL }}" data-msg-loading="{{ T "searchLoading" }}" data-msg-empty="{{ T "searchNoResults" }}" data-msg-error="{{ T "searchError" }}">
+<dialog id="searchDialog" class="search-dialog overlay-blur" aria-modal="true" aria-label="{{ T "search" }}" data-index-url="{{ $indexURL }}" data-msg-loading="{{ T "searchLoading" }}" data-msg-empty="{{ T "searchNoResults" }}" data-msg-error="{{ T "searchError" }}" data-msg-deprecated="{{ T "searchDeprecated" | default "已过时" }}">
   <div class="search-box">
     <div class="search-header">
       <span class="search-icon" aria-hidden="true">

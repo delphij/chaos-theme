@@ -25,6 +25,7 @@
   var msgLoading = dialog.getAttribute('data-msg-loading') || 'Loading...';
   var msgEmpty = dialog.getAttribute('data-msg-empty') || 'No matching posts found';
   var msgError = dialog.getAttribute('data-msg-error') || 'Failed to load search index';
+  var msgDeprecated = dialog.getAttribute('data-msg-deprecated') || '已过时';
 
   function escapeHTML(str) {
     if (!str) return '';
@@ -281,6 +282,12 @@
         }
         scores[id] *= (0.5 + 0.5 * coverage);
       }
+
+      // 4. Deprecated / Outdated content demotion
+      // Demote score so current articles rank first, but still discoverable when searched
+      if (doc.deprecated) {
+        scores[id] *= 0.25;
+      }
     }
 
     // Rank doc IDs by score descending; if tied, newer post first (smaller doc_id)
@@ -322,10 +329,15 @@
           '</span>';
       }
 
+      var deprecatedBadge = '';
+      if (doc.deprecated) {
+        deprecatedBadge = ' <span class="search-badge-deprecated">' + escapeHTML(msgDeprecated) + '</span>';
+      }
+
       html += '<li class="search-item" role="option" data-idx="' + idx + '" id="search-opt-' + idx + '">' +
         '<a href="' + escapeHTML(doc.url) + '" class="search-item-link">' +
           '<div class="search-item-header">' +
-            '<span class="search-item-title">' + titleHighlighted + '</span>' +
+            '<span class="search-item-title">' + titleHighlighted + deprecatedBadge + '</span>' +
             '<span class="search-item-date">' + escapeHTML(doc.date) + '</span>' +
           '</div>' +
           (summaryHighlighted ? '<div class="search-item-summary">' + summaryHighlighted + '</div>' : '') +

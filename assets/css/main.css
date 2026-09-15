@@ -1950,6 +1950,20 @@ dialog.search-dialog::backdrop {
   transition: color var(--transition-fast), background var(--transition-fast);
 }
 
+.search-badge-deprecated {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 0 6px;
+  margin-left: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: var(--border);
+  color: var(--muted);
+  vertical-align: middle;
+}
+
 mark {
   background: var(--mark-bg);
   color: var(--heading);
