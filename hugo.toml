@@ -31,6 +31,13 @@ title = 'My New Hugo Site'
   # remarkLocale = "zh"
   # remarkNoFooter = "true"
 
+  # Client-side full-text search (optional, disabled by default)
+  # When enabled, adds a search button to the header and hotkey '/' modal.
+  # Generate search-index.json with: python3 themes/chaos/tools/build_search_index.py
+  # [params.search]
+  #   enable = true
+  #   indexURL = "/search-index.json"
+
 [module]
   [module.hugoVersion]
     extended = false

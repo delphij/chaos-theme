@@ -30,5 +30,8 @@
   <footer class="site-foot">
     {{ partial "footer.html" . }}
   </footer>
+  {{- if site.Params.search.enable }}
+    {{ partial "search.html" . }}
+  {{- end }}
 </body>
 </html>

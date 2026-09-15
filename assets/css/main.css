@@ -1747,6 +1747,249 @@ strong {
 }
 
 /* ==========================================================================
+   CLIENT-SIDE SEARCH MODAL
+   Styled consistently with Chaos design tokens (Japanese papercraft aesthetic)
+   ========================================================================== */
+
+dialog.search-dialog {
+  border: var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  width: min(680px, 92vw);
+  max-width: 680px;
+  padding: 0;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  position: fixed;
+  top: 10vh;
+  margin: 0 auto;
+  z-index: var(--z-modal);
+}
+
+html.dark dialog.search-dialog {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+dialog.search-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.search-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: var(--border);
+  background: var(--surface);
+}
+
+.search-header .search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--heading);
+  font-size: var(--h3-size);
+  font-family: inherit;
+  font-weight: 500;
+  min-width: 0;
+  caret-color: var(--primary);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-input::-webkit-search-decoration,
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-results-button,
+.search-input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  display: none;
+}
+
+.search-input:focus,
+.search-input:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+.search-input::placeholder {
+  color: var(--muted);
+  opacity: 0.65;
+}
+
+.search-close {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 4px;
+  font-size: 14px;
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  background: transparent;
+}
+
+.search-close:hover {
+  background: var(--paper);
+  color: var(--primary);
+}
+
+.search-results {
+  max-height: min(480px, 55vh);
+  overflow-y: auto;
+  padding: 8px 12px;
+  background: var(--surface);
+}
+
+.search-hint,
+.search-loading,
+.search-empty,
+.search-error {
+  padding: 36px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--small-size);
+}
+
+.search-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.search-item {
+  border-radius: var(--radius-md);
+  margin-bottom: 4px;
+  border-left: 3px solid transparent;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.search-item:hover,
+.search-item.is-selected {
+  background: var(--paper);
+  border-left-color: var(--primary);
+}
+
+.search-item-link {
+  display: block;
+  padding: 10px 14px;
+  color: inherit;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.search-item-link:hover {
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.search-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.search-item-title {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--heading);
+  transition: color var(--transition-fast);
+}
+
+.search-item:hover .search-item-title,
+.search-item.is-selected .search-item-title {
+  color: var(--primary);
+}
+
+.search-item-date {
+  font-size: var(--small-size);
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.search-item-summary {
+  font-size: var(--small-size);
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.search-item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.search-tag {
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 1px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: var(--border);
+  color: var(--muted);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.search-results mark {
+  background: rgba(204, 102, 0, 0.15);
+  color: var(--heading);
+  font-weight: 600;
+  padding: 0 3px;
+  border-radius: var(--radius-sm);
+}
+
+html.dark .search-results mark {
+  background: rgba(255, 184, 77, 0.25);
+  color: var(--heading);
+}
+
+.search-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  border-top: var(--border);
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--paper);
+}
+
+.search-shortcut kbd {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--heading);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  border: var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  margin: 0 2px;
+}
+
+/* ==========================================================================
    PRINT STYLES
    Optimized layout for printing articles.
    Removes navigation, interactive elements, and applies print-friendly colors.

@@ -88,6 +88,11 @@ title = 'My New Hugo Site'
   mainSections = ["posts"]             # Sections to display on homepage
   excludedTypes = ["page"]             # Content types to hide from listings
 
+  # Client-side full-text search (optional, disabled by default)
+  [params.search]
+    enable = true                      # Enable search button and '/' hotkey
+    indexURL = "/search-index.json"    # Default: "/search-index.json"
+
 [params.social]
   facebook_app_id = "..."
   facebook_admin = "..."
@@ -237,6 +242,29 @@ Benefits:
 - **Performance**: Faster page loads, works offline
 - **Reliability**: Content survives if tweets are deleted
 - **Version control**: Cached content can be committed to git
+
+### Client-Side Full-Text Search
+
+Chaos provides a zero-dependency, privacy-preserving client-side full-text search feature.
+
+1. **Enable in Site Configuration**:
+   ```toml
+   [params.search]
+     enable = true
+     indexURL = "/search-index.json"
+   ```
+
+2. **Generate Search Index During Build**:
+   Run the offline indexing tool against your Hugo content directory:
+   ```bash
+   python3 themes/chaos/tools/build_search_index.py --content content --output public/search-index.json
+   ```
+
+3. **Key Features**:
+   - **Chinese Segmentation**: Uses vendored `jieba` for accurate CJK phrase and technical vocabulary tokenization.
+   - **Zero npm / Bundlers**: 100% native HTML5 `<dialog>` and Vanilla JavaScript (~1.5 KB minified).
+   - **Keyboard Friendly**: Press `/` anywhere on the page to open search, `ArrowUp`/`ArrowDown` to navigate results, `Enter` to open, and `Esc` to close.
+   - **Lazy Loading**: Index data is loaded asynchronously only on the first user interaction.
 
 ## Design System & Aesthetics
 
@@ -491,10 +519,11 @@ themes/chaos/
 
 ### Included (Vendored)
 
-All dependencies are vendored in `static/_3p/` to ensure reliability and privacy:
+All dependencies are vendored in `static/_3p/` and `tools/vendor/` to ensure reliability and privacy:
 
 - **KaTeX 0.16.22**: Mathematical typesetting for scientific content
 - **instant.page 5.2.0**: Link prefetching for near-instant page transitions
+- **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
 
 ### No External Dependencies
 

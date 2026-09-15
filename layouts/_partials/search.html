@@ -1,0 +1,30 @@
+{{- /*
+Renders the client-side search dialog modal for Chaos theme.
+Only rendered when site.Params.search.enable is true.
+*/}}
+{{- $indexURL := site.Params.search.indexURL | default "/search-index.json" | relURL -}}
+{{- with resources.Get "search-index.json" -}}
+  {{- $indexURL = (. | resources.Fingerprint).RelPermalink -}}
+{{- end -}}
+<dialog id="searchDialog" class="search-dialog overlay-blur" aria-modal="true" aria-label="{{ T "search" }}" data-index-url="{{ $indexURL }}" data-msg-loading="{{ T "searchLoading" }}" data-msg-empty="{{ T "searchNoResults" }}" data-msg-error="{{ T "searchError" }}">
+  <div class="search-box">
+    <div class="search-header">
+      <span class="search-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </span>
+      <input type="search" id="searchInput" class="search-input" placeholder="{{ T "searchPlaceholder" }}" autocomplete="off" spellcheck="false" aria-label="{{ T "search" }}">
+      <button type="button" class="btn-icon search-close" id="searchClose" aria-label="{{ T "searchClose" }}" title="{{ T "searchClose" }}">✕</button>
+    </div>
+    <div id="searchResults" class="search-results" role="region" aria-live="polite">
+      <div class="search-hint">{{ T "searchPlaceholder" }}</div>
+    </div>
+    <div class="search-footer" aria-hidden="true">
+      <span class="search-shortcut"><kbd>↑</kbd><kbd>↓</kbd> {{ T "searchNav" }}</span>
+      <span class="search-shortcut"><kbd>↵</kbd> {{ T "searchOpen" }}</span>
+      <span class="search-shortcut"><kbd>ESC</kbd> {{ T "searchClose" }}</span>
+    </div>
+  </div>
+</dialog>

@@ -10,5 +10,13 @@
     {{- partial "menu.html" (dict "menuID" "main" "page" .) }}
     <a href="{{ "atom.xml" | absURL }}" title="{{ T "atomFeed" }}" rel="alternate" type="application/atom+xml">{{ T "feedLabel" }}</a>
   </nav>
+  {{- if site.Params.search.enable -}}
+  <button class="btn-icon search-toggle" id="searchToggle" aria-label="{{ T "search" }}" title="{{ T "search" }} (/)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+  </button>
+  {{- end -}}
   <button class="btn-icon theme-toggle" id="themeToggle" aria-label="{{ T "themeToggle" }}">🌓</button>
 </div>

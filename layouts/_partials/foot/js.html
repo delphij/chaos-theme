@@ -14,3 +14,21 @@
     {{- end }}
   {{- end }}
 {{- end }}
+{{- if site.Params.search.enable }}
+  {{- with resources.Get "js/search.js" }}
+    {{- $opts := dict
+      "minify" (not hugo.IsDevelopment)
+      "sourceMap" (cond hugo.IsDevelopment "external" "")
+      "targetPath" "js/search.js"
+    }}
+    {{- with . | js.Build $opts }}
+      {{- if hugo.IsDevelopment }}
+        <script src="{{ .RelPermalink }}" defer></script>
+      {{- else }}
+        {{- with . | fingerprint }}
+          <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous" defer></script>
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

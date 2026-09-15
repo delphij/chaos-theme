@@ -118,6 +118,16 @@ backToHome = 'トップページに戻る'
 copyCode = 'コピー'
 copiedCode = 'コピーしました'
 
+# Search
+search = '検索'
+searchPlaceholder = '記事を検索… (ESCで閉じる)'
+searchNoResults = '該当する記事が見つかりません'
+searchClose = '閉じる'
+searchLoading = 'インデックスを読み込み中…'
+searchError = 'インデックスの読み込みに失敗しました'
+searchNav = '移動'
+searchOpen = '開く'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }}（{{ .Count }} 件の記事）'

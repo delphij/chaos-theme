@@ -118,6 +118,16 @@ backToHome = 'Back to Home'
 copyCode = 'Copy'
 copiedCode = 'Copied!'
 
+# Search
+search = 'Search'
+searchPlaceholder = 'Search posts… (ESC to close)'
+searchNoResults = 'No matching posts found'
+searchClose = 'Close'
+searchLoading = 'Loading search index…'
+searchError = 'Failed to load search index'
+searchNav = 'Navigate'
+searchOpen = 'Open'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   one = '{{ .Name }} ({{ .Count }} post)'

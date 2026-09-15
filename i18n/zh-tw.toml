@@ -118,6 +118,16 @@ backToHome = '返回首頁'
 copyCode = '複製'
 copiedCode = '已複製'
 
+# Search
+search = '搜尋'
+searchPlaceholder = '搜尋文章… (按 ESC 退出)'
+searchNoResults = '未找到相關文章'
+searchClose = '關閉'
+searchLoading = '正在載入索引…'
+searchError = '索引載入失敗'
+searchNav = '移動'
+searchOpen = '開啟'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }}（{{ .Count }} 篇文章）'
