@@ -30,6 +30,8 @@
   --border: 1px solid rgba(0,0,0,0.1); /* Subtle border for light mode */
   --pill-border: rgba(0, 0, 0, 0.06);          /* Count pill border, resting */
   --pill-border-active: rgba(162, 62, 72, 0.25); /* Count pill border, hover/active */
+  --cat-bg: #FDF0ED;                           /* Category pill background */
+  --mark-bg: rgba(204, 102, 0, 0.15);          /* Text & search highlight (山吹色 Yamabuki) */
 
   /* Alert colors - Semantic color system for different message types */
   --alert-note-bg: #F0F4FF;          /* Note/Historical background */
@@ -74,6 +76,9 @@
   /* Focus styles - High contrast for keyboard navigation accessibility (WCAG 2.4.11) */
   --focus-outline: 2px solid var(--primary);
   --focus-offset: 3px;
+
+  /* Elevation and shadows */
+  --shadow-dialog: 0 16px 36px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 /* Dark mode variables
@@ -99,7 +104,10 @@ html.dark {
   --border: 1px solid rgba(255,255,255,0.1); /* Subtle dark border */
   --pill-border: rgba(255, 255, 255, 0.08);
   --pill-border-active: rgba(255, 111, 97, 0.3);
+  --cat-bg: rgba(255, 111, 97, 0.15);
+  --mark-bg: rgba(255, 184, 77, 0.25);
   --focus-outline: 2px solid var(--link);
+  --shadow-dialog: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
 
   /* Alert colors adapted for dark mode with higher contrast */
   --alert-note-bg: #1E2A40;
@@ -423,15 +431,9 @@ ul {
 .cat-link {
   font-weight: 600;
   color: var(--primary);
-  background-color: #FDF0ED;
-  border-color: rgba(162, 62, 72, 0.25);
+  background-color: var(--cat-bg);
+  border-color: var(--pill-border-active);
   margin-right: 6px;
-}
-
-html.dark .cat-link {
-  background-color: rgba(255, 111, 97, 0.15);
-  border-color: rgba(255, 111, 97, 0.3);
-  color: var(--primary);
 }
 
 .tag-link {
@@ -1759,16 +1761,12 @@ dialog.search-dialog {
   width: min(680px, 92vw);
   max-width: 680px;
   padding: 0;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-dialog);
   overflow: hidden;
   position: fixed;
   top: 10vh;
   margin: 0 auto;
   z-index: var(--z-modal);
-}
-
-html.dark dialog.search-dialog {
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 dialog.search-dialog::backdrop {
@@ -1952,17 +1950,15 @@ dialog.search-dialog::backdrop {
   transition: color var(--transition-fast), background var(--transition-fast);
 }
 
-.search-results mark {
-  background: rgba(204, 102, 0, 0.15);
+mark {
+  background: var(--mark-bg);
   color: var(--heading);
-  font-weight: 600;
   padding: 0 3px;
   border-radius: var(--radius-sm);
 }
 
-html.dark .search-results mark {
-  background: rgba(255, 184, 77, 0.25);
-  color: var(--heading);
+.search-results mark {
+  font-weight: 600;
 }
 
 .search-footer {
