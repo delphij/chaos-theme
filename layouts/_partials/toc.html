@@ -10,7 +10,7 @@ Provides sticky sidebar on desktop, collapsible on tablet, and overlay on mobile
 */}}
 
 {{- $toc := .TableOfContents }}
-{{- if and $toc (gt (len $toc) 100) }}
+{{- if and $toc (findRE `(?s)<a\s+href=` $toc) }}
 <aside class="toc-wrapper" id="tocWrapper">
   <button class="toc-toggle" id="tocToggle" aria-label="{{ T "tocToggle" }}" aria-expanded="false" title="{{ T "tableOfContents" }}">
     <svg class="toc-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
