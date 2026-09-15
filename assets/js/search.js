@@ -131,14 +131,14 @@
     if (!q) return [];
 
     var tokens = [];
-    // 1. Extract alphanumeric tokens
-    var latinWords = q.match(/[a-z0-9_\-\.]+/gi) || [];
+    // 1. Extract alphanumeric tokens including technical symbols (+, #, -, _)
+    var latinWords = q.match(/[a-z0-9_\-\.\+#]+/gi) || [];
     latinWords.forEach(function (w) {
       if (w.length >= 1) tokens.push(w.toLowerCase());
     });
 
     // 2. Extract CJK phrases using dictionary matching against indexData.index keys
-    var cjkChars = q.replace(/[a-z0-9_\-\.\s]+/gi, '');
+    var cjkChars = q.replace(/[a-z0-9_\-\.\+#\s]+/gi, '');
     if (cjkChars && indexData && indexData.index) {
       var len = cjkChars.length;
       // Multi-gram forward matching (longest match)
@@ -186,30 +186,44 @@
       return;
     }
 
+    var cleanQuery = query.trim().toLowerCase();
     var tokens = extractTokens(query);
     if (tokens.length === 0) {
-      // Fallback: match substring in titles directly
-      tokens = [query.trim().toLowerCase()];
+      tokens = [cleanQuery];
     }
 
     var scores = {};
+    var docTermHits = {}; // docId -> { token: true }
     var docs = indexData.docs;
     var index = indexData.index;
+    var totalDocs = (docs && docs.length) || 2000;
 
     tokens.forEach(function (token) {
       var matchedDocIds = index[token];
+      var df = (matchedDocIds && matchedDocIds.length) || 0;
+      // Smoothed BM25-style IDF: give rare words significantly higher discriminative weight
+      var idf = Math.max(0.6, Math.log(1 + (totalDocs - df + 0.5) / (df + 0.5)));
+
       if (matchedDocIds) {
-        matchedDocIds.forEach(function (id) {
-          scores[id] = (scores[id] || 0) + 1;
-        });
+        for (var i = 0; i < matchedDocIds.length; i++) {
+          var id = matchedDocIds[i];
+          scores[id] = (scores[id] || 0) + (1.0 * idf);
+          if (!docTermHits[id]) docTermHits[id] = {};
+          docTermHits[id][token] = true;
+        }
       } else {
-        // Partial/prefix search for short latin query
+        // Partial/prefix search for latin tokens with length >= 2
         if (token.length >= 2) {
           for (var key in index) {
             if (key.indexOf(token) !== -1) {
-              var ids = index[key];
-              for (var j = 0; j < ids.length; j++) {
-                scores[ids[j]] = (scores[ids[j]] || 0) + 0.5;
+              var pIds = index[key];
+              var pDf = pIds.length;
+              var pIdf = Math.max(0.3, Math.log(1 + (totalDocs - pDf + 0.5) / (pDf + 0.5)));
+              for (var j = 0; j < pIds.length; j++) {
+                var pid = pIds[j];
+                scores[pid] = (scores[pid] || 0) + (0.35 * pIdf);
+                if (!docTermHits[pid]) docTermHits[pid] = {};
+                docTermHits[pid][token] = true;
               }
             }
           }
@@ -217,32 +231,68 @@
       }
     });
 
-    // Score boosting for Title / Tags / Categories
+    var numTokens = tokens.length;
+
+    // Multi-field boosting & Exact Phrase Matching
     for (var idStr in scores) {
       var id = parseInt(idStr, 10);
       var doc = docs[id];
       if (!doc) continue;
 
       var titleLower = (doc.title || '').toLowerCase();
+      var summaryLower = (doc.summary || '').toLowerCase();
       var tagsLower = (doc.tags || []).join(' ').toLowerCase();
 
+      // 1. Exact query phrase match (Highest user intent indicator)
+      if (cleanQuery.length >= 2) {
+        if (titleLower === cleanQuery) {
+          scores[id] += 120; // Exact title match
+        } else if (titleLower.indexOf(cleanQuery) !== -1) {
+          scores[id] += 60;  // Full query appears consecutively in title
+        }
+        if (tagsLower.indexOf(cleanQuery) !== -1) {
+          scores[id] += 45;  // Full query appears in tags (e.g. "Google+", "FreeBSD")
+        }
+        if (summaryLower.indexOf(cleanQuery) !== -1) {
+          scores[id] += 25;  // Full query appears in summary
+        }
+      }
+
+      // 2. Individual token matches in Title, Tags, Categories
       tokens.forEach(function (token) {
         if (titleLower.indexOf(token) !== -1) {
-          scores[id] += 15; // Heavy weight for title matches
+          scores[id] += 18;
+          if (titleLower.indexOf(token) === 0) {
+            scores[id] += 6; // Title starts with token
+          }
         }
         if (tagsLower.indexOf(token) !== -1) {
-          scores[id] += 8;  // Medium weight for tags
+          scores[id] += 12;
         }
       });
+
+      // 3. Coordinate matching / Term coverage bonus
+      // Ensure articles that match more or all query terms rank significantly higher
+      if (numTokens > 1 && docTermHits[id]) {
+        var matchedCount = Object.keys(docTermHits[id]).length;
+        var coverage = matchedCount / numTokens;
+        if (matchedCount === numTokens) {
+          scores[id] += 35; // All terms matched bonus
+        }
+        scores[id] *= (0.5 + 0.5 * coverage);
+      }
     }
 
-    // Rank doc IDs
+    // Rank doc IDs by score descending; if tied, newer post first (smaller doc_id)
     var rankedIds = Object.keys(scores).map(function (k) {
       return parseInt(k, 10);
     });
     rankedIds.sort(function (a, b) {
-      // 分数不同时按分数降序；分数相同时按 doc_id 升序（doc_id 越小发布时间越新）
-      return (scores[b] - scores[a]) || (a - b);
+      var diff = scores[b] - scores[a];
+      if (Math.abs(diff) > 0.001) {
+        return diff;
+      }
+      return a - b;
     });
 
     currentResults = rankedIds.slice(0, 25).map(function (id) {

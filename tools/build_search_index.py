@@ -149,11 +149,23 @@ def compute_post_url(filepath: str, base_content_dir: str, meta: dict, base_url:
     return url
 
 
+# Common technical terms with symbols that should be preserved intact
+TECH_SYMBOLS = [
+    "google+", "c++", "c#", ".net", "notepad++", "g++", "clang++", "tcp/ip"
+]
+for _ts in TECH_SYMBOLS:
+    jieba.add_word(_ts)
+
+
 def tokenize(text: str) -> set:
     """Segments text into lowercase searchable tokens, skipping stop words."""
     tokens = set()
     if not text:
         return tokens
+
+    # Pre-extract alphanumeric tokens with technical symbols (e.g. Google+, C++, C#, .NET)
+    for sym in re.findall(r"\b[a-zA-Z0-9_\-\.]+(?:\+\+|[+#])", text):
+        tokens.add(sym.lower())
 
     for word in jieba.cut_for_search(text):
         w = word.strip().lower()
@@ -163,10 +175,11 @@ def tokenize(text: str) -> set:
         if w in STOP_WORDS:
             continue
         # Only retain words with meaningful length (>= 2 chars, or alphanumeric/CJK non-stopword)
-        if len(w) == 1 and not re.match(r"[\u4e00-\u9fa5a-zA-Z0-9]", w):
+        if len(w) == 1 and not re.match(r"[\u4e00-\u9fa5a-zA-Z0-9\+#]", w):
             continue
         tokens.add(w)
     return tokens
+
 
 
 def main():
@@ -204,6 +217,9 @@ def main():
 
         date = meta.get("date", "")
         tags = meta.get("tags", [])
+        for tag in tags:
+            if any(ch in tag for ch in "+#"):
+                jieba.add_word(tag.strip().lower())
         categories = meta.get("categories", [])
         url = compute_post_url(filepath, content_dir, meta, args.base_url)
 
