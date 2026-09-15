@@ -1,0 +1,59 @@
+{{- /*
+Returns filtered terms for a taxonomy (e.g. categories, tags), applying
+site.Params.excludedCategories, site.Params.excludedTags, and site.Params.featuredCategories.
+Parameters (dict):
+  - Taxonomy: "categories" or "tags"
+  - Limit: number of items to return (default: 0, meaning all)
+  - Terms: optional term collection (default: site.Taxonomies.<Taxonomy>)
+*/ -}}
+{{- $taxonomy := .Taxonomy -}}
+{{- $limit := .Limit | default 0 -}}
+{{- $result := slice -}}
+
+{{- if and (eq $taxonomy "categories") site.Params.featuredCategories -}}
+  {{- range site.Params.featuredCategories -}}
+    {{- $slug := . | urlize -}}
+    {{- with site.GetPage (printf "/categories/%s" $slug) -}}
+      {{- $result = $result | append (dict "Page" . "Count" (len .Pages)) -}}
+    {{- end -}}
+  {{- end -}}
+{{- else -}}
+  {{- $rawTerms := .Terms -}}
+  {{- if not $rawTerms -}}
+    {{- with index site.Taxonomies $taxonomy -}}
+      {{- $rawTerms = .ByCount -}}
+    {{- end -}}
+  {{- else -}}
+    {{- if not (reflect.IsSlice $rawTerms) -}}
+      {{- $rawTerms = $rawTerms.ByCount -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- $excluded := slice -}}
+  {{- if eq $taxonomy "categories" -}}
+    {{- with site.Params.excludedCategories -}}
+      {{- range . -}}
+        {{- $excluded = $excluded | append (lower .) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- else if eq $taxonomy "tags" -}}
+    {{- with site.Params.excludedTags -}}
+      {{- range . -}}
+        {{- $excluded = $excluded | append (lower .) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- range $rawTerms -}}
+    {{- $termName := lower .Page.LinkTitle -}}
+    {{- if not (in $excluded $termName) -}}
+      {{- $result = $result | append . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if gt $limit 0 -}}
+  {{- $result = first $limit $result -}}
+{{- end -}}
+
+{{- return $result -}}

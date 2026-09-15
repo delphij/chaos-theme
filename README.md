@@ -88,6 +88,11 @@ title = 'My New Hugo Site'
   mainSections = ["posts"]             # Sections to display on homepage
   excludedTypes = ["page"]             # Content types to hide from listings
 
+  # Taxonomy display controls (optional)
+  excludedCategories = ["CategoryToHide"] # Hide from homepage "Core Categories"
+  excludedTags = ["TagToHide"]           # Hide from homepage & /tags/ "Popular Tags"
+  # featuredCategories = ["Category1", "Category2"] # Optional pinned list for "Core Categories"
+
   # Client-side full-text search (optional, disabled by default)
   [params.search]
     enable = true                      # Enable search button and '/' hotkey

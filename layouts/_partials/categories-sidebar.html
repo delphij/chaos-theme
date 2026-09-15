@@ -7,7 +7,7 @@ Provides quick access to popular tags.
     <div class="sidebar-widget">
       <h2 class="sidebar-widget-title">{{ T "popularTags" }}</h2>
       <div class="sidebar-tags-cloud">
-        {{ range first 24 site.Taxonomies.tags.ByCount }}
+        {{ range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "tags" "Limit" 24) }}
         <a class="sidebar-tag-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">#{{ .Page.LinkTitle }}</a>
         {{ end }}
       </div>

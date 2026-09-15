@@ -21,7 +21,7 @@
     <div class="tags-section" id="hot-tags">
       <h2 class="tags-section-heading">{{ T "popularTags" }}</h2>
       <div class="tags-flat-wrap">
-        {{ range first 24 .Data.Terms.ByCount }}
+        {{ range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "tags" "Terms" .Data.Terms "Limit" 24) }}
           <a class="tag-flat-item hot" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }}<span class="count-pill">{{ .Count }}</span></a>
         {{ end }}
       </div>
