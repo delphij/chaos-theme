@@ -17,7 +17,8 @@
   {{- $cachedFile := printf "data/x_embeds/%s.html" .id -}}
   {{- if fileExists $cachedFile -}}
     {{/* Use cached version - no scripts, no tracking */}}
-    {{- readFile $cachedFile | safeHTML -}}
+    {{- $content := readFile $cachedFile | safeHTML -}}
+    {{- partial "x-card.html" (dict "id" .id "user" .user "content" $content "ctx" $.ctx) -}}
   {{- else -}}
     {{/* Fallback to live fetch if cache doesn't exist */}}
     {{- $url := printf "https://x.com/%v/status/%v" .user .id -}}
@@ -27,7 +28,8 @@
       {{- with .Err -}}
         {{- warnidf "shortcode-x-getremote" "The %q shortcode was unable to retrieve the remote data: %s. See %s" $.ctx.Name . $.ctx.Position -}}
       {{- else with .Value -}}
-        {{- (. | transform.Unmarshal).html | safeHTML -}}
+        {{- $content := (. | transform.Unmarshal).html | safeHTML -}}
+        {{- partial "x-card.html" (dict "id" $.id "user" $.user "content" $content "ctx" $.ctx) -}}
       {{- else -}}
         {{- warnidf "shortcode-x-getremote" "The %q shortcode was unable to retrieve the remote data. See %s" $.ctx.Name $.ctx.Position -}}
       {{- end -}}

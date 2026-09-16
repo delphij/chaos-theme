@@ -1,0 +1,27 @@
+{{- /*
+Renders post footer metadata (tags and last modified date) at the end of an article.
+
+@context {page} page The post page context.
+
+@example: {{ partial "post-footer.html" . }}
+*/}}
+
+{{- $hasTags := and .Params.tags (gt (len .Params.tags) 0) -}}
+{{- $hasMod := and (not .Lastmod.IsZero) (gt (.Lastmod.Sub .Date).Hours 24) -}}
+
+{{- if or $hasTags $hasMod -}}
+<footer class="post-footer">
+  {{- if $hasTags -}}
+  <div class="post-tags" aria-label="{{ T "tags" }}">
+    {{- partial "taxonomy-links.html" (dict "page" . "tagsOnly" true) -}}
+  </div>
+  {{- end -}}
+  {{- if $hasMod -}}
+  {{- $modMachine := .Lastmod | time.Format "2006-01-02T15:04:05-07:00" -}}
+  {{- $modHuman := .Lastmod | time.Format "2006-01-02 15:04" -}}
+  <div class="post-modified">
+    <span>{{ T "lastModified" }}：<time datetime="{{ $modMachine }}">{{ $modHuman }}</time></span>
+  </div>
+  {{- end -}}
+</footer>
+{{- end -}}

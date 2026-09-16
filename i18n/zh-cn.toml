@@ -129,6 +129,9 @@ searchNav = '移动'
 searchOpen = '打开'
 searchDeprecated = '已过时'
 
+# X (Twitter) embeds
+xPostFrom = '来自 X (Twitter)'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }}（{{ .Count }} 篇文章）'

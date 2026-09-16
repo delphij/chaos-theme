@@ -15,7 +15,8 @@
     {{- if not site.Config.Services.X.DisableInlineCSS }}
       {{- template "__h_simple_x_css" (dict "ctx" $.ctx) }}
     {{- end }}
-    {{- readFile $cachedFile | safeHTML -}}
+    {{- $content := readFile $cachedFile | safeHTML -}}
+    {{- partial "x-card.html" (dict "id" .id "user" .user "content" $content "ctx" $.ctx) -}}
   {{- else -}}
     {{/* Fallback to live fetch if cache doesn't exist */}}
     {{- $dnt := site.Config.Privacy.X.EnableDNT }}
@@ -29,7 +30,8 @@
         {{- if not site.Config.Services.X.DisableInlineCSS }}
           {{- template "__h_simple_x_css" (dict "ctx" $.ctx) }}
         {{- end }}
-        {{- (. | transform.Unmarshal).html | safeHTML -}}
+        {{- $content := (. | transform.Unmarshal).html | safeHTML -}}
+        {{- partial "x-card.html" (dict "id" $.id "user" $.user "content" $content "ctx" $.ctx) -}}
       {{- else -}}
         {{- warnidf "shortcode-x-simple-getremote" "The %q shortcode was unable to retrieve the remote data. See %s" $.ctx.Name $.ctx.Position -}}
       {{- end -}}

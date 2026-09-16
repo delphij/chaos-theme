@@ -1,8 +1,9 @@
 {{ define "main" }}
   <h1>{{ .Title }}</h1>
 
-  <div class="meta">{{ partial "datetime.html" . }}<span class="reading-stats"> • {{ partial "reading-stats.html" . }}</span>{{ partial "taxonomy-links.html" . }}</div>
+  <div class="meta">{{ partial "datetime.html" . }}<span class="reading-stats"> • {{ partial "reading-stats.html" . }}</span>{{ with .Params.categories }}<span class="meta-sep"> • </span>{{ partial "taxonomy-links.html" (dict "page" $ "categoriesOnly" true) }}{{ end }}</div>
   {{- partial "content-plus-ruby.html" . -}}
+  {{- partial "post-footer.html" . -}}
   <div id="print-references" class="print-only"></div>
   {{- partial "remark.html" . -}}
   {{- partial "post-navigation.html" . -}}

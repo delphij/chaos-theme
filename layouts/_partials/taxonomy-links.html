@@ -14,26 +14,35 @@ Supports optional tag limit for summary cards.
 
 {{- $page := . -}}
 {{- $limit := 0 -}}
+{{- $categoriesOnly := false -}}
+{{- $tagsOnly := false -}}
 {{- if reflect.IsMap . -}}
   {{- $page = .page -}}
   {{- $limit = .limit | default 0 -}}
+  {{- $categoriesOnly = .categoriesOnly | default false -}}
+  {{- $tagsOnly = .tagsOnly | default false -}}
 {{- end -}}
 
 {{- if and $page (ne $page.Type "page") -}}
   {{- $categories := $page.Params.categories | default slice -}}
-  {{- with $page.Params.categories -}}
-    {{- range . }}
- <a class="taxo-link cat-link" href="{{ "/categories/" | relLangURL }}{{ . | urlize }}" title="{{ T `categoryTitle` (dict `Name` .) }}">{{ . }}</a>
+  {{- if not $tagsOnly -}}
+    {{- with $page.Params.categories -}}
+      {{- range $i, $cat := . -}}
+        {{- if gt $i 0 -}}<span class="cat-sep">, </span>{{- end -}}
+        <a class="taxo-link cat-link" href="{{ "/categories/" | relLangURL }}{{ $cat | urlize }}" title="{{ T `categoryTitle` (dict `Name` $cat) }}">{{ $cat }}</a>
+      {{- end -}}
     {{- end -}}
   {{- end -}}
-  {{- with $page.Params.tags -}}
-    {{- $count := 0 -}}
-    {{- range . }}
-      {{- if not (in $categories .) }}
-        {{- if or (le $limit 0) (lt $count $limit) }}
- <a class="taxo-link tag-link" href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" title="{{ T `tagTitle` (dict `Name` .) }}">#{{ . }}</a>
-          {{- $count = add $count 1 -}}
-        {{- end }}
+  {{- if not $categoriesOnly -}}
+    {{- with $page.Params.tags -}}
+      {{- $count := 0 -}}
+      {{- range . -}}
+        {{- if not (in $categories .) -}}
+          {{- if or (le $limit 0) (lt $count $limit) -}}
+            <a class="taxo-link tag-link" href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" title="{{ T `tagTitle` (dict `Name` .) }}">#{{ . }}</a>
+            {{- $count = add $count 1 -}}
+          {{- end -}}
+        {{- end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}

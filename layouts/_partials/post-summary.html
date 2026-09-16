@@ -11,7 +11,7 @@ Displays post title, date, taxonomy links, summary text, and optional
 
 <article class="post-entry">
   <h2 class="post-title"><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
-  <div class="meta">{{ partial "datetime.html" . }}{{ partial "taxonomy-links.html" (dict "page" . "limit" 3) }}</div>
+  <div class="meta">{{ partial "datetime.html" . }}{{ with .Params.categories }}<span class="meta-sep"> • </span>{{ partial "taxonomy-links.html" (dict "page" $ "categoriesOnly" true) }}{{ end }}</div>
   <div class="post-summary-content">
     {{ .Summary }}
   </div>
