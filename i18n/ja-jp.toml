@@ -141,3 +141,6 @@ xPostFrom = 'X (Twitter) より'
 
 [archivesSummary]
   other = 'サイト全体の記事 {{ .Count }} 件を時系列で収録しています。'
+
+[listPostCount]
+  other = '全 {{ .Count }} 件の記事。'

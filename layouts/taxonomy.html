@@ -6,7 +6,7 @@
 
     <div class="categories-list">
       {{ range .Data.Terms.ByCount }}
-        <a class="taxonomy-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">
+        <a class="taxonomy-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">
           <span class="taxonomy-name">{{ .Page.LinkTitle }}</span>
           <span class="count-pill">{{ .Count }}</span>
         </a>
@@ -22,7 +22,7 @@
       <h2 class="tags-section-heading">{{ T "popularTags" }}</h2>
       <div class="tags-flat-wrap">
         {{ range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "tags" "Terms" .Data.Terms "Limit" 24) }}
-          <a class="tag-flat-item hot" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }}<span class="count-pill">{{ .Count }}</span></a>
+          <a class="tag-flat-item hot" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }}<span class="count-pill">{{ .Count }}</span></a>
         {{ end }}
       </div>
     </div>
@@ -46,10 +46,10 @@
           {{ if gt (len $matchingTerms) 0 }}
             {{ $id := cond (eq $letter "#") "tag-letter-other" (printf "tag-letter-%s" $letter) }}
             <div class="tag-letter-group" id="{{ $id }}">
-              <div class="tag-letter-heading">{{ $letter }}</div>
+              <h3 class="tag-letter-heading">{{ $letter }}</h3>
               <div class="tags-flat-wrap">
                 {{ range $matchingTerms }}
-                  <a class="tag-flat-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }}<span class="count-pill">{{ .Count }}</span></a>
+                  <a class="tag-flat-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }}<span class="count-pill">{{ .Count }}</span></a>
                 {{ end }}
               </div>
             </div>
@@ -62,7 +62,7 @@
     {{ partial "page-header.html" . }}
     <div class="categories-list">
       {{ range .Data.Terms.ByCount }}
-        <a class="taxonomy-item" href="{{ .Page.RelPermalink }}">
+        <a class="taxonomy-item" href="{{ .Page.RelPermalink }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">
           <span class="taxonomy-name">{{ .Page.LinkTitle }}</span>
           <span class="count-pill">{{ .Count }}</span>
         </a>

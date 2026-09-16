@@ -10,7 +10,7 @@ Provides sticky Year & Month timeline jump navigation.
       <ul class="sidebar-year-list">
         {{ range $posts.GroupByDate "2006" }}
         <li>
-          <a class="sidebar-year-item" href="#year-{{ .Key }}" title="{{ T `yearPostCount` (dict `Year` .Key `Count` (len .Pages)) }}">{{ T "yearLabel" (dict "Year" .Key) }}<span class="count-pill">{{ len .Pages }}</span></a>
+          <a class="sidebar-year-item" href="#year-{{ .Key }}" title="{{ T `yearPostCount` (dict `Year` .Key `Count` (len .Pages)) }}" aria-label="{{ T `yearPostCount` (dict `Year` .Key `Count` (len .Pages)) }}">{{ T "yearLabel" (dict "Year" .Key) }}<span class="count-pill">{{ len .Pages }}</span></a>
         </li>
         {{ end }}
       </ul>

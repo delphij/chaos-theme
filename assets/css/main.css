@@ -39,6 +39,7 @@
   --heading: #111111;               /* 漆黑 Shikkoku (headings and titles, 18.2:1 contrast) */
   --muted: #545454;                 /* 墨灰 Sumi-hai (secondary text, captions, 5.8:1 contrast) */
   --primary: #A23E48;               /* 红緋 Hi-iro (primary brand color) */
+  --primary-hover: #7E2F37;         /* 红緋 deepened - hover for primary-coloured links */
   --primary-fg: #FFFFFF;            /* High contrast text on primary in light mode (6.2:1) */
   --accent: #2E5A88;                /* 瑠璃色 Ruri-iro (accent color) */
   --paper: #F0E6D2;                 /* 生成色 Kinari-iro (paper texture background) */
@@ -52,9 +53,10 @@
   --blockquote-fg: #333333;          /* Blockquote text color */
   --border-color: rgba(0,0,0,0.1);     /* Border colour, for widths other than 1px */
   --border: 1px solid var(--border-color); /* Subtle border for light mode */
-  --pill-border: rgba(0, 0, 0, 0.06);          /* Count pill border, resting */
-  --pill-border-active: rgba(162, 62, 72, 0.25); /* Count pill border, hover/active */
-  --cat-bg: #FDF0ED;                           /* Category pill background */
+  --code-bg: #F0F0F0;                          /* Code block ground. Deliberately neutral:
+                                                  a warm tint reads as yellow cast behind
+                                                  syntax colours. Separated from --bg enough
+                                                  to register as a block (1.09 vs 1.03). */
   --mark-bg: rgba(204, 102, 0, 0.15);          /* Text & search highlight (山吹色 Yamabuki) */
 
   /* Alert colors - Semantic color system for different message types */
@@ -71,7 +73,9 @@
 
   /* Layout dimensions - Spacing and container widths */
   --max-width: 1280px;               /* Maximum container width for header/footer/nav */
-  --content-width: 780px;            /* Optimal measure for CJK reading (35-45 chars per line) */
+  --content-width: 780px;            /* ~48 full-width CJK characters per line at 16px.
+                                        On the long side of the classical 30-40 range;
+                                        paired with the 1.7 line-height to stay readable. */
   --gutter: 24px;                    /* Horizontal padding */
   --nav-height: 80px;                /* Sticky navigation height for scroll offsets */
   --radius: 10px;                    /* Border radius for cards */
@@ -85,7 +89,15 @@
   --h1-size: 28px;                   /* Article titles */
   --h2-size: 22px;                   /* Section headings */
   --h3-size: 18px;                   /* Sub-section headings */
-  --small-size: 14px;                /* Small text, captions */
+
+  /* UI type scale - every non-body size resolves to one of these five steps,
+     so components stop inventing half-pixel values of their own. */
+  --text-2xs: 11px;                  /* Badges, keycaps */
+  --text-xs: 12px;                   /* Dense secondary UI */
+  --text-sm: 13px;                   /* Sidebar rows, dates, footer */
+  --text-md: 14px;                   /* Default small text */
+  --text-lg: 15px;                   /* Slightly reduced body */
+  --small-size: var(--text-md);      /* Small text, captions */
 
   /* Monospace stack - used by code, taxonomy count pills and archive dates.
      The bundled Noto Sans Mono face covers Latin and digits only; everything
@@ -122,10 +134,11 @@
 
     --bg: #1C1C1C;                     /* Dark background */
     --surface: #222222;                /* Elevated surfaces */
-    --text: #E6EDF3;                   /* Light text on dark (14.2:1 contrast) */
+    --text: #E8E8E8;                   /* Neutral off-white, 13.9:1 (was GitHub's blue-grey) */
     --heading: #FFFFFF;                /* High-contrast headings (17.5:1 contrast) */
     --muted: #A8A8A8;                  /* Muted text (7.0:1 contrast on #1C1C1C) */
     --primary: #FF6F61;                /* 珊瑚橙 (coral orange) */
+    --primary-hover: #FF9488;          /* Coral lightened - hover in dark mode (8.0:1) */
     --primary-fg: #1C1C1C;             /* High contrast text on primary in dark mode (8.4:1) */
     --accent: #8AB4F8;                 /* Lighter blue for dark mode */
     --paper: #2A2A2A;                  /* Subtle background variation */
@@ -135,9 +148,9 @@
     --blockquote-fg: #CCCCCC;          /* Lighter quote text */
     --border-color: rgba(255,255,255,0.1);
     --border: 1px solid var(--border-color); /* Subtle dark border */
-    --pill-border: rgba(255, 255, 255, 0.08);
-    --pill-border-active: rgba(255, 111, 97, 0.3);
-    --cat-bg: rgba(255, 111, 97, 0.15);
+    --code-bg: #242424;                /* Neutral, and lighter than --surface: code now sits
+                                          on the same elevation ladder as every other panel
+                                          instead of being darker than the page (#0d1117) */
     --mark-bg: rgba(255, 184, 77, 0.25);
     --focus-outline: 2px solid var(--link);
     --shadow-dialog: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -226,10 +239,15 @@ h6 {
   text-wrap: balance;
 }
 
+/* Heading spacing is set in em so it tracks the responsive size steps, and the
+   space above is deliberately far larger than the 1.15em gap between paragraphs:
+   with the previous px values a paragraph followed by an h3 was separated by
+   exactly as much air as two paragraphs, so the heading grouped with nothing. */
+
 /* H1 - Page and article titles */
 h1 {
   font-size: var(--h1-size);
-  margin: 16px 0 12px;
+  margin: 0.6em 0 0.4em;
   font-weight: 800;
   letter-spacing: -0.01em;           /* Tighter spacing for large text */
 }
@@ -237,13 +255,22 @@ h1 {
 /* H2 - Major section headings */
 h2 {
   font-size: var(--h2-size);
-  margin: 24px 0 10px;
+  margin: 2em 0 0.5em;
 }
 
 /* H3 - Sub-section headings */
 h3 {
   font-size: var(--h3-size);
-  margin: 18px 0 8px;
+  margin: 1.7em 0 0.4em;
+}
+
+/* H4-H6 - Previously unstyled, so they inherited the global margin reset and
+   sat flush against the surrounding text. */
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-base);
+  margin: 1.5em 0 0.4em;
 }
 
 /* Paragraphs - Body text with orphan/widow control for better typography */
@@ -485,7 +512,7 @@ ol ol {
 
 .cat-link:hover,
 .cat-link:focus-visible {
-  color: var(--accent);
+  color: var(--primary-hover);
 }
 
 .tag-link {
@@ -708,7 +735,7 @@ article.post {
 
 /* TOC title */
 .toc-title {
-  font-size: 14px;
+  font-size: var(--text-md);
   font-weight: 700;
   color: var(--heading);
   margin: 0 0 12px 0;
@@ -718,7 +745,7 @@ article.post {
 
 /* TOC content styling */
 .toc-content nav {
-  font-size: 14px;
+  font-size: var(--text-md);
   line-height: 1.6;
 }
 
@@ -810,7 +837,7 @@ article.post {
 }
 
 .sidebar-widget-title {
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 700;
   color: var(--heading);
   margin: 0;
@@ -835,7 +862,7 @@ article.post {
   justify-content: space-between;
   padding: 5px 8px;
   border-radius: var(--radius-sm);
-  font-size: 13.5px;
+  font-size: var(--text-md);
   color: var(--text);
 }
 
@@ -850,7 +877,7 @@ article.post {
 }
 
 .sidebar-tag-item {
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   color: var(--muted);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
@@ -863,7 +890,7 @@ article.post {
 }
 
 .sidebar-more-link {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--primary);
   font-weight: 500;
   transition: opacity var(--transition-fast);
@@ -874,34 +901,28 @@ article.post {
   text-decoration: underline;
 }
 
-/* Unified Global Count Pill Component */
+/* Unified global count component.
+   Deliberately typographic rather than a filled badge: counts are subordinate
+   to the label they annotate, and a stadium-shaped pill was the only fully
+   rounded object in an otherwise 4px-radius, paper-like design. Tabular
+   monospace figures keep columns of counts scanning cleanly at 3+ digits. */
 .count-pill {
   font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-xs);
   font-variant-numeric: tabular-nums;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 7px;
-  border-radius: 10px;
-  background: var(--paper);
   color: var(--muted);
-  border: 1px solid var(--pill-border);
   flex-shrink: 0;
-  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  transition: color var(--transition-fast);
 }
 
-/* Pill highlight follows its parent row's hover / active state */
+/* Count follows its parent row's hover / active state */
 .taxonomy-item:hover .count-pill,
 .tag-flat-item:hover .count-pill,
 .sidebar-cat-item:hover .count-pill,
+.sidebar-tag-item:hover .count-pill,
 .sidebar-year-item:hover .count-pill,
 .sidebar-year-item.active .count-pill {
-  background: var(--surface);
   color: var(--primary);
-  border-color: var(--pill-border-active);
 }
 
 /* Sidebar A-Z Index */
@@ -915,7 +936,7 @@ article.post {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 600;
   color: var(--muted);
   padding: 3px 6px;
@@ -930,7 +951,7 @@ article.post {
 }
 
 .sidebar-az-item {
-  font-size: 11.5px;
+  font-size: var(--text-xs);
   font-weight: 600;
   color: var(--muted);
   padding: 3px 0;
@@ -952,7 +973,7 @@ article.post {
   align-items: center;
   padding: 4px 8px;
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--text);
 }
 
@@ -992,23 +1013,27 @@ article.post {
 /* 1. Category Items List (/categories/) */
 .categories-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 4px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 2px 16px;
   margin-bottom: 32px;
   width: 100%;
 }
 
+/* The count sits next to the name it annotates rather than being pushed to the
+   far edge of the grid cell: with no dot leaders to carry the eye across, a
+   short name left the number stranded ~180px away from its label. */
 .taxonomy-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 8px;
+  justify-content: flex-start;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 8px;
   border-radius: var(--radius-sm);
   color: var(--text);
 }
 
 .taxonomy-name {
-  font-size: 14.5px;
+  font-size: var(--text-md);
   color: inherit;
 }
 
@@ -1019,7 +1044,7 @@ article.post {
 }
 
 .tags-section-heading {
-  font-size: 14.5px;
+  font-size: var(--text-md);
   font-weight: 700;
   color: var(--heading);
   margin: 0 0 14px 0;
@@ -1039,7 +1064,7 @@ article.post {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 13px;
+  font-size: var(--text-sm);
   padding: 3px 6px;
   border-radius: var(--radius-sm);
   color: var(--text);
@@ -1065,9 +1090,10 @@ article.post {
 }
 
 .tag-letter-heading {
-  font-size: 16px;
+  font-size: var(--font-size-base);
   font-weight: 700;
   color: var(--primary);
+  margin: 0;                         /* It is an <h3>: drop the heading margins */
   width: 20px;
   line-height: 1.5;
   flex-shrink: 0;
@@ -1095,7 +1121,7 @@ article.post {
 }
 
 .archive-year-title {
-  font-size: 18px;
+  font-size: var(--h3-size);
   font-weight: 700;
   margin: 0;
   color: var(--heading);
@@ -1122,7 +1148,7 @@ article.post {
 
 .archive-date {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   flex-shrink: 0;
@@ -1134,7 +1160,7 @@ article.post {
 }
 
 .archive-post-title {
-  font-size: 14.5px;
+  font-size: var(--text-md);
   color: var(--text);
   flex: 1;
   line-height: 1.45;
@@ -1146,7 +1172,7 @@ article.post {
 }
 
 .archive-cat-label {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--muted);
   flex-shrink: 0;
   transition: color var(--transition-fast);
@@ -1180,7 +1206,7 @@ footer.site-foot {
   margin: 40px auto 80px;
   padding: 24px var(--gutter);
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-sm);
   text-align: center;
 }
 
@@ -1260,6 +1286,7 @@ article.post {
 table {
   width: 100%;
   margin: 1em 0;
+  font-variant-numeric: tabular-nums; /* Columns of figures must align */
 }
 
 /* Table cells - Consistent padding and borders */
@@ -1347,7 +1374,7 @@ blockquote ul,
   gap: 8px;
   color: var(--heading);
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--text-sm);
   letter-spacing: 0.2px;
 }
 
@@ -1364,7 +1391,7 @@ blockquote ul,
 
 .x-card blockquote.twitter-tweet,
 article.post blockquote.twitter-tweet:not(.x-card blockquote) {
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-style: normal;
   line-height: 1.5;
   color: var(--muted);
@@ -1390,7 +1417,7 @@ article.post blockquote.twitter-tweet:not(.x-card blockquote) {
 /* Tweet text paragraph */
 blockquote.twitter-tweet p {
   color: var(--text);
-  font-size: 15px;
+  font-size: var(--text-lg);
   line-height: 1.65;
   margin: 0 0 12px 0;
   word-break: break-word;
@@ -1531,7 +1558,7 @@ pre code,
   align-items: center;
   gap: 5px;
   padding: 3px 8px;
-  font-size: 12px;
+  font-size: var(--text-xs);
   line-height: 1.4;
   color: var(--muted);
   background: var(--surface);
@@ -1762,10 +1789,11 @@ rt {
   padding: 0 0.1em;
 }
 
-/* Chinese emphasis dots - Traditional emphasis marks
-   Uses text-emphasis instead of bold for CJK text */
-strong {
-  font-weight: bold;
+/* Chinese emphasis dots - traditional emphasis marks.
+   Scoped to article prose: applied globally it also put dots under Latin words
+   and digits inside interface strings (the <strong> in feedIntro, sitemapIntro
+   and friends), where 着重号 has no business being. */
+article.post strong {
   text-emphasis: filled dot;         /* Adds dots below characters */
   text-emphasis-position: under;     /* Position below for horizontal text */
 }
@@ -1940,7 +1968,7 @@ strong {
 
   /* Brand comes first, takes remaining space */
   .brand {
-    font-size: 16px;
+    font-size: var(--font-size-base);
     flex: 1;
     min-width: 0;
   }
@@ -1980,13 +2008,9 @@ strong {
   /* Stack navigation links vertically on mobile */
   nav.main-links a {
     padding: 12px 16px;
-    font-size: 16px;
+    font-size: var(--font-size-base);
     width: 100%;
     box-sizing: border-box;
-  }
-
-  article h1 {
-    font-size: 24px;
   }
 
   .post-entry .post-title {
@@ -2005,7 +2029,7 @@ strong {
   }
 
   .x-card-source {
-    font-size: 12px;
+    font-size: var(--text-xs);
     gap: 6px;
   }
 
@@ -2019,7 +2043,7 @@ strong {
   }
 
   blockquote.twitter-tweet p {
-    font-size: 14.5px;
+    font-size: var(--text-md);
     line-height: 1.6;
     margin-bottom: 10px;
   }
@@ -2148,7 +2172,7 @@ dialog.search-dialog::backdrop {
   min-width: 32px;
   min-height: 32px;
   padding: 4px;
-  font-size: 14px;
+  font-size: var(--text-md);
   color: var(--muted);
   border-radius: var(--radius-sm);
   background: transparent;
@@ -2253,7 +2277,7 @@ dialog.search-dialog::backdrop {
 }
 
 .search-tag {
-  font-size: 12px;
+  font-size: var(--text-xs);
   line-height: 1.4;
   padding: 1px 7px;
   border-radius: var(--radius-sm);
@@ -2265,7 +2289,7 @@ dialog.search-dialog::backdrop {
 
 .search-badge-deprecated {
   display: inline-block;
-  font-size: 11px;
+  font-size: var(--text-2xs);
   font-weight: 500;
   line-height: 1.4;
   padding: 0 6px;
@@ -2294,14 +2318,14 @@ mark {
   gap: 16px;
   padding: 10px 20px;
   border-top: var(--border);
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--muted);
   background: var(--paper);
 }
 
 .search-shortcut kbd {
   font-family: inherit;
-  font-size: 11px;
+  font-size: var(--text-2xs);
   font-weight: 600;
   background: var(--surface);
   color: var(--heading);
@@ -2343,10 +2367,9 @@ mark {
     --link: #003366 !important;
     --link-hover: #000000 !important;
     --table-stripe: #F9F9F9 !important;
-    --cat-bg: #F0F0F0 !important;
     --mark-bg: #FFE58F !important;
-    --pill-border: #CCCCCC !important;
-    --pill-border-active: #999999 !important;
+    --code-bg: #F2F2F2 !important;
+    --primary-hover: #7E2F37 !important;
 
     /* Alert colors for print: crisp, high-contrast, paper-friendly */
     --alert-note-bg: #F4F7FC !important;
@@ -2366,6 +2389,11 @@ mark {
     --h1-size: 17.85pt;              /* 10.5pt × 1.7 */
     --h2-size: 13.65pt;              /* 10.5pt × 1.3 */
     --h3-size: 11.55pt;              /* 10.5pt × 1.1 */
+    --text-2xs: 7pt;
+    --text-xs: 7.5pt;
+    --text-sm: 8.5pt;
+    --text-md: 9pt;
+    --text-lg: 9.5pt;
     --small-size: 9pt;               /* ~85.7% of base (metadata, captions) */
   }
 
@@ -2502,7 +2530,7 @@ mark {
   }
 
   #print-references h2 {
-    font-size: 16px;
+    font-size: var(--h2-size);
     font-weight: 700;
     margin-bottom: 1em;
   }
@@ -2521,11 +2549,9 @@ mark {
     page-break-inside: avoid;
   }
 
-  /* Post footer for print */
+  /* Post footer for print - separated by whitespace, same as on screen */
   .post-footer {
-    border-top: var(--border);
-    margin-top: 2em;
-    padding-top: 0.8em;
+    margin-top: 2.5em;
     page-break-inside: avoid;
     break-inside: avoid;
   }
@@ -2557,7 +2583,7 @@ mark {
 
   /* Code styling - Consolidated styles for all code elements */
   code {
-    background: var(--paper);
+    background: var(--code-bg);
   }
 
   /* Remove background from code inside code blocks */

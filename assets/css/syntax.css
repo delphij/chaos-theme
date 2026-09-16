@@ -2,12 +2,12 @@
    Consolidated duplicate color rules for smaller file size
    Structural styles (lntable, lntd, lnlinks, line, lnt, ln) in main.css */
 
-/* Background */ .bg { background-color:#f7f7f7; }
-/* PreWrapper */ .chroma { background-color:#f7f7f7;-webkit-text-size-adjust:none; }
+/* Background */ .bg { background-color:var(--code-bg); }
+/* PreWrapper */ .chroma { background-color:var(--code-bg);-webkit-text-size-adjust:none; }
 /* Error */ .chroma .err { color:#f6f8fa;background-color:#82071e }
 /* LineHighlight */ .chroma .hl { background-color:#dedede }
-/* LineNumbersTable */ .chroma .lnt { color:#7f7f7f }
-/* LineNumbers */ .chroma .ln { color:#7f7f7f }
+/* LineNumbersTable */ .chroma .lnt { color:#6B6B6B }
+/* LineNumbers */ .chroma .ln { color:#6B6B6B }
 
 /* Keywords - GitHub red */
 .chroma .k,   /* Keyword */

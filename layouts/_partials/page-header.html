@@ -1,14 +1,24 @@
 {{- /*
-Renders a page header with title and content.
+Renders a page header with title, optional post count and content.
 
 The title is resolved via _funcs/get-page-title.html, which localizes
 Hugo's auto-generated section and taxonomy list titles when a matching
-i18n key exists.
+i18n key exists. The markup matches /categories/, /tags/ and /archives/
+so that a term page and its index page share one header treatment.
 
-@context {page} page The page context containing Title and Content.
+@context {page} page The page context containing Title, Pages and Content.
 
 @example: {{ partial "page-header.html" . }}
 */}}
 
-<h1>{{- partial "_funcs/get-page-title.html" . -}}</h1>
+{{- $count := 0 -}}
+{{- if or (eq .Kind "term") (eq .Kind "section") -}}
+  {{- $count = len .Pages -}}
+{{- end -}}
+<div class="page-title-group">
+  <h1 class="page-title">{{- partial "_funcs/get-page-title.html" . -}}</h1>
+  {{- if gt $count 0 }}
+  <p class="page-subtitle">{{ T "listPostCount" (dict "Count" $count) }}</p>
+  {{- end }}
+</div>
 {{ .Content }}

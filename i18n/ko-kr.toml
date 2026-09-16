@@ -141,3 +141,6 @@ xPostFrom = 'X (Twitter) 출처'
 
 [archivesSummary]
   other = '사이트 전체의 글 {{ .Count }}개를 시간순으로 모았습니다.'
+
+[listPostCount]
+  other = '모두 {{ .Count }}개의 글.'

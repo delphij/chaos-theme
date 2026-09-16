@@ -9,7 +9,7 @@ Provides quick navigation to core categories and popular tags.
       <ul class="sidebar-cat-list">
         {{ range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "categories" "Limit" 8) }}
         <li>
-          <a class="sidebar-cat-item" href="{{ .Page.RelPermalink }}">
+          <a class="sidebar-cat-item" href="{{ .Page.RelPermalink }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">
             <span class="sidebar-cat-name">{{ .Page.LinkTitle }}</span>
             <span class="count-pill">{{ .Count }}</span>
           </a>

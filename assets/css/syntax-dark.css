@@ -5,12 +5,12 @@
    Structural styles (lntable, lntd, lnlinks, line, lnt, ln) in main.css */
 
 @media screen {
-  /* Background */ html.dark .bg { color:#e6edf3;background-color:#0d1117; }
-  /* PreWrapper */ html.dark .chroma { color:#e6edf3;background-color:#0d1117;-webkit-text-size-adjust:none; }
+  /* Background */ html.dark .bg { color:var(--text);background-color:var(--code-bg); }
+  /* PreWrapper */ html.dark .chroma { color:var(--text);background-color:var(--code-bg);-webkit-text-size-adjust:none; }
   /* Error */ html.dark .chroma .err { color:#f85149 }
   /* LineHighlight */ html.dark .chroma .hl { background-color:#6e7681 }
-  /* LineNumbersTable */ html.dark .chroma .lnt { color:#737679 }
-  /* LineNumbers */ html.dark .chroma .ln { color:#6e7681 }
+  /* LineNumbersTable */ html.dark .chroma .lnt { color:#8E8E8E }
+  /* LineNumbers */ html.dark .chroma .ln { color:#8E8E8E }
 
   /* Keywords - red */
   html.dark .chroma .k,   /* Keyword */
@@ -134,7 +134,7 @@
   html.dark .chroma .p,   /* Punctuation */
   html.dark .chroma .na,  /* NameAttribute */
   html.dark .chroma .nx   /* NameOther */
-  { color:#e6edf3 }
+  { color:var(--text) }
 
   /* NameBuiltin - light theme sets purple, dark should use cyan */
   html.dark .chroma .nb,  /* NameBuiltin */

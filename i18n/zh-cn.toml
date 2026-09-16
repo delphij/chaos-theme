@@ -141,3 +141,6 @@ xPostFrom = '来自 X (Twitter)'
 
 [archivesSummary]
   other = '按时间线收录全站共 {{ .Count }} 篇技术文章与日志。'
+
+[listPostCount]
+  other = '共 {{ .Count }} 篇文章。'

@@ -144,3 +144,7 @@ xPostFrom = 'From X (Twitter)'
 [archivesSummary]
   one = '{{ .Count }} post from across the site, in chronological order.'
   other = '{{ .Count }} posts from across the site, in chronological order.'
+
+[listPostCount]
+  one = '{{ .Count }} post.'
+  other = '{{ .Count }} posts.'
