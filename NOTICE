@@ -32,6 +32,19 @@ See static/_3p/instantpage/5.2.0/LICENSE for full license text
 Website: https://instant.page/
 Prefetches pages on hover/touch to improve perceived performance.
 
+Noto Sans Mono
+Copyright 2022 The Noto Project Authors
+  (https://github.com/notofonts/latin-greek-cyrillic)
+Licensed under the SIL Open Font License, Version 1.1
+Location: static/_3p/noto-sans-mono/2.014/
+See static/_3p/noto-sans-mono/2.014/LICENSE for full license text
+Website: https://fonts.google.com/noto/specimen/Noto+Sans+Mono
+Shipped as a Latin/numeral subset (see the README in that directory for the
+exact subsetting command); the glyph outlines are upstream's, unmodified.
+Provides the monospace layer for code, taxonomy count pills and archive dates.
+The upstream copyright line declares no Reserved Font Name, so the subset keeps
+the original family name.
+
 Mermaid
 Copyright (c) 2014 - present Knut Sveidqvist
 Licensed under the MIT License

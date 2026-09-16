@@ -1,4 +1,27 @@
 /* ==========================================================================
+   WEBFONTS
+   Noto Sans Mono 2.014 (OFL 1.1), vendored in static/_3p/noto-sans-mono/2.014/.
+   Glyph outlines are upstream's, untouched; the file is only subsetted to the
+   Latin ranges below and pinned to wdth=100 with the wght 400-700 axis kept,
+   which fits in ~16KB with no synthetic bolding and no second request.
+
+   unicode-range deliberately covers Latin-1 and a little punctuation only:
+   CJK never touches this face, so Chinese comments inside code blocks fall
+   through to the system CJK font. font-display: swap keeps text painting
+   immediately, so the face is never on the LCP critical path.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Noto Sans Mono";
+  src: url("../_3p/noto-sans-mono/2.014/noto-sans-mono-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2010-2015, U+2018-201F, U+2026, U+2030,
+                 U+2032-2033, U+20AC, U+2190-2193, U+2212, U+2260, U+2264-2265;
+}
+
+/* ==========================================================================
    CSS VARIABLES
    Global design tokens for colors, spacing, and typography.
    Uses CSS custom properties for easy theme switching and maintenance.
@@ -27,7 +50,8 @@
   /* UI elements - Borders and backgrounds */
   --table-stripe: #F2F2F2;           /* Alternating table row background */
   --blockquote-fg: #333333;          /* Blockquote text color */
-  --border: 1px solid rgba(0,0,0,0.1); /* Subtle border for light mode */
+  --border-color: rgba(0,0,0,0.1);     /* Border colour, for widths other than 1px */
+  --border: 1px solid var(--border-color); /* Subtle border for light mode */
   --pill-border: rgba(0, 0, 0, 0.06);          /* Count pill border, resting */
   --pill-border-active: rgba(162, 62, 72, 0.25); /* Count pill border, hover/active */
   --cat-bg: #FDF0ED;                           /* Category pill background */
@@ -62,6 +86,12 @@
   --h2-size: 22px;                   /* Section headings */
   --h3-size: 18px;                   /* Sub-section headings */
   --small-size: 14px;                /* Small text, captions */
+
+  /* Monospace stack - used by code, taxonomy count pills and archive dates.
+     The bundled Noto Sans Mono face covers Latin and digits only; everything
+     else, CJK included, falls through to the platform fonts listed after it. */
+  --font-mono: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+               "Liberation Mono", monospace;
 
   /* Animation timing - Consistent transitions */
   --transition-fast: 0.2s ease;      /* Quick transitions for hover/focus */
@@ -103,7 +133,8 @@
     --link-hover: #99CCFF;             /* Link hover in dark mode */
     --table-stripe: #242424;           /* Darker stripe for tables */
     --blockquote-fg: #CCCCCC;          /* Lighter quote text */
-    --border: 1px solid rgba(255,255,255,0.1); /* Subtle dark border */
+    --border-color: rgba(255,255,255,0.1);
+    --border: 1px solid var(--border-color); /* Subtle dark border */
     --pill-border: rgba(255, 255, 255, 0.08);
     --pill-border-active: rgba(255, 111, 97, 0.3);
     --cat-bg: rgba(255, 111, 97, 0.15);
@@ -845,9 +876,10 @@ article.post {
 
 /* Unified Global Count Pill Component */
 .count-pill {
-  font-family: var(--font-mono), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -1091,10 +1123,10 @@ article.post {
 .archive-date {
   font-family: var(--font-mono);
   font-size: 13px;
+  font-variant-numeric: tabular-nums;
   color: var(--muted);
   flex-shrink: 0;
   width: 82px;
-  letter-spacing: -0.2px;
 }
 
 .archive-date-short {
@@ -1190,11 +1222,11 @@ article.post {
   line-height: 1.6;
 }
 
-/* Post footer metadata at the end of article (tags & last modified date) */
+/* Post footer metadata at the end of article (tags & last modified date).
+   Separated from the body by whitespace alone - the muted colour and smaller
+   size already mark it as metadata, so a rule would only add furniture. */
 .post-footer {
-  margin: 2.5em 0 1.5em 0;
-  padding-top: 1.25em;
-  border-top: var(--border);
+  margin: 4em 0 1.5em 0;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -1233,7 +1265,7 @@ table {
 /* Table cells - Consistent padding and borders */
 table th,
 table td {
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--border);
   padding: 0.75rem;
   text-align: left;
   vertical-align: top;
@@ -1241,7 +1273,7 @@ table td {
 
 /* Table header - Inverted colors for visual hierarchy */
 table thead th {
-  border-bottom: 2px solid var(--border);
+  border-bottom: 2px solid var(--border-color);
   vertical-align: bottom;
   background-color: var(--text);
   color: var(--bg);
@@ -1249,7 +1281,7 @@ table thead th {
 
 /* Multiple table bodies - Visual separator */
 table tbody + tbody {
-  border-top: 2px solid var(--border);
+  border-top: 2px solid var(--border-color);
 }
 
 /* Striped rows - Zebra striping for easier row scanning */
@@ -1445,11 +1477,37 @@ blockquote.twitter-tweet > a:focus-visible {
    Includes line numbers, horizontal scroll, and selection behavior.
    ========================================================================== */
 
-/* Code blocks use smaller font for compact display
-   Inline code (not in pre) keeps body font size */
+/* Code elements share the monospace stack. Declaring the family explicitly
+   also cancels the UA monospace quirk, which otherwise renders code a few
+   pixels smaller than the surrounding CJK text. */
+pre,
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+}
+
+/* Code blocks use smaller font for compact display */
 pre {
   font-size: var(--small-size);
   hanging-punctuation: none;         /* Disable for monospace code blocks */
+}
+
+/* Inline code - no backdrop of its own: the monospace face already separates
+   it from running CJK text, and a tint would only add noise mid-paragraph.
+   The block-level background on .highlight stays, since a block is its own
+   unit. Size is an optical adjustment (mono x-height runs large next to CJK),
+   set in em so it tracks its context: body, heading or list item. */
+code {
+  font-size: 0.9em;
+  overflow-wrap: break-word;
+}
+
+/* Code inside a block inherits the block's size, not the inline adjustment */
+pre code,
+.highlight code,
+.chroma code {
+  font-size: inherit;
 }
 
 /* Code block wrapper - Scroll container for wide code */
@@ -1598,6 +1656,14 @@ pre.mermaid {
   padding: 1.5rem 0;
   margin: 1.5rem 0;
   overflow-x: auto;
+
+  /* Diagram labels are figure text, not code, so opt out of the monospace
+     stack every other <pre> gets. This is also load-bearing: Mermaid measures
+     label widths in a temporary container under <body>, where the inherited
+     font is the body sans stack, then the finished SVG inherits from this
+     element. A monospace <pre> here renders ~34% wider than it was measured,
+     which overflows foreignObject and clips node labels. */
+  font-family: inherit;
 }
 
 .mermaid svg {
@@ -1980,7 +2046,14 @@ strong {
   /* Post footer on mobile - Stack tags and modification date cleanly */
   .post-footer {
     flex-direction: column;
+    align-items: stretch;              /* baseline is meaningless once stacked */
     gap: 8px;
+  }
+
+  /* flex-basis follows the main axis, so the 300px row-width hint would
+     otherwise become a 300px block height once the footer stacks. */
+  .post-footer .post-tags {
+    flex: 0 1 auto;
   }
 
   .post-footer .post-modified {
@@ -2261,7 +2334,7 @@ mark {
     --text: #000000 !important;
     --heading: #000000 !important;
     --muted: #444444 !important;
-    --border: 1px solid #CCCCCC !important;
+    --border-color: #CCCCCC !important;
     --blockquote-fg: #111111 !important;
     --paper: #F5F5F5 !important;
     --primary: #A23E48 !important;
@@ -2425,7 +2498,7 @@ mark {
     display: block;
     margin-top: 3em;
     padding-top: 1em;
-    border-top: 2px solid var(--border);
+    border-top: 2px solid var(--border-color);
   }
 
   #print-references h2 {
@@ -2450,7 +2523,7 @@ mark {
 
   /* Post footer for print */
   .post-footer {
-    border-top: 1px solid var(--border);
+    border-top: var(--border);
     margin-top: 2em;
     padding-top: 0.8em;
     page-break-inside: avoid;
