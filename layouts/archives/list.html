@@ -8,10 +8,7 @@
   <div class="archive-timeline">
     {{ range $posts.GroupByDate "2006" }}
       <div class="archive-year-section" id="year-{{ .Key }}">
-        <div class="archive-year-header">
-          <h2 class="archive-year-title">{{ T "yearLabel" (dict "Year" .Key) }}</h2>
-          <span class="count-pill">{{ len .Pages }}</span>
-        </div>
+        <h2 class="archive-year-title">{{ T "yearLabel" (dict "Year" .Key) }}</h2>
         <div class="archive-post-list">
           {{ range .Pages }}
             <div class="archive-post-row">

@@ -24,118 +24,14 @@
           </xsl:choose>
         </title>
         <style>
-          :root {
-            color-scheme: light;
-            --bg: #FAFAFA;
-            --surface: #FFFFFF;
-            --text: #222222;
-            --heading: #111111;
-            --muted: #545454;
-            --primary: #A23E48;
-            --primary-fg: #FFFFFF;
-            --accent: #2E5A88;
-            --paper: #F0E6D2;
-            --link: #0050A5;
-            --link-hover: #003875;
-            --danger: #CC3333;
-            --code-bg: #F5F5F5;
-            --border: 1px solid rgba(0, 0, 0, 0.1);
-            --transition-fast: 0.2s ease;
-            --content-width: 780px;
-            --radius-sm: 4px;
-            --radius-md: 6px;
-            --radius-lg: 8px;
-            --font-size-base: 16px;
-            --line-height: 1.8;
-          }
+          {{ partial "xml-xsl-styles.html" . }}
 
-          * {
-            box-sizing: border-box;
-          }
-
-          body {
-            margin: 0;
-            padding: 0;
-            background: var(--bg);
-            color: var(--text);
-            font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            font-size: var(--font-size-base);
-            line-height: var(--line-height);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-          }
-
-          /* Header */
-          .feed-header {
-            background: var(--surface);
-            border-bottom: var(--border);
-            padding: 16px 24px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-          }
-
-          .feed-header-inner {
-            max-width: var(--content-width);
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-          }
-
-          .feed-brand {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--heading);
-            text-decoration: none;
-          }
-
-          .feed-brand:hover {
-            color: var(--primary);
-          }
-
-          .feed-back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            padding: 6px 12px;
-            border-radius: var(--radius-sm);
-            background: var(--paper);
-            transition: opacity var(--transition-fast);
-          }
-
-          .feed-back-link:hover {
-            opacity: 0.85;
-          }
-
-          /* Main container */
-          .feed-container {
-            max-width: var(--content-width);
-            margin: 32px auto;
-            padding: 0 20px 60px;
-          }
-
-          /* Hero notice banner */
-          .feed-notice {
-            background: var(--surface);
-            border: var(--border);
-            border-left: 4px solid var(--primary);
-            border-radius: var(--radius-lg);
-            padding: 20px 24px;
-            margin-bottom: 36px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-          }
-
+          /* RSS-specific styles */
           .feed-notice-title {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 18px;
+            font-size: 19px;
             font-weight: 700;
             color: var(--heading);
             margin: 0 0 10px;
@@ -146,24 +42,7 @@
             flex-shrink: 0;
           }
 
-          .feed-notice p {
-            margin: 8px 0;
-            font-size: 14.5px;
-            color: var(--text);
-            line-height: 1.6;
-          }
-
-          .feed-notice a {
-            color: var(--link);
-            text-decoration: underline;
-            text-underline-offset: 3px;
-          }
-
-          .feed-notice a:hover {
-            color: var(--link-hover);
-          }
-
-          /* Clickable button: copies the feed address to the clipboard. */
+          /* Clickable button: copies the feed address to the clipboard */
           .feed-url-box {
             display: flex;
             align-items: center;
@@ -171,12 +50,12 @@
             gap: 8px;
             width: 100%;
             margin-top: 14px;
-            padding: 10px 14px;
+            padding: 8px 12px;
             background: var(--paper);
             border: var(--border);
             border-radius: var(--radius-sm);
-            font-family: ui-monospace, SFMono-Regular, Consolas, Monaco, monospace;
-            font-size: 13.5px;
+            font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
             line-height: var(--line-height);
             color: var(--text);
             text-align: left;
@@ -194,45 +73,6 @@
             outline-offset: 2px;
           }
 
-          .feed-url-value {
-            flex: 1 1 auto;
-            min-width: 0;
-            word-break: break-all;
-            user-select: text;
-          }
-
-          .feed-url-hint {
-            flex-shrink: 0;
-            margin-left: auto;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--muted);
-            background: var(--surface);
-            padding: 2px 6px;
-            border-radius: var(--radius-sm);
-            transition: color var(--transition-fast);
-          }
-
-          .feed-url-box:hover .feed-url-hint {
-            color: var(--primary);
-          }
-
-          .feed-url-status {
-            margin: 8px 0 0;
-            min-height: 1.5em;
-            font-size: 13px;
-            color: var(--muted);
-          }
-
-          .feed-url-status[data-state="ok"] {
-            color: var(--primary);
-          }
-
-          .feed-url-status[data-state="error"] {
-            color: var(--danger);
-          }
-
           .feed-url-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -245,14 +85,43 @@
             flex-shrink: 0;
           }
 
-          /* Section header */
+          .feed-url-value {
+            flex: 1 1 auto;
+            min-width: 0;
+            word-break: break-all;
+            user-select: text;
+          }
+
+          .feed-url-hint {
+            flex-shrink: 0;
+            margin-left: auto;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            background: var(--surface);
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            border: var(--border);
+            transition: color var(--transition-fast), border-color var(--transition-fast);
+          }
+
+          .feed-url-box:hover .feed-url-hint {
+            color: var(--primary);
+            border-color: var(--primary);
+          }
+
+          .feed-url-box.copied .feed-url-hint {
+            color: var(--primary);
+            border-color: var(--primary);
+            font-weight: 700;
+          }
+
+          /* Feed section heading */
           .feed-section-heading {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 700;
             color: var(--heading);
-            margin: 0 0 20px;
-            padding-bottom: 8px;
-            border-bottom: var(--border);
+            margin: 0 0 24px;
           }
 
           .feed-entries {
@@ -261,27 +130,19 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 36px;
+            gap: 48px;
           }
 
           .feed-entry {
-            background: var(--surface);
-            border: var(--border);
-            border-radius: var(--radius-lg);
-            padding: 28px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-          }
-
-          .feed-entry:hover {
-            border-color: var(--primary);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            background: transparent;
+            padding: 0;
+            border: none;
           }
 
           .feed-entry-title {
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 700;
-            margin: 0 0 10px;
+            margin: 0 0 8px;
             line-height: 1.4;
           }
 
@@ -296,9 +157,9 @@
           }
 
           .feed-entry-meta {
-            font-size: 13.5px;
+            font-size: 13px;
             color: var(--muted);
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -314,9 +175,9 @@
           }
 
           .feed-entry-content {
-            font-size: 15.5px;
+            font-size: var(--font-size-base);
             color: var(--text);
-            line-height: 1.8;
+            line-height: var(--line-height);
             overflow-wrap: break-word;
           }
 
@@ -327,7 +188,7 @@
           .feed-entry-content img {
             max-width: 100%;
             height: auto;
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-sm);
             margin: 16px 0;
             display: block;
           }
@@ -342,28 +203,78 @@
             color: var(--link-hover);
           }
 
-          .feed-entry-content pre {
+          /* Inline code: clean monospace without background tint */
+          .feed-entry-content code {
+            font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            overflow-wrap: break-word;
+            background: transparent;
+            padding: 0;
+          }
+
+          /* Code block container */
+          .feed-entry-content pre,
+          .feed-entry-content .highlight {
             background: var(--code-bg);
             border: var(--border);
             border-radius: var(--radius-md);
-            padding: 14px;
+            margin: 16px 0;
             overflow-x: auto;
-            font-family: ui-monospace, SFMono-Regular, Consolas, Monaco, monospace;
+          }
+
+          .feed-entry-content pre {
+            padding: 12px;
+            font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-size: 13.5px;
             line-height: 1.5;
           }
 
-          .feed-entry-content code {
-            font-family: ui-monospace, SFMono-Regular, Consolas, Monaco, monospace;
-            font-size: 0.9em;
-            background: var(--paper);
-            padding: 2px 6px;
-            border-radius: var(--radius-sm);
+          .feed-entry-content .highlight pre {
+            margin: 0;
+            border: 0;
+            background: transparent;
           }
 
-          .feed-entry-content pre code {
+          .feed-entry-content pre code,
+          .feed-entry-content .highlight code,
+          .feed-entry-content .chroma code {
+            font-size: inherit;
             background: transparent;
             padding: 0;
+          }
+
+          /* Chroma line number table: reset borders and padding */
+          .feed-entry-content .chroma {
+            background: transparent !important;
+          }
+
+          .feed-entry-content .chroma .lntable {
+            border: 0 !important;
+            border-spacing: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: auto !important;
+            background: transparent !important;
+          }
+
+          .feed-entry-content .chroma .lntd {
+            border: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            vertical-align: top !important;
+            background: transparent !important;
+          }
+
+          .feed-entry-content .chroma .lnt,
+          .feed-entry-content .chroma .ln {
+            white-space: pre;
+            user-select: none;
+            padding: 0 0.8em 0 0.4em;
+            color: var(--muted);
+          }
+
+          .feed-entry-content .chroma .line {
+            display: flex;
           }
 
           .feed-entry-content blockquote {
@@ -374,28 +285,28 @@
             border-radius: 0 var(--radius-md) var(--radius-md) 0;
           }
 
-          .feed-entry-content table {
+          /* Content data tables */
+          .feed-entry-content table:not(.lntable) {
             width: 100%;
             border-collapse: collapse;
             margin: 16px 0;
             font-size: 14px;
           }
 
-          .feed-entry-content th,
-          .feed-entry-content td {
+          .feed-entry-content table:not(.lntable) th,
+          .feed-entry-content table:not(.lntable) td {
             padding: 8px 12px;
-            border: var(--border);
+            border-bottom: var(--border);
+            text-align: left;
           }
 
-          .feed-entry-content th {
+          .feed-entry-content table:not(.lntable) th {
             background: var(--paper);
             font-weight: 600;
           }
 
           .feed-entry-more {
-            margin-top: 20px;
-            padding-top: 14px;
-            border-top: var(--border);
+            margin-top: 16px;
           }
 
           .feed-read-more {
@@ -406,12 +317,11 @@
             font-weight: 600;
             color: var(--primary);
             text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: border-color var(--transition-fast);
+            transition: opacity var(--transition-fast);
           }
 
           .feed-read-more:hover {
-            border-bottom-color: var(--primary);
+            opacity: 0.8;
           }
 
           /* Footer */
@@ -419,28 +329,27 @@
             text-align: center;
             font-size: 13px;
             color: var(--muted);
-            margin-top: 48px;
+            margin-top: 64px;
             padding-top: 24px;
-            border-top: var(--border);
           }
         </style>
       </head>
       <body>
-        <header class="feed-header">
-          <div class="feed-header-inner">
-            <a class="feed-brand" href="{{ "/" | relLangURL }}">
+        <header class="site-header">
+          <div class="site-header-inner">
+            <a class="site-brand" href="{{ "/" | relLangURL }}">
               <xsl:value-of select="$feed-title" />
             </a>
-            <a class="feed-back-link" href="{{ "/" | relLangURL }}">
+            <a class="back-link" href="{{ "/" | relLangURL }}">
               {{ T "visitBlogHome" }}
             </a>
           </div>
         </header>
 
-        <main class="feed-container">
-          <section class="feed-notice">
+        <main class="container">
+          <section class="info-card accent-primary">
             <h1 class="feed-notice-title">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M4 11a9 9 0 0 1 9 9"></path>
                 <path d="M4 4a16 16 0 0 1 16 16"></path>
                 <circle cx="5" cy="19" r="1"></circle>
@@ -468,7 +377,7 @@
                    "Title" `<xsl:value-of select="atom:feed/atom:title | rss/channel/title" />`
                    "Readers" (delimit $readers (T "listSeparator"))) }}
             </p>
-            <button type="button" class="feed-url-box" id="feedUrlCopy" title="{{ T `copyFeedUrl` }}">
+            <button type="button" class="feed-url-box" id="feedUrlCopy" title="{{ T `copyFeedUrl` }}" aria-label="{{ T `copyFeedUrl` }}">
               <span class="feed-url-label">{{ T "feedUrlLabel" }}</span>
               <span class="feed-url-value" id="feedUrlValue">
                 <xsl:choose>
@@ -486,9 +395,8 @@
                   </xsl:otherwise>
                 </xsl:choose>
               </span>
-              <span class="feed-url-hint">{{ T "copyFeedUrl" }}</span>
+              <span class="feed-url-hint" id="feedUrlHint">{{ T "copyFeedUrl" }}</span>
             </button>
-            <p class="feed-url-status" id="feedUrlStatus" role="status"></p>
           </section>
 
           <h2 class="feed-section-heading">{{ T "feedLatestPosts" }}</h2>
@@ -517,24 +425,23 @@
           (function() {
             var box = document.getElementById('feedUrlCopy');
             var value = document.getElementById('feedUrlValue');
-            var status = document.getElementById('feedUrlStatus');
-            if (!box || !value || !status) return;
+            var hint = document.getElementById('feedUrlHint');
+            if (!box || !value || !hint) return;
 
-            var I18N = {
-              copied: ]]>{{ T "feedUrlCopied" | jsonify }}<![CDATA[,
-              failed: ]]>{{ T "feedUrlCopyFailed" | jsonify }}<![CDATA[
-            };
-
+            var copyLabel = ]]>{{ T "copyFeedUrl" | jsonify }}<![CDATA[;
+            var copiedLabel = ]]>{{ T "copiedCode" | jsonify }}<![CDATA[;
             var resetTimer;
 
             function report(ok) {
-              status.textContent = ok ? I18N.copied : I18N.failed;
-              status.setAttribute('data-state', ok ? 'ok' : 'error');
-              clearTimeout(resetTimer);
-              resetTimer = setTimeout(function() {
-                status.textContent = '';
-                status.removeAttribute('data-state');
-              }, 4000);
+              if (ok) {
+                hint.textContent = copiedLabel;
+                box.classList.add('copied');
+                clearTimeout(resetTimer);
+                resetTimer = setTimeout(function() {
+                  hint.textContent = copyLabel;
+                  box.classList.remove('copied');
+                }, 2000);
+              }
             }
 
             function legacyCopy(text) {

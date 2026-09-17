@@ -14,25 +14,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{{ T "sitemapPageTitle" }} — {{ site.Title }}</title>
         <style>
-          :root {
-            color-scheme: light;
-            --bg: #FAFAFA;
-            --surface: #FFFFFF;
-            --text: #222222;
-            --heading: #111111;
-            --muted: #545454;
-            --primary: #A23E48;
-            --primary-fg: #FFFFFF;
-            --accent: #2E5A88;
-            --paper: #F0E6D2;
-            --link: #0050A5;
-            --link-hover: #003875;
-            --paper-strong: #E8DDCA;
-            --border: 1px solid rgba(0, 0, 0, 0.1);
-            --transition-fast: 0.2s ease;
-            --transition-quick: 0.15s ease;
+          {{ partial "xml-xsl-styles.html" . }}
 
-            /* Content type accents, shared by the filter pills and the table badges */
+          /* Sitemap specific content type tokens */
+          :root {
+            --content-width: 960px;
             --type-post-bg: #EBF3FB;
             --type-post-fg: #1D5B90;
             --type-post-border: #B8D5F2;
@@ -45,113 +31,14 @@
             --type-page-bg: #F2F2F2;
             --type-page-fg: #444444;
             --type-page-border: #D0D0D0;
-            --content-width: 960px;
-            --radius-sm: 4px;
-            --radius-md: 6px;
-            --radius-lg: 8px;
-            --font-size-base: 15px;
-            --line-height: 1.6;
           }
 
-          * {
-            box-sizing: border-box;
-          }
-
-          body {
-            margin: 0;
-            padding: 0;
-            background: var(--bg);
-            color: var(--text);
-            font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            font-size: var(--font-size-base);
-            line-height: var(--line-height);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-          }
-
-          .site-header {
-            background: var(--surface);
-            border-bottom: var(--border);
-            padding: 16px 24px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-          }
-
-          .site-header-inner {
-            max-width: var(--content-width);
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-          }
-
-          .site-brand {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--heading);
-            text-decoration: none;
-          }
-
-          .site-brand:hover {
-            color: var(--primary);
-          }
-
-          .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            padding: 6px 12px;
-            border-radius: var(--radius-sm);
-            background: var(--paper);
-            transition: opacity var(--transition-fast);
-          }
-
-          .back-link:hover {
-            opacity: 0.85;
-          }
-
-          .container {
-            max-width: var(--content-width);
-            margin: 32px auto;
-            padding: 0 20px 60px;
-          }
-
-          .info-card {
-            background: var(--surface);
-            border: var(--border);
-            border-left: 4px solid var(--accent);
-            border-radius: var(--radius-lg);
-            padding: 20px 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-          }
-
-          .info-card h1 {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--heading);
-            margin: 0 0 8px;
-          }
-
-          .info-card p {
-            margin: 6px 0;
-            font-size: 14px;
-            color: var(--muted);
-          }
-
+          /* Filter bar without dividing line */
           .stats-bar {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             margin-top: 14px;
-            padding-top: 14px;
-            border-top: var(--border);
             align-items: center;
           }
 
@@ -168,17 +55,16 @@
             gap: 6px;
             font-size: 13px;
             font-weight: 500;
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: var(--radius-sm);
             cursor: pointer;
             user-select: none;
             border: 1px solid transparent;
-            transition: transform var(--transition-quick), opacity var(--transition-quick), background-color var(--transition-quick), border-color var(--transition-quick), box-shadow var(--transition-quick);
+            transition: opacity var(--transition-fast), background-color var(--transition-fast);
           }
 
           .stat-pill:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            opacity: 0.85;
           }
 
           /* Active category states */
@@ -210,8 +96,8 @@
           .stat-pill.inactive {
             background: transparent;
             color: var(--muted);
-            border: 1px dashed rgba(0, 0, 0, 0.25);
-            opacity: 0.5;
+            border-color: transparent;
+            opacity: 0.45;
             text-decoration: line-through;
           }
 
@@ -236,18 +122,19 @@
             color: var(--heading);
           }
 
+          /* Table without dense horizontal lines */
           .table-wrapper {
             background: var(--surface);
             border: var(--border);
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-md);
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
           }
 
           table {
             border-collapse: collapse;
             width: 100%;
             font-size: 13.5px;
+            font-variant-numeric: tabular-nums;
           }
 
           th {
@@ -256,13 +143,13 @@
             text-align: left;
             padding: 12px 16px;
             font-weight: 600;
-            border-bottom: var(--border);
+            border-bottom: 2px solid var(--border-color);
             user-select: none;
           }
 
           th.sortable {
             cursor: pointer;
-            transition: background-color var(--transition-quick), color var(--transition-quick);
+            transition: background-color var(--transition-fast), color var(--transition-fast);
           }
 
           th.sortable:hover {
@@ -280,7 +167,7 @@
             margin-left: 6px;
             font-size: 12px;
             color: var(--muted);
-            transition: color var(--transition-quick);
+            transition: color var(--transition-fast);
           }
 
           th.sorted-asc .sort-icon,
@@ -290,17 +177,18 @@
           }
 
           td {
-            padding: 10px 16px;
-            border-bottom: var(--border);
+            padding: 9px 16px;
+            border-bottom: none;
             vertical-align: middle;
           }
 
-          tr:last-child td {
-            border-bottom: none;
+          /* Zebra striping instead of lines on every row */
+          tbody tr:nth-of-type(even) td {
+            background-color: var(--table-stripe);
           }
 
           tr:hover td {
-            background: rgba(0, 0, 0, 0.02);
+            background-color: var(--paper) !important;
           }
 
           tr.is-hidden {
@@ -327,12 +215,11 @@
             margin-right: 8px;
             vertical-align: middle;
             cursor: pointer;
-            transition: opacity var(--transition-quick), transform var(--transition-quick);
+            transition: opacity var(--transition-fast);
           }
 
           .type-badge:hover {
             opacity: 0.8;
-            transform: scale(1.05);
           }
 
           .badge-post {
@@ -357,7 +244,7 @@
 
           .path-text {
             vertical-align: middle;
-            font-family: ui-monospace, SFMono-Regular, Consolas, Monaco, monospace;
+            font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-size: 13px;
           }
 

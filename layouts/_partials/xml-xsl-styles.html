@@ -1,0 +1,142 @@
+/* ==========================================================================
+   SHARED XML / XSL STYLES (RSS Feed and Sitemap)
+   Conforms to Chaos theme light palette and paper minimalism.
+   Light mode only.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --text: #222222;
+  --heading: #111111;
+  --muted: #545454;
+  --primary: #A23E48;
+  --primary-hover: #7E2F37;
+  --primary-fg: #FFFFFF;
+  --accent: #2E5A88;
+  --paper: #F0E6D2;
+  --paper-strong: #E8DDCA;
+  --link: #0050A5;
+  --link-hover: #003875;
+  --table-stripe: #F5F5F5;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border: 1px solid var(--border-color);
+  --code-bg: #F0F0F0;
+  --transition-fast: 0.2s ease;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --content-width: 860px;
+  --font-size-base: 15.5px;
+  --line-height: 1.7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Header bar */
+.site-header {
+  background: var(--surface);
+  border-bottom: var(--border);
+  padding: 14px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.site-header-inner {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.site-brand {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--heading);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.site-brand:hover {
+  color: var(--primary);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  transition: opacity var(--transition-fast);
+}
+
+.back-link:hover {
+  opacity: 0.85;
+}
+
+/* Main content container */
+.container {
+  max-width: var(--content-width);
+  margin: 32px auto;
+  padding: 0 20px 60px;
+}
+
+/* Common notice banner */
+.info-card {
+  background: var(--surface);
+  border: var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-bottom: 32px;
+}
+
+.info-card.accent-primary {
+  border-left-color: var(--primary);
+}
+
+.info-card h1 {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--heading);
+  margin: 0 0 8px;
+}
+
+.info-card p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.info-card a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.info-card a:hover {
+  color: var(--link-hover);
+}
