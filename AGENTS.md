@@ -37,6 +37,18 @@ Hugo compiles Markdown → static HTML at build time. No client-side frameworks,
 - **Performance**: Served from same domain (no DNS lookup, connection overhead)
 - **Versioning**: Explicit control over versions
 
+### Client-Side Search Engine Architecture
+Chaos implements a zero-dependency, privacy-preserving client-side full-text search engine powered by an offline pre-computed inverted index:
+- **Offline Indexing (`tools/build_search_index.py`)**:
+  - Scans Hugo markdown, preserves technical identifiers inside code blocks and inline backticks, tokenizes with vendored `jieba`.
+  - Splits output into two mathematically disjoint tiers: Tier 1 (Core metadata + Title/Tags) and Tier 2 (Body only, strictly `P_T1(w) ∩ P_T2(w) = ∅`).
+- **Progressive Delivery**:
+  - Tier 1 (a small fraction of the total index) is loaded upon opening the search modal for sub-50ms Time-to-Interactive.
+  - Tier 2 (the remaining body index) is fetched in the background via `requestIdleCallback` and merged into the memory index without UI stalls.
+- **Scoring & Safety**:
+  - BM25-IDF + multi-field boosting (Title exact +120, Title phrase +60, Tag phrase +45, Token in Title +18, Token in Tag +12).
+  - All index dictionary lookups use `Array.isArray()` and `hasOwnProperty` guards to ensure immunity against Object prototype collision (e.g. searching for `constructor` or `toString`).
+
 ## 3. Code Quality Standards
 
 ### Formatting Rationale

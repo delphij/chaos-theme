@@ -33,10 +33,11 @@ title = 'My New Hugo Site'
 
   # Client-side full-text search (optional, disabled by default)
   # When enabled, adds a search button to the header and hotkey '/' modal.
-  # Generate search-index.json with: python3 themes/chaos/tools/build_search_index.py
+  # Generate search index with: python3 themes/chaos/tools/build_search_index.py --output assets/search-index.json
   # [params.search]
   #   enable = true
   #   indexURL = "/search-index.json"
+  #   bodyIndexURL = "/search-index-body.json"  # Optional; auto-detected if search-index-body.json exists in assets/
 
 [module]
   [module.hugoVersion]

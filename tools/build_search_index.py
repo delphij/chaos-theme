@@ -54,10 +54,11 @@ def clean_markdown(text: str) -> str:
     text = re.sub(r"!\[.*?\]\(.*?\)", " ", text)
     # Convert links [text](url) -> text
     text = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", text)
-    # Remove code blocks
-    text = re.sub(r"```[\s\S]*?```", " ", text)
-    # Remove inline code
-    text = re.sub(r"`[^`]+`", " ", text)
+    # Remove code fence markers (```lang ... ```) but preserve technical code content!
+    text = re.sub(r"```[a-zA-Z0-9_\-\.]*", " ", text)
+    # Remove inline code backticks while preserving code identifier text
+    text = re.sub(r"`([^`]+)`", r" \1 ", text)
+    text = re.sub(r"`", " ", text)
     # Remove headings marker
     text = re.sub(r"^[#\s]+", " ", text, flags=re.MULTILINE)
     # Remove blockquotes, table borders, bold/italic markers
@@ -198,15 +199,24 @@ def tokenize(text: str) -> set:
 def main():
     parser = argparse.ArgumentParser(description="Build offline search index for Chaos theme.")
     parser.add_argument("--content", default="content", help="Path to Hugo content directory (default: content)")
-    parser.add_argument("--output", default="assets/search-index.json", help="Path to output search-index.json (default: assets/search-index.json)")
+    parser.add_argument("--output", default="assets/search-index.json", help="Path to output Tier 1 / core search-index.json (default: assets/search-index.json)")
+    parser.add_argument("--output-body", default="", help="Path to output Tier 2 / body search-index.json (default: auto derived as <stem>-body.json)")
+    parser.add_argument("--single-file", action="store_true", help="Generate legacy monolithic single-file index instead of two-tier")
     parser.add_argument("--base-url", default="/", help="Base URL for site links (default: /)")
-    parser.add_argument("--max-body-chars", type=int, default=3000, help="Max body characters to index per post (default: 3000)")
+    parser.add_argument("--max-body-chars", type=int, default=6000, help="Max body characters to index per post (default: 6000)")
     args = parser.parse_args()
 
     content_dir = os.path.abspath(args.content)
     if not os.path.isdir(content_dir):
         sys.stderr.write(f"Content directory not found: {content_dir}\n")
         sys.exit(1)
+
+    output_path = os.path.abspath(args.output)
+    if args.output_body:
+        output_body_path = os.path.abspath(args.output_body)
+    else:
+        root, ext = os.path.splitext(output_path)
+        output_body_path = f"{root}-body{ext or '.json'}"
 
     print(f"Scanning markdown files in {content_dir}...")
     files = glob.glob(os.path.join(content_dir, "**", "*.md"), recursive=True)
@@ -239,9 +249,8 @@ def main():
         url = compute_post_url(filepath, content_dir, meta, args.base_url)
 
         clean_body = clean_markdown(body)
-        summary = meta.get("description", "")
-        if not summary:
-            summary = clean_body[:160]
+        # Only retain summary if explicitly set in front matter to keep docs payload compact
+        summary = meta.get("description", "").strip()
 
         parsed_posts.append({
             "title": title,
@@ -258,7 +267,8 @@ def main():
     parsed_posts.sort(key=lambda p: (p["date"] or "", p["title"]), reverse=True)
 
     docs = []
-    index = {}
+    tier1_index = {}
+    tier2_index = {}
 
     for post in parsed_posts:
         doc_id = len(docs)
@@ -267,53 +277,88 @@ def main():
             "title": post["title"],
             "url": post["url"],
             "date": post["date"],
-            "summary": post["summary"],
             "tags": post["tags"],
             "categories": post["categories"],
         }
+        if post["summary"]:
+            doc_entry["summary"] = post["summary"]
         if post.get("deprecated"):
             doc_entry["deprecated"] = True
         docs.append(doc_entry)
 
-        # Tokenize fields
-        doc_tokens = set()
-
-        # Title tokens
-        doc_tokens.update(tokenize(post["title"]))
-
-        # Tag & category tokens
+        # Tier 1 tokens: Title, Tags, Categories
+        tier1_tokens = set()
+        tier1_tokens.update(tokenize(post["title"]))
         for tag in post["tags"]:
-            doc_tokens.update(tokenize(tag))
+            tier1_tokens.update(tokenize(tag))
         for cat in post["categories"]:
-            doc_tokens.update(tokenize(cat))
+            tier1_tokens.update(tokenize(cat))
 
-        # Body tokens (up to max_body_chars)
-        doc_tokens.update(tokenize(post["clean_body"][: args.max_body_chars]))
+        for token in tier1_tokens:
+            if token not in tier1_index:
+                tier1_index[token] = []
+            tier1_index[token].append(doc_id)
 
-        for token in doc_tokens:
-            if token not in index:
-                index[token] = []
-            index[token].append(doc_id)
+        # Body tokens: up to max_body_chars
+        body_tokens = tokenize(post["clean_body"][: args.max_body_chars])
+
+        if args.single_file:
+            # Monolithic index: combine all tokens into tier1_index
+            for token in body_tokens:
+                if token not in tier1_tokens:
+                    if token not in tier1_index:
+                        tier1_index[token] = []
+                    tier1_index[token].append(doc_id)
+        else:
+            # Two-tier disjoint index: only record body tokens that are NOT in tier1_tokens for this doc
+            tier2_tokens = body_tokens - tier1_tokens
+            for token in tier2_tokens:
+                if token not in tier2_index:
+                    tier2_index[token] = []
+                tier2_index[token].append(doc_id)
 
     # Sort index keys alphabetically for deterministic output
-    sorted_index = {k: sorted(index[k]) for k in sorted(index.keys())}
+    sorted_tier1_index = {k: sorted(tier1_index[k]) for k in sorted(tier1_index.keys())}
 
-    payload = {
-        "docs": docs,
-        "index": sorted_index,
-    }
-
-    output_path = os.path.abspath(args.output)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
+    t1_payload = {
+        "docs": docs,
+        "index": sorted_tier1_index,
+    }
     with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+        json.dump(t1_payload, f, ensure_ascii=False, separators=(",", ":"))
 
-    file_size_kb = os.path.getsize(output_path) / 1024
-    print(f"Successfully generated search index:")
-    print(f"  - Total indexed posts: {len(docs)}")
-    print(f"  - Total unique terms:  {len(sorted_index)}")
-    print(f"  - Output file:         {output_path} ({file_size_kb:.1f} KB)")
+    t1_size_kb = os.path.getsize(output_path) / 1024
+
+    if args.single_file:
+        print("Successfully generated monolithic search index:")
+        print(f"  - Total indexed posts: {len(docs)}")
+        print(f"  - Total unique terms:  {len(sorted_tier1_index)}")
+        print(f"  - Output file:         {output_path} ({t1_size_kb:.1f} KB)")
+    else:
+        sorted_tier2_index = {k: sorted(tier2_index[k]) for k in sorted(tier2_index.keys())}
+        os.makedirs(os.path.dirname(output_body_path), exist_ok=True)
+        t2_payload = {
+            "index": sorted_tier2_index,
+        }
+        with open(output_body_path, "w", encoding="utf-8") as f:
+            json.dump(t2_payload, f, ensure_ascii=False, separators=(",", ":"))
+
+        t2_size_kb = os.path.getsize(output_body_path) / 1024
+
+        # Sanity check: Ensure strict disjointness between Tier 1 and Tier 2 posting lists
+        conflicts = 0
+        for term, doc_ids in sorted_tier1_index.items():
+            if term in sorted_tier2_index:
+                overlap = set(doc_ids) & set(sorted_tier2_index[term])
+                if overlap:
+                    conflicts += len(overlap)
+
+        print("Successfully generated two-tier search index:")
+        print(f"  - Total indexed posts: {len(docs)}")
+        print(f"  - Tier 1 (Core):       {output_path} ({t1_size_kb:.1f} KB, {len(sorted_tier1_index)} terms)")
+        print(f"  - Tier 2 (Body):       {output_body_path} ({t2_size_kb:.1f} KB, {len(sorted_tier2_index)} terms)")
+        print(f"  - Disjoint check:      {conflicts} overlapping posting pairs (strictly 0)")
 
 
 if __name__ == "__main__":

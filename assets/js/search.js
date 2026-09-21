@@ -18,6 +18,8 @@
 
   var indexData = null;
   var isLoading = false;
+  var isBodyLoading = false;
+  var hasBodyIndex = false;
   var selectedIndex = -1;
   var currentResults = [];
   var debounceTimer = null;
@@ -39,9 +41,64 @@
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
+  function scheduleLoadBodyIndex() {
+    if (hasBodyIndex || isBodyLoading || !indexData) return;
+    var bodyUrl = dialog.getAttribute('data-body-index-url');
+    if (!bodyUrl) return;
+
+    var startFetch = function () {
+      loadBodyIndex(bodyUrl);
+    };
+
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(startFetch, { timeout: 1500 });
+    } else {
+      setTimeout(startFetch, 150);
+    }
+  }
+
+  function loadBodyIndex(bodyUrl) {
+    if (hasBodyIndex || isBodyLoading || !indexData) return;
+    isBodyLoading = true;
+
+    fetch(bodyUrl)
+      .then(function (res) {
+        if (!res.ok) {
+          throw new Error('HTTP ' + res.status);
+        }
+        return res.json();
+      })
+      .then(function (data) {
+        isBodyLoading = false;
+        hasBodyIndex = true;
+        if (data && data.index && indexData && indexData.index) {
+          var targetIndex = indexData.index;
+          var bodyIdx = data.index;
+          for (var term in bodyIdx) {
+            if (Object.prototype.hasOwnProperty.call(bodyIdx, term)) {
+              if (Array.isArray(targetIndex[term])) {
+                targetIndex[term] = targetIndex[term].concat(bodyIdx[term]);
+              } else {
+                targetIndex[term] = bodyIdx[term];
+              }
+            }
+          }
+          // If the search dialog is currently open and has user input, re-run search with full body index
+          if (dialog.open && input && input.value.trim()) {
+            performSearch(input.value.trim());
+          }
+        }
+      })
+      .catch(function () {
+        isBodyLoading = false;
+        // Non-fatal: search remains operational with Tier 1 (Core) index
+      });
+  }
+
   function loadIndex(callback) {
     if (indexData) {
       if (callback) callback();
+      scheduleLoadBodyIndex();
       return;
     }
     if (isLoading) return;
@@ -62,6 +119,7 @@
         isLoading = false;
         resultsContainer.innerHTML = initialHTML;
         if (callback) callback();
+        scheduleLoadBodyIndex();
       })
       .catch(function (err) {
         isLoading = false;
@@ -146,13 +204,13 @@
       for (var i = 0; i < len; i++) {
         for (var l = Math.min(6, len - i); l >= 2; l--) {
           var sub = cjkChars.substr(i, l);
-          if (indexData.index[sub]) {
+          if (Array.isArray(indexData.index[sub])) {
             tokens.push(sub);
           }
         }
         // Also check single character
         var single = cjkChars.substr(i, 1);
-        if (indexData.index[single]) {
+        if (Array.isArray(indexData.index[single])) {
           tokens.push(single);
         }
       }
@@ -200,7 +258,7 @@
     var totalDocs = (docs && docs.length) || 2000;
 
     tokens.forEach(function (token) {
-      var matchedDocIds = index[token];
+      var matchedDocIds = Array.isArray(index[token]) ? index[token] : null;
       var df = (matchedDocIds && matchedDocIds.length) || 0;
       // Smoothed BM25-style IDF: give rare words significantly higher discriminative weight
       var idf = Math.max(0.6, Math.log(1 + (totalDocs - df + 0.5) / (df + 0.5)));
@@ -216,7 +274,7 @@
         // Partial/prefix search for latin tokens with length >= 2
         if (token.length >= 2) {
           for (var key in index) {
-            if (key.indexOf(token) !== -1) {
+            if (Array.isArray(index[key]) && key.indexOf(token) !== -1) {
               var pIds = index[key];
               var pDf = pIds.length;
               var pIdf = Math.max(0.3, Math.log(1 + (totalDocs - pDf + 0.5) / (pDf + 0.5)));
@@ -319,7 +377,7 @@
     var html = '<ul class="search-list" role="listbox">';
     results.forEach(function (doc, idx) {
       var titleHighlighted = highlightText(doc.title, tokens);
-      var summaryHighlighted = highlightText(doc.summary, tokens);
+      var summaryHighlighted = doc.summary ? highlightText(doc.summary, tokens) : '';
       var tagsHTML = '';
       if (doc.tags && doc.tags.length > 0) {
         tagsHTML = '<span class="search-item-tags">' +
