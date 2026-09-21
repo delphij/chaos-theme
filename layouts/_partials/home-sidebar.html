@@ -10,7 +10,7 @@ Provides quick navigation to core categories (on non-category pages) and popular
       <h2 class="sidebar-widget-title">{{ T "coreCategories" }}</h2>
       <div class="sidebar-tags-cloud">
         {{ range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "categories" "Limit" 8) }}
-        <a class="sidebar-tag-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }} ({{ .Count }})</a>
+        {{ partial "term-chip.html" (dict "term" . "class" "sidebar-tag-item") }}
         {{ end }}
       </div>
       <div class="sidebar-widget-footer">
@@ -24,7 +24,7 @@ Provides quick navigation to core categories (on non-category pages) and popular
       <div class="sidebar-tags-cloud">
         {{ $tagLimit := cond $isCategoriesTaxo 24 16 }}
         {{ range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "tags" "Limit" $tagLimit) }}
-        <a class="sidebar-tag-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">#{{ .Page.LinkTitle }} ({{ .Count }})</a>
+        {{ partial "term-chip.html" (dict "term" . "class" "sidebar-tag-item" "prefix" "#") }}
         {{ end }}
       </div>
       <div class="sidebar-widget-footer">

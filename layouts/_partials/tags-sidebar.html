@@ -1,6 +1,9 @@
 {{- /*
 Sidebar for /tags/ taxonomy page.
 Provides A-Z letter jump navigation matching the TOC style.
+
+Letters and anchor ids come from _funcs/get-tag-letters.html, shared with
+taxonomy.html, so every jump link here has a matching anchor there.
 */}}
 <aside class="home-sidebar toc-wrapper" aria-label="{{ T `tagsAlphabetNav` }}">
   <div class="sidebar-card">
@@ -9,10 +12,8 @@ Provides A-Z letter jump navigation matching the TOC style.
       <div class="sidebar-tag-nav">
         <a class="sidebar-nav-jump" href="#hot-tags">{{ T "popularTags" }}</a>
         <div class="sidebar-az-grid">
-          {{ $letters := slice "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" "#" }}
-          {{ range $letters }}
-            {{ $id := cond (eq . "#") "tag-letter-other" (printf "tag-letter-%s" .) }}
-            <a class="sidebar-az-item" href="#{{ $id }}">{{ . }}</a>
+          {{ range partial "_funcs/get-tag-letters.html" .Data.Terms.Alphabetical }}
+            <a class="sidebar-az-item" href="#{{ .id }}">{{ .letter }}</a>
           {{ end }}
         </div>
       </div>

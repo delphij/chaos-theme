@@ -6,7 +6,7 @@
       <h2 class="tags-section-heading">{{ T "popularTags" }}</h2>
       <div class="tags-flat-wrap">
         {{ range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "tags" "Terms" .Data.Terms "Limit" 24) }}
-          <a class="tag-flat-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }} ({{ .Count }})</a>
+          {{ partial "term-chip.html" (dict "term" . "class" "tag-flat-item") }}
         {{ end }}
       </div>
     </div>
@@ -14,30 +14,18 @@
     <div class="tags-section">
       <h2 class="tags-section-heading">{{ T "allTagsAZ" }}</h2>
       <div class="tags-az-container">
-        {{ $letters := slice "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z" "#" }}
-        {{ range $letters }}
-          {{ $letter := . }}
-          {{ $matchingTerms := slice }}
-          {{ range $.Data.Terms.Alphabetical }}
-            {{ $firstChar := upper (substr .Page.LinkTitle 0 1) }}
-            {{ if and (ne $letter "#") (eq $firstChar $letter) }}
-              {{ $matchingTerms = $matchingTerms | append . }}
-            {{ else if and (eq $letter "#") (not (findRE "^[A-Za-z]" .Page.LinkTitle)) }}
-              {{ $matchingTerms = $matchingTerms | append . }}
-            {{ end }}
-          {{ end }}
-
-          {{ if gt (len $matchingTerms) 0 }}
-            {{ $id := cond (eq $letter "#") "tag-letter-other" (printf "tag-letter-%s" $letter) }}
-            <div class="tag-letter-group" id="{{ $id }}">
-              <h3 class="tag-letter-heading">{{ $letter }}</h3>
-              <div class="tags-flat-wrap">
-                {{ range $matchingTerms }}
-                  <a class="tag-flat-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }} ({{ .Count }})</a>
-                {{ end }}
-              </div>
+        {{- /* Letters and anchor ids come from _funcs/get-tag-letters.html, which
+               the sidebar reads too, so the jump links cannot drift from these
+               anchors. */}}
+        {{ range partial "_funcs/get-tag-letters.html" .Data.Terms.Alphabetical }}
+          <div class="tag-letter-group" id="{{ .id }}">
+            <h3 class="tag-letter-heading">{{ .letter }}</h3>
+            <div class="tags-flat-wrap">
+              {{ range .terms }}
+                {{ partial "term-chip.html" (dict "term" . "class" "tag-flat-item") }}
+              {{ end }}
             </div>
-          {{ end }}
+          </div>
         {{ end }}
       </div>
     </div>
@@ -45,7 +33,7 @@
   {{- else -}}
     <div class="tags-flat-wrap">
       {{ range .Data.Terms.ByCount }}
-        <a class="tag-flat-item" href="{{ .Page.RelPermalink }}" title="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}" aria-label="{{ T "termPostCount" (dict "Name" .Page.LinkTitle "Count" .Count) }}">{{ .Page.LinkTitle }} ({{ .Count }})</a>
+        {{ partial "term-chip.html" (dict "term" . "class" "tag-flat-item") }}
       {{ end }}
     </div>
   {{- end -}}

@@ -1,0 +1,16 @@
+{{- /*
+Renders one taxonomy term as a link showing its post count.
+
+The same markup was written out five times across taxonomy.html and
+home-sidebar.html, differing only by class name and an optional prefix. The
+accessible label is built once here instead of the translation being called
+twice per chip.
+
+@param {map} term   A taxonomy term (.Page and .Count).
+@param {string} class CSS class for the anchor.
+@param {string} prefix Optional string before the term name, e.g. "#".
+
+@example: {{ partial "term-chip.html" (dict "term" . "class" "tag-flat-item") }}
+*/ -}}
+{{- $label := T "termPostCount" (dict "Name" .term.Page.LinkTitle "Count" .term.Count) -}}
+<a class="{{ .class }}" href="{{ .term.Page.RelPermalink }}" title="{{ $label }}" aria-label="{{ $label }}">{{ with .prefix }}{{ . }}{{ end }}{{ .term.Page.LinkTitle }} ({{ .term.Count }})</a>

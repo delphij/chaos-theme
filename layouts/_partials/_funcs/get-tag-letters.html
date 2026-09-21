@@ -1,0 +1,35 @@
+{{- /*
+Groups taxonomy terms into A-Z (plus "#") buckets for the alphabetical index.
+
+This is the single source of truth for two things the /tags/ page and its
+sidebar must agree on exactly: which letters exist, and what anchor id each
+one gets. They used to carry a copy each, so the sidebar's jump links and the
+page's anchors were a cross-file contract with nothing enforcing it - edit one
+and the links break silently. Returning only non-empty groups also makes a
+dead jump link structurally impossible rather than merely unlikely.
+
+Buckets in one pass over the terms; the 27 lookups afterwards are constant
+work, where matching every letter against every term was 27 x N (over 30,000
+iterations for this site's 1129 tags).
+
+@param {slice} terms Taxonomy terms, e.g. .Data.Terms.Alphabetical
+@returns {slice} Ordered dicts of {letter, id, terms}, empty letters omitted.
+
+@example: {{ range partial "_funcs/get-tag-letters.html" .Data.Terms.Alphabetical }}
+*/ -}}
+
+{{- $buckets := newScratch -}}
+{{- range . -}}
+  {{- $first := upper (substr .Page.LinkTitle 0 1) -}}
+  {{- $letter := cond (eq (len (findRE `^[A-Z]$` $first)) 1) $first "#" -}}
+  {{- $buckets.Add (printf "g-%s" $letter) (slice .) -}}
+{{- end -}}
+
+{{- $out := slice -}}
+{{- range $letter := append (slice "#") (split "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "") -}}
+  {{- with $buckets.Get (printf "g-%s" $letter) -}}
+    {{- $id := cond (eq $letter "#") "tag-letter-other" (printf "tag-letter-%s" $letter) -}}
+    {{- $out = $out | append (dict "letter" $letter "id" $id "terms" .) -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

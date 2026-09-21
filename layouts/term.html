@@ -1,7 +1,0 @@
-{{ define "main" }}
-  {{ partial "page-header.html" . }}
-  {{ range .Paginator.Pages }}
-    {{ partial "post-summary.html" . }}
-  {{ end }}
-  {{ partial "paginator.html" . }}
-{{ end }}

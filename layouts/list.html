@@ -1,0 +1,18 @@
+{{- /*
+Shared list layout for section and term pages.
+
+These were two files differing only by the excludedTypes filter, which is a
+no-op on term pages (their pages are posts) and so is safe to apply to both.
+Hugo picks the more specific taxonomy.html for taxonomy pages and
+archives/list.html for the archives section, and home.html keeps its own
+layout - the homepage has no page header.
+*/ -}}
+{{ define "main" }}
+  {{ partial "page-header.html" . }}
+  {{ range .Paginator.Pages }}
+    {{- if not (in (site.Params.excludedTypes | default (slice "page")) .Type) -}}
+      {{ partial "post-summary.html" . }}
+    {{- end -}}
+  {{ end }}
+  {{ partial "paginator.html" . }}
+{{ end }}
