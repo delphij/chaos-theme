@@ -16,6 +16,7 @@ Generates Schema.org structured data in JSON-LD format.
   {{- end -}}
 {{- end -}}
 {{- $licenseURL := site.Params.licenseURL | default "https://creativecommons.org/licenses/by-nc/4.0/" -}}
+{{- $inLanguage := or site.Language.Locale site.Language.Lang site.LanguageCode "zh-CN" -}}
 
 {{- if .IsHome -}}
   {{- $website := dict
@@ -24,7 +25,7 @@ Generates Schema.org structured data in JSON-LD format.
     "name" site.Title
     "url" site.BaseURL
     "description" (partial "_funcs/get-meta-description.html" .)
-    "inLanguage" (site.Language.Locale | default "zh-CN")
+    "inLanguage" $inLanguage
   -}}
   {{- if $author -}}
     {{- $website = merge $website (dict "author" $author) -}}
@@ -54,13 +55,17 @@ Generates Schema.org structured data in JSON-LD format.
     "description" (partial "_funcs/get-meta-description.html" .)
     "mainEntityOfPage" (dict "@type" "WebPage" "@id" .Permalink)
     "url" .Permalink
-    "inLanguage" (site.Language.Locale | default "zh-CN")
+    "inLanguage" $inLanguage
   -}}
   {{- with .PublishDate -}}
-    {{- $article = merge $article (dict "datePublished" (.Format $ISO8601)) -}}
+    {{- if not .IsZero -}}
+      {{- $article = merge $article (dict "datePublished" (.Format $ISO8601)) -}}
+    {{- end -}}
   {{- end -}}
   {{- with .Lastmod -}}
-    {{- $article = merge $article (dict "dateModified" (.Format $ISO8601)) -}}
+    {{- if not .IsZero -}}
+      {{- $article = merge $article (dict "dateModified" (.Format $ISO8601)) -}}
+    {{- end -}}
   {{- end -}}
   {{- with .WordCount -}}
     {{- $article = merge $article (dict "wordCount" .) -}}
@@ -72,7 +77,7 @@ Generates Schema.org structured data in JSON-LD format.
     {{- $article = merge $article (dict "image" $images) -}}
   {{- end -}}
   {{- if $author -}}
-    {{- $article = merge $article (dict "author" $author "publisher" (dict "@type" "Person" "name" site.Params.author.name)) -}}
+    {{- $article = merge $article (dict "author" $author "publisher" $author) -}}
   {{- end -}}
   {{- with $licenseURL -}}
     {{- $article = merge $article (dict "license" .) -}}

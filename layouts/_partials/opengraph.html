@@ -12,8 +12,15 @@
   <meta property="og:description" content="{{ . }}">
 {{- end }}
 
-{{- with or .Params.locale site.Language.Locale }}
-  <meta property="og:locale" content="{{ replace . `-` `_` }}">
+{{- $rawLocale := or .Params.locale site.Language.Locale site.Language.Lang site.LanguageCode "zh-CN" -}}
+<meta property="og:locale" content="{{ partial "_funcs/get-og-locale.html" $rawLocale }}">
+{{- if .IsTranslated -}}
+  {{- range .Translations -}}
+    {{- $tLocale := or .Params.locale .Language.Locale .Language.Lang .Language.LanguageCode -}}
+    {{- with $tLocale -}}
+<meta property="og:locale:alternate" content="{{ partial "_funcs/get-og-locale.html" . }}">
+    {{- end -}}
+  {{- end -}}
 {{- end }}
 
 {{- if .IsPage }}
@@ -35,8 +42,13 @@
   <meta property="og:type" content="website">
 {{- end }}
 
-{{- range partial "_funcs/get-page-images.html" . | first 6 }}
-  <meta property="og:image" content="{{ . }}">
+{{- $images := partial "_funcs/get-page-images.html" . | first 6 -}}
+{{- $pageTitle := partial "_funcs/get-meta-title.html" . -}}
+{{- range $idx, $img := $images }}
+  <meta property="og:image" content="{{ $img }}">
+  {{- if and (eq $idx 0) $pageTitle }}
+  <meta property="og:image:alt" content="{{ $pageTitle }}">
+  {{- end }}
 {{- end }}
 
 {{- with .Params.audio }}

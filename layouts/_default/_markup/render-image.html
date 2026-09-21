@@ -15,16 +15,22 @@
 {{ $alt := .PlainText | safeHTML }}
 {{ $dest := .Destination }}
 
-{{/* Check if destination is a remote URL */}}
-{{ $isRemote := or (hasPrefix $dest "http://") (hasPrefix $dest "https://") }}
+{{/* Check if destination is a remote URL, protocol-relative URL, or data URI */}}
+{{ $isRemote := or (hasPrefix $dest "http://") (hasPrefix $dest "https://") (hasPrefix $dest "//") (findRE "^[A-Za-z][A-Za-z0-9+.-]*:" $dest) }}
 
 {{ if $isRemote }}
-  {{/* Render remote image as simple img tag */}}
-  <a href="{{ $dest | safeURL }}">
+  {{/* Render remote image or data URI */}}
+  {{- if hasPrefix $dest "data:" }}
     <picture>
       <img src="{{ $dest | safeURL }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
     </picture>
-  </a>
+  {{- else }}
+    <a href="{{ $dest }}">
+      <picture>
+        <img src="{{ $dest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
+      </picture>
+    </a>
+  {{- end }}
 {{ else if $src }}
 
   {{/* Decide target format: GIF stays GIF, everything else becomes WebP */}}
@@ -149,4 +155,12 @@
     </picture>
   </a>
 
+{{ else if $dest }}
+  {{/* Fallback for local non-page-resource images (e.g. static files or relative URLs) */}}
+  {{ $linkDest := strings.TrimPrefix "/" $dest | relURL }}
+  <a href="{{ $linkDest }}">
+    <picture>
+      <img src="{{ $linkDest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
+    </picture>
+  </a>
 {{ end }}

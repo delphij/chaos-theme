@@ -14,9 +14,9 @@ A minimalist Hugo theme designed for clarity, performance, and excellent Chinese
 - **Print-Ready Articles**: Automatic conversion of external links to footnotes for clean, readable printouts
 - **Chinese Typography**: Modern CSS features for CJK text (text-autospace, hanging-punctuation, auto-phrase)
 - **Mathematics Support**: Built-in KaTeX integration for scientific content
-- **SEO & Licensing**: Complete OpenGraph, Twitter Cards, Schema.org and machine-readable CC licensing support
+- **SEO & Licensing**: Comprehensive OpenGraph (with territory-cased locale, primary image alt, and alternates), Twitter Cards, Schema.org (JSON-LD BlogPosting/WebSite/BreadcrumbList with complete publisher metadata), multilingual hreflang and default-language x-default clusters, W3C-compliant XML sitemap, and machine-readable CC licensing support
 - **Accessible**: WCAG 2.1 AA compliant with skip-to-content links, ARIA labels, screen reader announcements, and reduced-motion support
-- **Multilingual**: i18n support for English, Simplified Chinese, Traditional Chinese, Japanese, and Korean
+- **Multilingual**: Native i18n support for 5 languages (EN, zh-CN, zh-TW, JA, KO) with automatic hreflang links, localized SEO metadata, and x-default navigation paths
 
 ## Requirements
 
@@ -204,17 +204,15 @@ Create styled alert boxes:
 
 ### Responsive Images
 
-All images automatically generate responsive srcsets with WebP conversion:
+All markdown images are handled automatically by the custom render hook:
 
 ```markdown
 ![Alt text](image.jpg)
 ```
 
-This creates:
-- Multiple resolutions (360px, 640px, 960px, 1232px)
-- 1x and 2x DPR variants
-- WebP format with fallback
-- Lazy loading enabled
+- **Page bundle images**: Automatically processed into responsive `<picture>` elements with WebP conversion, multiple viewport resolutions (360px, 640px, 960px, 1232px), 1x/2x DPR variants, and explicit `width`/`height` to eliminate Cumulative Layout Shift (CLS).
+- **Static & relative paths**: Fall back to lazy-loaded `<picture><img>` elements with subpath-aware `relURL` resolution, preventing broken links and ignoring empty destinations.
+- **Remote images**: Rendered with native `loading="lazy"` and `decoding="async"`.
 
 ### Social Media Embeds
 
@@ -451,12 +449,22 @@ The theme is optimized for performance with modern best practices:
 - **Optimized Intersection Observer**: Tracks current active element, reduces DOM operations by ~80%
 - **Consolidated Event Listeners**: Single handlers for click-outside and Escape key events
 - **Helper Functions**: DRY patterns with reusable utilities (`setupOverlayToggle`, `checkMediaQuery`)
+- **Speculation Rules Scoping**: Prerendering rules are cleanly scoped via `relURL` (supporting subpath baseURL deployments), with an `instant.page` fallback for older browsers
 
 ### Content Delivery
 - **Lazy Loading**: Images load on-demand with `async` decoding
 - **WebP Conversion**: Automatic modern format support with fallbacks
-- **Responsive Images**: Multiple resolutions and DPR variants
+- **Responsive Images**: Multiple resolutions and DPR variants; bundle images include explicit dimensions to prevent CLS
+- **Universal Image Fallback**: Seamless fallback for static and non-bundle images with native lazy loading
 - **Layout Stability**: Proper content width constraints prevent layout shifts from long code blocks
+
+### SEO & Metadata Architecture
+- **Mobile Viewport Compliance**: Strict `<meta name="viewport" content="width=device-width, initial-scale=1">` standards
+- **Clean 404 Pages**: Automatic suppression of canonical links on 404 status pages to avoid search crawler confusion
+- **Multilingual hreflang & x-default**: Seamless cross-language discovery cluster for translated articles, pointing `x-default` consistently to the default content language
+- **W3C-Compliant XML Sitemap**: Namespaced with `xmlns:xhtml` and multilingual alternate links
+- **Rich Structured Data**: Complete Schema.org JSON-LD (WebSite, BlogPosting, BreadcrumbList) with full publisher and author metadata
+- **Standardized Social Cards**: OpenGraph `og:locale` normalized to `language_TERRITORY`, with primary card `og:image:alt` and `twitter:image:alt`
 
 ### Interaction Performance
 - **Efficient Animations**: Hardware-accelerated backdrop-filter for glass effects

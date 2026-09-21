@@ -1,7 +1,11 @@
 {{- $images := partial "_funcs/get-page-images.html" . }}
+{{- $metaTitle := partial "_funcs/get-meta-title.html" . }}
 {{- with index $images 0 }}
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="{{ . }}">
+  {{- with $metaTitle }}
+  <meta name="twitter:image:alt" content="{{ . }}">
+  {{- end }}
 {{- else }}
   <meta name="twitter:card" content="summary">
 {{- end }}

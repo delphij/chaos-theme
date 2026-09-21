@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 {{- $isPaginated := or .IsHome (in (slice "section" "term") .Kind) -}}
 {{- $pagNumber := 1 -}}
 {{- if $isPaginated -}}
@@ -26,11 +26,21 @@
   {{- $robots = .Params.robots -}}
 {{- end -}}
 <meta name="robots" content="{{ $robots }}">
+{{- if ne .Kind "404" -}}
 {{- $canonicalURL := .Permalink -}}
 {{- if and $isPaginated (gt $pagNumber 1) -}}
   {{- $canonicalURL = .Paginator.URL | absURL -}}
 {{- end -}}
 <link rel="canonical" href="{{ $canonicalURL }}">
+{{- end -}}
+{{- if .IsTranslated -}}
+  {{- range .AllTranslations -}}
+<link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}">
+  {{- end -}}
+  {{- with index (where .AllTranslations "Language.Lang" site.Sites.Default.Language.Lang) 0 -}}
+<link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
+  {{- end -}}
+{{- end -}}
 {{- $licenseURL := site.Params.licenseURL | default "https://creativecommons.org/licenses/by-nc/4.0/" -}}
 {{- with $licenseURL -}}
 <link rel="license" href="{{ . }}">
@@ -73,7 +83,7 @@
   {{ end }}
 {{ end }}
 {{ if $hasMath }}
-<link href="{{ "/_3p/katex/0.17.0/katex.min.css" | relURL }}" rel="stylesheet">
+<link href="{{ "_3p/katex/0.17.0/katex.min.css" | relURL }}" rel="stylesheet">
 {{ end }}
 {{- /* i18n strings for JavaScript */ -}}
 <script>
@@ -96,10 +106,10 @@
     {
       "where": {
         "and": [
-          { "href_matches": "/*" },
-          { "not": { "href_matches": "/archives*" } },
-          { "not": { "href_matches": "/feed.xsl" } },
-          { "not": { "href_matches": "/*.xml" } },
+          { "href_matches": "{{ "*" | relURL }}" },
+          { "not": { "href_matches": "{{ "archives*" | relURL }}" } },
+          { "not": { "href_matches": "{{ "feed.xsl" | relURL }}" } },
+          { "not": { "href_matches": "{{ "*.xml" | relURL }}" } },
           { "not": { "selector_matches": "[target=_blank]" } }
         ]
       },
@@ -112,7 +122,7 @@
 <script type="module">
   if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('speculationrules')) {
     const script = document.createElement('script');
-    script.src = {{ "/_3p/instantpage/5.2.0/instantpage.min.js" | relURL }};
+    script.src = {{ "_3p/instantpage/5.2.0/instantpage.min.js" | relURL }};
     script.type = 'module';
     document.head.appendChild(script);
   }

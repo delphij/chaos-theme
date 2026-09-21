@@ -1,0 +1,27 @@
+{{- /*
+Normalizes a BCP 47 language tag into OpenGraph's language_TERRITORY format.
+Handles:
+- 2-part tags: "zh-cn" -> "zh_CN", "en-us" -> "en_US"
+- 3-part tags: "zh-Hant-TW" -> "zh_TW", "sr-Latn-RS" -> "sr_RS"
+- Single-part tags: "ja" -> "ja"
+
+@param {string} . The raw locale or language code string.
+@returns {string} The normalized OpenGraph locale string.
+@example: {{ $ogLocale := partial "_funcs/get-og-locale.html" "zh-Hant-TW" }}
+*/}}
+
+{{- $raw := . | default "" -}}
+{{- $parts := split (replace $raw "-" "_") "_" -}}
+{{- $lang := index $parts 0 | lower -}}
+{{- $territory := "" -}}
+{{- range $part := (after 1 $parts) -}}
+  {{- /* ISO 3166-1 alpha-2 (2 letters) or UN M.49 (3 digits) */ -}}
+  {{- if or (findRE "^[A-Za-z]{2}$" $part) (findRE "^[0-9]{3}$" $part) -}}
+    {{- $territory = upper $part -}}
+  {{- end -}}
+{{- end -}}
+{{- if $territory -}}
+  {{- return (printf "%s_%s" $lang $territory) -}}
+{{- else -}}
+  {{- return $lang -}}
+{{- end -}}
