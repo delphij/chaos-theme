@@ -9,6 +9,11 @@ Supports optional tag limit for summary cards.
 @context {page|map} page The page context or dict with "page" and optional "limit".
 
 @example: {{ partial "taxonomy-links.html" . }}
+The hrefs come from each term's own page rather than being assembled from the
+term name: hand-built URLs omitted the trailing slash, so every taxonomy link
+in a post footer - 13,885 of them - cost the reader a 301 redirect, and
+instant.page was prefetching the redirect rather than the page.
+
 @example: {{ partial "taxonomy-links.html" (dict "page" . "limit" 3) }}
 */}}
 
@@ -29,7 +34,8 @@ Supports optional tag limit for summary cards.
     {{- with $page.Params.categories -}}
       {{- range $i, $cat := . -}}
         {{- if gt $i 0 -}}<span class="cat-sep">, </span>{{- end -}}
-        <a class="taxo-link cat-link" href="{{ "/categories/" | relLangURL }}{{ $cat | urlize }}" title="{{ T `categoryTitle` (dict `Name` $cat) }}">{{ $cat }}</a>
+        {{- $termPage := site.GetPage (printf "/categories/%s" ($cat | urlize)) -}}
+        <a class="taxo-link cat-link" href="{{ with $termPage }}{{ .RelPermalink }}{{ else }}{{ printf "/categories/%s/" ($cat | urlize) | relLangURL }}{{ end }}" title="{{ T `categoryTitle` (dict `Name` $cat) }}">{{ $cat }}</a>
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -39,7 +45,8 @@ Supports optional tag limit for summary cards.
       {{- range . -}}
         {{- if not (in $categories .) -}}
           {{- if or (le $limit 0) (lt $count $limit) -}}
-            <a class="taxo-link tag-link" href="{{ "/tags/" | relLangURL }}{{ . | urlize }}" title="{{ T `tagTitle` (dict `Name` .) }}">#{{ . }}</a>
+            {{- $termPage := site.GetPage (printf "/tags/%s" (. | urlize)) -}}
+            <a class="taxo-link tag-link" href="{{ with $termPage }}{{ .RelPermalink }}{{ else }}{{ printf "/tags/%s/" (. | urlize) | relLangURL }}{{ end }}" title="{{ T `tagTitle` (dict `Name` .) }}">#{{ . }}</a>
             {{- $count = add $count 1 -}}
           {{- end -}}
         {{- end -}}
