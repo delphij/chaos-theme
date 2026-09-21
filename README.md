@@ -2,6 +2,12 @@
 
 A minimalist Hugo theme designed for clarity, performance, and excellent Chinese typography support.
 
+| Light | Dark |
+| --- | --- |
+| ![Chaos theme homepage in light mode](images/screenshot.png) | ![Chaos theme article page in dark mode, with KaTeX math and table of contents](images/screenshot-dark.png) |
+
+Screenshots are taken from the bundled [example site](#example-site).
+
 ## Features
 
 - **Performance-focused**: Lightweight with minimal dependencies, no JavaScript frameworks
@@ -42,6 +48,14 @@ Update your site's `config.toml` or `hugo.toml`:
 
 ```toml
 theme = "chaos"
+```
+
+## Example Site
+
+The `exampleSite/` directory holds a small demo blog that exercises the theme's features: Chinese typography, ruby annotations, KaTeX math, alerts, syntax highlighting, Mermaid diagrams, taxonomies, and archives. Run it from the theme's root directory:
+
+```bash
+hugo server --source exampleSite
 ```
 
 ## Quick Start
@@ -595,6 +609,9 @@ hugo --verbose
 
 # Production build
 hugo --gc --minify
+
+# Preview the theme itself using the bundled example site
+hugo server --source exampleSite
 ```
 
 ### Project Structure
@@ -605,7 +622,9 @@ themes/chaos/
 ├── assets/
 │   ├── css/                 # Source CSS files
 │   └── js/                  # Source JavaScript
+├── exampleSite/             # Demo site (hugo server --source exampleSite)
 ├── i18n/                    # Translation files
+├── images/                  # Theme screenshots
 ├── layouts/
 │   ├── _default/            # Default templates
 │   ├── _markup/             # Markdown render hooks

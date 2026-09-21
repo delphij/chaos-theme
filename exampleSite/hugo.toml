@@ -1,0 +1,70 @@
+# Example site for the Chaos theme.
+#
+# Run it from the theme's root directory:
+#
+#   hugo server --source exampleSite
+#
+# `themesDir = '..'` with `theme = '.'` resolves to the theme's own root, so
+# this works whatever the checkout directory is called. A real site would
+# just set `theme = 'chaos'` instead of these two lines.
+theme = '.'
+themesDir = '..'
+
+baseURL = 'https://example.org/'
+languageCode = 'zh-cn'
+defaultContentLanguage = 'zh-cn'
+title = '混沌札记'
+hasCJKLanguage = true
+enableGitInfo = false
+
+[pagination]
+  pagerSize = 5
+
+[taxonomies]
+  tag = 'tags'
+  category = 'categories'
+  series = 'series'
+
+[menus]
+  [[menus.main]]
+    identifier = 'home'
+    pageRef = '/'
+    weight = 10
+
+  [[menus.main]]
+    identifier = 'archives'
+    pageRef = '/archives'
+    weight = 20
+
+  [[menus.main]]
+    identifier = 'categories'
+    pageRef = '/categories'
+    weight = 30
+
+  [[menus.main]]
+    identifier = 'tags'
+    pageRef = '/tags'
+    weight = 40
+
+  [[menus.main]]
+    name = '关于'
+    pageRef = '/pages/about'
+    weight = 50
+
+[markup.highlight]
+  noClasses = false
+
+[markup.goldmark.extensions.passthrough]
+  enable = true
+  [markup.goldmark.extensions.passthrough.delimiters]
+    block = [['$$', '$$']]
+    inline = [['\(', '\)']]
+
+[params]
+  subtitle = '一个 *Chaos* 主题的示例站点'
+  description = 'Chaos 主题的示例站点：中文排版、数学公式、提示框、代码高亮与深浅色模式。'
+  mainSections = ['posts']
+  excludedTypes = ['page']
+
+  [params.author]
+    name = 'Chaos'
