@@ -13,260 +13,192 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{{ T "sitemapPageTitle" }} — {{ site.Title }}</title>
+        {{ partial "xml-xsl-theme.html" . }}
         <style>
           {{ partial "xml-xsl-styles.html" . }}
 
-          /* Sitemap specific content type tokens */
-          :root {
-            --content-width: 960px;
-            --type-post-bg: #EBF3FB;
-            --type-post-fg: #1D5B90;
-            --type-post-border: #B8D5F2;
-            --type-cat-bg: #FDF0ED;
-            --type-cat-fg: var(--primary);
-            --type-cat-border: #F5C6BE;
-            --type-tag-bg: #F0F4F0;
-            --type-tag-fg: #2D6A2E;
-            --type-tag-border: #C4DFC4;
-            --type-page-bg: #F2F2F2;
-            --type-page-fg: #444444;
-            --type-page-border: #D0D0D0;
+          /* ----- Sitemap-specific layout ----- */
+
+          /* A dense two-column table, so it uses the site's chrome measure
+             rather than the narrower reading measure. */
+          .container {
+            max-width: var(--max-width);
           }
 
-          /* Filter bar without dividing line */
+          /* One colour per content type, assigned from the existing palette so
+             the pills and the in-table badges cannot drift apart. */
+          .stat-pill[data-filter="post"],
+          .type-badge[data-filter-type="post"] {
+            --type-color: var(--accent);
+          }
+
+          .stat-pill[data-filter="category"],
+          .type-badge[data-filter-type="category"] {
+            --type-color: var(--primary);
+          }
+
+          .stat-pill[data-filter="tag"],
+          .type-badge[data-filter-type="tag"] {
+            --type-color: var(--muted);
+          }
+
+          .stat-pill[data-filter="page"],
+          .type-badge[data-filter-type="page"] {
+            --type-color: var(--heading);
+          }
+
+          /* Filter toolbar */
           .stats-bar {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 14px;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
           }
 
           .filter-label {
-            font-size: 13px;
+            font-size: var(--text-sm);
             font-weight: 600;
             color: var(--muted);
-            margin-right: 2px;
           }
 
+          /* Pills follow .tag-flat-item: flat by default, tinted when engaged. */
           .stat-pill {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            padding: 5px 12px;
+            padding: 3px 8px;
+            font: inherit;
+            font-size: var(--text-sm);
+            border: 0;
             border-radius: var(--radius-sm);
-            cursor: pointer;
-            user-select: none;
-            border: 1px solid transparent;
-            transition: opacity var(--transition-fast), background-color var(--transition-fast);
-          }
-
-          .stat-pill:hover {
-            opacity: 0.85;
-          }
-
-          /* Active category states */
-          .stat-pill[data-filter="post"].active {
-            background: var(--type-post-bg);
-            color: var(--type-post-fg);
-            border-color: var(--type-post-border);
-          }
-
-          .stat-pill[data-filter="category"].active {
-            background: var(--type-cat-bg);
-            color: var(--type-cat-fg);
-            border-color: var(--type-cat-border);
-          }
-
-          .stat-pill[data-filter="tag"].active {
-            background: var(--type-tag-bg);
-            color: var(--type-tag-fg);
-            border-color: var(--type-tag-border);
-          }
-
-          .stat-pill[data-filter="page"].active {
-            background: var(--type-page-bg);
-            color: var(--type-page-fg);
-            border-color: var(--type-page-border);
-          }
-
-          /* Inactive category state */
-          .stat-pill.inactive {
             background: transparent;
             color: var(--muted);
-            border-color: transparent;
-            opacity: 0.45;
+            cursor: pointer;
+            user-select: none;
+            transition: color var(--transition-fast), background-color var(--transition-fast);
+          }
+
+          .stat-pill.active {
+            color: var(--type-color);
+            background: var(--paper);
+          }
+
+          .stat-pill.inactive {
             text-decoration: line-through;
           }
 
-          .stat-pill.inactive .stat-num {
-            color: var(--muted);
-          }
-
           .stat-num {
+            font-family: var(--font-mono);
             font-weight: 700;
           }
 
           .filter-status {
-            font-size: 13px;
-            color: var(--muted);
-            margin: 0 0 12px 2px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 4px 16px;
+            margin: 0 0 12px;
+            font-size: var(--text-sm);
+            color: var(--muted);
           }
 
-          .filter-status span strong {
+          .filter-status strong {
             color: var(--heading);
           }
 
-          /* Table without dense horizontal lines */
+          .filter-hint {
+            font-size: var(--text-xs);
+          }
+
+          /* The table itself is bare and striped (see the shared partial); only
+             the sort affordances and the path column are added here. */
           .table-wrapper {
-            background: var(--surface);
-            border: var(--border);
-            border-radius: var(--radius-md);
-            overflow: hidden;
+            overflow-x: auto;
           }
 
           table {
-            border-collapse: collapse;
-            width: 100%;
-            font-size: 13.5px;
-            font-variant-numeric: tabular-nums;
-          }
-
-          th {
-            background: var(--paper);
-            color: var(--heading);
-            text-align: left;
-            padding: 12px 16px;
-            font-weight: 600;
-            border-bottom: 2px solid var(--border-color);
-            user-select: none;
+            font-size: var(--text-sm);
           }
 
           th.sortable {
             cursor: pointer;
+            user-select: none;
             transition: background-color var(--transition-fast), color var(--transition-fast);
           }
 
           th.sortable:hover {
-            background: var(--paper-strong);
-            color: var(--primary);
-          }
-
-          th.sortable:focus-visible {
-            outline: 2px solid var(--primary);
-            outline-offset: -2px;
+            background-color: var(--primary);
+            color: var(--primary-fg);
           }
 
           .sort-icon {
             display: inline-block;
             margin-left: 6px;
-            font-size: 12px;
-            color: var(--muted);
-            transition: color var(--transition-fast);
+            font-size: var(--text-xs);
+            opacity: 0.55;
           }
 
           th.sorted-asc .sort-icon,
           th.sorted-desc .sort-icon {
-            color: var(--primary);
-            font-weight: 700;
+            opacity: 1;
           }
 
           td {
-            padding: 9px 16px;
-            border-bottom: none;
             vertical-align: middle;
           }
 
-          /* Zebra striping instead of lines on every row */
-          tbody tr:nth-of-type(even) td {
-            background-color: var(--table-stripe);
+          /* Rows highlight on hover like .archive-post-row on the site,
+             and the row's link takes the primary colour with it. */
+          tr:hover td {
+            background-color: var(--paper);
           }
 
-          tr:hover td {
-            background-color: var(--paper) !important;
+          tr:hover a.link-plain {
+            color: var(--primary);
           }
 
           tr.is-hidden {
-            display: none !important;
+            display: none;
           }
 
-          a {
-            color: var(--link);
-            text-decoration: none;
-            word-break: break-all;
-          }
-
-          a:hover {
-            color: var(--link-hover);
-            text-decoration: underline;
-          }
-
+          /* Type labels are flat coloured text, not chips - the site treats
+             taxonomy the same way. */
           .type-badge {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: var(--radius-sm);
+            font-size: var(--text-2xs);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--type-color);
             margin-right: 8px;
-            vertical-align: middle;
             cursor: pointer;
-            transition: opacity var(--transition-fast);
-          }
-
-          .type-badge:hover {
-            opacity: 0.8;
-          }
-
-          .badge-post {
-            background: var(--type-post-bg);
-            color: var(--type-post-fg);
-          }
-
-          .badge-cat {
-            background: var(--type-cat-bg);
-            color: var(--type-cat-fg);
-          }
-
-          .badge-tag {
-            background: var(--type-tag-bg);
-            color: var(--type-tag-fg);
-          }
-
-          .badge-page {
-            background: var(--type-page-bg);
-            color: var(--type-page-fg);
+            user-select: none;
           }
 
           .path-text {
-            vertical-align: middle;
-            font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 13px;
+            font-family: var(--font-mono);
+            word-break: break-all;
           }
 
           .time-col {
             white-space: nowrap;
             color: var(--muted);
-            font-size: 13px;
           }
 
           .empty-state {
             text-align: center;
             padding: 40px 16px;
             color: var(--muted);
-            font-size: 14.5px;
+            font-size: var(--small-size);
           }
         </style>
       </head>
       <body>
         <header class="site-header">
           <div class="site-header-inner">
-            <a class="site-brand" href="{{ "/" | relLangURL }}">{{ site.Title }}</a>
-            <a class="back-link" href="{{ "/" | relLangURL }}">{{ T "visitBlogHome" }}</a>
+            <a class="site-brand link-plain" href="{{ "/" | relLangURL }}">{{ site.Title }}</a>
+            <a class="back-link link-plain" href="{{ "/" | relLangURL }}">{{ T "visitBlogHome" }}</a>
           </div>
         </header>
 
@@ -303,7 +235,7 @@
             <span>{{ T "sitemapVisibleCount" (dict
                   "Visible" `<strong id="visibleCount"><xsl:value-of select="count(sitemap:urlset/sitemap:url)"/></strong>`
                   "Total" `<xsl:value-of select="count(sitemap:urlset/sitemap:url)"/>`) }}</span>
-            <span style="font-size: 12px; color: var(--muted);">{{ T "sitemapHint" }}</span>
+            <span class="filter-hint">{{ T "sitemapHint" }}</span>
           </div>
 
           <div class="table-wrapper">
@@ -343,20 +275,20 @@
                     <td>
                       <xsl:choose>
                         <xsl:when test="$itemType = 'post'">
-                          <span class="type-badge badge-post" data-filter-type="post" title="{{ T `sitemapOnlyType` (dict `Type` (T `contentTypePost`)) }}">{{ T "contentTypePost" }}</span>
+                          <span class="type-badge" data-filter-type="post" title="{{ T `sitemapOnlyType` (dict `Type` (T `contentTypePost`)) }}">{{ T "contentTypePost" }}</span>
                         </xsl:when>
                         <xsl:when test="$itemType = 'category'">
-                          <span class="type-badge badge-cat" data-filter-type="category" title="{{ T `sitemapOnlyType` (dict `Type` (T `categories`)) }}">{{ T "categories" }}</span>
+                          <span class="type-badge" data-filter-type="category" title="{{ T `sitemapOnlyType` (dict `Type` (T `categories`)) }}">{{ T "categories" }}</span>
                         </xsl:when>
                         <xsl:when test="$itemType = 'tag'">
-                          <span class="type-badge badge-tag" data-filter-type="tag" title="{{ T `sitemapOnlyType` (dict `Type` (T `tags`)) }}">{{ T "tags" }}</span>
+                          <span class="type-badge" data-filter-type="tag" title="{{ T `sitemapOnlyType` (dict `Type` (T `tags`)) }}">{{ T "tags" }}</span>
                         </xsl:when>
                         <xsl:otherwise>
-                          <span class="type-badge badge-page" data-filter-type="page" title="{{ T `sitemapOnlyType` (dict `Type` (T `contentTypePage`)) }}">{{ T "contentTypePage" }}</span>
+                          <span class="type-badge" data-filter-type="page" title="{{ T `sitemapOnlyType` (dict `Type` (T `contentTypePage`)) }}">{{ T "contentTypePage" }}</span>
                         </xsl:otherwise>
                       </xsl:choose>
 
-                      <a>
+                      <a class="link-plain">
                         <xsl:attribute name="href">
                           <xsl:value-of select="sitemap:loc" />
                         </xsl:attribute>
@@ -382,6 +314,10 @@
               </tbody>
             </table>
           </div>
+
+          <footer class="page-footer">
+            <p>© {{ now.Format "2006" }} {{ site.Title }}.</p>
+          </footer>
         </main>
 
         <script>

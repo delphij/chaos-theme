@@ -23,18 +23,88 @@
             <xsl:otherwise>{{ T "rssFeedPageTitle" }}</xsl:otherwise>
           </xsl:choose>
         </title>
+        {{ partial "xml-xsl-theme.html" . }}
         <style>
           {{ partial "xml-xsl-styles.html" . }}
 
-          /* RSS-specific styles */
+          /* Syntax highlighting reused verbatim from the site's own stylesheets,
+             so code inside a feed entry reads exactly as it does in the article.
+             The dark sheet is scoped to html.dark, which xml-xsl-theme.html sets. */
+          {{ (resources.Get "css/syntax.css").Content }}
+          {{ (resources.Get "css/syntax-dark.css").Content }}
+
+          /* Code blocks: a tinted, unframed, horizontally scrollable slab, as in
+             the article. The main site hangs the line-number column into the
+             margin on wide screens; that flourish is skipped here. */
+          .highlight pre {
+            margin: 0;
+            padding: 12px;
+            overflow-x: auto;
+            max-width: 100%;
+          }
+
+          .chroma .lntable {
+            border-spacing: 0;
+            padding: 0;
+            margin: 0;
+            border: 0;
+            display: block;
+            overflow-x: auto;
+            max-width: 100%;
+          }
+
+          .chroma .lntd {
+            vertical-align: top;
+            padding: 0;
+            margin: 0;
+            border: 0;
+          }
+
+          .chroma .lntd:first-child {
+            padding-right: 1em;
+          }
+
+          .chroma .lnt,
+          .chroma .ln {
+            white-space: pre;
+            -webkit-user-select: none;
+            user-select: none;
+            padding: 0 0 0 0.4em;
+          }
+
+          .chroma .line {
+            display: flex;
+          }
+
+          /* The feed pipeline hands us formulas and diagrams as plain preformatted
+             blocks rather than as Chroma output, so they need the code ground
+             that .chroma would otherwise supply. (No angle brackets in this
+             file's CSS: it is XML, and a literal tag name would be parsed.) */
+          .feed-entry-content pre:not(.chroma) {
+            margin: 1.5rem 0;
+            padding: 12px;
+            background: var(--code-bg);
+            overflow-x: auto;
+          }
+
+          .feed-entry-content figure {
+            margin: 1.5rem 0;
+          }
+
+          .feed-entry-content figcaption {
+            margin-top: 6px;
+            font-size: var(--text-sm);
+            color: var(--muted);
+          }
+
+          /* ----- Feed-specific layout ----- */
+
+          /* Icon sits on the baseline of the banner heading; size, colour and
+             spacing come from .info-card h1 in the shared partial. */
           .feed-notice-title {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 19px;
-            font-weight: 700;
-            color: var(--heading);
-            margin: 0 0 10px;
           }
 
           .feed-notice-title svg {
@@ -42,7 +112,8 @@
             flex-shrink: 0;
           }
 
-          /* Clickable button: copies the feed address to the clipboard */
+          /* The feed address, built like the article code-copy button: a quiet
+             inset field that copies itself when clicked. */
           .feed-url-box {
             display: flex;
             align-items: center;
@@ -51,37 +122,28 @@
             width: 100%;
             margin-top: 14px;
             padding: 8px 12px;
-            background: var(--paper);
+            background: var(--surface);
             border: var(--border);
             border-radius: var(--radius-sm);
-            font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 13px;
+            font-family: var(--font-mono);
+            font-size: var(--text-sm);
             line-height: var(--line-height);
             color: var(--text);
             text-align: left;
             cursor: pointer;
-            transition: border-color var(--transition-fast), background-color var(--transition-fast);
+            transition: border-color var(--transition-fast);
           }
 
           .feed-url-box:hover {
             border-color: var(--primary);
-            background: var(--surface);
-          }
-
-          .feed-url-box:focus-visible {
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
           }
 
           .feed-url-label {
-            font-size: 11px;
+            font-size: var(--text-2xs);
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-weight: 700;
             color: var(--primary);
-            background: var(--surface);
-            padding: 2px 6px;
-            border-radius: var(--radius-sm);
             flex-shrink: 0;
           }
 
@@ -95,35 +157,37 @@
           .feed-url-hint {
             flex-shrink: 0;
             margin-left: auto;
-            font-size: 12px;
-            font-weight: 500;
+            padding: 3px 8px;
+            font-size: var(--text-xs);
+            line-height: 1.4;
             color: var(--muted);
             background: var(--surface);
-            padding: 2px 8px;
-            border-radius: var(--radius-sm);
             border: var(--border);
-            transition: color var(--transition-fast), border-color var(--transition-fast);
+            border-radius: var(--radius-sm);
+            user-select: none;
+            transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
           }
 
           .feed-url-box:hover .feed-url-hint {
-            color: var(--primary);
+            color: var(--heading);
+            background: var(--paper);
             border-color: var(--primary);
           }
 
           .feed-url-box.copied .feed-url-hint {
-            color: var(--primary);
-            border-color: var(--primary);
-            font-weight: 700;
+            color: var(--alert-tip-border);
+            border-color: var(--alert-tip-border);
           }
 
-          /* Feed section heading */
+          /* Section label above the list: deliberately quieter than the entry
+             titles it introduces, like .tags-section-heading on the site. */
           .feed-section-heading {
-            font-size: 19px;
-            font-weight: 700;
-            color: var(--heading);
+            font-size: var(--text-md);
             margin: 0 0 24px;
           }
 
+          /* Entries are spaced like .post-entry on the homepage: whitespace
+             only, no rules or cards between them. */
           .feed-entries {
             list-style: none;
             padding: 0;
@@ -133,214 +197,56 @@
             gap: 48px;
           }
 
-          .feed-entry {
-            background: transparent;
-            padding: 0;
-            border: none;
-          }
-
           .feed-entry-title {
-            font-size: 21px;
-            font-weight: 700;
-            margin: 0 0 8px;
-            line-height: 1.4;
-          }
-
-          .feed-entry-title a {
-            color: var(--heading);
-            text-decoration: none;
-            transition: color var(--transition-fast);
-          }
-
-          .feed-entry-title a:hover {
-            color: var(--primary);
+            font-size: var(--h1-size);
+            letter-spacing: -0.01em;
+            margin: 0 0 10px;
           }
 
           .feed-entry-meta {
-            font-size: 13px;
-            color: var(--muted);
-            margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 8px;
             flex-wrap: wrap;
+            gap: 8px;
+            font-size: var(--small-size);
+            color: var(--muted);
+            line-height: 1.6;
           }
 
-          .feed-entry-tag {
-            background: var(--paper);
-            padding: 2px 6px;
-            border-radius: var(--radius-sm);
-            font-size: 12px;
-            color: var(--muted);
+          .feed-entry-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
           }
 
           .feed-entry-content {
-            font-size: var(--font-size-base);
-            color: var(--text);
-            line-height: var(--line-height);
-            overflow-wrap: break-word;
-          }
-
-          .feed-entry-content p {
             margin: 14px 0;
           }
 
+          .feed-entry-content p {
+            margin: 0 0 1.15em;
+          }
+
           .feed-entry-content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: var(--radius-sm);
-            margin: 16px 0;
-            display: block;
-          }
-
-          .feed-entry-content a {
-            color: var(--link);
-            text-decoration: underline;
-            text-underline-offset: 3px;
-          }
-
-          .feed-entry-content a:hover {
-            color: var(--link-hover);
-          }
-
-          /* Inline code: clean monospace without background tint */
-          .feed-entry-content code {
-            font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 0.9em;
-            overflow-wrap: break-word;
-            background: transparent;
-            padding: 0;
-          }
-
-          /* Code block container */
-          .feed-entry-content pre,
-          .feed-entry-content .highlight {
-            background: var(--code-bg);
-            border: var(--border);
-            border-radius: var(--radius-md);
-            margin: 16px 0;
-            overflow-x: auto;
-          }
-
-          .feed-entry-content pre {
-            padding: 12px;
-            font-family: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 13.5px;
-            line-height: 1.5;
-          }
-
-          .feed-entry-content .highlight pre {
-            margin: 0;
-            border: 0;
-            background: transparent;
-          }
-
-          .feed-entry-content pre code,
-          .feed-entry-content .highlight code,
-          .feed-entry-content .chroma code {
-            font-size: inherit;
-            background: transparent;
-            padding: 0;
-          }
-
-          /* Chroma line number table: reset borders and padding */
-          .feed-entry-content .chroma {
-            background: transparent !important;
-          }
-
-          .feed-entry-content .chroma .lntable {
-            border: 0 !important;
-            border-spacing: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            width: auto !important;
-            background: transparent !important;
-          }
-
-          .feed-entry-content .chroma .lntd {
-            border: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            vertical-align: top !important;
-            background: transparent !important;
-          }
-
-          .feed-entry-content .chroma .lnt,
-          .feed-entry-content .chroma .ln {
-            white-space: pre;
-            user-select: none;
-            padding: 0 0.8em 0 0.4em;
-            color: var(--muted);
-          }
-
-          .feed-entry-content .chroma .line {
-            display: flex;
-          }
-
-          .feed-entry-content blockquote {
-            margin: 16px 0;
-            padding: 12px 18px;
-            background: var(--paper);
-            border-left: 4px solid var(--accent);
-            border-radius: 0 var(--radius-md) var(--radius-md) 0;
-          }
-
-          /* Content data tables */
-          .feed-entry-content table:not(.lntable) {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-            font-size: 14px;
-          }
-
-          .feed-entry-content table:not(.lntable) th,
-          .feed-entry-content table:not(.lntable) td {
-            padding: 8px 12px;
-            border-bottom: var(--border);
-            text-align: left;
-          }
-
-          .feed-entry-content table:not(.lntable) th {
-            background: var(--paper);
-            font-weight: 600;
+            margin: 1em 0;
           }
 
           .feed-entry-more {
-            margin-top: 16px;
+            margin-top: 14px;
           }
 
           .feed-read-more {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
             font-weight: 600;
-            color: var(--primary);
-            text-decoration: none;
-            transition: opacity var(--transition-fast);
-          }
-
-          .feed-read-more:hover {
-            opacity: 0.8;
-          }
-
-          /* Footer */
-          .feed-footer {
-            text-align: center;
-            font-size: 13px;
-            color: var(--muted);
-            margin-top: 64px;
-            padding-top: 24px;
           }
         </style>
       </head>
       <body>
         <header class="site-header">
           <div class="site-header-inner">
-            <a class="site-brand" href="{{ "/" | relLangURL }}">
+            <a class="site-brand link-plain" href="{{ "/" | relLangURL }}">
               <xsl:value-of select="$feed-title" />
             </a>
-            <a class="back-link" href="{{ "/" | relLangURL }}">
+            <a class="back-link link-plain" href="{{ "/" | relLangURL }}">
               {{ T "visitBlogHome" }}
             </a>
           </div>
@@ -405,7 +311,7 @@
             <xsl:apply-templates select="atom:feed/atom:entry | rss/channel/item" />
           </ul>
 
-          <footer class="feed-footer">
+          <footer class="page-footer">
             <p>
               © <xsl:choose>
                 <xsl:when test="$is-atom and string-length(atom:feed/atom:updated) &gt;= 4">
@@ -485,7 +391,7 @@
     <li class="feed-entry">
       <article>
         <h3 class="feed-entry-title">
-          <a>
+          <a class="link-plain">
             <xsl:attribute name="href">
               <xsl:value-of select="atom:link[not(@rel) or @rel='alternate']/@href | link" />
             </xsl:attribute>
@@ -544,9 +450,10 @@
           <xsl:if test="atom:category | category">
             <span>•</span>
             <span class="feed-entry-tags">
+              {{- /* Tags are flat muted text, like .tag-link on the site; the
+                     flex gap on .feed-entry-tags does the separating. */}}
               <xsl:for-each select="atom:category/@term | category">
-                <span class="feed-entry-tag"><xsl:value-of select="." /></span>
-                <xsl:if test="position() != last()"> </xsl:if>
+                <span><xsl:value-of select="." /></span>
               </xsl:for-each>
             </span>
           </xsl:if>

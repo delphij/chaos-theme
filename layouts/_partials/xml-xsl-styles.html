@@ -1,11 +1,30 @@
 /* ==========================================================================
-   SHARED XML / XSL STYLES (RSS Feed and Sitemap)
-   Conforms to Chaos theme light palette and paper minimalism.
-   Light mode only.
+   SHARED XML / XSL STYLES (Atom/RSS feed and XML sitemap)
+
+   These pages are produced by the browser's XSLT processor, which cannot pull
+   in the site's stylesheet bundle, so the tokens and base rules the chrome
+   needs are restated here. Every value is copied from assets/css/main.css and
+   must stay in step with it - nothing is invented locally. Page-specific
+   layout stays in the XSL that needs it.
    ========================================================================== */
+
+/* Same vendored face as the main site, so var(--font-mono) actually resolves
+   to Noto Sans Mono here instead of silently falling through to the platform
+   default. Subsetting, axes and unicode-range are upstream's; see main.css. */
+@font-face {
+  font-family: "Noto Sans Mono";
+  src: url("{{ "_3p/noto-sans-mono/2.014/noto-sans-mono-latin.woff2" | relURL }}") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2010-2015, U+2018-201F, U+2026, U+2030,
+                 U+2032-2033, U+20AC, U+2190-2193, U+2212, U+2260, U+2264-2265;
+}
 
 :root {
   color-scheme: light;
+
+  /* Colour palette - light mode */
   --bg: #FAFAFA;
   --surface: #FFFFFF;
   --text: #222222;
@@ -16,21 +35,91 @@
   --primary-fg: #FFFFFF;
   --accent: #2E5A88;
   --paper: #F0E6D2;
-  --paper-strong: #E8DDCA;
   --link: #0050A5;
   --link-hover: #003875;
-  --table-stripe: #F5F5F5;
+  --table-stripe: #F2F2F2;
+  --blockquote-fg: #333333;
   --border-color: rgba(0, 0, 0, 0.1);
   --border: 1px solid var(--border-color);
   --code-bg: #F0F0F0;
-  --transition-fast: 0.2s ease;
+  --alert-note-bg: #F0F4FF;
+  --alert-note-border: #3366CC;
+  --alert-tip-border: #228B22;
+
+  /* Layout dimensions */
+  --max-width: 1280px;
+  --content-width: 780px;
+  --gutter: 24px;
   --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 8px;
-  --content-width: 860px;
-  --font-size-base: 15.5px;
+
+  /* Typography scale */
+  --font-size-base: 16px;
   --line-height: 1.7;
+  --h1-size: 28px;
+  --h2-size: 22px;
+  --h3-size: 18px;
+
+  /* UI type scale - every non-body size resolves to one of these steps, so
+     these pages stop inventing half-pixel values of their own. */
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --small-size: var(--text-md);
+
+  --font-mono: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+               "Liberation Mono", monospace;
+
+  --transition-fast: 0.2s ease;
+  --focus-outline: 2px solid var(--primary);
+  --focus-offset: 3px;
 }
+
+/* Dark palette, mirroring html.dark in main.css. The class is set from the same
+   stored preference the site uses (see xml-xsl-theme.html); with scripting off
+   these pages stay light, exactly as they were before. */
+@media screen {
+  html.dark {
+    color-scheme: dark;
+
+    --bg: #1C1C1C;
+    --surface: #222222;
+    --text: #E8E8E8;
+    --heading: #FFFFFF;
+    --muted: #A8A8A8;
+    --primary: #FF6F61;
+    --primary-hover: #FF9488;
+    --primary-fg: #1C1C1C;
+    --accent: #8AB4F8;
+    --paper: #2A2A2A;
+    --link: #66B3FF;
+    --link-hover: #99CCFF;
+    --table-stripe: #242424;
+    --blockquote-fg: #CCCCCC;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border: 1px solid var(--border-color);
+    --code-bg: #242424;
+    --alert-note-bg: #1E2A40;
+    --alert-note-border: #6699FF;
+    --alert-tip-border: #66CC66;
+    --focus-outline: 2px solid var(--link);
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --max-width: 100%;
+    --gutter: 16px;
+    --h1-size: 24px;
+    --h2-size: 20px;
+    --h3-size: 17px;
+  }
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
 
 * {
   box-sizing: border-box;
@@ -41,26 +130,137 @@ body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   font-size: var(--font-size-base);
   line-height: var(--line-height);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* CJK typography, as on the main site */
+  text-autospace: normal;
+  hanging-punctuation: first allow-end last;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
-/* Header bar */
+h1,
+h2,
+h3 {
+  color: var(--heading);
+  font-weight: 700;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+/* Links carry the site's signature dotted underline that firms up on hover. */
+a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--link);
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+a:hover {
+  color: var(--link-hover);
+  border-bottom-style: solid;
+  border-bottom-color: var(--link-hover);
+}
+
+/* Chrome and row links stay plain and turn primary on hover, matching the
+   .link-plain family in main.css. */
+.link-plain {
+  border-bottom: none;
+  color: inherit;
+}
+
+.link-plain:hover {
+  border-bottom: none;
+  color: var(--primary);
+}
+
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+}
+
+@media (forced-colors: active) {
+  a:focus-visible,
+  button:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* Lists keep the site's rhythm: markers hang in the margin on wide screens
+   and tuck back in on narrow ones so they cannot clip at the screen edge. */
+ul,
+ol {
+  margin: 1em 0;
+  padding-left: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+ul::marker,
+ol::marker {
+  color: var(--muted);
+}
+
+ul ul,
+ul ol,
+ol ul,
+ol ol {
+  padding-left: 1.5em;
+  margin: 0.3em 0;
+}
+
+@media (max-width: 768px) {
+  ul,
+  ol {
+    padding-left: 1.4em;
+  }
+
+  ul ul,
+  ul ol,
+  ol ul,
+  ol ol {
+    padding-left: 1.2em;
+  }
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ==========================================================================
+   LAYOUT - HEADER, CONTAINER, FOOTER
+   ========================================================================== */
+
+/* Same glass treatment as .site-nav on the main site. */
 .site-header {
-  background: var(--surface);
+  width: 100%;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.02));
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   border-bottom: var(--border);
-  padding: 14px 20px;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 40;
+}
+
+@supports not (backdrop-filter: blur(6px)) {
+  .site-header {
+    background: var(--bg);
+  }
 }
 
 .site-header-inner {
-  max-width: var(--content-width);
+  max-width: var(--max-width);
   margin: 0 auto;
+  padding: 12px var(--gutter);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -68,50 +268,56 @@ body {
 }
 
 .site-brand {
-  font-size: 17px;
+  font-size: var(--h3-size);
   font-weight: 700;
+  letter-spacing: 0.02em;
   color: var(--heading);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-.site-brand:hover {
-  color: var(--primary);
+  min-width: 0;
 }
 
 .back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 500;
-  padding: 5px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--paper);
-  transition: opacity var(--transition-fast);
+  font-size: var(--small-size);
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
 
 .back-link:hover {
-  opacity: 0.85;
+  color: var(--primary);
+  background: var(--paper);
 }
 
-/* Main content container */
 .container {
   max-width: var(--content-width);
-  margin: 32px auto;
-  padding: 0 20px 60px;
+  margin: 28px auto;
+  padding: 0 var(--gutter) 60px;
 }
 
-/* Common notice banner */
+.page-footer {
+  margin: 40px 0 0;
+  padding: 24px 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+/* ==========================================================================
+   COMPONENTS
+   ========================================================================== */
+
+/* Intro banner, built like .alert in main.css: a tinted ground and one accent
+   edge, no surrounding box. */
 .info-card {
-  background: var(--surface);
-  border: var(--border);
-  border-left: 4px solid var(--accent);
-  border-radius: var(--radius-md);
-  padding: 20px 24px;
-  margin-bottom: 32px;
+  background: var(--alert-note-bg);
+  border-left: 4px solid var(--alert-note-border);
+  border-radius: 0.5em;
+  padding: 1em;
+  margin: 0 0 32px;
+  line-height: var(--line-height);
 }
 
 .info-card.accent-primary {
@@ -119,24 +325,83 @@ body {
 }
 
 .info-card h1 {
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--heading);
+  font-size: var(--h3-size);
   margin: 0 0 8px;
 }
 
 .info-card p {
-  margin: 8px 0;
-  font-size: 14px;
+  margin: 0.6em 0;
+  font-size: var(--small-size);
   line-height: 1.6;
 }
 
-.info-card a {
-  color: var(--link);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.info-card p:last-of-type {
+  margin-bottom: 0;
 }
 
-.info-card a:hover {
-  color: var(--link-hover);
+/* Tables: bare, striped, with the inverted header the main site uses. */
+table {
+  width: 100%;
+  margin: 1em 0;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+table th,
+table td {
+  border-bottom: var(--border);
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+table thead th {
+  border-bottom: 2px solid var(--border-color);
+  vertical-align: bottom;
+  background-color: var(--text);
+  color: var(--bg);
+}
+
+table tbody tr:nth-of-type(even) {
+  background-color: var(--table-stripe);
+}
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  margin: 16px 0;
+  padding: 12px 16px;
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  color: var(--blockquote-fg);
+  font-size: 0.95em;
+}
+
+blockquote ol,
+blockquote ul {
+  padding-left: 1.5em;
+}
+
+/* Code: the monospace stack cancels the UA size quirk; inline code carries no
+   backdrop of its own, and blocks are tinted but unframed, as on the site. */
+pre,
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+}
+
+pre {
+  font-size: var(--small-size);
+  hanging-punctuation: none;
+}
+
+code {
+  font-size: 0.9em;
+  overflow-wrap: break-word;
+}
+
+pre code,
+.highlight code,
+.chroma code {
+  font-size: inherit;
 }

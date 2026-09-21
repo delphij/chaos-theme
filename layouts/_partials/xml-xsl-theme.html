@@ -1,0 +1,27 @@
+{{- /*
+Applies the reader's site theme to an XSLT-rendered page.
+
+These pages cannot run the site's main.js, so this restates just the one thing
+that matters visually: resolve the same `theme-mode` preference the theme
+toggle stores and stamp `dark` or `light` on the root element, which is what
+the dark token block and syntax-dark.css key off. Belongs in <head> so the
+class lands before first paint.
+
+@example: {{ partial "xml-xsl-theme.html" . }}
+*/ -}}
+<script>
+<![CDATA[
+  (function() {
+    var mode;
+    try {
+      mode = localStorage.getItem('theme-mode');
+    } catch (e) {
+      // Storage unavailable (private mode, blocked cookies): fall back to the system.
+    }
+    if (mode !== 'dark' && mode !== 'light') {
+      mode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.classList.add(mode);
+  })();
+]]>
+</script>
