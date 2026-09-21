@@ -81,6 +81,7 @@ rssFeedIntro = '這是一個 <strong>RSS 2.0</strong> 格式的網站訂閱源�
 feedSubscribeHelp = '要訂閱 <strong>{{ .Title }}</strong> 的最新內容，請將下方位址複製並加入您的 RSS 閱讀器（{{ .Readers }}）中：'
 feedLatestPosts = '最新文章列表'
 feedReadMore = '在網站閱讀全文並參與討論 →'
+feedDiagramSource = '圖表原始碼（Mermaid）。請至原文檢視算繪後的圖形。'
 feedUrlLabel = 'Feed URL'
 copyFeedUrl = '複製訂閱位址'
 feedUrlCopied = '訂閱位址已複製到剪貼簿。'

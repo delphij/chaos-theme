@@ -81,6 +81,7 @@ rssFeedIntro = 'これは <strong>RSS 2.0</strong> 形式のウェブフィー�
 feedSubscribeHelp = '<strong>{{ .Title }}</strong> の最新情報を購読するには、下記のアドレスをコピーして RSS リーダー（{{ .Readers }}）に追加してください：'
 feedLatestPosts = '最新の記事'
 feedReadMore = 'サイトで全文を読んでコメントする →'
+feedDiagramSource = '図のソース (Mermaid)。描画された図は元記事をご覧ください。'
 feedUrlLabel = 'Feed URL'
 copyFeedUrl = 'フィード URL をコピー'
 feedUrlCopied = 'フィード URL をクリップボードにコピーしました。'

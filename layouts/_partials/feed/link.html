@@ -1,0 +1,21 @@
+{{- /*
+Renders a link for the feed output formats.
+
+Only one thing changes from the default: the destination is made absolute. A
+feed is read away from this origin, so a root-relative href resolves against
+whatever host the reader happens to be on. Atom carries xml:base for this, but
+enough readers ignore it that relying on it is not worth the broken links.
+
+@context {link} The link render hook context.
+
+@example: {{ partial "feed/link.html" . }}
+*/ -}}
+{{- $dest := .Destination -}}
+{{- if hasPrefix $dest "#" -}}
+  {{- $dest = printf "%s%s" .Page.Permalink $dest -}}
+{{- else if hasPrefix $dest "/" -}}
+  {{- $dest = $dest | absURL -}}
+{{- else if not (or (hasPrefix $dest "//") (findRE `^[A-Za-z][A-Za-z0-9+.-]*:` $dest)) -}}
+  {{- $dest = printf "%s%s" .Page.Permalink $dest -}}
+{{- end -}}
+<a href="{{ $dest }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>

@@ -1,0 +1,50 @@
+{{- /*
+Applies the theme's post-rendering text conventions to a block of rendered HTML.
+Shared by the HTML and feed pipelines so the two cannot drift.
+
+ 1. Ruby (義訓) annotations: [base]{annotation}, [base]^{annotation} or
+    [base]^(annotation). Output follows the current HTML standard: <rb> is
+    obsolete, so the base text is a bare child of <ruby>, and <rp> supplies the
+    parenthetical fallback a renderer without ruby support shows instead -
+    "民国十八（一九二九）" rather than the two runs colliding.
+
+ 2. Spaces an author types between CJK and Latin runs are removed, so that CSS
+    text-autospace can insert the proportional space instead: narrower and more
+    even than a typed word space (measured at 16px, 2px per boundary against
+    5.33px). The two never stack - once a real space is present the characters
+    are no longer adjacent and autospace inserts nothing - so leaving them in
+    would simply give the wider, less typographic gap. text-autospace: normal
+    is the CSS Text 4 initial value, so this is the right thing to emit for any
+    conforming renderer, feed readers included.
+
+Both stay string rewrites over rendered HTML because neither is a Markdown
+construct: Goldmark has no hook for them, and Hugo cannot load a custom
+Goldmark extension. (Everything that IS a Markdown construct - math, images,
+links, diagrams - is handled structurally instead, by the per-output-format
+render hooks in layouts/_markup/. Line-wrap newlines are handled at parse time
+by markup.goldmark.extensions.cjk, which is why they never reach code blocks.)
+The ruby patterns are bounded and newline-free so one stray bracket cannot let
+a match run away.
+
+IMPORTANT: pass one page's rendered content, never an assembled feed document.
+A string containing "<![CDATA[" offers the leading "[" something to match, and
+the match can then run to the next "]...{...}" anywhere in the feed.
+
+@param {string} content Rendered HTML for a single page.
+@returns {string} The same HTML with the conventions applied.
+
+@example: {{ partial "_funcs/typeset-content.html" .Content }}
+*/ -}}
+
+{{- $content := . -}}
+
+{{- $ruby := `<ruby>$1<rp>（</rp><rt>$2</rt><rp>）</rp></ruby>` -}}
+{{- $content = $content | replaceRE `\[([^\]\n]{1,32})\]\^?\{([^}\n]{1,32})\}` $ruby -}}
+{{- $content = $content | replaceRE `\[([^\]\n]{1,32})\]\^\(([^)\n]{1,32})\)` $ruby -}}
+
+{{- $cjk := `[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{3000}-\x{303f}\x{ff00}-\x{ffef}]` -}}
+{{- $content = $content | replaceRE (printf `(%s)\s+(%s)` $cjk $cjk) "$1$2" -}}
+{{- $content = $content | replaceRE (printf `(%s)\s+([a-zA-Z0-9])` $cjk) "$1$2" -}}
+{{- $content = $content | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" -}}
+
+{{- return $content -}}

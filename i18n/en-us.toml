@@ -81,6 +81,7 @@ rssFeedIntro = 'This is an <strong>RSS 2.0</strong> web feed. If your browser or
 feedSubscribeHelp = 'To follow <strong>{{ .Title }}</strong>, copy the address below into your RSS reader ({{ .Readers }}):'
 feedLatestPosts = 'Latest posts'
 feedReadMore = 'Read the full post and join the discussion →'
+feedDiagramSource = 'Diagram source (Mermaid). See the original article for the rendered figure.'
 feedUrlLabel = 'Feed URL'
 copyFeedUrl = 'Copy feed URL'
 feedUrlCopied = 'Feed URL copied to clipboard.'

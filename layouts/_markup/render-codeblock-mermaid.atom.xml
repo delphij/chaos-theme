@@ -1,0 +1,4 @@
+{{- /* Feed variant of the codeblock-mermaid render hook. Both feed output formats need
+       their own file: the ATOM format does not inherit the RSS variant. The
+       logic lives in the partial so the two cannot drift. */ -}}
+{{- partial "feed/mermaid.html" . -}}

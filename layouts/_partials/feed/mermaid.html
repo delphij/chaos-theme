@@ -1,0 +1,15 @@
+{{- /*
+Renders a Mermaid code block for the feed output formats.
+
+These pages deliberately do not pull in the Mermaid renderer, so the diagram is
+presented as the source it is, with a line saying so, rather than as an
+unexplained wall of syntax.
+
+@context {codeblock} The codeblock render hook context.
+
+@example: {{ partial "feed/mermaid.html" . }}
+*/ -}}
+<figure>
+  <pre><code class="language-mermaid">{{ .Inner }}</code></pre>
+  <figcaption>{{ T "feedDiagramSource" }}</figcaption>
+</figure>

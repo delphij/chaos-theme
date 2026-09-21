@@ -48,8 +48,9 @@
     {{ end }}
     <updated>{{ .Lastmod.UTC.Format "2006-01-02T15:04:05Z" | safeHTML }}</updated>
     <published>{{ .Date.UTC.Format "2006-01-02T15:04:05Z" | safeHTML }}</published>
-    <summary type="html">{{ trim .Summary "\n" }}</summary>
-    <content type="html" xml:base="{{ "/" | absLangURL }}">{{ "<![CDATA[" | safeHTML }}{{ .Content }}{{ "]]>" | safeHTML }}</content>
+    {{- /* type="html" is not a CDATA section: the markup must stay escaped here. */}}
+    <summary type="html">{{ partial "_funcs/typeset-content.html" (trim .Summary "\n") }}</summary>
+    <content type="html" xml:base="{{ "/" | absLangURL }}">{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" .Content | safeHTML }}{{ "]]>" | safeHTML }}</content>
   </entry>
   {{- end }}
 </feed>

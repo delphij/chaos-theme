@@ -1,0 +1,23 @@
+{{- /*
+Renders a math passthrough for the feed output formats.
+
+The HTML hook hands this same markup to KaTeX, whose "htmlAndMathml" output
+depends on katex.min.css to hide the MathML copy and position the span copy.
+A feed reader has neither, so it renders both at once and the formula comes out
+duplicated and overlapping. The TeX source is the one lossless representation
+available, it survives any sanitiser, and the reader can copy it - so that is
+what the feed carries. 88 formulas on this site come to 82 KB of KaTeX markup
+against 1.7 KB of TeX.
+
+@context {passthrough} The passthrough render hook context.
+
+@example: {{ partial "feed/math.html" . }}
+*/ -}}
+{{- $tex := trim .Inner "\n" -}}
+{{- if eq .Type "block" -}}
+<pre><code class="language-tex">$$
+{{ $tex }}
+$$</code></pre>
+{{- else -}}
+<code class="language-tex">\({{ $tex }}\)</code>
+{{- end -}}

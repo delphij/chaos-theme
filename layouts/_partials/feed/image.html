@@ -1,0 +1,34 @@
+{{- /*
+Renders an image for the feed output formats.
+
+The HTML hook builds a <picture> with a WebP <source>, a width-descriptor
+srcset and a sizes attribute - roughly 1.2 KB of markup per image, and the
+whole apparatus is wasted on a feed reader, which has no layout to be
+responsive to. Some sanitisers drop <picture> and <source> outright.
+
+So the feed gets one plain absolute <img>, capped at the article measure. The
+width asked for is one the HTML hook already generates, so this reuses an
+existing derivative instead of adding another to the build. Resizing is
+unconditional rather than falling back to the source file, because posts
+cascade build.publishResources = false and the untouched source is not
+published.
+
+@context {image} The image render hook context.
+
+@example: {{ partial "feed/image.html" . }}
+*/ -}}
+{{- $dest := .Destination -}}
+{{- $alt := .PlainText -}}
+{{- $isRemote := or (hasPrefix $dest "//") (findRE `^[A-Za-z][A-Za-z0-9+.-]*:` $dest) -}}
+{{- $src := .Page.Resources.GetMatch ($dest | safeURL) -}}
+
+{{- if $isRemote -}}
+  <img src="{{ $dest }}" alt="{{ $alt }}">
+{{- else if $src -}}
+  {{- $width := cond (le $src.Width 1232) $src.Width 1232 -}}
+  {{- $format := cond (eq $src.MediaType.SubType "gif") "" "webp" -}}
+  {{- $img := $src.Resize (printf "%dx %s" $width $format) -}}
+  <a href="{{ $img.Permalink }}"><img src="{{ $img.Permalink }}" width="{{ $img.Width }}" height="{{ $img.Height }}" alt="{{ $alt }}"></a>
+{{- else if $dest -}}
+  <img src="{{ strings.TrimPrefix "/" $dest | absURL }}" alt="{{ $alt }}">
+{{- end -}}

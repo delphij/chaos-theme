@@ -82,8 +82,8 @@
         {{- end }}
       {{- end }}
       <comments>{{ .Permalink }}#comments</comments>
-      <description>{{ "<![CDATA[" | safeHTML }}{{ .Summary }}{{ "]]>" | safeHTML }}</description>
-      <content:encoded>{{ "<![CDATA[" | safeHTML }}{{ .Content }}{{ "]]>" | safeHTML }}</content:encoded>
+      <description>{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" .Summary | safeHTML }}{{ "]]>" | safeHTML }}</description>
+      <content:encoded>{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" .Content | safeHTML }}{{ "]]>" | safeHTML }}</content:encoded>
     </item>
       {{- end }}
     {{- end }}

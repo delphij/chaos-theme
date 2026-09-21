@@ -288,7 +288,11 @@ Target: Chrome/Edge 112+, Firefox 117+, Safari 16.5+ (2023+)
 ### Modern Features Used
 - CSS: Variables, Grid, Flexbox, `dvh`, containment, `color-scheme`, backdrop-filter
 - CJK Typography: `text-autospace: normal`, `text-spacing-trim: normal`, `font-feature-settings: "chws" 1` for OpenType CJK punctuation kerning
-- Build-time CJK Filtering: Automated whitespace/newline stripping between CJK characters/punctuation in `layouts/_partials/content-plus-ruby.html`
+- Build-time CJK Filtering: line-wrap newlines are collapsed at parse time by
+  `markup.goldmark.extensions.cjk` (site config); spaces typed between CJK and
+  Latin runs are stripped in `layouts/_partials/_funcs/typeset-content.html` so
+  `text-autospace` can insert the proportional space instead. That partial also
+  expands ruby annotations, and is shared by the HTML and feed pipelines.
 - JS: ES6+, optional chaining, nullish coalescing, modern array/DOM methods, Intersection Observer
 
 ## 12. Quality Assurance Checklist
