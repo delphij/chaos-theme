@@ -1,10 +1,17 @@
 {{- /*
 Renders one taxonomy term as a link showing its post count.
 
-The same markup was written out five times across taxonomy.html and
-home-sidebar.html, differing only by class name and an optional prefix. The
-accessible label is built once here instead of the translation being called
-twice per chip.
+The label is the link's text, and nothing overrides it: no aria-label, no
+title. Both used to be set to the long termPostCount form, which made the
+accessible name differ from the visible text (a WCAG 2.5.3 "Label in Name"
+problem, since aria-label replaces the name rather than extending it) and
+duplicated 27 KB of identical strings across the 1155 chips on /tags/.
+
+The brackets are half-width in every language, and deliberately not an i18n
+string: what they enclose is always a Latin numeral, so their width follows
+the content rather than the page language. Full-width brackets would add 15px
+of conspicuous whitespace to every chip - including "转帖（176）", where the
+name is Chinese but the number still is not.
 
 @param {map} term   A taxonomy term (.Page and .Count).
 @param {string} class CSS class for the anchor.
@@ -12,5 +19,4 @@ twice per chip.
 
 @example: {{ partial "term-chip.html" (dict "term" . "class" "tag-flat-item") }}
 */ -}}
-{{- $label := T "termPostCount" (dict "Name" .term.Page.LinkTitle "Count" .term.Count) -}}
-<a class="{{ .class }}" href="{{ .term.Page.RelPermalink }}" title="{{ $label }}" aria-label="{{ $label }}">{{ with .prefix }}{{ . }}{{ end }}{{ .term.Page.LinkTitle }} ({{ .term.Count }})</a>
+<a class="{{ .class }}" href="{{ .term.Page.RelPermalink }}">{{ with .prefix }}{{ . }}{{ end }}{{ .term.Page.LinkTitle }} ({{ .term.Count }})</a>
