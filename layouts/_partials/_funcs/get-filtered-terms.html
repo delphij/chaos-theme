@@ -11,12 +11,21 @@ Parameters (dict):
 {{- $result := slice -}}
 
 {{- if and (eq $taxonomy "categories") site.Params.featuredCategories -}}
+  {{- $recentYears := site.Params.featuredCategoriesRecentYears | default 5 -}}
+  {{- $cutoff := now.AddDate (int (sub 0 (int $recentYears))) 0 0 -}}
   {{- range site.Params.featuredCategories -}}
     {{- $slug := . | urlize -}}
     {{- with site.GetPage (printf "/categories/%s" $slug) -}}
-      {{- $result = $result | append (dict "Page" . "Count" (len .Pages)) -}}
+      {{- $recentCount := 0 -}}
+      {{- if gt $recentYears 0 -}}
+        {{- $recentCount = len (where .Pages "Date" "ge" $cutoff) -}}
+      {{- end -}}
+      {{- $totalCount := len .Pages -}}
+      {{- $score := add (mul $recentCount 100000) $totalCount -}}
+      {{- $result = $result | append (dict "Page" . "Count" $totalCount "RecentCount" $recentCount "Score" $score) -}}
     {{- end -}}
   {{- end -}}
+  {{- $result = sort $result "Score" "desc" -}}
 {{- else -}}
   {{- $rawTerms := .Terms -}}
   {{- if not $rawTerms -}}

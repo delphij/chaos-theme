@@ -91,7 +91,8 @@ title = 'My New Hugo Site'
   # Taxonomy display controls (optional)
   excludedCategories = ["CategoryToHide"] # Hide from homepage "Core Categories"
   excludedTags = ["TagToHide"]           # Hide from homepage & /tags/ "Popular Tags"
-  # featuredCategories = ["Category1", "Category2"] # Optional pinned list for "Core Categories"
+  # featuredCategories = ["Category1", "Category2"] # Optional pinned list for "Core Categories" (sorted dynamically by recent activity)
+  # featuredCategoriesRecentYears = 5    # Time window in years to prioritize active categories (default: 5, set 0 for all-time count)
 
   # Client-side full-text search (optional, disabled by default)
   [params.search]
