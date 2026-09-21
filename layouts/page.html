@@ -2,7 +2,15 @@
   <h1 class="post-title">{{ .Title }}</h1>
 
   <div class="meta">{{ partial "datetime.html" . }}<span class="reading-stats"> • {{ partial "reading-stats.html" . }}</span>{{ with .Params.categories }}<span class="meta-sep"> • </span>{{ partial "taxonomy-links.html" (dict "page" $ "categoriesOnly" true) }}{{ end }}</div>
-  {{- partial "_funcs/typeset-content.html" .Content | safeHTML -}}
+  {{- /* The first image of an article is its likeliest LCP element, and
+         loading="lazy" on the LCP image is the one case where lazy loading
+         costs more than it saves: the request waits for layout. Promote just
+         that one, here rather than in the image render hook - a hook cannot
+         tell an article render from a list page, whose summaries reuse the
+         same markup and would each promote an image of their own. */ -}}
+  {{- $content := partial "_funcs/typeset-content.html" .Content -}}
+  {{- $content = replaceRE `loading="lazy" decoding="async"` `fetchpriority="high"` $content 1 -}}
+  {{- $content | safeHTML -}}
   {{- partial "post-footer.html" . -}}
   <div id="print-references" class="print-only"></div>
   {{- partial "remark.html" . -}}

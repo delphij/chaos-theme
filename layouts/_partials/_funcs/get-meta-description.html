@@ -26,5 +26,13 @@ Fallback order:
 {{- else -}}
   {{- $description = .Title -}}
 {{- end -}}
-{{- return ($description | plainify | htmlUnescape | replaceRE `[\n\r\t ]+` " " | strings.TrimSpace) -}}
+{{- /* Chroma renders line numbers as their own spans inside the summary, so
+       plainify would otherwise drip "1 2 3 4 5 …" into the description. */ -}}
+{{- $description = $description | replaceRE `(?s)<span class="lnt?"[^>]*>.*?</span>` "" -}}
+
+{{- $description = $description | plainify | htmlUnescape | replaceRE `[\n\r\t ]+` " " | strings.TrimSpace -}}
+
+{{- /* Search engines show roughly 160 characters; anything past that is page
+       weight that no one reads. Summaries here ran to 400. */ -}}
+{{- return ($description | truncate 150 "…") -}}
 
