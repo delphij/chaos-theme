@@ -20,8 +20,9 @@ Handles:
     {{- $territory = upper $part -}}
   {{- end -}}
 {{- end -}}
+{{- /* A partial may hold only one return, and it must come last. */ -}}
+{{- $locale := $lang -}}
 {{- if $territory -}}
-  {{- return (printf "%s_%s" $lang $territory) -}}
-{{- else -}}
-  {{- return $lang -}}
+  {{- $locale = printf "%s_%s" $lang $territory -}}
 {{- end -}}
+{{- return $locale -}}
