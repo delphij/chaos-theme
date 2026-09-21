@@ -2,7 +2,7 @@
 Initializes or returns the paginator for paginated list pages.
 
 Must be called before .Paginator is accessed elsewhere, so that
-custom collections (such as site.RegularPages on the homepage)
+custom collections (such as the mainSections pages on the homepage)
 are correctly registered.
 
 Sections whose layout renders a complete listing of its own are skipped:
@@ -15,7 +15,9 @@ paginating them would emit one identical full-size page per pager entry.
 {{- $unpaginatedSections := slice "posts" "archives" -}}
 {{- $paginator := false -}}
 {{- if .IsHome -}}
-  {{- $paginator = .Paginate site.RegularPages -}}
+  {{- /* site.MainSections rather than site.Params.mainSections: it falls back
+         to the section with the most pages when the site leaves it unset. */ -}}
+  {{- $paginator = .Paginate (where site.RegularPages "Type" "in" site.MainSections) -}}
 {{- else if and (eq .Kind "section") (not (in $unpaginatedSections .Section)) -}}
   {{- $pages := where site.RegularPages "Type" "in" site.Params.mainSections -}}
   {{- $paginator = .Paginate (where $pages "Params.hidden" "ne" true) -}}
