@@ -1,13 +1,19 @@
+{{- /* css/tokens.css is executed as a template (its @font-face URL must come
+       out absolute; see the file) and so cannot just be listed alongside the
+       plain sheets. It goes first: everything after it resolves var()s it
+       defines. */ -}}
+{{- $tokens := resources.Get "css/tokens.css" | resources.ExecuteAsTemplate "css/tokens.css" . -}}
 {{- $cssFiles := slice "css/normalize.css" "css/main.css" "css/syntax.css" "css/syntax-dark.css" -}}
 
 {{- if hugo.IsDevelopment }}
+  <link rel="stylesheet" href="{{ $tokens.RelPermalink }}"></link>
   {{- range $cssFiles }}
     {{- with resources.Get . }}
       <link rel="stylesheet" href="{{ .RelPermalink }}"></link>
     {{- end }}
   {{- end }}
 {{- else }}
-  {{- $cssResources := slice -}}
+  {{- $cssResources := slice $tokens -}}
   {{- range $cssFiles }}
     {{- $cssResources = $cssResources | append (resources.Get .) -}}
   {{- end -}}

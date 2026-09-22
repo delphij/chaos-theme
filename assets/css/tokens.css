@@ -1,0 +1,185 @@
+/* ==========================================================================
+   DESIGN TOKENS
+   The single definition of the palette, type scale, spacing and the vendored
+   monospace face. Consumed twice: bundled into the site stylesheet by
+   head/css.html, and inlined into the XSLT-rendered feed and sitemap pages by
+   xml-xsl-styles.html, which cannot link a stylesheet the way a normal page
+   can. Keeping one copy is the point -- a palette change that lands in only
+   one of the two is the failure this file exists to prevent.
+
+   Executed as a Go template (resources.ExecuteAsTemplate) for one reason: the
+   @font-face URL. A relative URL would be correct in the bundle and wrong when
+   inlined -- inside a <style> element a relative URL resolves against the
+   document, not against a stylesheet -- so it is emitted absolute, which is
+   correct in both and under a subdirectory baseURL.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Noto Sans Mono";
+  src: url("{{ "_3p/noto-sans-mono/2.014/noto-sans-mono-latin.woff2" | relURL }}") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2010-2015, U+2018-201F, U+2026, U+2030,
+                 U+2032-2033, U+20AC, U+2190-2193, U+2212, U+2260, U+2264-2265;
+}
+
+/* ==========================================================================
+   CSS VARIABLES
+   Global design tokens for colors, spacing, and typography.
+   Uses CSS custom properties for easy theme switching and maintenance.
+   ========================================================================== */
+
+:root {
+  /* Color scheme - Tells browser to use native light UI for controls */
+  color-scheme: light;
+
+  /* Color palette - Light mode
+     Primary brand colors with Japanese traditional color names */
+  --bg: #FAFAFA;                    /* 白練 Shiro-neri (page background) */
+  --surface: #FFFFFF;               /* 純白 Junpaku (card/panel surfaces) */
+  --text: #222222;                  /* 墨 Sumi (body text, 15.3:1 contrast on #FAFAFA) */
+  --heading: #111111;               /* 漆黑 Shikkoku (headings and titles, 18.2:1 contrast) */
+  --muted: #545454;                 /* 墨灰 Sumi-hai (secondary text, captions, 5.8:1 contrast) */
+  --primary: #A23E48;               /* 红緋 Hi-iro (primary brand color) */
+  --primary-hover: #7E2F37;         /* 红緋 deepened - hover for primary-coloured links */
+  --primary-fg: #FFFFFF;            /* High contrast text on primary in light mode (6.2:1) */
+  --accent: #2E5A88;                /* 瑠璃色 Ruri-iro (accent color) */
+  --paper: #F0E6D2;                 /* 生成色 Kinari-iro (paper texture background) */
+
+  /* Links - High contrast accessible blue palette (7.2:1 on #FAFAFA, WCAG AAA) */
+  --link: #0050A5;                  /* Default link color */
+  --link-hover: #003875;            /* Link hover state */
+
+  /* UI elements - Borders and backgrounds */
+  --table-stripe: #F2F2F2;           /* Alternating table row background */
+  --blockquote-fg: #333333;          /* Blockquote text color */
+  --border-color: rgba(0,0,0,0.1);     /* Border colour, for widths other than 1px */
+  --border: 1px solid var(--border-color); /* Subtle border for light mode */
+  --code-bg: #F0F0F0;                          /* Code block ground. Deliberately neutral:
+                                                  a warm tint reads as yellow cast behind
+                                                  syntax colours. Separated from --bg enough
+                                                  to register as a block (1.09 vs 1.03). */
+  --mark-bg: rgba(204, 102, 0, 0.15);          /* Text & search highlight (山吹色 Yamabuki) */
+
+  /* Alert colors - Semantic color system for different message types */
+  --alert-note-bg: #F0F4FF;          /* Note/Historical background */
+  --alert-note-border: #3366CC;      /* Note border */
+  --alert-tip-bg: #F0FFF4;           /* Tip background */
+  --alert-tip-border: #228B22;       /* Tip border */
+  --alert-important-bg: #FFF8E5;     /* Important background */
+  --alert-important-border: #CC6600; /* Important border */
+  --alert-warning-bg: #FFF0F0;       /* Warning/Disclaimer background */
+  --alert-warning-border: #CC3333;   /* Warning border */
+  --alert-caution-bg: #FAF0FF;       /* Caution background */
+  --alert-caution-border: #8844AA;   /* Caution border */
+
+  /* Layout dimensions - Spacing and container widths */
+  --max-width: 1280px;               /* Maximum container width for header/footer/nav */
+  --content-width: 780px;            /* ~48 full-width CJK characters per line at 16px.
+                                        On the long side of the classical 30-40 range;
+                                        paired with the 1.7 line-height to stay readable. */
+  --gutter: 24px;                    /* Horizontal padding */
+  --nav-height: 80px;                /* Sticky navigation height for scroll offsets */
+  --radius: 10px;                    /* Border radius for cards */
+  --radius-sm: 4px;                  /* Small border radius */
+  --radius-md: 6px;                  /* Medium border radius */
+  --radius-lg: 8px;                  /* Large border radius */
+
+  /* Typography scale - Consistent font sizing system */
+  --font-size-base: 16px;            /* Base font size */
+  --line-height: 1.7;                /* Line height optimized for compact CJK reading texture */
+  --h1-size: 28px;                   /* Article titles */
+  --h2-size: 22px;                   /* Section headings */
+  --h3-size: 18px;                   /* Sub-section headings */
+
+  /* UI type scale - every non-body size resolves to one of these five steps,
+     so components stop inventing half-pixel values of their own. */
+  --text-2xs: 11px;                  /* Badges, keycaps */
+  --text-xs: 12px;                   /* Dense secondary UI */
+  --text-sm: 13px;                   /* Sidebar rows, dates, footer */
+  --text-md: 14px;                   /* Default small text */
+  --text-lg: 15px;                   /* Slightly reduced body */
+  --small-size: var(--text-md);      /* Small text, captions */
+
+  /* Monospace stack - used by code, taxonomy count pills and archive dates.
+     The bundled Noto Sans Mono face covers Latin and digits only; everything
+     else, CJK included, falls through to the platform fonts listed after it. */
+  --font-mono: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+               "Liberation Mono", monospace;
+
+  /* Animation timing - Consistent transitions */
+  --transition-fast: 0.2s ease;      /* Quick transitions for hover/focus */
+  --transition-normal: 0.3s ease;    /* Standard transitions for UI elements */
+
+  /* Z-index layers - Consistent stacking context */
+  --z-nav: 40;                       /* Sticky navigation header */
+  --z-overlay: 50;                   /* Overlays (menu, TOC) */
+  --z-modal: 60;                     /* Floating buttons (TOC toggle) */
+  --z-top: 100;                      /* Top layer (skip link, announcements) */
+
+  /* Focus styles - High contrast for keyboard navigation accessibility (WCAG 2.4.11) */
+  --focus-outline: 2px solid var(--primary);
+  --focus-offset: 3px;
+
+  /* Elevation and shadows */
+  --shadow-dialog: 0 16px 36px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark mode variables
+   Complete color palette override for dark theme.
+   Maintains visual hierarchy and accessibility in low-light conditions.
+   Applies to screen only - print always uses light theme standards. */
+@media screen {
+  html.dark {
+    /* Color scheme - Tells browser to use native dark UI for controls */
+    color-scheme: dark;
+
+    --bg: #1C1C1C;                     /* Dark background */
+    --surface: #222222;                /* Elevated surfaces */
+    --text: #E8E8E8;                   /* Neutral off-white, 13.9:1 (was GitHub's blue-grey) */
+    --heading: #FFFFFF;                /* High-contrast headings (17.5:1 contrast) */
+    --muted: #A8A8A8;                  /* Muted text (7.0:1 contrast on #1C1C1C) */
+    --primary: #FF6F61;                /* 珊瑚橙 (coral orange) */
+    --primary-hover: #FF9488;          /* Coral lightened - hover in dark mode (8.0:1) */
+    --primary-fg: #1C1C1C;             /* High contrast text on primary in dark mode (8.4:1) */
+    --accent: #8AB4F8;                 /* Lighter blue for dark mode */
+    --paper: #2A2A2A;                  /* Subtle background variation */
+    --link: #66B3FF;                   /* Brighter link meeting WCAG AAA (7.8:1 contrast) */
+    --link-hover: #99CCFF;             /* Link hover in dark mode */
+    --table-stripe: #242424;           /* Darker stripe for tables */
+    --blockquote-fg: #CCCCCC;          /* Lighter quote text */
+    --border-color: rgba(255,255,255,0.1);
+    --border: 1px solid var(--border-color); /* Subtle dark border */
+    --code-bg: #242424;                /* Neutral, and lighter than --surface: code now sits
+                                          on the same elevation ladder as every other panel
+                                          instead of being darker than the page (#0d1117) */
+    --mark-bg: rgba(255, 184, 77, 0.25);
+    --focus-outline: 2px solid var(--link);
+    --shadow-dialog: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+
+    /* Alert colors adapted for dark mode with higher contrast */
+    --alert-note-bg: #1E2A40;
+    --alert-note-border: #6699FF;
+    --alert-tip-bg: #1F2D1F;
+    --alert-tip-border: #66CC66;
+    --alert-important-bg: #332B1E;
+    --alert-important-border: #FFB84D;
+    --alert-warning-bg: #3A1E1E;
+    --alert-warning-border: #FF6666;
+    --alert-caution-bg: #2A1E33;
+    --alert-caution-border: #B266CC;
+  }
+}
+
+/* Mobile & Small Tablet breakpoint (<= 768px): the token half of it. The rest
+   of that breakpoint's rules stay with the components they restyle. */
+@media (max-width: 768px) {
+  :root {
+    --max-width: 100%;
+    --gutter: 16px;
+    --h1-size: 24px;
+    --h2-size: 20px;
+    --h3-size: 17px;
+  }
+}
