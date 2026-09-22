@@ -73,10 +73,10 @@
             <table id="sitemapTable">
               <thead>
                 <tr>
-                  <th style="width: 70%;" class="sortable" id="thPath" data-col="path" tabindex="0" role="button" aria-label="{{ T `sortByPath` }}">
+                  <th class="sortable" id="thPath" data-col="path" tabindex="0" role="button" aria-label="{{ T `sortByPath` }}">
                     {{ T "sitemapColumnPath" }} <span class="sort-icon" id="iconPath">↕</span>
                   </th>
-                  <th style="width: 30%;" class="sortable sorted-desc" id="thTime" data-col="time" tabindex="0" role="button" aria-label="{{ T `sortByTimeDescending` }}">
+                  <th class="sortable sorted-desc" id="thTime" data-col="time" tabindex="0" role="button" aria-label="{{ T `sortByTimeDescending` }}">
                     {{ T "sitemapColumnLastModified" }} <span class="sort-icon" id="iconTime">↓</span>
                   </th>
                 </tr>
