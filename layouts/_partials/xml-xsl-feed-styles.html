@@ -1,0 +1,227 @@
+{{- /*
+The stylesheet of the page feed.xsl renders: the shared XSL page styles, the
+site's own syntax highlighting so code in a feed entry reads as it does in the
+article, and the feed-specific layout.
+
+Lives in a partial rather than inline in the stylesheet so the caller can hand
+it to resources.Minify -- the comments below are for whoever maintains this,
+not for every reader of the feed.
+
+No angle brackets anywhere in here: the caller is an XML document, and a
+literal tag name would be parsed as markup.
+
+@example: {{ partial "xml-xsl-feed-styles.html" . }}
+*/ -}}
+{{ partial "xml-xsl-styles.html" . }}
+
+/* Syntax highlighting reused verbatim from the site's own stylesheets,
+   so code inside a feed entry reads exactly as it does in the article.
+   The dark sheet is scoped to html.dark, which xml-xsl-theme.html sets. */
+{{ (resources.Get "css/syntax.css").Content }}
+{{ (resources.Get "css/syntax-dark.css").Content }}
+
+/* Code blocks: a tinted, unframed, horizontally scrollable slab, as in
+   the article. The main site hangs the line-number column into the
+   margin on wide screens; that flourish is skipped here. */
+.highlight pre {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.chroma .lntable {
+  border-spacing: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.chroma .lntd {
+  vertical-align: top;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.chroma .lntd:first-child {
+  padding-right: 1em;
+}
+
+.chroma .lnt,
+.chroma .ln {
+  white-space: pre;
+  -webkit-user-select: none;
+  user-select: none;
+  padding: 0 0 0 0.4em;
+}
+
+.chroma .line {
+  display: flex;
+}
+
+/* The feed pipeline hands us formulas and diagrams as plain preformatted
+   blocks rather than as Chroma output, so they need the code ground
+   that .chroma would otherwise supply. (No angle brackets in this
+   file's CSS: it is XML, and a literal tag name would be parsed.) */
+.feed-entry-content pre:not(.chroma) {
+  margin: 1.5rem 0;
+  padding: 12px;
+  background: var(--code-bg);
+  overflow-x: auto;
+}
+
+.feed-entry-content figure {
+  margin: 1.5rem 0;
+}
+
+.feed-entry-content figcaption {
+  margin-top: 6px;
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+/* ----- Feed-specific layout ----- */
+
+/* Icon sits on the baseline of the banner heading; size, colour and
+   spacing come from .info-card h1 in the shared partial. */
+.feed-notice-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feed-notice-title svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* The feed address, built like the article code-copy button: a quiet
+   inset field that copies itself when clicked. */
+.feed-url-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--line-height);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.feed-url-box:hover {
+  border-color: var(--primary);
+}
+
+.feed-url-label {
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.feed-url-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-all;
+  user-select: text;
+}
+
+.feed-url-hint {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 3px 8px;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--muted);
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  user-select: none;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.feed-url-box:hover .feed-url-hint {
+  color: var(--heading);
+  background: var(--paper);
+  border-color: var(--primary);
+}
+
+.feed-url-box.copied .feed-url-hint {
+  color: var(--alert-tip-border);
+  border-color: var(--alert-tip-border);
+}
+
+/* Section label above the list: deliberately quieter than the entry
+   titles it introduces, like .tags-section-heading on the site. */
+.feed-section-heading {
+  font-size: var(--text-md);
+  margin: 0 0 24px;
+}
+
+/* Entries are spaced like .post-entry on the homepage: whitespace
+   only, no rules or cards between them. */
+.feed-entries {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.feed-entry-title {
+  font-size: var(--h1-size);
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+
+.feed-entry-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: var(--small-size);
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.feed-entry-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.feed-entry-content {
+  margin: 14px 0;
+}
+
+.feed-entry-content p {
+  margin: 0 0 1.15em;
+}
+
+.feed-entry-content img {
+  margin: 1em 0;
+}
+
+.feed-entry-more {
+  margin-top: 14px;
+}
+
+.feed-read-more {
+  font-weight: 600;
+}

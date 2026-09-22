@@ -1,0 +1,190 @@
+{{- /*
+The stylesheet of the page sitemap.xsl renders: the shared XSL page styles
+plus the sitemap's table, type pills and filter toolbar.
+
+Lives in a partial rather than inline in the stylesheet so the caller can hand
+it to resources.Minify -- the comments below are for whoever maintains this,
+not for every reader of the sitemap.
+
+No angle brackets anywhere in here: the caller is an XML document, and a
+literal tag name would be parsed as markup.
+
+@example: {{ partial "xml-xsl-sitemap-styles.html" . }}
+*/ -}}
+{{ partial "xml-xsl-styles.html" . }}
+
+/* ----- Sitemap-specific layout ----- */
+
+/* A dense two-column table, so it uses the site's chrome measure
+   rather than the narrower reading measure. */
+.container {
+  max-width: var(--max-width);
+}
+
+/* One colour per content type, assigned from the existing palette so
+   the pills and the in-table badges cannot drift apart. */
+.stat-pill[data-filter="post"],
+.type-badge[data-filter-type="post"] {
+  --type-color: var(--accent);
+}
+
+.stat-pill[data-filter="category"],
+.type-badge[data-filter-type="category"] {
+  --type-color: var(--primary);
+}
+
+.stat-pill[data-filter="tag"],
+.type-badge[data-filter-type="tag"] {
+  --type-color: var(--muted);
+}
+
+.stat-pill[data-filter="page"],
+.type-badge[data-filter-type="page"] {
+  --type-color: var(--heading);
+}
+
+/* Filter toolbar */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.filter-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Pills follow .tag-flat-item: flat by default, tinted when engaged. */
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  font: inherit;
+  font-size: var(--text-sm);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.stat-pill.active {
+  color: var(--type-color);
+  background: var(--paper);
+}
+
+.stat-pill.inactive {
+  text-decoration: line-through;
+}
+
+.stat-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.filter-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 12px;
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.filter-status strong {
+  color: var(--heading);
+}
+
+.filter-hint {
+  font-size: var(--text-xs);
+}
+
+/* The table itself is bare and striped (see the shared partial); only
+   the sort affordances and the path column are added here. */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  font-size: var(--text-sm);
+}
+
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+th.sortable:hover {
+  background-color: var(--primary);
+  color: var(--primary-fg);
+}
+
+.sort-icon {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: var(--text-xs);
+  opacity: 0.55;
+}
+
+th.sorted-asc .sort-icon,
+th.sorted-desc .sort-icon {
+  opacity: 1;
+}
+
+td {
+  vertical-align: middle;
+}
+
+/* Rows highlight on hover like .archive-post-row on the site,
+   and the row's link takes the primary colour with it. */
+tr:hover td {
+  background-color: var(--paper);
+}
+
+tr:hover a.link-plain {
+  color: var(--primary);
+}
+
+tr.is-hidden {
+  display: none;
+}
+
+/* Type labels are flat coloured text, not chips - the site treats
+   taxonomy the same way. */
+.type-badge {
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--type-color);
+  margin-right: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.path-text {
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+
+.time-col {
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--muted);
+  font-size: var(--small-size);
+}

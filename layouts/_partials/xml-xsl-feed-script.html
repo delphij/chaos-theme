@@ -1,0 +1,64 @@
+{{- /*
+The copy-to-clipboard behaviour of the feed address on the page
+feed.xsl renders.
+
+Lives in a partial rather than inline in the stylesheet so the caller can
+hand it to resources.Minify. The caller wraps the result in a CDATA
+section, which is why nothing here may contain the string that would
+close one.
+
+@example: {{ partial "xml-xsl-feed-script.html" . }}
+*/ -}}
+(function() {
+  var box = document.getElementById('feedUrlCopy');
+  var value = document.getElementById('feedUrlValue');
+  var hint = document.getElementById('feedUrlHint');
+  if (!box || !value || !hint) return;
+
+  var copyLabel = {{ T "copyFeedUrl" | jsonify }};
+  var copiedLabel = {{ T "copiedCode" | jsonify }};
+  var resetTimer;
+
+  function report(ok) {
+    if (ok) {
+      hint.textContent = copiedLabel;
+      box.classList.add('copied');
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(function() {
+        hint.textContent = copyLabel;
+        box.classList.remove('copied');
+      }, 2000);
+    }
+  }
+
+  function legacyCopy(text) {
+    var area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.top = '-1000px';
+    document.body.appendChild(area);
+    area.select();
+    var ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch (e) {
+      ok = false;
+    }
+    document.body.removeChild(area);
+    return ok;
+  }
+
+  box.addEventListener('click', function() {
+    var text = value.textContent.trim();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function() {
+        report(true);
+      }).catch(function() {
+        report(legacyCopy(text));
+      });
+    } else {
+      report(legacyCopy(text));
+    }
+  });
+})();
