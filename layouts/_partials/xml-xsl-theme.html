@@ -9,19 +9,4 @@ class lands before first paint.
 
 @example: {{ partial "xml-xsl-theme.html" . }}
 */ -}}
-<script>
-<![CDATA[
-  (function() {
-    var mode;
-    try {
-      mode = localStorage.getItem('theme-mode');
-    } catch (e) {
-      // Storage unavailable (private mode, blocked cookies): fall back to the system.
-    }
-    if (mode !== 'dark' && mode !== 'light') {
-      mode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    document.documentElement.classList.add(mode);
-  })();
-]]>
-</script>
+<script><![CDATA[{{ (resources.Get "js/xml-xsl-theme.js" | resources.Minify).Content | safeJS }}]]></script>

@@ -93,31 +93,28 @@
     copiedCode: {{ T "copiedCode" }}
   };
 </script>
-{{- /* Speculation Rules API for native prerendering (modern browsers) */ -}}
-<script type="speculationrules">
-{
-  "prerender": [
-    {
-      "where": {
-        "and": [
-          { "href_matches": "{{ "*" | relURL }}" },
-          { "not": { "href_matches": "{{ "archives*" | relURL }}" } },
-          { "not": { "href_matches": "{{ "feed.xsl" | relURL }}" } },
-          { "not": { "href_matches": "{{ "*.xml" | relURL }}" } },
-          { "not": { "selector_matches": "[target=_blank]" } }
-        ]
-      },
-      "eagerness": "moderate"
-    }
-  ]
-}
-</script>
-{{- /* Fallback to instant.page for older browsers lacking speculation rules support */ -}}
-<script type="module">
-  if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('speculationrules')) {
-    const script = document.createElement('script');
-    script.src = {{ "_3p/instantpage/5.2.0/instantpage.min.js" | relURL }};
-    script.type = 'module';
-    document.head.appendChild(script);
-  }
-</script>
+{{- /* Speculation Rules API for native prerendering (modern browsers).
+
+       Built as a map and serialised rather than written out as literal JSON:
+       the minifier leaves a speculationrules script alone, since the type is
+       an HTML keyword rather than a media type it can dispatch on, so hand-
+       written JSON would ship its indentation to every page. */ -}}
+{{- $rules := dict "prerender" (slice (dict
+      "where" (dict "and" (slice
+        (dict "href_matches" ("*" | relURL))
+        (dict "not" (dict "href_matches" ("archives*" | relURL)))
+        (dict "not" (dict "href_matches" ("feed.xsl" | relURL)))
+        (dict "not" (dict "href_matches" ("*.xml" | relURL)))
+        (dict "not" (dict "selector_matches" "[target=_blank]"))))
+      "eagerness" "moderate")) -}}
+<script type="speculationrules">{{ $rules | jsonify | safeHTML }}</script>
+{{- /* Fallback to instant.page for older browsers lacking speculation rules
+       support. Minified explicitly: type="module" is an HTML keyword, not a
+       media type, so the minifier passes the script through untouched. */ -}}
+{{- $fallback := printf `if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('speculationrules')) {
+  const script = document.createElement('script');
+  script.src = %q;
+  script.type = 'module';
+  document.head.appendChild(script);
+}` ("_3p/instantpage/5.2.0/instantpage.min.js" | relURL) -}}
+<script type="module">{{ (resources.FromString "js/instantpage-fallback.js" $fallback | resources.Minify).Content | safeJS }}</script>
