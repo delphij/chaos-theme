@@ -3,7 +3,10 @@
   xmlns:html="http://www.w3.org/TR/REC-html40"
   xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
   xmlns:sitemap="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  {{- /* Without this the processor copies these declarations onto the
+         result's <html> element, where they mean nothing. */}}
+  exclude-result-prefixes="html image sitemap">
 
   <xsl:output method="html" encoding="UTF-8" indent="yes" />
 
@@ -12,6 +15,10 @@
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {{- /* This page is a rendering of the sitemap, not a page of the site:
+               keep it, and the static companion the build renders from this
+               same stylesheet, out of the index. */}}
+        <meta name="robots" content="noindex, follow" />
         <title>{{ T "sitemapPageTitle" }} — {{ site.Title }}</title>
         {{ partial "xml-xsl-theme.html" . }}
         <style>

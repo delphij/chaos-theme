@@ -3,7 +3,10 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:atom="http://www.w3.org/2005/Atom"
   xmlns:content="http://purl.org/rss/1.0/modules/content/"
-  xmlns:dc="http://purl.org/dc/elements/1.1/">
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  {{- /* Without this the processor copies these three declarations onto the
+         result's <html> element, where they mean nothing. */}}
+  exclude-result-prefixes="atom content dc">
 
   <xsl:output method="html" encoding="utf-8" indent="yes" />
 
@@ -15,6 +18,10 @@
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {{- /* This page is a rendering of the feed, not a page of the site:
+               keep it, and the static companion the build renders from this
+               same stylesheet, out of the index. */}}
+        <meta name="robots" content="noindex, follow" />
         <title>
           <xsl:value-of select="$feed-title" />
           <xsl:text> — </xsl:text>

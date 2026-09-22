@@ -457,6 +457,56 @@ Configure in `config.toml`:
   languages = "zh, en"
 ```
 
+### Readable XML in a Post-XSLT Browser
+
+The feeds and the sitemap carry an `<?xml-stylesheet?>` instruction, which is
+what makes `feed.xsl` and `sitemap.xsl` render them as readable pages rather
+than raw XML. Browsers are removing the XSLT engine behind that: Chrome stops
+running XSLT on stable in 158 (November 2026) and removes it in 176, and
+Firefox and WebKit have signalled the same.
+
+`tools/render_xsl_companions.sh` keeps those pages working without shipping an
+XSLT engine to the browser. Run it after `hugo`, on the built site:
+
+```bash
+hugo --minify
+sh themes/chaos/tools/render_xsl_companions.sh public
+```
+
+For every XML output carrying an `<?xml-stylesheet?>` instruction it runs that
+stylesheet with `xsltproc` and writes the result beside the XML —
+`public/atom.xml.html`, `public/sitemap.xml.html`. Nothing needs to list which
+outputs exist: the documents name their own stylesheets. Requires `xsltproc`
+(macOS ships it; FreeBSD `textproc/libxslt`, Debian `xsltproc`).
+
+The server then serves the companion to browser navigations and the untouched
+XML to everything else, so `/atom.xml` stays one URL that is readable to people
+and unchanged for feed readers and crawlers. In nginx:
+
+```nginx
+map $http_sec_fetch_dest $xslc_nav { default ""; document ".html"; }
+
+location ~ \.xml$ {
+    add_header Vary "Sec-Fetch-Dest";
+    try_files $uri$xslc_nav $uri =404;
+}
+```
+
+`Sec-Fetch-Dest` is added by the browser's own network stack, cannot be forged
+by page script, and is absent from every non-browser HTTP client, so robots
+never reach the HTML branch. (A second `map` on `$http_user_agent` can force
+anything self-identifying as a robot back to the XML, for the case of a crawler
+that renders through a headless browser.) The second `try_files` candidate is
+the XML itself: if the render step never ran, browsers simply get the XML,
+which is what they get today.
+
+Note that an `add_header` in this block suppresses any `add_header` inherited
+from `server{}`, so repeat the site's other headers there if it has any.
+
+Because the companion is rendered *from the stylesheet*, there is no second
+copy of the design to drift out of step — the `.xsl` file stays the single
+source of truth for both paths.
+
 ## Printing
 
 The theme provides optimized print output for articles, ensuring a clean and readable experience:
@@ -663,7 +713,7 @@ All dependencies are vendored in `static/_3p/` and `tools/vendor/` to ensure rel
 - No npm packages required
 - No JavaScript frameworks
 - No external CDNs (except optional comment system)
-- No build tools beyond Hugo
+- No build tools beyond Hugo for the site itself; two optional helpers run on the built output (`python3` for the search index, `xsltproc` for the XSLT companions)
 - All assets self-hosted for performance and privacy
 
 ## Contributing
