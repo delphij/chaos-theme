@@ -1,5 +1,5 @@
-{{ $pag := $.Paginator }}
-{{ if gt $pag.TotalPages 1 }}
+{{ $pag := $.Store.Get "paginator" }}
+{{ if and $pag (gt $pag.TotalPages 1) }}
 <ul class="pager" aria-label="{{ T "paginationLabel" }}">
   {{ if $pag.HasPrev }}
   <li class="page-item page-prev">

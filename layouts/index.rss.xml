@@ -1,6 +1,6 @@
 {{- $pages := "" -}}
 {{- if .IsHome -}}
-  {{- $pages = where site.RegularPages "Type" "in" site.Params.mainSections -}}
+  {{- $pages = partial "_funcs/get-main-pages.html" . -}}
 {{- else -}}
   {{- $pages = .RegularPages -}}
 {{- end -}}

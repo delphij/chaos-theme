@@ -1,4 +1,9 @@
-{{- $paginator := partial "_funcs/get-paginator.html" . -}}
+{{- /* Resolved once here, before anything reads it: .Store.Get "paginator" is
+       the single answer to "is this page paginated, and with which pages?".
+       Templates must not touch .Paginator themselves - on a page the theme
+       does not paginate, that would build Hugo's own unfiltered paginator
+       and emit pager URLs for it. */ -}}
+{{- .Store.Set "paginator" (partial "_funcs/get-paginator.html" .) -}}
 <!DOCTYPE html>
 <html lang="{{ site.Language.Locale }}" dir="{{ or site.Language.Direction `ltr` }}">
 <head>

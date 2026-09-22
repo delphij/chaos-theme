@@ -1,18 +1,26 @@
 {{- /*
 Shared list layout for section and term pages.
 
-These were two files differing only by the excludedTypes filter, which is a
-no-op on term pages (their pages are posts) and so is safe to apply to both.
 Hugo picks the more specific taxonomy.html for taxonomy pages and
 archives/list.html for the archives section, and home.html keeps its own
 layout - the homepage has no page header.
+
+The listing filters live in _funcs/get-list-pages.html, which
+_funcs/get-paginator.html hands to .Paginate, so the pages of the paginator
+baseof.html stored are already filtered. A section listed in
+site.Params.unpaginatedSections has no stored paginator and falls back to the
+same filtered collection, listed in full.
 */ -}}
 {{ define "main" }}
   {{ partial "page-header.html" . }}
-  {{ range .Paginator.Pages }}
-    {{- if not (in (site.Params.excludedTypes | default (slice "page")) .Type) -}}
+  {{ with .Store.Get "paginator" }}
+    {{ range .Pages }}
       {{ partial "post-summary.html" . }}
-    {{- end -}}
+    {{ end }}
+    {{ partial "paginator.html" $ }}
+  {{ else }}
+    {{ range partial "_funcs/get-list-pages.html" $ }}
+      {{ partial "post-summary.html" . }}
+    {{ end }}
   {{ end }}
-  {{ partial "paginator.html" . }}
 {{ end }}

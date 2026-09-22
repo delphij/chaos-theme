@@ -1,9 +1,17 @@
+{{- /* Pages the site redirects away (site.Params.redirects) are kept out of the
+       sitemap: their content lives at the redirect target. */ -}}
+{{- $redirected := slice -}}
+{{- range site.Params.redirects -}}
+  {{- with index . "from" -}}
+    {{- $redirected = $redirected | append . -}}
+  {{- end -}}
+{{- end -}}
 {{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
 {{ "<?" | safeHTML }}xml-stylesheet type="text/xsl" href="{{ "sitemap.xsl" | relURL }}"{{ "?>" | safeHTML }}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   {{ range .Data.Pages }}
-  {{- if and .Permalink (ne .Kind "404") (not (or .Params.hidden .Params.private .Params.noindex (eq .RelPermalink "/posts/") (and (isset .Params "robots") (findRE `(?i)noindex` .Params.robots)))) }}
+  {{- if and .Permalink (ne .Kind "404") (not (or .Params.hidden .Params.private .Params.noindex (in $redirected .RelPermalink) (and (isset .Params "robots") (findRE `(?i)noindex` .Params.robots)))) }}
   <url>
     <loc>{{ .Permalink }}</loc>
     {{- if not .Lastmod.IsZero }}

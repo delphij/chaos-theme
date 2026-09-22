@@ -1,7 +1,7 @@
 {{ define "main" }}
   <div class="page-title-group">
     <h1 class="page-title">{{ partial "_funcs/get-page-title.html" . }}</h1>
-    {{ $posts := where site.RegularPages "Type" "posts" }}
+    {{ $posts := partial "_funcs/get-main-pages.html" . }}
     <p class="page-subtitle">{{ T "archivesSummary" (dict "Count" (len $posts)) }}</p>
   </div>
 

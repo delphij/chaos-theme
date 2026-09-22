@@ -1,5 +1,23 @@
-/posts /archives/;
-/posts/ /archives/;
+{{- /*
+Host-level redirect rules, one "<from> <to>;" per line.
+
+Site-specific redirects come from site.Params.redirects, so routing decisions
+stay with the site rather than the theme:
+
+  [[params.redirects]]
+    from = "/posts/"
+    to = "/archives/"
+
+The /atom.xsl and /rss.xsl rules are the theme's own: it serves a single
+/feed.xsl for both feeds. Front matter aliases are appended automatically.
+*/ -}}
+{{- range site.Params.redirects -}}
+{{- $from := index . "from" -}}
+{{- $to := index . "to" -}}
+{{- if and $from $to -}}
+{{- printf "%s %s;\n" $from $to -}}
+{{- end -}}
+{{- end -}}
 /atom.xsl /feed.xsl;
 /rss.xsl /feed.xsl;
 {{ range $p := site.Pages -}}

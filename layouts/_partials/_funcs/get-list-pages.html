@@ -1,0 +1,27 @@
+{{- /*
+Returns the pages a list page should list, already filtered.
+
+  home     the site's main-section pages (see _funcs/get-main-pages.html)
+  section  the section's own pages, including those in its subsections, so a
+           blog filing posts under content/posts/<year>/<month>/ still lists
+           them on /posts/
+  term     the pages holding the term
+
+@context {page} page The list page.
+@returns {page.Pages} The filtered pages.
+*/ -}}
+
+{{- $pages := slice -}}
+{{- if .IsHome -}}
+  {{- $pages = partial "_funcs/get-main-pages.html" . -}}
+{{- else -}}
+  {{- if eq .Kind "section" -}}
+    {{- $pages = .RegularPagesRecursive -}}
+  {{- else -}}
+    {{- $pages = .Pages -}}
+  {{- end -}}
+  {{- $excludedTypes := site.Params.excludedTypes | default (slice "page") -}}
+  {{- $pages = where $pages "Type" "not in" $excludedTypes -}}
+  {{- $pages = where $pages "Params.hidden" "ne" true -}}
+{{- end -}}
+{{- return $pages -}}

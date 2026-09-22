@@ -101,6 +101,18 @@ title = 'My New Hugo Site'
   # Content filtering
   mainSections = ["posts"]             # Sections to display on homepage
   excludedTypes = ["page"]             # Content types to hide from listings
+  # unpaginatedSections = ["archives"] # Sections whose layout renders its own
+                                       # complete listing, so the theme must not
+                                       # paginate them (default: ["archives"])
+
+  # Routing (optional)
+  # Emitted as host redirect rules in /redirects.txt; the "from" URLs are also
+  # kept out of the sitemap. Useful when a section URL has moved, e.g. a site
+  # that lists its posts at /archives/ instead of /posts/:
+  # redirects = [{ from = "/posts/", to = "/archives/" }]
+  # archiveBreadcrumbSections = ["posts"] # Sections whose Schema.org breadcrumb
+                                          # points at /archives/ instead of the
+                                          # section page (pairs with the above)
 
   # Taxonomy display controls (optional)
   excludedCategories = ["CategoryToHide"] # Hide from homepage "Core Categories"

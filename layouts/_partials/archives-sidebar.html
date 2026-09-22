@@ -2,7 +2,7 @@
 Sidebar for /archives/ page.
 Provides sticky Year & Month timeline jump navigation.
 */}}
-{{ $posts := where site.RegularPages "Type" "posts" }}
+{{ $posts := partial "_funcs/get-main-pages.html" . }}
 <aside class="home-sidebar toc-wrapper" aria-label="{{ T `archivesYearNav` }}">
   <div class="sidebar-card">
     <div class="sidebar-widget">

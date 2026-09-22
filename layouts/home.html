@@ -1,8 +1,10 @@
 {{ define "main" }}
   <h1 class="sr-only">{{ site.Title }}</h1>
   {{ .Content }}
-  {{ range .Paginator.Pages }}
-    {{ partial "post-summary.html" . }}
+  {{ with .Store.Get "paginator" }}
+    {{ range .Pages }}
+      {{ partial "post-summary.html" . }}
+    {{ end }}
   {{ end }}
   {{ partial "paginator.html" . }}
 {{ end }}

@@ -1,11 +1,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-{{- $isPaginated := or .IsHome (in (slice "section" "term") .Kind) -}}
+{{- $pag := .Store.Get "paginator" -}}
 {{- $pagNumber := 1 -}}
-{{- if $isPaginated -}}
-  {{- with .Paginator -}}
-    {{- $pagNumber = .PageNumber -}}
-  {{- end -}}
+{{- with $pag -}}
+  {{- $pagNumber = .PageNumber -}}
 {{- end -}}
 {{- $pageSuffix := "" -}}
 {{- if gt $pagNumber 1 -}}
@@ -28,8 +26,8 @@
 <meta name="robots" content="{{ $robots }}">
 {{- if ne .Kind "404" -}}
 {{- $canonicalURL := .Permalink -}}
-{{- if and $isPaginated (gt $pagNumber 1) -}}
-  {{- $canonicalURL = .Paginator.URL | absURL -}}
+{{- if gt $pagNumber 1 -}}
+  {{- $canonicalURL = $pag.URL | absURL -}}
 {{- end -}}
 <link rel="canonical" href="{{ $canonicalURL }}">
 {{- end -}}
@@ -45,14 +43,12 @@
 {{- with $licenseURL -}}
 <link rel="license" href="{{ . }}">
 {{- end -}}
-{{- if $isPaginated -}}
-  {{- with .Paginator -}}
-    {{- if .HasPrev -}}
-      <link rel="prev" href="{{ .Prev.URL | absURL }}">
-    {{- end -}}
-    {{- if .HasNext -}}
-      <link rel="next" href="{{ .Next.URL | absURL }}">
-    {{- end -}}
+{{- with $pag -}}
+  {{- if .HasPrev -}}
+    <link rel="prev" href="{{ .Prev.URL | absURL }}">
+  {{- end -}}
+  {{- if .HasNext -}}
+    <link rel="next" href="{{ .Next.URL | absURL }}">
   {{- end -}}
 {{- end -}}
 {{ partialCached "head/css.html" . }}
@@ -71,13 +67,11 @@
 {{ $noop := .WordCount }}
 {{ $hasMath := .Page.Store.Get "hasMath" }}
 {{ if not $hasMath }}
-  {{ if or (eq .Kind "home") (eq .Kind "section") (eq .Kind "term") }}
-    {{ with .Paginator }}
-      {{ range .Pages }}
-        {{ $_ := .Summary }}
-        {{ if .Store.Get "hasMath" }}
-          {{ $hasMath = true }}
-        {{ end }}
+  {{ with $pag }}
+    {{ range .Pages }}
+      {{ $_ := .Summary }}
+      {{ if .Store.Get "hasMath" }}
+        {{ $hasMath = true }}
       {{ end }}
     {{ end }}
   {{ end }}

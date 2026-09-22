@@ -1,27 +1,28 @@
 {{- /*
 Initializes or returns the paginator for paginated list pages.
 
-Must be called before .Paginator is accessed elsewhere, so that
-custom collections (such as the mainSections pages on the homepage)
-are correctly registered.
+Called once from baseof.html, which stores the result as the page's
+"paginator" store entry; templates read that rather than .Paginator, so the
+custom collection (the filtered listing) is the one Hugo registers.
 
-Sections whose layout renders a complete listing of its own are skipped:
+Sections listed in site.Params.unpaginatedSections (default: the archives)
+are skipped: their layout renders a complete listing of its own, and
 paginating them would emit one identical full-size page per pager entry.
 
 @context {page} page The page context.
 @returns {paginator} The initialized paginator object, or false for non-paginated pages.
 */}}
 
-{{- $unpaginatedSections := slice "posts" "archives" -}}
+{{- $unpaginatedSections := site.Params.unpaginatedSections | default (slice "archives") -}}
+{{- $paginate := false -}}
+{{- if or .IsHome (eq .Kind "term") -}}
+  {{- $paginate = true -}}
+{{- else if eq .Kind "section" -}}
+  {{- $paginate = not (in $unpaginatedSections .Section) -}}
+{{- end -}}
+
 {{- $paginator := false -}}
-{{- if .IsHome -}}
-  {{- /* site.MainSections rather than site.Params.mainSections: it falls back
-         to the section with the most pages when the site leaves it unset. */ -}}
-  {{- $paginator = .Paginate (where site.RegularPages "Type" "in" site.MainSections) -}}
-{{- else if and (eq .Kind "section") (not (in $unpaginatedSections .Section)) -}}
-  {{- $pages := where site.RegularPages "Type" "in" site.Params.mainSections -}}
-  {{- $paginator = .Paginate (where $pages "Params.hidden" "ne" true) -}}
-{{- else if eq .Kind "term" -}}
-  {{- $paginator = .Paginate .Pages -}}
+{{- if $paginate -}}
+  {{- $paginator = .Paginate (partial "_funcs/get-list-pages.html" .) -}}
 {{- end -}}
 {{- return $paginator -}}
