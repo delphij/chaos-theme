@@ -9,7 +9,10 @@
 <head>
   {{ partial "head.html" . }}
 </head>
-<body>
+{{- /* modules/code-copy.js reads these. Document-scoped because it decorates
+       every .highlight the highlighter emits, and creates the buttons itself,
+       so there is no nearer element to hang them on. */ -}}
+<body data-copy-label="{{ T "copyCode" }}" data-copied-label="{{ T "copiedCode" }}">
   <a href="#main-content" class="skip-link">{{ T "skipToContent" }}</a>
   <div id="theme-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   <header class="site-nav">

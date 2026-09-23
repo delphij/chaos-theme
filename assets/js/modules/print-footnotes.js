@@ -49,7 +49,7 @@ export function initPrintFootnotes() {
 
     // Build references section with clickable numbers
     const heading = document.createElement('h2');
-    heading.textContent = window.i18n?.printReferences || 'References';
+    heading.textContent = printReferences.dataset.heading || 'References';
 
     const list = document.createElement('ol');
     const items = footnotes.map(({ url, refId, noteId }) => {

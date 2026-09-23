@@ -12,7 +12,7 @@
   {{- $content = replaceRE `loading="lazy" decoding="async"` `fetchpriority="high"` $content 1 -}}
   {{- $content | safeHTML -}}
   {{- partial "post-footer.html" . -}}
-  <div id="print-references" class="print-only"></div>
+  <div id="print-references" class="print-only" data-heading="{{ T "printReferences" }}"></div>
   {{- partial "remark.html" . -}}
   {{- partial "post-navigation.html" . -}}
 {{ end }}

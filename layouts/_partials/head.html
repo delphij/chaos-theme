@@ -67,20 +67,6 @@
 {{ if partial "_funcs/has-feature.html" (dict "page" . "markup" `class="katex"`) }}
 <link href="{{ "_3p/katex/0.17.0/katex.min.css" | relURL }}" rel="stylesheet">
 {{ end }}
-{{- /* i18n strings for JavaScript */ -}}
-<script>
-  window.i18n = {
-    themeLightMode: {{ T "themeLightMode" }},
-    themeDarkMode: {{ T "themeDarkMode" }},
-    themeAutoMode: {{ T "themeAutoMode" }},
-    printReferences: {{ T "printReferences" }},
-    themeToggleToDark: {{ T "themeToggleToDark" }},
-    themeToggleToLight: {{ T "themeToggleToLight" }},
-    themeToggleToAuto: {{ T "themeToggleToAuto" }},
-    copyCode: {{ T "copyCode" }},
-    copiedCode: {{ T "copiedCode" }}
-  };
-</script>
 {{- /* Speculation Rules API for native prerendering (modern browsers).
 
        Built as a map and serialised rather than written out as literal JSON:

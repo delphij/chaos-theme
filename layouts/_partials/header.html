@@ -15,5 +15,15 @@
     {{- partial "icon-search.html" . -}}
   </button>
   {{- end -}}
-  <button class="btn-icon theme-toggle" id="themeToggle" aria-label="{{ T "themeToggle" }}">🌓</button>
+  {{- /* modules/theme.js reads its strings from here. They sit on the button
+         because it is what drives all six: the three aria-labels describe the
+         state a click moves to, and the three announcements are only ever
+         made from this button's click handler. */ -}}
+  <button class="btn-icon theme-toggle" id="themeToggle" aria-label="{{ T "themeToggle" }}"
+    data-label-to-dark="{{ T "themeToggleToDark" }}"
+    data-label-to-light="{{ T "themeToggleToLight" }}"
+    data-label-to-auto="{{ T "themeToggleToAuto" }}"
+    data-announce-dark="{{ T "themeDarkMode" }}"
+    data-announce-light="{{ T "themeLightMode" }}"
+    data-announce-auto="{{ T "themeAutoMode" }}">🌓</button>
 </div>

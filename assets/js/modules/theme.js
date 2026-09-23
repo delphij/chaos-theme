@@ -22,6 +22,10 @@ export const THEME_CHANGE_EVENT = 'chaos:themechange';
 // Cached DOM references for performance
 const themeAnnouncement = document.getElementById('theme-announcement');
 
+// Localised strings, from the toggle button's data-* attributes (see
+// _partials/header.html). Read once: the button does not change.
+const labels = btn?.dataset ?? {};
+
 // Helper function for media query checks
 function checkMediaQuery(query) {
   return window.matchMedia?.(query).matches ?? false;
@@ -78,20 +82,20 @@ function applyTheme(mode) {
     btn.textContent = mode === THEME_AUTO ? '🌓' : (isDark ? '🌙' : '☀️');
     const nextMode = getNextMode(mode);
     let nextLabel = '';
-    if (nextMode === THEME_DARK) nextLabel = window.i18n?.themeToggleToDark;
-    else if (nextMode === THEME_LIGHT) nextLabel = window.i18n?.themeToggleToLight;
-    else if (nextMode === THEME_AUTO) nextLabel = window.i18n?.themeToggleToAuto;
+    if (nextMode === THEME_DARK) nextLabel = labels.labelToDark;
+    else if (nextMode === THEME_LIGHT) nextLabel = labels.labelToLight;
+    else if (nextMode === THEME_AUTO) nextLabel = labels.labelToAuto;
     if (nextLabel) btn.setAttribute('aria-label', nextLabel);
   }
 }
 
 // Announce theme change to screen readers via aria-live region
 function announceTheme(mode) {
-  if (!themeAnnouncement || !window.i18n) return;
+  if (!themeAnnouncement) return;
   if (mode === THEME_AUTO) {
-    themeAnnouncement.textContent = window.i18n.themeAutoMode || 'Auto';
+    themeAnnouncement.textContent = labels.announceAuto || 'Auto';
   } else {
-    themeAnnouncement.textContent = mode === THEME_DARK ? window.i18n.themeDarkMode : window.i18n.themeLightMode;
+    themeAnnouncement.textContent = mode === THEME_DARK ? labels.announceDark : labels.announceLight;
   }
 }
 
