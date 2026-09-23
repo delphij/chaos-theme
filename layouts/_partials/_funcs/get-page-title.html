@@ -1,11 +1,20 @@
 {{- /*
 Returns the display title for a page.
 
-Hugo derives list page titles from the section or taxonomy name
-(e.g. "tags", "categories", "posts") without localization. For section
-and taxonomy pages, translate the title when a matching i18n key exists
-(lowercased, so it works regardless of capitalizeListTitles); otherwise
-return the title unchanged. Term and regular pages are never translated.
+Hugo derives a list page's title from the section or taxonomy name ("tags",
+"categories", "posts") and does not localize it, so those are looked up in the
+i18n table -- lowercased, so the lookup does not depend on
+capitalizeListTitles. Term and regular pages are never translated.
+
+A title the author wrote in front matter is returned untouched. Probing the
+i18n table with it was wrong twice over: a translation could override what the
+author asked for, and any list page whose title is not an i18n key logged
+
+  WARN  i18n|MISSING_TRANSLATION|zh-CN|归档
+
+on every build -- content/archives/_index.md sets title: "归档", which is a
+title, not a key. That warning is why the build could not be run under
+--panicOnWarning.
 
 @context {page} page The page to resolve the title for.
 
@@ -15,7 +24,7 @@ return the title unchanged. Term and regular pages are never translated.
 */}}
 
 {{- $title := .Title -}}
-{{- if in (slice "section" "taxonomy") .Kind -}}
+{{- if and (in (slice "section" "taxonomy") .Kind) (not .Params.title) -}}
   {{- with T (lower $title) -}}
     {{- $title = . -}}
   {{- end -}}
