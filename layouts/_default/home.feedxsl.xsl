@@ -8,7 +8,13 @@
          result's <html> element, where they mean nothing. */}}
   exclude-result-prefixes="atom content dc">
 
-  <xsl:output method="html" encoding="utf-8" indent="yes" />
+{{- /* doctype-system is how an XSLT 1.0 serializer is asked for a doctype at
+       all; libxslt special-cases this value and emits the modern
+       "<!DOCTYPE html>" rather than the legacy SYSTEM form the name
+       suggests. Without it the serializer emits no doctype, which leaves
+       the static companion pages -- real .html files served as text/html --
+       in quirks mode. */}}
+  <xsl:output method="html" encoding="utf-8" indent="yes" doctype-system="about:legacy-compat" />
 
   <xsl:template match="/">
     <xsl:variable name="is-atom" select="boolean(/atom:feed)" />
