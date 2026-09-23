@@ -15,6 +15,10 @@ const btn = document.getElementById('themeToggle');
 const storageKey = 'theme-mode';
 const legacyStorageKey = 'scheme';
 
+// Fired on document whenever the effective theme is (re)applied, with
+// { mode, theme } in detail. Exported so a listener cannot misspell it.
+export const THEME_CHANGE_EVENT = 'chaos:themechange';
+
 // Cached DOM references for performance
 const themeAnnouncement = document.getElementById('theme-announcement');
 
@@ -60,6 +64,14 @@ function applyTheme(mode) {
   const effectiveTheme = getEffectiveTheme(mode);
   const isDark = effectiveTheme === THEME_DARK;
   root.classList.toggle(THEME_DARK, isDark);
+
+  // Anything that has to redraw itself for the new theme listens for this
+  // rather than watching the toggle button, so it also fires when the OS
+  // scheme flips while the site is in auto mode -- which a click listener
+  // on the button never sees.
+  document.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT, {
+    detail: { mode, theme: effectiveTheme }
+  }));
 
   if (btn) {
     // 🌓 for Auto (following system), 🌙 for forced dark, ☀️ for forced light
