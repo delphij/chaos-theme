@@ -32,7 +32,7 @@ Chaos 是一个极简的 Hugo 博客主题：没有 JavaScript 框架，全部�
 
 ```toml
 theme = 'chaos'
-languageCode = 'zh-cn'
+locale = 'zh-cn'
 defaultContentLanguage = 'zh-cn'
 
 [params]

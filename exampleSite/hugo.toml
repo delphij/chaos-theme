@@ -11,11 +11,22 @@ theme = '.'
 themesDir = '..'
 
 baseURL = 'https://example.org/'
-languageCode = 'zh-cn'
+locale = 'zh-cn'
 defaultContentLanguage = 'zh-cn'
 title = '混沌札记'
 hasCJKLanguage = true
 enableGitInfo = false
+
+# Hugo does not inherit [outputs] from a theme -- only output format and media
+# type definitions merge -- so every site has to name the formats itself. These
+# are the ones the theme provides templates for: the Atom feed, the two XSLT
+# stylesheets that render the feeds and the sitemap as readable pages, and the
+# redirect rules.
+[outputs]
+  home = ['HTML', 'ATOM', 'sitemapxsl', 'RSS', 'feedxsl', 'REDIR']
+  section = ['HTML']
+  taxonomy = ['HTML']
+  term = ['HTML']
 
 [pagination]
   pagerSize = 5

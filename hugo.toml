@@ -1,5 +1,5 @@
 baseURL = 'https://example.org/'
-languageCode = 'zh-cn'
+locale = 'zh-cn'
 defaultContentLanguage = 'zh-cn'
 title = 'My New Hugo Site'
 
@@ -13,6 +13,15 @@ title = 'My New Hugo Site'
     identifier = 'tags'
     pageRef = '/tags'
     weight = 20
+
+# Hugo does not inherit [outputs] from a theme, so a site has to name the
+# formats itself. Without this the feeds render, but /feed.xsl, /sitemap.xsl
+# and /atom.xml -- which the theme provides templates for -- are never built.
+[outputs]
+  home = ['HTML', 'ATOM', 'sitemapxsl', 'RSS', 'feedxsl', 'REDIR']
+  section = ['HTML']
+  taxonomy = ['HTML']
+  term = ['HTML']
 
 [markup.highlight]
   noClasses = false
@@ -42,4 +51,5 @@ title = 'My New Hugo Site'
 [module]
   [module.hugoVersion]
     extended = false
-    min = '0.146.0'
+    # 0.158.0 is where `locale` replaced `languageCode`, which this config uses.
+    min = '0.158.0'

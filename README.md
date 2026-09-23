@@ -64,9 +64,17 @@ See `hugo.toml` in this theme directory for a complete example configuration. Ke
 
 ```toml
 baseURL = 'https://example.org/'
-languageCode = 'zh-cn'
+locale = 'zh-cn'
 defaultContentLanguage = 'zh-cn'
 title = 'My New Hugo Site'
+
+# Hugo does not inherit [outputs] from a theme, so name the formats here or
+# /feed.xsl, /sitemap.xsl and /atom.xml are never built.
+[outputs]
+  home = ['HTML', 'ATOM', 'sitemapxsl', 'RSS', 'feedxsl', 'REDIR']
+  section = ['HTML']
+  taxonomy = ['HTML']
+  term = ['HTML']
 
 [params]
   subtitle = "Optional subtitle with **Markdown** support"
