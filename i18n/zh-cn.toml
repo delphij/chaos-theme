@@ -84,7 +84,6 @@ feedReadMore = '在网站阅读全文并参与讨论 →'
 feedDiagramSource = '图表源码（Mermaid）。请到原文查看渲染后的图形。'
 feedUrlLabel = 'Feed URL'
 copyFeedUrl = '复制订阅地址'
-feedUrlCopied = '订阅地址已复制到剪贴板。'
 feedUrlCopyFailed = '无法自动复制，请手动选择上面的地址并复制。'
 listSeparator = '、'
 
@@ -111,7 +110,6 @@ contentTypePage = '页面'
 
 # SEO, pagination and 404
 lastModified = '最后修改'
-lastModifiedTitle = '更新于 {{ .Date }}'
 pageNumber = '第 {{ .Number }} 页'
 pageNotFound = '页面未找到'
 pageNotFoundDesc = '抱歉，您访问的页面不存在或已被移除。'

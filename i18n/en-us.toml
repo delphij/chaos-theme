@@ -84,7 +84,6 @@ feedReadMore = 'Read the full post and join the discussion →'
 feedDiagramSource = 'Diagram source (Mermaid). See the original article for the rendered figure.'
 feedUrlLabel = 'Feed URL'
 copyFeedUrl = 'Copy feed URL'
-feedUrlCopied = 'Feed URL copied to clipboard.'
 feedUrlCopyFailed = 'Could not copy automatically. Please select the address above and copy it manually.'
 listSeparator = ', '
 
@@ -111,7 +110,6 @@ contentTypePage = 'Pages'
 
 # SEO, pagination and 404
 lastModified = 'Last updated'
-lastModifiedTitle = 'Updated on {{ .Date }}'
 pageNumber = 'Page {{ .Number }}'
 pageNotFound = 'Page Not Found'
 pageNotFoundDesc = 'Sorry, the page you are looking for does not exist or has been moved.'

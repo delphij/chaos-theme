@@ -84,7 +84,6 @@ feedReadMore = 'サイトで全文を読んでコメントする →'
 feedDiagramSource = '図のソース (Mermaid)。描画された図は元記事をご覧ください。'
 feedUrlLabel = 'Feed URL'
 copyFeedUrl = 'フィード URL をコピー'
-feedUrlCopied = 'フィード URL をクリップボードにコピーしました。'
 feedUrlCopyFailed = '自動でコピーできませんでした。上のアドレスを選択して手動でコピーしてください。'
 listSeparator = '、'
 
@@ -111,7 +110,6 @@ contentTypePage = 'ページ'
 
 # SEO, pagination and 404
 lastModified = '最終更新'
-lastModifiedTitle = '{{ .Date }} に更新'
 pageNumber = '{{ .Number }} ページ'
 pageNotFound = 'ページが見つかりません'
 pageNotFoundDesc = 'お探しのページは存在しないか、移動された可能性があります。'
