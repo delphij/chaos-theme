@@ -1,0 +1,19 @@
+{{- /*
+The magnifier icon.
+
+Used twice -- by the header's search button and by the search dialog's input
+-- and the two copies were byte-identical, so they live here instead and
+cannot drift.
+
+Always aria-hidden: the icon is decorative in both places. The accessible
+name comes from the button's aria-label in the header, and from the dialog's
+own label inside the search box.
+
+Emitted on one line with no trailing newline. The HTML minifier compacts the
+inside of an <svg> but leaves the whitespace around it alone, so a
+pretty-printed icon partial ships its indentation to every page that uses it.
+
+@example: {{ partial "icon-search.html" . }}
+*/ -}}
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+{{- /* no trailing newline */ -}}
