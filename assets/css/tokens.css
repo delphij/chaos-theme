@@ -3,8 +3,8 @@
    The single definition of the palette, type scale, spacing and the vendored
    monospace face. Consumed twice: bundled into the site stylesheet by
    head/css.html, and inlined into the XSLT-rendered feed and sitemap pages by
-   xml-xsl-styles.html, which cannot link a stylesheet the way a normal page
-   can. Keeping one copy is the point -- a palette change that lands in only
+   _funcs/get-xsl-css.html, which cannot link a stylesheet the way a normal
+   page can. Keeping one copy is the point -- a palette change that lands in only
    one of the two is the failure this file exists to prevent.
 
    Executed as a Go template (resources.ExecuteAsTemplate) for one reason: the

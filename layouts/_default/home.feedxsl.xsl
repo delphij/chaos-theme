@@ -39,7 +39,7 @@
         {{ partial "xml-xsl-theme.html" . }}
         {{- /* Minified: the source of these styles is documented, the copy that
                reaches every reader of the feed does not need to be. */ -}}
-        <style>{{ (resources.FromString "css/xml-xsl-feed.css" (partial "xml-xsl-feed-styles.html" .) | resources.Minify).Content }}</style>
+        <style>{{ partial "_funcs/get-xsl-css.html" (dict "page" . "name" "feed" "sheets" (slice "css/syntax.css" "css/syntax-dark.css" "css/xml-xsl-feed.css")) }}</style>
       </head>
       <body>
         <header class="site-header">
@@ -128,7 +128,7 @@
         </main>
 
         {{- /* Minified, and wrapped in CDATA because the stylesheet is XML. */ -}}
-        <script><![CDATA[{{ (resources.FromString "js/xml-xsl-feed.js" (partial "xml-xsl-feed-script.html" .) | resources.Minify).Content }}]]></script>
+        <script><![CDATA[{{ (resources.Get "js/xml-xsl-feed.js" | resources.ExecuteAsTemplate "js/xml-xsl-feed.js" . | resources.Minify).Content }}]]></script>
       </body>
     </html>
   </xsl:template>

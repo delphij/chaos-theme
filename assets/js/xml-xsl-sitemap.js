@@ -1,14 +1,11 @@
-{{- /*
-The type filters, column sorting and visible-count readout of the page
-sitemap.xsl renders.
+// Type filters, column sorting and the visible-count readout of the page
+//
+// sitemap.xsl renders.
+//
+// Executed as a template (resources.ExecuteAsTemplate) for the localised
+// strings, then minified and inlined into an XML document inside a CDATA
+// section -- so nothing here may contain the string that would close one.
 
-Lives in a partial rather than inline in the stylesheet so the caller can
-hand it to resources.Minify. The caller wraps the result in a CDATA
-section, which is why nothing here may contain the string that would
-close one.
-
-@example: {{ partial "xml-xsl-sitemap-script.html" . }}
-*/ -}}
 (function() {
   // Localised strings the script sets at runtime. Fully resolved at build
   // time so no sentence is assembled from fragments in JavaScript.

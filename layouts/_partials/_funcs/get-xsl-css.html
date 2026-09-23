@@ -1,0 +1,36 @@
+{{- /*
+Builds the stylesheet for one XSLT-rendered page, minified and ready to inline.
+
+An XSLT-rendered page cannot link a stylesheet the way an ordinary page can,
+so its CSS is inlined. Everything it is built from is a plain file under
+assets/css/, concatenated here rather than pasted into a template, so each
+piece keeps syntax highlighting, an editor's CSS tooling and .editorconfig.
+
+Every page gets the design tokens and the shared XSL base; `sheets` names what
+comes after them, in order. tokens.css is executed as a template because its
+@font-face URL has to come out absolute -- inside a style element a relative
+URL resolves against the document, not against a stylesheet.
+
+The result is minified, so the comments in those files cost a reader of the
+page nothing.
+
+@param {page}    page   The page being rendered, for tokens.css.
+@param {string}  name   Distinguishes the concatenated resources.
+@param {string*} sheets Asset paths appended after the base, in order.
+
+@returns {string} The minified stylesheet.
+
+@example: {{ partial "_funcs/get-xsl-css.html" (dict "page" . "name" "feed" "sheets" (slice "css/xml-xsl-feed.css")) }}
+*/ -}}
+
+{{- $parts := slice
+  (resources.Get "css/tokens.css" | resources.ExecuteAsTemplate "css/tokens.css" .page)
+  (resources.Get "css/xml-xsl-base.css")
+-}}
+{{- range .sheets -}}
+  {{- $parts = $parts | append (resources.Get .) -}}
+{{- end -}}
+
+{{- return ($parts
+  | resources.Concat (printf "css/xml-xsl-%s.bundle.css" .name)
+  | resources.Minify).Content -}}

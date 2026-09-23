@@ -1,14 +1,11 @@
-{{- /*
-The copy-to-clipboard behaviour of the feed address on the page
-feed.xsl renders.
+// Copy-to-clipboard for the feed address on the page feed.xsl renders.
+//
+// 
+//
+// Executed as a template (resources.ExecuteAsTemplate) for the localised
+// strings, then minified and inlined into an XML document inside a CDATA
+// section -- so nothing here may contain the string that would close one.
 
-Lives in a partial rather than inline in the stylesheet so the caller can
-hand it to resources.Minify. The caller wraps the result in a CDATA
-section, which is why nothing here may contain the string that would
-close one.
-
-@example: {{ partial "xml-xsl-feed-script.html" . }}
-*/ -}}
 (function() {
   var box = document.getElementById('feedUrlCopy');
   var value = document.getElementById('feedUrlValue');

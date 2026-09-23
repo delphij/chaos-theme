@@ -1,9 +1,16 @@
-{{- /* Design tokens -- palette, type scale, spacing, the vendored mono face --
-       are shared verbatim with the main site's stylesheet, so a change to any
-       of them lands in one place rather than two. This page cannot link a
-       stylesheet the way a normal page can, so the same file is inlined here.
-       See assets/css/tokens.css for why it is executed as a template. */ -}}
-{{ (resources.Get "css/tokens.css" | resources.ExecuteAsTemplate "css/tokens.css" .).Content | safeHTML }}
+/* ==========================================================================
+   XSL PAGE STYLES -- SHARED BASE
+
+   Shared by feed.xsl and sitemap.xsl. The design tokens it builds on are
+   concatenated in front of it by xml-xsl-style.html, from the same
+   assets/css/tokens.css the site stylesheet uses, so a palette change
+   lands in one place rather than two.
+
+   Inlined into an XML document, which imposes one rule: no angle
+   brackets anywhere in this file. A literal tag name would be parsed as
+   markup. The caller minifies, so these comments are for whoever
+   maintains the file, not for every reader of the page.
+   ========================================================================== */
 
 /* ==========================================================================
    BASE

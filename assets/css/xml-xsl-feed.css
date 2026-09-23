@@ -1,24 +1,15 @@
-{{- /*
-The stylesheet of the page feed.xsl renders: the shared XSL page styles, the
-site's own syntax highlighting so code in a feed entry reads as it does in the
-article, and the feed-specific layout.
+/* ==========================================================================
+   FEED PAGE STYLES
 
-Lives in a partial rather than inline in the stylesheet so the caller can hand
-it to resources.Minify -- the comments below are for whoever maintains this,
-not for every reader of the feed.
+   The feed-specific half of what feed.xsl renders. Concatenated after the
+   tokens, the shared base, and the site's own syntax highlighting, so code
+   in a feed entry reads as it does in the article.
 
-No angle brackets anywhere in here: the caller is an XML document, and a
-literal tag name would be parsed as markup.
-
-@example: {{ partial "xml-xsl-feed-styles.html" . }}
-*/ -}}
-{{ partial "xml-xsl-styles.html" . }}
-
-/* Syntax highlighting reused verbatim from the site's own stylesheets,
-   so code inside a feed entry reads exactly as it does in the article.
-   The dark sheet is scoped to html.dark, which xml-xsl-theme.html sets. */
-{{ (resources.Get "css/syntax.css").Content }}
-{{ (resources.Get "css/syntax-dark.css").Content }}
+   Inlined into an XML document, which imposes one rule: no angle
+   brackets anywhere in this file. A literal tag name would be parsed as
+   markup. The caller minifies, so these comments are for whoever
+   maintains the file, not for every reader of the page.
+   ========================================================================== */
 
 /* Code blocks: a tinted, unframed, horizontally scrollable slab, as in
    the article. The main site hangs the line-number column into the

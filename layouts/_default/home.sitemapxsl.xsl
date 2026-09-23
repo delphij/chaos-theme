@@ -29,7 +29,7 @@
         {{ partial "xml-xsl-theme.html" . }}
         {{- /* Minified: the source of these styles is documented, the copy that
                reaches every reader of the sitemap does not need to be. */ -}}
-        <style>{{ (resources.FromString "css/xml-xsl-sitemap.css" (partial "xml-xsl-sitemap-styles.html" .) | resources.Minify).Content }}</style>
+        <style>{{ partial "_funcs/get-xsl-css.html" (dict "page" . "name" "sitemap" "sheets" (slice "css/xml-xsl-sitemap.css")) }}</style>
       </head>
       <body>
         <header class="site-header">
@@ -158,7 +158,7 @@
         </main>
 
         {{- /* Minified, and wrapped in CDATA because the stylesheet is XML. */ -}}
-        <script><![CDATA[{{ (resources.FromString "js/xml-xsl-sitemap.js" (partial "xml-xsl-sitemap-script.html" .) | resources.Minify).Content }}]]></script>
+        <script><![CDATA[{{ (resources.Get "js/xml-xsl-sitemap.js" | resources.ExecuteAsTemplate "js/xml-xsl-sitemap.js" . | resources.Minify).Content }}]]></script>
       </body>
     </html>
   </xsl:template>
