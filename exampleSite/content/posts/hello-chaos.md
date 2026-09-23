@@ -1,11 +1,11 @@
-+++
-title = '你好，Chaos'
-date = '2026-09-12'
-description = 'Chaos 主题功能速览：深浅色模式、目录、即时导航与多语言支持。'
-categories = ['主题']
-tags = ['Hugo', 'Chaos', '入门']
-series = 'Chaos 主题指南'
-+++
+---
+title: "你好，Chaos"
+date: 2026-09-12
+description: "Chaos 主题功能速览：深浅色模式、目录、即时导航与多语言支持。"
+categories: ["主题"]
+tags: ["Hugo", "Chaos", "入门"]
+series: "Chaos 主题指南"
+---
 
 Chaos 是一个极简的 Hugo 博客主题：没有 JavaScript 框架，全部脚本加起来大约 3KB，
 却仍然提供了深浅色模式、自动目录、即时页面导航和完整的多语言支持。
