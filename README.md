@@ -470,8 +470,17 @@ XSLT engine to the browser. Run it after `hugo`, on the built site:
 
 ```bash
 hugo --minify
+sh themes/chaos/tools/strip_xsl_space.sh public
 sh themes/chaos/tools/render_xsl_companions.sh public
 ```
+
+`strip_xsl_space.sh` removes the whitespace Hugo's minifier cannot: it has no
+minifier for `application/xslt+xml`, and routing the stylesheet through the XML
+one instead silently trims text nodes that have content, which in XSLT destroys
+`<xsl:text> </xsl:text>` -- the only way to emit a literal space. The script
+strips whitespace-only text nodes and nothing else, through `xsl:strip-space`,
+which is what an XSLT processor already does with a stylesheet when it loads
+one, so the rendered output is unchanged. About 11% off each stylesheet.
 
 For every XML output carrying an `<?xml-stylesheet?>` instruction it runs that
 stylesheet with `xsltproc` and writes the result beside the XML —
