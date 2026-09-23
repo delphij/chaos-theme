@@ -1,19 +1,4 @@
-{{- $noop := .WordCount -}}
-{{- $hasMermaid := .Page.Store.Get "hasMermaid" -}}
-{{- if not $hasMermaid -}}
-  {{- /* Only the pages this page lists; taxonomy list pages render terms rather
-         than post content and get no paginator at all. */ -}}
-  {{- with .Page.Store.Get "paginator" -}}
-    {{- range .Pages -}}
-      {{- $_ := .Summary -}}
-      {{- if .Store.Get "hasMermaid" -}}
-        {{- $hasMermaid = true -}}
-      {{- end -}}
-    {{- end -}}
-  {{- end -}}
-{{- end -}}
-
-{{- if $hasMermaid -}}
+{{- if partial "_funcs/has-feature.html" (dict "page" . "markup" `<pre class="mermaid"`) -}}
 {{- /* The library, then the theme's glue. Both deferred, so they run in this
        order and the glue needs no DOMContentLoaded wrapper of its own. */ -}}
 <script src="{{ "/_3p/mermaid/11.4.1/mermaid.min.js" | relURL }}" defer></script>

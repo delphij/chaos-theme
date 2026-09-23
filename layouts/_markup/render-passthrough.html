@@ -6,6 +6,5 @@
     {{- if eq $.Type "inline" }}<span class="math-inline">{{- end }}
     {{- .Value }}
     {{- if eq $.Type "inline" }}</span>{{- end }}
-    {{- $.Page.Store.Set "hasMath" true }}
   {{- end }}
 {{- end -}}

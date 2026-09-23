@@ -64,19 +64,7 @@
 {{ partial "schema.html" . }}
 {{ partial "opengraph.html" . }}
 {{ partial "twitter_cards.html" . }}
-{{ $noop := .WordCount }}
-{{ $hasMath := .Page.Store.Get "hasMath" }}
-{{ if not $hasMath }}
-  {{ with $pag }}
-    {{ range .Pages }}
-      {{ $_ := .Summary }}
-      {{ if .Store.Get "hasMath" }}
-        {{ $hasMath = true }}
-      {{ end }}
-    {{ end }}
-  {{ end }}
-{{ end }}
-{{ if $hasMath }}
+{{ if partial "_funcs/has-feature.html" (dict "page" . "markup" `class="katex"`) }}
 <link href="{{ "_3p/katex/0.17.0/katex.min.css" | relURL }}" rel="stylesheet">
 {{ end }}
 {{- /* i18n strings for JavaScript */ -}}

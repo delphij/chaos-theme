@@ -1,0 +1,58 @@
+{{- /*
+Reports whether the HTML this page is about to emit contains a given
+feature's markup, so the asset that renders it is loaded only where it is
+needed.
+
+This replaced a page-scoped flag that the render hooks set (Store.Set
+"hasMath" / "hasMermaid") and the gates read. The flag answered the wrong
+question. Rendering a page's .Summary renders its whole content and then
+truncates, so the hook fired for a diagram far below the summary divider and
+set the flag; a list page reading it concluded that the summary it was about
+to print contained a diagram. On this site that put a 2.5 MB Mermaid library
+on seven pages to serve the one that actually has a figure, and KaTeX's
+stylesheet on 89 pages to serve 58.
+
+Asking about the markup instead answers exactly the question the gate
+means. The two places a page can emit a feature's markup are its own
+.Content and the .Summary of each page it lists, which is what the layouts
+render -- page.html and page-header.html print .Content, home.html and
+list.html print both.
+
+Known limit: the listing half walks the stored paginator, which is what
+home.html and list.html print. A section named in site.Params
+.unpaginatedSections has no stored paginator; list.html then lists
+_funcs/get-list-pages.html instead, and a feature appearing only there goes
+undetected. Not reachable on this site -- its unpaginated sections are
+archives and posts, whose layouts print neither .Content nor summaries --
+and the alternative, walking that collection unconditionally, would load
+both assets on /archives/, which displays neither.
+
+@param {page}   page   The page about to be rendered.
+@param {string} markup A substring of what the feature's render hook emits,
+                       matched against unminified template output: so
+                       `<pre class="mermaid"` as written in
+                       _markup/render-codeblock-mermaid.html, not the
+                       attribute-stripped form the minifier later produces.
+
+@returns {bool}
+
+@example: {{ partial "_funcs/has-feature.html" (dict "page" . "markup" `class="katex"`) }}
+*/ -}}
+
+{{- $page := .page -}}
+{{- $markup := .markup -}}
+
+{{- $found := strings.Contains $page.Content $markup -}}
+{{- if not $found -}}
+  {{- with $page.Store.Get "paginator" -}}
+    {{- range .Pages -}}
+      {{- if not $found -}}
+        {{- if strings.Contains .Summary $markup -}}
+          {{- $found = true -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return $found -}}
