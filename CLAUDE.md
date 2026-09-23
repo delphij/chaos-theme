@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project Overview
 
-Minimalist Hugo theme for personal blogs with excellent Chinese typography support. Design philosophy: fast-loading, accessible (WCAG 2.1 AA), mobile-first, minimal dependencies (~3KB JavaScript total).
+Minimalist Hugo theme for personal blogs with excellent Chinese typography support. Design philosophy: fast-loading, accessible (WCAG 2.1 AA), mobile-first, minimal dependencies (brotli: ~2KB main.js, ~2KB search.js when search is enabled).
 
 **Key Features**: Dark/light mode, responsive mobile menu with glass effects, automatic table of contents, instant page navigation, full i18n (5 languages).
 
@@ -36,7 +36,8 @@ hugo --gc --minify          # Production build
 ## Coding Standards
 
 ### Formatting (Strictly Enforced)
-- **Indentation**: 2 spaces (NO tabs)
+- **Indentation**: 2 spaces in templates, CSS and JS; 4 in Python; the shell
+  scripts in `tools/` are tab-indented. `.editorconfig` states all of this.
 - **Line endings**: LF
 - **EOF**: Single newline
 - **Naming**: kebab-case files, BEM-style CSS classes
@@ -58,7 +59,13 @@ hugo --gc --minify          # Production build
 - No hardcoded colors
 
 ### JavaScript
-- Vanilla ES6+ (const/let, arrow functions, IIFE scope)
+- ES modules: each feature is one file under `assets/js/modules/` exporting a
+  single `init*()`, and `main.js` is only the wiring. No IIFE wrapper -- a
+  module is already its own scope
+- Bundled by `js.Build` (esbuild, built into Hugo), so no Node toolchain is
+  involved: `hugo` alone builds the theme
+- Syntax floor is declared as `es2020` in `_partials/foot/js.html`; write newer
+  syntax freely and esbuild lowers it
 - Apache 2.0 copyright header required
 - Cache DOM references at initialization
 - Modern DOM methods (`replaceChildren`, `append`)
