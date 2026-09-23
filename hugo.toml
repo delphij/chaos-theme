@@ -3,6 +3,13 @@ locale = 'zh-cn'
 defaultContentLanguage = 'zh-cn'
 title = 'My New Hugo Site'
 
+# Required for Chinese, Japanese and Korean content. Hugo otherwise counts
+# words by splitting on whitespace, which makes a whole CJK sentence one word:
+# .WordCount and .ReadingTime come out an order of magnitude too low, and
+# .Summary stops truncating at all, so list pages print entire articles. A
+# theme cannot set this for you -- Hugo does not inherit it from theme config.
+hasCJKLanguage = true
+
 [menus]
   [[menus.main]]
     identifier = 'home'

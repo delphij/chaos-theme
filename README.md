@@ -68,6 +68,12 @@ locale = 'zh-cn'
 defaultContentLanguage = 'zh-cn'
 title = 'My New Hugo Site'
 
+# Required for CJK content: without it Hugo counts a whole Chinese sentence as
+# one word, so the reading stats are an order of magnitude too low and
+# .Summary never truncates -- list pages print whole articles. The theme
+# cannot set this for you; Hugo does not inherit it from theme config.
+hasCJKLanguage = true
+
 # Hugo does not inherit [outputs] from a theme, so name the formats here or
 # /feed.xsl, /sitemap.xsl and /atom.xml are never built.
 [outputs]
