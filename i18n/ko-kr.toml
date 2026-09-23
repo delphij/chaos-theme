@@ -116,6 +116,7 @@ pageNotFoundDesc = '요청하신 페이지가 존재하지 않거나 이동되�
 backToHome = '홈으로 돌아가기'
 copyCode = '복사'
 copiedCode = '복사됨'
+copyFailed = '복사 실패'
 
 # Search
 search = '검색'

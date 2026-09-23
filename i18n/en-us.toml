@@ -116,6 +116,7 @@ pageNotFoundDesc = 'Sorry, the page you are looking for does not exist or has be
 backToHome = 'Back to Home'
 copyCode = 'Copy'
 copiedCode = 'Copied!'
+copyFailed = 'Copy failed'
 
 # Search
 search = 'Search'

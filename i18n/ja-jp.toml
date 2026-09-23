@@ -116,6 +116,7 @@ pageNotFoundDesc = 'お探しのページは存在しないか、移動された
 backToHome = 'トップページに戻る'
 copyCode = 'コピー'
 copiedCode = 'コピーしました'
+copyFailed = 'コピーできませんでした'
 
 # Search
 search = '検索'

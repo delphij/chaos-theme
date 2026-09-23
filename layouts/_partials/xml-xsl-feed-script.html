@@ -17,48 +17,35 @@ close one.
 
   var copyLabel = {{ T "copyFeedUrl" | jsonify }};
   var copiedLabel = {{ T "copiedCode" | jsonify }};
+  var failedLabel = {{ T "feedUrlCopyFailed" | jsonify }};
   var resetTimer;
 
   function report(ok) {
-    if (ok) {
-      hint.textContent = copiedLabel;
-      box.classList.add('copied');
-      clearTimeout(resetTimer);
-      resetTimer = setTimeout(function() {
-        hint.textContent = copyLabel;
-        box.classList.remove('copied');
-      }, 2000);
-    }
-  }
-
-  function legacyCopy(text) {
-    var area = document.createElement('textarea');
-    area.value = text;
-    area.setAttribute('readonly', '');
-    area.style.position = 'fixed';
-    area.style.top = '-1000px';
-    document.body.appendChild(area);
-    area.select();
-    var ok = false;
-    try {
-      ok = document.execCommand('copy');
-    } catch (e) {
-      ok = false;
-    }
-    document.body.removeChild(area);
-    return ok;
+    hint.textContent = ok ? copiedLabel : failedLabel;
+    box.classList.toggle('copied', ok);
+    box.classList.toggle('failed', !ok);
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(function() {
+      hint.textContent = copyLabel;
+      box.classList.remove('copied');
+      box.classList.remove('failed');
+    }, 2000);
   }
 
   box.addEventListener('click', function() {
-    var text = value.textContent.trim();
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(function() {
+    // navigator.clipboard alone: document.execCommand is deprecated, and the
+    // textarea fallback that used it was a second copy of what main.js also
+    // carried. Outside a secure context clipboard is undefined and the
+    // property access throws, so the try covers that as well as a rejected
+    // write -- and the page now says so rather than appearing to do nothing.
+    try {
+      navigator.clipboard.writeText(value.textContent.trim()).then(function() {
         report(true);
       }).catch(function() {
-        report(legacyCopy(text));
+        report(false);
       });
-    } else {
-      report(legacyCopy(text));
+    } catch (e) {
+      report(false);
     }
   });
 })();

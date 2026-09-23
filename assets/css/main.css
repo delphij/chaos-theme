@@ -1337,6 +1337,12 @@ pre code,
   border-color: var(--alert-tip-border);
 }
 
+.code-copy-btn.failed {
+  opacity: 1;
+  color: var(--alert-warning-border);
+  border-color: var(--alert-warning-border);
+}
+
 /* Chroma structural styles - Layout for syntax highlighting components */
 
 /* Line number links - Remove default link styling */

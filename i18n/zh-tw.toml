@@ -116,6 +116,7 @@ pageNotFoundDesc = '抱歉，您訪問的頁面不存在或已被移除。'
 backToHome = '返回首頁'
 copyCode = '複製'
 copiedCode = '已複製'
+copyFailed = '複製失敗'
 
 # Search
 search = '搜尋'
