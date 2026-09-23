@@ -1,4 +1,18 @@
-{{ $emojis := dict
+{{- /*
+Renders a blockquote, including GitHub-style alerts.
+
+Whitespace control is deliberate throughout. A render hook's output is baked
+into .Content, which the feed templates carry verbatim inside a CDATA section;
+the XML minifier does not descend into character data, so every newline and
+every indent a pretty-printed hook emits survives into the feed. The HTML page
+hides this because --minify collapses it afterwards - the feed is where the
+hook's real output shows. So the markup is emitted without any whitespace the
+document does not need, and both output formats get the same clean result.
+
+@context {blockquote} The blockquote render hook context.
+*/ -}}
+
+{{- $emojis := dict
   "caution" ":warning:"
   "disclaimer" ":warning:"
   "historical" ":scroll:"
@@ -6,22 +20,16 @@
   "note" ":notebook:"
   "tip" ":bulb:"
   "warning" ":rotating_light:"
-}}
+-}}
 
-{{ if eq .Type "alert" }}
-  <blockquote class="alert alert-{{ .AlertType }}">
-    <p class="alert-heading">
-      {{ transform.Emojify (index $emojis .AlertType) }}
-      {{ with .AlertTitle }}
-        {{ . }}
-      {{ else }}
-        {{ or (i18n .AlertType) (title .AlertType) }}
-      {{ end }}
-    </p>
-    {{ .Text }}
-  </blockquote>
-{{ else }}
-  <blockquote>
-    {{ .Text }}
-  </blockquote>
-{{ end }}
+{{- if eq .Type "alert" -}}
+  {{- $title := "" -}}
+  {{- with .AlertTitle -}}
+    {{- $title = . -}}
+  {{- else -}}
+    {{- $title = or (i18n .AlertType) (title .AlertType) -}}
+  {{- end -}}
+  <blockquote class="alert alert-{{ .AlertType }}"><p class="alert-heading">{{ transform.Emojify (index $emojis .AlertType) }} {{ $title }}</p>{{ .Text }}</blockquote>
+{{- else -}}
+  <blockquote>{{ .Text }}</blockquote>
+{{- end -}}

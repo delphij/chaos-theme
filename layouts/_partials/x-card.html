@@ -1,25 +1,21 @@
-{{/*
-  X (Twitter) Embed Card Partial
-  Renders a refined, privacy-friendly card for an embedded X/Twitter post.
+{{- /*
+X (Twitter) Embed Card Partial
+Renders a refined, privacy-friendly card for an embedded X/Twitter post.
 
-  @param {string} id - Tweet ID
-  @param {string} user - Tweet author handle
-  @param {template.HTML} content - The HTML content (from cached file or oEmbed)
-*/}}
+The markup is emitted without the whitespace a pretty-printed template would
+add. This partial's output lands in .Content, which the feed templates carry
+verbatim inside a CDATA section, and the XML minifier does not descend into
+character data - only the HTML page would have had that whitespace collapsed
+by --minify. See layouts/_markup/render-blockquote.html.
+
+@param {string} id - Tweet ID
+@param {string} user - Tweet author handle
+@param {template.HTML} content - The HTML content (from cached file or oEmbed)
+*/ -}}
 {{- $profileUrl := printf "https://x.com/%s" .user -}}
 {{- $userTarget := printf "(@%s)" .user -}}
 {{- $userReplacement := printf `(<a href="%s" target="_blank" rel="noopener noreferrer" class="x-profile-link">@%s</a>)` $profileUrl .user -}}
 {{- $content := replace .content $userTarget $userReplacement | safeHTML -}}
-<figure class="x-card" id="x-{{ .id }}">
-  <div class="x-card-header">
-    <div class="x-card-source">
-      <svg class="x-logo" viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-      </svg>
-      <span class="x-card-label">{{ T "xPostFrom" | default "来自 X (Twitter)" }}</span>
-    </div>
-  </div>
-  <div class="x-card-body">
-    {{ $content }}
-  </div>
-</figure>
+{{- $logo := `<svg class="x-logo" viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>` | safeHTML -}}
+<figure class="x-card" id="x-{{ .id }}"><div class="x-card-header"><div class="x-card-source">{{ $logo }}<span class="x-card-label">{{ T "xPostFrom" | default "来自 X (Twitter)" }}</span></div></div><div class="x-card-body">{{ $content }}</div></figure>
+{{- /* No trailing newline: it would survive into the feed. */ -}}

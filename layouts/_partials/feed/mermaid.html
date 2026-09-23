@@ -9,7 +9,5 @@ unexplained wall of syntax.
 
 @example: {{ partial "feed/mermaid.html" . }}
 */ -}}
-<figure>
-  <pre><code class="language-mermaid">{{ .Inner }}</code></pre>
-  <figcaption>{{ T "feedDiagramSource" }}</figcaption>
-</figure>
+<figure><pre><code class="language-mermaid">{{ .Inner }}</code></pre><figcaption>{{ T "feedDiagramSource" }}</figcaption></figure>
+{{- /* No trailing newline: it would survive into the feed. */ -}}
