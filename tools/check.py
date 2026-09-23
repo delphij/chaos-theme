@@ -7,10 +7,13 @@ after a build:
 
     python3 themes/chaos/tools/check.py --public public
 
-Needs nothing but Python 3. It is a maintainer's tool: it is not part of
-`hugo`, and a site never runs it.
+Needs nothing but Python 3, which tools/build_search_index.py already requires,
+so it is cheap enough to belong in a build rather than in someone's habits: a
+site's build script should run it after hugo and before anything
+post-processes the output. It is not part of `hugo` itself, and `hugo` alone
+still builds the theme.
 
-Hugo covers what it can already, and the build script runs it under
+Hugo already covers what it can, and the build runs it under
 --printI18nWarnings --printPathWarnings --panicOnWarning. What is here is what
 Hugo has no opinion about.
 """

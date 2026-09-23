@@ -120,14 +120,27 @@ perf: performance improvement
 chore: maintenance
 ```
 
-### Maintainer Tools (`tools/`)
+### `tools/`
 
-Neither is part of a build: `hugo` builds the theme alone and a site never
-runs them. See README.md for what each checks.
+Not all one kind, and the difference decides whether a build calls it. See
+README.md for the full list.
+
+- **Build steps**, run by a site's build script: `build_search_index.py`,
+  `post_build.sh` (which runs `strip_xsl_space.sh` and
+  `render_xsl_companions.sh`), and `check.py`
+- **Content tooling**, run by hand while writing: `fetch_x_embed.py`,
+  `auxmark.py`, `generate_default_card.py`
+- **Diagnostics**, never in a build: `search_harness.mjs`
+
+`hugo` alone still builds the theme; none of these is a dependency of the
+templates.
+
+The two added for this theme's own correctness:
 
 - `tools/check.py --public public` -- i18n key parity, unread translations,
   CJK literals, authored script left inline in a template, template
-  indentation leaking into the feeds. Python 3 only. Exit 1 on failure
+  indentation leaking into the feeds. Python 3 only, exit 1 on failure, and
+  it belongs in the build right after `hugo`
 - `tools/search_harness.mjs` -- runs `assets/js/search.js` against a real
   index in a stubbed DOM; `--compare <file>` checks a change against the
   version it replaces. Derives its queries from the index, so it carries no

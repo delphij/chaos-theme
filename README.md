@@ -723,7 +723,7 @@ themes/chaos/
 ├── static/
 │   └── _3p/                 # Third-party dependencies
 │       └── katex/           # KaTeX for math rendering
-├── tools/                   # Maintainer scripts (see below)
+├── tools/                   # Build steps, content tooling, checks (below)
 └── hugo.toml                # Example configuration
 ```
 
@@ -731,12 +731,36 @@ themes/chaos/
 which imports the feature modules in `assets/js/modules/`, plus `search.js`
 and `mermaid.js`, each loaded only on pages that need it.
 
-### Maintainer checks
+### `tools/`
 
-Neither of these is part of a build. `hugo` builds the theme on its own, and a
-site never runs them.
+Three kinds of script live here, and the difference matters when wiring up a
+site's build.
 
-`tools/check.py` covers the classes of mistake Hugo has no opinion about, and
+**Build steps.** A site's build script runs these, and parts of the theme do
+not work without them:
+
+- `build_search_index.py` — the offline search index, without which the search
+  dialog has nothing to read (see *Client-Side Full-Text Search* above)
+- `post_build.sh` — the single post-build entry point, which runs
+  `strip_xsl_space.sh` and `render_xsl_companions.sh` (see *Readable XML in a
+  Post-XSLT Browser* above)
+- `check.py` — the checks below. Cheap enough to belong in the same build,
+  right after `hugo`
+
+**Content tooling**, run by hand while writing rather than by a build:
+`fetch_x_embed.py` caches an X embed into `data/x_embeds/`, `auxmark.py`
+preprocesses and expands Markdown under git control, and
+`generate_default_card.py` renders the default social sharing card.
+
+**Diagnostics**, never part of a build: `search_harness.mjs`, below.
+
+`hugo` alone still builds the theme. None of this is a dependency of the
+theme's templates — the build steps produce content and post-process output,
+and a site that skips them gets a working site with less in it.
+
+#### `check.py`
+
+Covers the classes of mistake Hugo has no opinion about, and
 every one of them shipped here at some point without failing a build:
 
 ```bash
@@ -752,10 +776,11 @@ python3 themes/chaos/tools/check.py --public public
 - no space-indented tag in a built feed, the signature of a template shipping
   its indentation through CDATA (needs `--public`)
 
-Exit status is 1 on failure. Python 3 only, which the search index already
-needs.
+Exit status is 1 on failure, so a build script can stop on it.
 
-`tools/search_harness.mjs` runs `assets/js/search.js` against a real index in
+#### `search_harness.mjs`
+
+Runs `assets/js/search.js` against a real index in
 a stubbed DOM, to see what a query returns or to check a change against the
 version it replaces:
 
@@ -779,7 +804,8 @@ most queries return a single result, and a single result cannot show a change
 in ranking. The tool says so when that happens rather than reporting a
 reassuring "identical".
 
-This is the one thing in the theme that needs Node.
+This is the one thing in the theme that needs Node, and the one script in
+`tools/` that no build should run.
 
 ## Dependencies
 
