@@ -110,12 +110,15 @@ class ScriptStripper(HTMLParser):
 
 def detect_hugo_language(site_root: Path) -> str | None:
     """
-    Detect Hugo site's languageCode from config files.
+    Detect the Hugo site's language from its config files.
+
+    Reads `locale`, falling back to `languageCode`, which Hugo deprecated in
+    0.158.0 in favour of it. Sites on either spelling are handled.
 
     Maps Hugo language codes to X supported language codes.
     X supported languages: https://developer.x.com/en/docs/x-for-websites/supported-languages
     """
-    # X language code mapping (Hugo languageCode -> X lang parameter)
+    # X language code mapping (Hugo locale -> X lang parameter)
     lang_map = {
         'ar': 'ar',     # Arabic
         'bn': 'bn',     # Bengali
@@ -164,13 +167,17 @@ def detect_hugo_language(site_root: Path) -> str | None:
             try:
                 with open(config_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    # Simple regex to extract languageCode
-                    match = re.search(r'languageCode\s*=\s*["\']([^"\']+)["\']', content, re.IGNORECASE)
-                    if match:
-                        hugo_lang = match.group(1).lower()
-                        x_lang = lang_map.get(hugo_lang)
-                        if x_lang:
-                            return x_lang
+                    # Simple regex over the config; `locale` wins because a
+                    # site migrating from `languageCode` may still carry both.
+                    for key in ('locale', 'languageCode'):
+                        match = re.search(
+                            rf'^\s*{key}\s*=\s*["\']([^"\']+)["\']',
+                            content, re.IGNORECASE | re.MULTILINE)
+                        if match:
+                            hugo_lang = match.group(1).lower()
+                            x_lang = lang_map.get(hugo_lang)
+                            if x_lang:
+                                return x_lang
             except Exception:
                 # If we can't read the config, just continue
                 pass
