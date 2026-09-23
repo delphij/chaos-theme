@@ -14,7 +14,7 @@ Only rendered when site.Params.search.enable is true.
     {{- $bodyIndexURL = . | relURL -}}
   {{- end -}}
 {{- end -}}
-<dialog id="searchDialog" class="search-dialog overlay-blur" aria-modal="true" aria-label="{{ T "search" }}" data-index-url="{{ $indexURL }}"{{ with $bodyIndexURL }} data-body-index-url="{{ . }}"{{ end }} data-msg-loading="{{ T "searchLoading" }}" data-msg-empty="{{ T "searchNoResults" }}" data-msg-error="{{ T "searchError" }}" data-msg-deprecated="{{ T "searchDeprecated" | default "已过时" }}">
+<dialog id="searchDialog" class="search-dialog overlay-blur" aria-modal="true" aria-label="{{ T "search" }}" data-index-url="{{ $indexURL }}"{{ with $bodyIndexURL }} data-body-index-url="{{ . }}"{{ end }} data-msg-loading="{{ T "searchLoading" }}" data-msg-empty="{{ T "searchNoResults" }}" data-msg-error="{{ T "searchError" }}" data-msg-deprecated="{{ T "searchDeprecated" }}">
   <div class="search-box">
     <div class="search-header">
       <span class="search-icon" aria-hidden="true">

@@ -13,7 +13,9 @@ Requires site.Params.remarkURL to be set. Optional parameters:
 
 {{- with site.Params.remarkURL }}
 {{- $siteId := site.Params.remarkSiteId | default "remark" }}
-{{- $locale := site.Params.remarkLocale | default "zh" }}
+{{- /* Remark42 takes a bare language code ("zh", "en", "ja"), so derive it
+       from the site language rather than hardcoding any one of them. */ -}}
+{{- $locale := site.Params.remarkLocale | default (index (split site.Language.Lang "-") 0) | default "en" }}
 {{- $noFooter := site.Params.remarkNoFooter | default "true" }}
 <script>var remark_config = { host: '{{ . }}', site_id: '{{ $siteId }}', locale: '{{ $locale }}', no_footer: '{{ $noFooter }}' };</script>
 <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)}}(remark_config.components||["embed"],document);</script>

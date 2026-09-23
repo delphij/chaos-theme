@@ -27,7 +27,7 @@
   var msgLoading = dialog.getAttribute('data-msg-loading') || 'Loading...';
   var msgEmpty = dialog.getAttribute('data-msg-empty') || 'No matching posts found';
   var msgError = dialog.getAttribute('data-msg-error') || 'Failed to load search index';
-  var msgDeprecated = dialog.getAttribute('data-msg-deprecated') || '已过时';
+  var msgDeprecated = dialog.getAttribute('data-msg-deprecated') || 'Deprecated';
 
   function escapeHTML(str) {
     if (!str) return '';
