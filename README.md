@@ -470,9 +470,14 @@ XSLT engine to the browser. Run it after `hugo`, on the built site:
 
 ```bash
 hugo --minify
-sh themes/chaos/tools/strip_xsl_space.sh public
-sh themes/chaos/tools/render_xsl_companions.sh public
+sh themes/chaos/tools/post_build.sh public
 ```
+
+`post_build.sh` is the only entry point a site's build script needs: it runs
+the theme's post-build steps in the order they require, so a step added later
+reaches every site without each one editing its own build script. Today that
+is `strip_xsl_space.sh` followed by `render_xsl_companions.sh`; both are
+idempotent and either can still be run on its own.
 
 `strip_xsl_space.sh` removes the whitespace Hugo's minifier cannot: it has no
 minifier for `application/xslt+xml`, and routing the stylesheet through the XML
