@@ -120,6 +120,24 @@ perf: performance improvement
 chore: maintenance
 ```
 
+### Maintainer Tools (`tools/`)
+
+Neither is part of a build: `hugo` builds the theme alone and a site never
+runs them. See README.md for what each checks.
+
+- `tools/check.py --public public` -- i18n key parity, unread translations,
+  CJK literals, authored script left inline in a template, template
+  indentation leaking into the feeds. Python 3 only. Exit 1 on failure
+- `tools/search_harness.mjs` -- runs `assets/js/search.js` against a real
+  index in a stubbed DOM; `--compare <file>` checks a change against the
+  version it replaces. Derives its queries from the index, so it carries no
+  site's content. Pass `--body`, or most queries return a single result and
+  a ranking change cannot show. The only thing here that needs Node
+
+Add a check to `check.py` when a mistake gets through that a build would not
+have caught -- that is what it is for, and every check in it was put there by
+one.
+
 ### Python Tools (auxmark and utilities)
 - **Git integration**: Use `git mv` instead of `shutil.move()` for file operations when appropriate
   - Better history tracking (git recognizes renames vs delete+add)

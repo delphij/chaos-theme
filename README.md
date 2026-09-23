@@ -718,13 +718,68 @@ themes/chaos/
 ├── layouts/
 │   ├── _default/            # Default templates
 │   ├── _markup/             # Markdown render hooks
-│   ├── partials/            # Reusable components
-│   └── shortcodes/          # Content shortcodes
+│   ├── _partials/           # Reusable components
+│   └── _shortcodes/         # Content shortcodes
 ├── static/
 │   └── _3p/                 # Third-party dependencies
 │       └── katex/           # KaTeX for math rendering
+├── tools/                   # Maintainer scripts (see below)
 └── hugo.toml                # Example configuration
 ```
+
+`assets/js/` holds one entry point per thing the browser loads: `main.js`,
+which imports the feature modules in `assets/js/modules/`, plus `search.js`
+and `mermaid.js`, each loaded only on pages that need it.
+
+### Maintainer checks
+
+Neither of these is part of a build. `hugo` builds the theme on its own, and a
+site never runs them.
+
+`tools/check.py` covers the classes of mistake Hugo has no opinion about, and
+every one of them shipped here at some point without failing a build:
+
+```bash
+python3 themes/chaos/tools/check.py --public public
+```
+
+- the five i18n files define the same keys
+- no translated string that nothing renders
+- no CJK outside comments, so a five-language theme never falls back to
+  Chinese
+- no authored script over eight lines left inline in a template, where
+  `js.Build` cannot reach it
+- no space-indented tag in a built feed, the signature of a template shipping
+  its indentation through CDATA (needs `--public`)
+
+Exit status is 1 on failure. Python 3 only, which the search index already
+needs.
+
+`tools/search_harness.mjs` runs `assets/js/search.js` against a real index in
+a stubbed DOM, to see what a query returns or to check a change against the
+version it replaces:
+
+```bash
+# What does this query match?
+node themes/chaos/tools/search_harness.mjs \
+  --index assets/search-index.json --query "some term"
+
+# Did a change to search.js alter any ranking?
+git -C themes/chaos show HEAD:assets/js/search.js > /tmp/search-old.js
+node themes/chaos/tools/search_harness.mjs \
+  --index assets/search-index.json --body assets/search-index-body.json \
+  --compare /tmp/search-old.js
+```
+
+With no `--query`, queries are derived from the index itself, sampled across
+the frequency range plus a multi-token query, a single character and one
+string that matches nothing — so nothing about any particular site is baked
+in. Pass `--body` when comparing: the core index alone matches so little that
+most queries return a single result, and a single result cannot show a change
+in ranking. The tool says so when that happens rather than reporting a
+reassuring "identical".
+
+This is the one thing in the theme that needs Node.
 
 ## Dependencies
 
