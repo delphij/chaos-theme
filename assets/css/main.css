@@ -1613,6 +1613,48 @@ article.post strong {
    RESPONSIVE / MEDIA QUERIES
    Breakpoints for tablet and mobile devices.
    Adjusts layout, typography, and navigation for smaller screens.
+
+   THE BREAKPOINTS, all of them, wherever they appear in this file. They
+   cannot be custom properties -- a media query is evaluated before var()
+   is resolved -- so this list is the only place they are written down.
+
+     1359px  max   the article layout loses room for the side TOC, which
+                   becomes the floating toggle and drawer
+      960px  max   the brand subtitle stops fitting beside the title
+      769px  min   the one min-width query: the code block line-number
+                   column. Complementary with 768px max, which hides that
+                   column outright -- which is why it is 769 and not 768,
+                   so the two can never both apply
+      768px  max   the mobile layout proper: stacked nav behind the menu
+                   toggle, single-column content, narrower gutters, and
+                   the line-number column hidden
+      600px  max   the archive timeline's date column only: narrowed, and
+                   the full date swapped for the short one
+
+   Also in this file, not width-based and already living with what they
+   modify: (prefers-reduced-motion: reduce) with the view transition near
+   the top, (forced-colors: active) with the :focus-visible styles,
+   (hover: none) with the code copy button, and print at the end.
+
+   WHAT IS OVERRIDDEN HERE, by component, so a change to one of these
+   sections above has a single place to check rather than a search:
+
+     1359px  article.post, .content-layout, .home-sidebar, .nav-inner,
+             .toc, .toc-wrapper, .toc-toggle, .toc.toc-open
+      960px  .brand
+      768px  .brand, nav.main-links, .menu-toggle, .nav-inner,
+             .post-entry, .post-title, .post-footer, .x-card and its
+             parts, blockquote.twitter-tweet, .highlight, .chroma,
+             ul, ol
+
+   These rules sit here rather than beside the components they modify
+   because moving them would reorder the cascade. Most are provably safe
+   to move -- 25 of the 30 touch a (selector, property) pair no rule
+   between here and their component also sets at equal specificity --
+   but two are not: .nav-inner is set at both 1359px and 768px and must
+   keep that order, and `ul ul` here ties `blockquote ul` above on
+   specificity. Relocating the rest without those two would scatter the
+   overrides across two conventions, which is worse than one.
    ========================================================================== */
 
 /* Tablet breakpoint - Collapse 2-column layout to single column (<= 1359px) */
