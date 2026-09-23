@@ -1,0 +1,42 @@
+# EditorConfig (https://editorconfig.org): conventions an editor reads
+# directly. It is data, not a tool -- adding it makes `hugo` depend on
+# nothing, and a contributor without EditorConfig support loses only the
+# automation, not the ability to build.
+#
+# Every rule below was measured against this tree rather than chosen, so
+# adopting it reformats nothing:
+#
+#   indent_style  spaces in every source file except the shell scripts in
+#                 tools/, which are tab-indented
+#   indent_size   2 throughout; Python is the one exception at 4
+#   final newline present in every source file. Absent only in the vendored
+#                 minified files under static/_3p, exempted below
+#   trailing ws   no source file has any
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# PEP 8.
+[*.py]
+indent_size = 4
+
+[*.sh]
+indent_style = tab
+
+# Two trailing spaces are a hard line break in Markdown.
+[*.md]
+trim_trailing_whitespace = false
+
+# Vendored third-party builds, kept byte-for-byte as upstream ships them.
+[static/_3p/**]
+insert_final_newline = false
+trim_trailing_whitespace = false
+indent_style = unset
+indent_size = unset
