@@ -13,9 +13,23 @@ apart from each other.
   {{- $scripts = $scripts | append "js/search.js" -}}
 {{- end -}}
 {{- range $scripts }}
+  {{- /* target states the syntax floor of the emitted bundle. Without it the
+         output is whatever the source happens to be, so the baseline is
+         decided by accident rather than written down.
+
+         es2020 is where the source already sits: optional chaining and
+         nullish coalescing are its newest syntax. Declaring it means newer
+         syntax can be written freely from here on and esbuild lowers it,
+         rather than silently raising what browsers the theme requires.
+
+         It cannot express the real floor, which is higher and set by runtime
+         APIs rather than syntax -- <dialog>, IntersectionObserver,
+         CSS.escape, replaceChildren. Those are a feature-detection concern,
+         not a build one. */ -}}
   {{- $opts := dict
     "minify" (not hugo.IsDevelopment)
     "sourceMap" (cond hugo.IsDevelopment "external" "")
+    "target" "es2020"
     "targetPath" .
   }}
   {{- with resources.Get . }}
