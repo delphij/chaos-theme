@@ -28,7 +28,7 @@ here.
 
 ## [Unreleased]
 
-## [1.0.0]
+## [1.0.0] - 2026-09-23
 
 First stable release. Requires Hugo 0.158.0 or later, standard edition.
 
