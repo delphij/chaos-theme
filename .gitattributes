@@ -1,0 +1,10 @@
+# Left out of `git archive`, and so of the release tarball: files for working
+# on the theme, not for using it. Hugo Modules fetch from the repository
+# itself and are not affected.
+/.github         export-ignore
+/.gitattributes  export-ignore
+/.gitignore      export-ignore
+/.editorconfig   export-ignore
+/AGENTS.md       export-ignore
+/CLAUDE.md       export-ignore
+/GEMINI.md       export-ignore

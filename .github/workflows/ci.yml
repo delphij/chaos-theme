@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Weekly, so a new Hugo release that breaks the theme shows up before a
+    # user reports it.
+    - cron: '17 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Hugo ${{ matrix.hugo }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 'min' is read from hugo.toml, so the declared minimum is the version
+        # that gets tested; check.py keeps theme.toml in agreement with it.
+        hugo: [min, latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve Hugo version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ '${{ matrix.hugo }}' = min ]; then
+            v=$(sed -n "s/^ *min *= *'\(.*\)'/\1/p" hugo.toml)
+          else
+            v=$(gh release view -R gohugoio/hugo --json tagName -q .tagName)
+            v=${v#v}
+          fi
+          test -n "$v"
+          echo "hugo=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Install Hugo ${{ steps.version.outputs.hugo }}
+        run: |
+          v=${{ steps.version.outputs.hugo }}
+          curl -fsSL "https://github.com/gohugoio/hugo/releases/download/v$v/hugo_${v}_linux-amd64.tar.gz" \
+            | tar -xz -C "$RUNNER_TEMP" hugo
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      - name: Build example site
+        # --panicOnWarning turns every warning, missing translations included,
+        # into a failure.
+        run: |
+          hugo version
+          hugo --source exampleSite --destination "$RUNNER_TEMP/public" \
+            --gc --minify --panicOnWarning --printI18nWarnings --printPathWarnings
+
+      - name: Self-checks
+        run: python3 tools/check.py --public "$RUNNER_TEMP/public"
+
+  release:
+    # A v* tag publishes a release, once the theme has built on both versions.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Release notes from CHANGELOG.md
+        # The tag must have its own section: a release without notes is a
+        # tag pushed by mistake, or a changelog not written yet.
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          awk -v h="## [$version]" '
+            index($0, h) == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found && /^\[[^]]+\]: / { exit }
+            found { print }
+          ' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          if ! grep -q '[^[:space:]]' "$RUNNER_TEMP/notes.md"; then
+            echo "::error::CHANGELOG.md has no section for $version"
+            exit 1
+          fi
+
+      - name: Build tarball
+        # The chaos/ prefix extracts straight into themes/chaos, the directory
+        # README.md tells a manual install to use. .gitattributes decides what
+        # is left out.
+        run: |
+          name=chaos-theme-$GITHUB_REF_NAME
+          git archive --format=tar --prefix=chaos/ "$GITHUB_REF_NAME" \
+            | xz -9 > "$RUNNER_TEMP/$name.tar.xz"
+          tar -tJf "$RUNNER_TEMP/$name.tar.xz" chaos/theme.toml chaos/hugo.toml > /dev/null
+          echo "TARBALL=$RUNNER_TEMP/$name.tar.xz" >> "$GITHUB_ENV"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$TARBALL" \
+            --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag
