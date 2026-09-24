@@ -19,7 +19,7 @@ hugo --gc --minify          # Production build
 ## Architecture
 
 ### Technology Stack
-- **Hugo** 0.146.0+ (standard edition)
+- **Hugo** 0.158.0+ (standard edition)
 - **Languages**: Go Templates, HTML5, CSS3, vanilla JavaScript
 - **Asset Processing**: Hugo Pipes (bundling, minification, SRI)
 - **Dependencies**: KaTeX 0.17.0, instant.page 5.2.0, Mermaid 11.4.1, Noto Sans Mono 2.014 (Latin subset) — all vendored in `static/_3p/`
@@ -138,10 +138,10 @@ templates.
 The two added for this theme's own correctness:
 
 - `tools/check.py --public public` -- i18n key parity, unread translations,
-  CJK literals, authored script left inline in a template, template
-  indentation leaking into the feeds, a menu whose active entry is not the
-  page's own. Python 3 only, exit 1 on failure, and it belongs in the build
-  right after `hugo`
+  version parity (theme.toml vs hugo.toml), CJK literals, authored script left
+  inline in a template, template indentation leaking into the feeds, a menu
+  whose active entry is not the page's own. Python 3 only, exit 1 on failure,
+  and it belongs in the build right after `hugo`
 - `tools/search_harness.mjs` -- runs `assets/js/search.js` against a real
   index in a stubbed DOM; `--compare <file>` checks a change against the
   version it replaces. Derives its queries from the index, so it carries no

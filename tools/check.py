@@ -82,6 +82,34 @@ def check_i18n_unused(theme):
         fail('i18n-unused', f'{len(unused)} key(s) nothing references: {", ".join(unused)}')
 
 
+def check_version_parity(theme):
+    """theme.toml and hugo.toml declare the same minimum Hugo version.
+
+    hugo.toml defines min under [module.hugoVersion], while theme.toml
+    defines min_version. If one is bumped without the other, users or tools
+    reading either file see conflicting minimum version requirements.
+    """
+    theme_toml = theme / 'theme.toml'
+    hugo_toml = theme / 'hugo.toml'
+    if not (theme_toml.exists() and hugo_toml.exists()):
+        return
+
+    m_theme = re.search(r'(?m)^\s*min_version\s*=\s*["\']([^"\']+)["\']', theme_toml.read_text(encoding='utf-8'))
+    m_hugo = re.search(r'(?m)^\s*min\s*=\s*["\']([^"\']+)["\']', hugo_toml.read_text(encoding='utf-8'))
+
+    v_theme = m_theme.group(1) if m_theme else None
+    v_hugo = m_hugo.group(1) if m_hugo else None
+
+    if not v_theme:
+        fail('version-parity', 'theme.toml is missing min_version')
+    elif not v_hugo:
+        fail('version-parity', 'hugo.toml is missing [module.hugoVersion].min')
+    elif v_theme != v_hugo:
+        fail('version-parity', f'minimum Hugo version mismatch: theme.toml has {v_theme}, hugo.toml has {v_hugo}')
+    else:
+        notes.append(f'version-parity: Hugo >={v_theme}')
+
+
 def check_no_cjk_literals(theme):
     """No CJK outside comments.
 
@@ -246,6 +274,7 @@ def main():
 
     check_i18n_parity(theme)
     check_i18n_unused(theme)
+    check_version_parity(theme)
     check_no_cjk_literals(theme)
     check_no_authored_inline_js(theme)
     if args.public:

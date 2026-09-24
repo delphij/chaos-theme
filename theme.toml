@@ -6,7 +6,7 @@ homepage = "https://github.com/delphij/chaos-theme"
 demosite = "https://blog.delphij.net/"
 tags = ["blog", "minimal", "responsive", "dark-mode", "chinese", "cjk", "typography", "accessible", "multilingual", "mathematics"]
 features = ["responsive", "dark-mode", "multilingual", "mathematics", "comments", "seo", "performance"]
-min_version = "0.146.0"
+min_version = "0.158.0"
 
 [author]
 name = "Xin Li"

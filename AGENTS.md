@@ -188,8 +188,11 @@ Only for:
 5. **Can we vendor it?** (Self-hosting requirement)
 
 ### Current Dependencies Rationale
-- **KaTeX 0.16.22**: Best-in-class math rendering, self-contained
+- **KaTeX 0.17.0**: Best-in-class math rendering, self-contained
 - **instant.page 5.2.0**: Tiny (1KB), dramatic perceived performance improvement
+- **Mermaid 11.4.1**: Generation of diagram and flowchart from text, loaded conditionally
+- **Noto Sans Mono 2.014**: Clean Latin monospace subset with consistent character metrics
+- **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
 - **Remark42**: Optional, user's choice, not vendored (embedded script)
 
 ### Attribution Standards

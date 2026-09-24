@@ -53,3 +53,12 @@ See static/_3p/mermaid/11.4.1/LICENSE for full license text
 Website: https://mermaid.js.org/
 Generation of diagram and flowchart from text.
 
+jieba
+Copyright (c) 2013 Sun Junyi
+Licensed under the MIT License
+Location: tools/vendor/jieba/
+See tools/vendor/jieba/LICENSE for full license text
+Website: https://github.com/fxsjy/jieba
+Chinese text segmentation for offline search index generator.
+
+

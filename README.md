@@ -26,7 +26,7 @@ Screenshots are taken from the bundled [example site](#example-site).
 
 ## Requirements
 
-- Hugo 0.146.0 or later (standard version, extended not required)
+- Hugo 0.158.0 or later (standard version, extended not required)
 
 ## Installation
 
@@ -769,6 +769,7 @@ python3 themes/chaos/tools/check.py --public public
 
 - the five i18n files define the same keys
 - no translated string that nothing renders
+- `theme.toml` and `hugo.toml` declare the same minimum Hugo version
 - no CJK outside comments, so a five-language theme never falls back to
   Chinese
 - no authored script over eight lines left inline in a template, where
@@ -817,8 +818,10 @@ This is the one thing in the theme that needs Node, and the one script in
 
 All dependencies are vendored in `static/_3p/` and `tools/vendor/` to ensure reliability and privacy:
 
-- **KaTeX 0.16.22**: Mathematical typesetting for scientific content
+- **KaTeX 0.17.0**: Mathematical typesetting for scientific content
 - **instant.page 5.2.0**: Link prefetching for near-instant page transitions
+- **Mermaid 11.4.1**: Diagram and flowchart generation from text
+- **Noto Sans Mono 2.014**: Monospace font subset for code blocks and dates
 - **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
 
 ### No External Dependencies
