@@ -250,12 +250,18 @@ def check_feed_whitespace(public):
 
     Space-indented tags are the signature: this theme's templates indent with
     spaces, while hand-written HTML in posts uses tabs.
+
+    Only the CDATA sections are scanned. The feed's own elements are indented
+    too unless the site was built with --minify, and that indentation is
+    harmless -- counting it made the check fail on every unminified build.
     """
     for name in ('atom.xml', 'index.xml'):
         f = public / name
         if not f.exists():
             continue
-        hits = re.findall(r'\n +<[a-zA-Z/]', f.read_text(encoding='utf-8', errors='replace'))
+        text = f.read_text(encoding='utf-8', errors='replace')
+        hits = [h for cdata in re.findall(r'<!\[CDATA\[(.*?)\]\]>', text, re.S)
+                for h in re.findall(r'\n +<[a-zA-Z/]', cdata)]
         if hits:
             fail('feed-whitespace', f'{name} carries {len(hits)} space-indented tag(s); '
                                     f'a template is emitting whitespace into .Content')
