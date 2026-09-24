@@ -23,9 +23,9 @@
 
      chaos.reset       normalize.css
      chaos.tokens      this file: custom properties, light, dark and mobile
-     chaos.base        main.css: bare element selectors
+     chaos.base        main.css: element defaults and their states
      chaos.syntax      syntax.css, syntax-dark.css: Chroma colours
-     chaos.components  main.css: everything with a class, state or id
+     chaos.components  main.css: everything with a class or id
 
    The XSLT-rendered pages inline this file too, ahead of unlayered sheets
    of their own; they only read these properties, so nothing there changes.

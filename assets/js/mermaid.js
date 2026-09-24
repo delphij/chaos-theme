@@ -10,10 +10,7 @@
 // library it needs. Loading either unconditionally would put them on all of
 // the site's pages to serve the few that have a figure.
 
-// Kept in step with THEME_CHANGE_EVENT in modules/theme.js. Not imported:
-// this is a separate bundle, and importing it would pull the whole theme
-// module in with it.
-const THEME_CHANGE_EVENT = 'chaos:themechange';
+import { THEME_CHANGE_EVENT } from './modules/events.js';
 
 function isDarkTheme(event) {
   // The event carries the theme that was just applied; without one (the

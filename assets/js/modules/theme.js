@@ -5,6 +5,8 @@
 // Three-state theme toggle (auto / dark / light) and its Remark42 sync.
 // Extracted from main.js.
 
+import { THEME_CHANGE_EVENT } from './events.js';
+
 // Constants
 const THEME_AUTO = 'auto';
 const THEME_DARK = 'dark';
@@ -14,10 +16,7 @@ const root = document.documentElement;
 const btn = document.getElementById('themeToggle');
 const storageKey = 'theme-mode';
 const legacyStorageKey = 'scheme';
-
-// Fired on document whenever the effective theme is (re)applied, with
-// { mode, theme } in detail. Exported so a listener cannot misspell it.
-export const THEME_CHANGE_EVENT = 'chaos:themechange';
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 // Cached DOM references for performance
 const themeAnnouncement = document.getElementById('theme-announcement');
@@ -25,42 +24,31 @@ const themeAnnouncement = document.getElementById('theme-announcement');
 // Localised strings, from the toggle button's data-* attributes (see
 // _partials/header.html). Read once: the button does not change.
 const labels = btn?.dataset ?? {};
+const NEXT_LABEL = { [THEME_DARK]: labels.labelToDark, [THEME_LIGHT]: labels.labelToLight, [THEME_AUTO]: labels.labelToAuto };
+const ANNOUNCEMENT = { [THEME_DARK]: labels.announceDark, [THEME_LIGHT]: labels.announceLight, [THEME_AUTO]: labels.announceAuto || 'Auto' };
 
-// Helper function for media query checks
-function checkMediaQuery(query) {
-  return window.matchMedia?.(query).matches ?? false;
-}
-
-function isSystemDark() {
-  return checkMediaQuery('(prefers-color-scheme: dark)');
+function systemTheme() {
+  return systemDark.matches ? THEME_DARK : THEME_LIGHT;
 }
 
 // Resolve visual theme ('dark' | 'light') from mode
 function getEffectiveTheme(mode) {
-  if (mode === THEME_DARK) return THEME_DARK;
-  if (mode === THEME_LIGHT) return THEME_LIGHT;
-  return isSystemDark() ? THEME_DARK : THEME_LIGHT;
+  return mode === THEME_AUTO ? systemTheme() : mode;
 }
 
 // Get current active mode ('auto' | 'dark' | 'light')
 function getCurrentMode() {
   const stored = getStoredTheme();
-  if (stored === THEME_DARK || stored === THEME_LIGHT) return stored;
-  return THEME_AUTO;
+  return stored === THEME_DARK || stored === THEME_LIGHT ? stored : THEME_AUTO;
 }
 
 // Three-state cycle:
 // Auto -> opposite of current system -> same as system -> Auto
 function getNextMode(currentMode) {
-  if (currentMode === THEME_AUTO) {
-    return isSystemDark() ? THEME_LIGHT : THEME_DARK;
-  }
-  const systemTheme = isSystemDark() ? THEME_DARK : THEME_LIGHT;
-  const oppositeTheme = isSystemDark() ? THEME_LIGHT : THEME_DARK;
-  if (currentMode === oppositeTheme) {
-    return systemTheme;
-  }
-  return THEME_AUTO;
+  const system = systemTheme();
+  const opposite = system === THEME_DARK ? THEME_LIGHT : THEME_DARK;
+  if (currentMode === THEME_AUTO) return opposite;
+  return currentMode === opposite ? system : THEME_AUTO;
 }
 
 // Apply theme to DOM and button
@@ -80,23 +68,14 @@ function applyTheme(mode) {
   if (btn) {
     // 🌓 for Auto (following system), 🌙 for forced dark, ☀️ for forced light
     btn.textContent = mode === THEME_AUTO ? '🌓' : (isDark ? '🌙' : '☀️');
-    const nextMode = getNextMode(mode);
-    let nextLabel = '';
-    if (nextMode === THEME_DARK) nextLabel = labels.labelToDark;
-    else if (nextMode === THEME_LIGHT) nextLabel = labels.labelToLight;
-    else if (nextMode === THEME_AUTO) nextLabel = labels.labelToAuto;
+    const nextLabel = NEXT_LABEL[getNextMode(mode)];
     if (nextLabel) btn.setAttribute('aria-label', nextLabel);
   }
 }
 
 // Announce theme change to screen readers via aria-live region
 function announceTheme(mode) {
-  if (!themeAnnouncement) return;
-  if (mode === THEME_AUTO) {
-    themeAnnouncement.textContent = labels.announceAuto || 'Auto';
-  } else {
-    themeAnnouncement.textContent = mode === THEME_DARK ? labels.announceDark : labels.announceLight;
-  }
+  if (themeAnnouncement) themeAnnouncement.textContent = ANNOUNCEMENT[mode];
 }
 
 // Sync theme with Remark42 comment system
@@ -148,7 +127,7 @@ export function initTheme() {
   applyTheme(initialMode);
 
   // Real-time listener for OS/browser color scheme changes
-  window.matchMedia?.('(prefers-color-scheme: dark)')?.addEventListener('change', () => {
+  systemDark.addEventListener('change', () => {
     if (getCurrentMode() === THEME_AUTO) {
       applyTheme(THEME_AUTO);
       syncRemark42Theme(false);

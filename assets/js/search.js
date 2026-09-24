@@ -127,32 +127,27 @@ function initSearch() {
     }
   }
 
-  function closeSearch() {
-    dialog.close();
+  // Every way out -- the close button, a click on the backdrop, Escape --
+  // ends in the dialog's close event, so the reset is here once rather than
+  // in each of them.
+  dialog.addEventListener('close', () => {
     input.value = '';
     resultsContainer.innerHTML = initialHTML;
     selectedIndex = -1;
     currentResults = [];
-  }
+  });
 
   toggleBtn?.addEventListener('click', e => {
     e.preventDefault();
     openSearch();
   });
 
-  closeBtn?.addEventListener('click', closeSearch);
+  closeBtn?.addEventListener('click', () => dialog.close());
 
-  // Close when clicking outside dialog content
+  // Close on a click on the backdrop. The dialog has no padding and clips its
+  // content, so a click whose target is the dialog itself landed outside it.
   dialog.addEventListener('click', e => {
-    const rect = dialog.getBoundingClientRect();
-    const isInDialog =
-      rect.top <= e.clientY &&
-      e.clientY <= rect.top + rect.height &&
-      rect.left <= e.clientX &&
-      e.clientX <= rect.left + rect.width;
-    if (!isInDialog || e.target === dialog) {
-      closeSearch();
-    }
+    if (e.target === dialog) dialog.close();
   });
 
   // Global hotkey '/' to open search (unless typing in input/textarea)
@@ -164,7 +159,9 @@ function initSearch() {
         openSearch();
       }
     } else if (e.key === 'Escape' && dialog.open) {
-      closeSearch();
+      // Not left to the dialog: a search input takes the first Escape to
+      // clear itself, so the dialog would need a second one to close.
+      dialog.close();
     }
   });
 
@@ -175,10 +172,7 @@ function initSearch() {
 
     const tokens = [];
     // 1. Extract alphanumeric tokens including technical symbols (+, #, -, _)
-    const latinWords = q.match(/[a-z0-9_\-\.\+#]+/gi) || [];
-    for (const w of latinWords) {
-      if (w.length >= 1) tokens.push(w.toLowerCase());
-    }
+    tokens.push(...(q.match(/[a-z0-9_\-\.\+#]+/gi) || []));
 
     // 2. Extract CJK phrases using dictionary matching against indexData.index keys
     const cjkChars = q.replace(/[a-z0-9_\-\.\+#\s]+/gi, '');

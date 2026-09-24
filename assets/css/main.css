@@ -8,14 +8,11 @@
 
    This file fills two of them:
 
-     chaos.base        Element selectors (h1, a, table th, ...), with at
-                       most a structural pseudo-class or pseudo-element.
-                       They lost to every component rule on specificity
-                       already, so the lower layer changes nothing.
-     chaos.components  Everything that names a class, attribute, id or
-                       user state -- including a:hover, which outranks the
-                       resting colour of component links and must go on
-                       doing so.
+     chaos.base        Element defaults: element selectors and their
+                       states (a:hover, :focus-visible), the global focus
+                       ring and anchor offset. A component restyles any of
+                       it by naming a class, never by outbidding it.
+     chaos.components  Everything that names a class or id.
 
    Rules are nested where the parent is a single selector (or a list whose
    members share one specificity). A nested rule's `&` takes the highest
@@ -171,13 +168,44 @@
   }
 
   /* Links - Dotted underline with smooth transition to solid on hover.
-     The hover state is in chaos.components (LINKS), not here: it has to keep
-     outranking the resting colour of component links, as it always has. */
+     Here in the base layer, a link state loses to any component rule, so a
+     component that drops the underline need not drop it again for :hover. */
   a {
     color: var(--link);
     text-decoration: none;
     border-bottom: 1px dotted var(--link);
     transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+
+    &:hover {
+      color: var(--link-hover);
+      border-bottom-style: solid;
+      border-bottom-color: var(--link-hover);
+    }
+  }
+
+  /* Focus ring for keyboard navigation accessibility */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  [tabindex]:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* High Contrast Mode support. Flat: the list above mixes specificities. */
+  @media (forced-colors: active) {
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 2px solid Highlight;
+    }
+  }
+
+  /* Anything that can be jumped to clears the sticky navigation: headings from
+     the TOC, the skip link's #main-content, footnotes and their back-links. */
+  [id] {
+    scroll-margin-top: var(--nav-height);
   }
 
   /* Blockquotes - Styled quote blocks with left border accent and background tint.
@@ -311,11 +339,6 @@
     font-variant-east-asian: ruby;
   }
 
-  /* Ruby base text - The main character */
-  rb {
-    font-size: 1em;
-  }
-
   /* Ruby text - The small pronunciation guide */
   rt {
     font-size: 0.65em;
@@ -338,39 +361,11 @@
 @layer chaos.components {
   /* ==========================================================================
      LINKS
-     States and variants of the base link.
+     Link variants shared across components.
      ========================================================================== */
 
-  a:hover {
-    color: var(--link-hover);
-    border-bottom-style: solid;
-    border-bottom-color: var(--link-hover);
-  }
-
-  /* Link focus state for keyboard navigation accessibility */
-  a:focus-visible,
-  button:focus-visible,
-  input:focus-visible,
-  [tabindex]:focus-visible {
-    outline: var(--focus-outline);
-    outline-offset: var(--focus-offset);
-  }
-
-  /* High Contrast Mode support */
-  @media (forced-colors: active) {
-    a:focus-visible,
-    button:focus-visible,
-    input:focus-visible,
-    [tabindex]:focus-visible {
-      outline: 2px solid Highlight;
-    }
-  }
-
-  /* Link variants - Plain links without underline for navigation
-     All non-article links share this reset to avoid repeating border-bottom: none
-     throughout individual component styles. The :hover copy is needed because
-     a:hover above outranks a single class. */
-  .link-plain,
+  /* Plain links - every non-prose link drops the underline. The hover state
+     needs no copy of this: a:hover is in chaos.base. */
   .brand,
   .post-entry .post-title a,
   .toc-content a,
@@ -383,44 +378,22 @@
   .sidebar-year-item,
   .tag-flat-item,
   .taxo-link,
-  .cat-link,
-  .tag-link,
   .archive-post-title,
-  .archive-cat-label {
+  .archive-cat-label,
+  .search-item-link {
     border-bottom: none;
-    text-decoration: none;
   }
 
-  .link-plain:hover,
-  .brand:hover,
-  .post-entry .post-title a:hover,
-  .toc-content a:hover,
-  nav.main-links a:hover,
-  .skip-link:hover,
-  .sidebar-tag-item:hover,
-  .sidebar-more-link:hover,
-  .sidebar-nav-jump:hover,
-  .sidebar-az-item:hover,
-  .sidebar-year-item:hover,
-  .tag-flat-item:hover,
-  .taxo-link:hover,
-  .cat-link:hover,
-  .tag-link:hover,
-  .archive-post-title:hover,
-  .archive-cat-label:hover {
-    border-bottom: none;
-    text-decoration: none;
-  }
-
-  /* Navigation item highlight - Shared resting transition and hover treatment for
-     every "row" style link (sidebar entries, taxonomy items, TOC links). Declared
-     once here so the individual components only carry their own resting colors. */
+  /* Navigation items - every "row" style link (sidebar entries, taxonomy
+     chips, TOC links) shares one shape, transition, hover and active state,
+     so the individual components only carry their size and resting colour. */
   .sidebar-tag-item,
   .sidebar-nav-jump,
   .sidebar-az-item,
   .sidebar-year-item,
   .tag-flat-item,
   .toc-content a {
+    border-radius: var(--radius-sm);
     transition: color var(--transition-fast), background-color var(--transition-fast);
   }
 
@@ -432,6 +405,23 @@
   .toc-content a:hover {
     color: var(--primary);
     background: var(--paper);
+  }
+
+  .sidebar-nav-jump.active,
+  .sidebar-az-item.active,
+  .sidebar-year-item.active,
+  .toc-content a.active {
+    color: var(--primary);
+    font-weight: 600;
+    background: var(--paper);
+  }
+
+  /* Term chips (term-chip.html): the sidebar and /tags/ variants differ only
+     in size and colour. */
+  .sidebar-tag-item,
+  .tag-flat-item {
+    display: inline-flex;
+    align-items: center;
   }
 
   /* ==========================================================================
@@ -466,81 +456,45 @@
     }
   }
 
+  /* Post title - the article's <h1> and each summary's <h2>, sized alike.
+     Colour, weight and line height come from the heading defaults. */
   .post-title {
     font-size: var(--h1-size);
     margin: 0 0 10px;
-    font-weight: 700;
-    line-height: 1.35;
     letter-spacing: -0.01em;
-    color: var(--heading);
 
     @media (max-width: 768px) {
       font-size: 22px;
     }
   }
 
-  .post-entry .post-title {
-    font-size: var(--h1-size);
-    margin: 0 0 10px;
-    font-weight: 700;
-    line-height: 1.35;
-    letter-spacing: -0.01em;
+  .post-entry .post-title a {
+    color: var(--heading);
+    transition: color var(--transition-fast);
 
-    @media (max-width: 768px) {
-      font-size: 22px;
-    }
-
-    a {
-      color: var(--heading);
-      transition: color var(--transition-fast);
-
-      &:hover {
-        color: var(--primary);
-      }
+    &:hover {
+      color: var(--primary);
     }
   }
 
   .post-summary-content {
     margin: 14px 0;
-    line-height: var(--line-height);
-    color: var(--text);
   }
 
   .post-more {
     margin-top: 14px;
   }
 
+  /* A prose link in bold: colour and underline are the base link's */
   .read-more {
     font-weight: 600;
-    color: var(--link);
-    border-bottom: 1px dotted var(--link);
-
-    &:hover {
-      color: var(--link-hover);
-      border-bottom-style: solid;
-    }
   }
 
   /* Taxonomy Links (Categories & Tags - Clean Flat Typographic Links) */
   .taxo-link {
     display: inline-block;
     font-size: var(--small-size);
-    text-decoration: none !important;
-    border: none !important;
-    border-bottom: none !important;
-    background: transparent !important;
-    padding: 0;
-    vertical-align: baseline;
-    line-height: inherit;
     transition: color var(--transition-fast);
-
-    &:hover,
-    &:focus-visible {
-      text-decoration: none !important;
-      border: none !important;
-      border-bottom: none !important;
-      background: transparent !important;
-    }
   }
 
   .cat-link {
@@ -563,29 +517,13 @@
     }
   }
 
+  /* Separators inherit the muted colour of the metadata they sit in */
   .meta-sep {
-    color: var(--muted);
     user-select: none;
   }
 
   .cat-sep {
-    color: var(--muted);
     margin-right: 4px;
-  }
-
-  /* Account for sticky header when jumping to anchors */
-  #main-content {
-    scroll-margin-top: var(--nav-height); /* Offset for sticky navigation */
-  }
-
-  /* Headings with IDs (used for table of contents anchors) */
-  h1[id],
-  h2[id],
-  h3[id],
-  h4[id],
-  h5[id],
-  h6[id] {
-    scroll-margin-top: var(--nav-height); /* Offset for sticky navigation */
   }
 
   /* ==========================================================================
@@ -637,6 +575,10 @@
     gap: 10px;
     min-width: 0;
     flex-shrink: 1;
+
+    &:hover {
+      color: var(--link-hover);
+    }
 
     /* Brand comes first, takes remaining space */
     @media (max-width: 768px) {
@@ -708,7 +650,7 @@
       white-space: nowrap;
       padding: 8px 12px;
       border-radius: var(--radius-md);
-      transition: all var(--transition-fast);
+      transition: color var(--transition-fast), background var(--transition-fast);
 
       /* Stack navigation links vertically on mobile */
       @media (max-width: 768px) {
@@ -746,11 +688,6 @@
       background: var(--paper);
       color: var(--primary);
     }
-  }
-
-  /* Theme toggle button - Dark/light mode switcher */
-  .theme-toggle {
-    background: transparent;
   }
 
   /* Shared overlay styles for modals and dropdowns - consistent with header glass effect */
@@ -841,8 +778,9 @@
     }
   }
 
-  /* TOC container - content styling */
-  .toc {
+  /* Side panel - the TOC and the list-page sidebars are one card */
+  .toc,
+  .sidebar-card {
     max-height: calc(100dvh - 100px);  /* Match wrapper height */
     overflow-y: auto;
     padding: 16px;
@@ -850,7 +788,9 @@
     border: var(--border);
     border-radius: var(--radius-lg);
     contain: layout style;             /* Optimize rendering performance */
+  }
 
+  .toc {
     /* TOC: Switch to mobile overlay behavior on tablet */
     @media (max-width: 1359px) {
       display: none;
@@ -873,14 +813,19 @@
     }
   }
 
-  /* TOC title */
-  .toc-title {
-    font-size: var(--text-md);
-    font-weight: 700;
-    color: var(--heading);
-    margin: 0 0 12px 0;
+  /* Panel labels - the uppercase headings of the TOC, the sidebar widgets
+     and the /tags/ sections. Each is an <h2>, so colour and weight come
+     from the heading defaults; only size and spacing differ. */
+  .toc-title,
+  .sidebar-widget-title,
+  .tags-section-heading {
     text-transform: uppercase;
     letter-spacing: 0.5px;
+  }
+
+  .toc-title {
+    font-size: var(--text-md);
+    margin: 0 0 12px 0;
   }
 
   /* TOC content styling */
@@ -909,14 +854,6 @@
       color: var(--muted);
       display: block;
       padding: 6px 10px;
-      border-radius: var(--radius-sm);
-
-      /* Active section highlighting */
-      &.active {
-        color: var(--primary);
-        font-weight: 600;
-        background: var(--paper);
-      }
     }
   }
 
@@ -948,14 +885,7 @@
       }
     }
 
-    svg {
-      display: block;
-    }
-
-    .toc-icon-open {
-      display: block;
-    }
-
+    /* Icons are block-level SVGs (normalize.css); only the swap is here */
     .toc-icon-close {
       display: none;
     }
@@ -976,30 +906,18 @@
      Browsing guide sidebar matching TOC sticky layout and design tokens.
      ========================================================================== */
 
+  /* Every list-page sidebar is also a .toc-wrapper, which places it; this
+     class only drops it where there is no second column to put it in. */
   .home-sidebar {
-    grid-column: 2;
-    position: sticky;
-    top: var(--nav-height);
-    align-self: start;
-    max-width: 280px;
-    max-height: calc(100dvh - 100px);
-
     @media (max-width: 1359px) {
       display: none;
     }
   }
 
   .sidebar-card {
-    max-height: calc(100dvh - 100px);
-    overflow-y: auto;
-    padding: 16px;
-    background: var(--surface);
-    border: var(--border);
-    border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
     gap: 20px;
-    contain: layout style;
   }
 
   .sidebar-widget {
@@ -1010,13 +928,9 @@
 
   .sidebar-widget-title {
     font-size: var(--text-sm);
-    font-weight: 700;
-    color: var(--heading);
     margin: 0;
     padding-bottom: 6px;
     border-bottom: var(--border);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
 
   .sidebar-tags-cloud {
@@ -1026,13 +940,9 @@
   }
 
   .sidebar-tag-item {
-    display: inline-flex;
-    align-items: center;
     font-size: var(--text-xs);
     color: var(--muted);
     padding: 2px 6px;
-    border-radius: var(--radius-sm);
-    background: transparent;
   }
 
   .sidebar-widget-footer {
@@ -1047,6 +957,7 @@
     transition: opacity var(--transition-fast);
 
     &:hover {
+      color: var(--link-hover);
       opacity: 0.8;
       text-decoration: underline;
     }
@@ -1067,7 +978,6 @@
     font-weight: 600;
     color: var(--muted);
     padding: 3px 6px;
-    border-radius: var(--radius-sm);
   }
 
   .sidebar-az-grid {
@@ -1082,7 +992,6 @@
     font-weight: 600;
     color: var(--muted);
     padding: 3px 0;
-    border-radius: var(--radius-sm);
   }
 
   .sidebar-year-list {
@@ -1099,18 +1008,9 @@
     justify-content: space-between;
     align-items: center;
     padding: 4px 8px;
-    border-radius: var(--radius-sm);
     font-size: var(--text-sm);
     color: var(--text);
     font-variant-numeric: tabular-nums;
-  }
-
-  .sidebar-nav-jump.active,
-  .sidebar-az-item.active,
-  .sidebar-year-item.active {
-    color: var(--primary);
-    font-weight: 600;
-    background: var(--paper);
   }
 
   /* ==========================================================================
@@ -1122,11 +1022,9 @@
     margin: 0 0 28px 0;
   }
 
+  /* An <h1>: size, weight and colour are the heading defaults */
   .page-title {
-    font-size: var(--h1-size);
-    font-weight: 700;
     margin: 0 0 8px 0;
-    color: var(--heading);
   }
 
   .page-subtitle {
@@ -1136,19 +1034,22 @@
     line-height: 1.5;
   }
 
+  /* Jump targets of the /tags/ and /archives/ sidebars land a little below
+     the navigation, where their headings read as a fresh start. */
+  .tags-section,
+  .tag-letter-group,
+  .archive-year-section {
+    scroll-margin-top: calc(var(--nav-height) + 16px);
+  }
+
   /* 2. Tags Index & Alphabetical Library (/tags/) */
   .tags-section {
     margin-bottom: 32px;
-    scroll-margin-top: calc(var(--nav-height) + 16px);
   }
 
   .tags-section-heading {
     font-size: var(--text-md);
-    font-weight: 700;
-    color: var(--heading);
     margin: 0 0 14px 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
 
   .tags-flat-wrap {
@@ -1158,13 +1059,9 @@
   }
 
   .tag-flat-item {
-    display: inline-flex;
-    align-items: center;
     font-size: var(--text-sm);
     padding: 3px 6px;
-    border-radius: var(--radius-sm);
     color: var(--text);
-    background: transparent;
   }
 
   .tags-az-container {
@@ -1177,13 +1074,11 @@
     display: flex;
     gap: 16px;
     align-items: flex-start;
-    scroll-margin-top: calc(var(--nav-height) + 16px);
     padding-top: 4px;
   }
 
   .tag-letter-heading {
     font-size: var(--font-size-base);
-    font-weight: 700;
     color: var(--primary);
     margin: 0;                         /* It is an <h3>: drop the heading margins */
     width: 20px;
@@ -1199,15 +1094,9 @@
     gap: 32px;
   }
 
-  .archive-year-section {
-    scroll-margin-top: calc(var(--nav-height) + 16px);
-  }
-
   .archive-year-title {
     font-size: var(--h3-size);
-    font-weight: 700;
     margin: 0 0 12px 0;
-    color: var(--heading);
   }
 
   .archive-post-list {
@@ -1301,13 +1190,10 @@
      ========================================================================== */
 
   article.post {
-    background: transparent;
-    color: var(--text);
-
     /* Chinese typography enhancements for professional text layout
+       (text-autospace is inherited from body)
        - text-align: start - Eliminates artificial space stretching in mixed CJK/Latin text
        - text-wrap: pretty - Avoids orphan characters and balances line breaks
-       - text-autospace: Automatic spacing between CJK and Latin characters
        - text-spacing-trim: Optimizes CJK punctuation spacing (Chrome 133+, Safari 18.2+)
        - text-spacing: Standard shorthand for CJK spacing and trimming
        - font-feature-settings: "chws" 1 - Enables OpenType Contextual Half-width Spacing for adjacent CJK punctuation
@@ -1315,7 +1201,6 @@
        - hyphens: auto - Hyphenate long English words at line ends to avoid large voids */
     text-align: start;
     text-wrap: pretty;
-    text-autospace: normal;
     text-spacing-trim: normal;
     text-spacing: auto-spaces normal;
     font-feature-settings: "chws" 1;
@@ -1367,8 +1252,6 @@
     }
 
     .post-modified {
-      color: var(--muted);
-      font-size: var(--small-size);
       white-space: nowrap;
       flex-shrink: 0;
       margin-left: auto;
@@ -1692,45 +1575,38 @@
       user-select: none;
       margin-right: 0;               /* Reduced gap between numbers and code */
       padding: 0 0 0 0.4em;
+
+      /* Page background, to cover the gap the hanging indent leaves */
+      @media (min-width: 769px) {
+        background: var(--bg);
+      }
+    }
+
+    /* Line number column - Default spacing for inline layout */
+    .lntd:first-child {
+      padding-right: 1em;
+
+      /* Hanging indent: page background and minimal gap on desktop */
+      @media (min-width: 769px) {
+        padding-right: 0;
+        background: var(--bg);
+      }
+
+      /* Code blocks on mobile - Hide line numbers to maximize reading width and avoid horizontal scroll */
+      @media (max-width: 768px) {
+        display: none;
+      }
+
+      pre {
+        @media (min-width: 769px) {
+          background: var(--bg);
+        }
+      }
     }
 
     /* Code lines - Flex layout for alignment */
     .line {
       display: flex;
-    }
-  }
-
-  /* Line number column. These lists mix specificities, so they stay flat. */
-
-  /* Line number column spacing - Default spacing for inline layout */
-  .highlight .lntable .lntd:first-child,
-  .chroma .lntd:first-child {
-    padding-right: 1em;
-  }
-
-  @media (min-width: 769px) {
-    /* Line number column - page background for hanging indent effect
-       Apply to column, pre element, and line number elements to cover gap from negative margin */
-    .highlight .lntable .lntd:first-child,
-    .highlight .lntable .lntd:first-child pre,
-    .chroma .lntd:first-child,
-    .chroma .lntd:first-child pre,
-    .chroma .lnt,
-    .chroma .ln {
-      background: var(--bg);
-    }
-
-    .highlight .lntable .lntd:first-child,
-    .chroma .lntd:first-child {
-      padding-right: 0;                /* Minimal gap with hanging indent on desktop */
-    }
-  }
-
-  /* Code blocks on mobile - Hide line numbers to maximize reading width and avoid horizontal scroll */
-  @media (max-width: 768px) {
-    .highlight .lntable .lntd:first-child,
-    .chroma .lntd:first-child {
-      display: none;
     }
   }
 
@@ -1760,9 +1636,8 @@
   }
 
   .mermaid {
+    /* Scaled to fit by normalize.css like any SVG; only the font is set here */
     svg {
-      max-width: 100%;
-      height: auto;
       font-family: inherit;
     }
 
@@ -1805,11 +1680,9 @@
       border-radius: var(--radius-lg);
       font-weight: 600;
       border: var(--border);
-      border-bottom: var(--border);
       color: var(--heading);
       background: var(--surface);
-      text-decoration: none;
-      transition: all var(--transition-fast);
+      transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
 
       &:hover {
         background: var(--paper);
@@ -1874,7 +1747,7 @@
     padding: 0;
     margin: -1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
     white-space: nowrap;
     border-width: 0;
   }
@@ -1965,22 +1838,19 @@
     font-weight: 500;
     min-width: 0;
     caret-color: var(--primary);
-    -webkit-appearance: none;
     appearance: none;
 
+    /* WebKit's own search-field decorations */
     &::-webkit-search-decoration,
     &::-webkit-search-cancel-button,
     &::-webkit-search-results-button,
     &::-webkit-search-results-decoration {
-      -webkit-appearance: none;
       display: none;
     }
 
-    &:focus,
+    /* The dialog is the focus indicator */
     &:focus-visible {
-      outline: none !important;
-      outline-offset: 0 !important;
-      box-shadow: none !important;
+      outline: none;
     }
 
     &::placeholder {
@@ -2052,13 +1922,6 @@
     display: block;
     padding: 10px 14px;
     color: inherit;
-    text-decoration: none;
-    border-bottom: none;
-
-    &:hover {
-      text-decoration: none;
-      border-bottom: none;
-    }
   }
 
   .search-item-header {
@@ -2100,28 +1963,27 @@
     gap: 6px;
   }
 
-  .search-tag {
-    font-size: var(--text-xs);
+  /* Result pills: tags and the deprecated badge */
+  .search-tag,
+  .search-badge-deprecated {
     line-height: 1.4;
-    padding: 1px 7px;
     border-radius: var(--radius-sm);
     background: var(--surface);
     border: var(--border);
     color: var(--muted);
-    transition: color var(--transition-fast), background var(--transition-fast);
+  }
+
+  .search-tag {
+    font-size: var(--text-xs);
+    padding: 1px 7px;
   }
 
   .search-badge-deprecated {
     display: inline-block;
     font-size: var(--text-2xs);
     font-weight: 500;
-    line-height: 1.4;
     padding: 0 6px;
     margin-left: 6px;
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    border: var(--border);
-    color: var(--muted);
     vertical-align: middle;
   }
 
@@ -2159,39 +2021,40 @@
      ========================================================================== */
 
   @media print {
-    /* Force light mode colors and Chinese print typography standards */
+    /* Force light mode colors and Chinese print typography standards. No
+       !important needed: chaos.components outranks the chaos.tokens layer. */
     :root,
     html.dark {
-      color-scheme: light !important;
-      --bg: #FFFFFF !important;
-      --surface: #FFFFFF !important;
-      --text: #000000 !important;
-      --heading: #000000 !important;
-      --muted: #444444 !important;
-      --border-color: #CCCCCC !important;
-      --blockquote-fg: #111111 !important;
-      --paper: #F5F5F5 !important;
-      --primary: #A23E48 !important;
-      --primary-fg: #FFFFFF !important;
-      --accent: #1C3B5E !important;
-      --link: #003366 !important;
-      --link-hover: #000000 !important;
-      --table-stripe: #F9F9F9 !important;
-      --mark-bg: #FFE58F !important;
-      --code-bg: #F2F2F2 !important;
-      --primary-hover: #7E2F37 !important;
+      color-scheme: light;
+      --bg: #FFFFFF;
+      --surface: #FFFFFF;
+      --text: #000000;
+      --heading: #000000;
+      --muted: #444444;
+      --border-color: #CCCCCC;
+      --blockquote-fg: #111111;
+      --paper: #F5F5F5;
+      --primary: #A23E48;
+      --primary-fg: #FFFFFF;
+      --accent: #1C3B5E;
+      --link: #003366;
+      --link-hover: #000000;
+      --table-stripe: #F9F9F9;
+      --mark-bg: #FFE58F;
+      --code-bg: #F2F2F2;
+      --primary-hover: #7E2F37;
 
       /* Alert colors for print: crisp, high-contrast, paper-friendly */
-      --alert-note-bg: #F4F7FC !important;
-      --alert-note-border: #2255AA !important;
-      --alert-tip-bg: #F2F9F2 !important;
-      --alert-tip-border: #1B7A1B !important;
-      --alert-important-bg: #FFFBF0 !important;
-      --alert-important-border: #B35500 !important;
-      --alert-warning-bg: #FFF5F5 !important;
-      --alert-warning-border: #B32424 !important;
-      --alert-caution-bg: #FBF5FF !important;
-      --alert-caution-border: #732E99 !important;
+      --alert-note-bg: #F4F7FC;
+      --alert-note-border: #2255AA;
+      --alert-tip-bg: #F2F9F2;
+      --alert-tip-border: #1B7A1B;
+      --alert-important-bg: #FFFBF0;
+      --alert-important-border: #B35500;
+      --alert-warning-bg: #FFF5F5;
+      --alert-warning-border: #B32424;
+      --alert-caution-bg: #FBF5FF;
+      --alert-caution-border: #732E99;
 
       /* Print typography scale */
       --line-height: 1.6;              /* Slightly tighter for print */
@@ -2207,22 +2070,16 @@
       --small-size: 9pt;               /* ~85.7% of base (metadata, captions) */
     }
 
-    /* Hide interactive and navigation elements */
+    /* Hide interactive and navigation elements, and the reading stats (word
+       count/read time), which page numbers make redundant */
     .site-nav,
     .site-foot,
     .skip-link,
-    .theme-toggle,
-    .menu-toggle,
-    .toc-toggle,
     .toc-wrapper,
     .pager,
     #remark42,
+    .reading-stats,
     button {
-      display: none !important;
-    }
-
-    /* Hide reading stats (word count/read time) - redundant with page numbers */
-    .reading-stats {
       display: none !important;
     }
 
@@ -2383,13 +2240,13 @@
 
     /* X embed card print styles */
     .x-card {
-      border: var(--border) !important;
+      border: var(--border);
       break-inside: avoid;
-      margin: 16px 0 !important;
+      margin: 16px 0;
     }
 
     .x-card-header {
-      background: transparent !important;
+      background: transparent;
     }
 
     /* Code styling - Consolidated styles for all code elements */

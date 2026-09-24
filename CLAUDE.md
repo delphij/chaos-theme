@@ -50,18 +50,22 @@ hugo --gc --minify          # Production build
 
 ### CSS
 **Organization**: cascade layers, declared once at the top of `tokens.css`:
-`chaos.reset` (normalize.css) → `chaos.tokens` → `chaos.base` (bare element
-selectors in main.css) → `chaos.syntax` (Chroma colours) → `chaos.components`
-(everything with a class, state or id, then print). A later layer wins
+`chaos.reset` (normalize.css) → `chaos.tokens` → `chaos.base` (element
+defaults in main.css) → `chaos.syntax` (Chroma colours) → `chaos.components`
+(everything with a class or id, then print). A later layer wins
 regardless of specificity, and unlayered CSS beats them all.
 
 **Nesting**: nest a component's states, children and breakpoints inside it.
 Only nest under a single selector or a list of equal specificity -- `&` takes
 the list's highest specificity, like `:is()` -- and put declarations before
-nested rules. Element selectors (with structural pseudo-classes such as
-`:nth-of-type` and pseudo-elements) go in `chaos.base`; anything naming a
-class, attribute, id or user state (`:hover`, `:focus`) in `chaos.components`. Breakpoints are listed at
-the top of main.css.
+nested rules. Element defaults go in `chaos.base` -- element selectors and
+their states (`a:hover`, `:focus-visible`), the focus ring, the `[id]` anchor
+offset -- and anything naming a class or id in `chaos.components`, so a
+component never has to restate a default's `:hover` to override it.
+Before adding a rule, look for the concept it belongs to: shared shapes
+(side panels, panel labels, navigation items, term chips, result pills) are
+one grouped rule, with only the differences left per component.
+Breakpoints are listed at the top of main.css.
 
 **Performance Rules**:
 - Specific transitions (NOT `transition: all`)
