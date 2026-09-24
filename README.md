@@ -4,7 +4,7 @@ A minimalist Hugo theme designed for clarity, performance, and excellent Chinese
 
 | Light | Dark |
 | --- | --- |
-| ![Chaos theme homepage in light mode](images/screenshot.png) | ![Chaos theme article page in dark mode, with KaTeX math and table of contents](images/screenshot-dark.png) |
+| ![Chaos theme homepage in light mode](https://raw.githubusercontent.com/delphij/chaos-theme/main/images/screenshot.png) | ![Chaos theme article page in dark mode, with KaTeX math and table of contents](https://raw.githubusercontent.com/delphij/chaos-theme/main/images/screenshot-dark.png) |
 
 Screenshots are taken from the bundled [example site](#example-site).
 
@@ -30,25 +30,45 @@ Screenshots are taken from the bundled [example site](#example-site).
 
 ## Installation
 
+### As a Hugo Module
+
+```bash
+cd your-hugo-site
+hugo mod init github.com/you/your-site   # once, if the site is not a module yet
+```
+
+```toml
+# hugo.toml
+[module]
+  [[module.imports]]
+    path = 'github.com/delphij/chaos-theme'
+```
+
+`hugo mod get -u github.com/delphij/chaos-theme` updates to the latest release.
+A Go toolchain must be installed for Hugo Modules to work.
+
 ### As a Git Submodule
 
 ```bash
 cd your-hugo-site
-git submodule add https://github.com/yourusername/chaos.git themes/chaos
+git submodule add https://github.com/delphij/chaos-theme.git themes/chaos
+```
+
+```toml
+# hugo.toml
+theme = 'chaos'
 ```
 
 ### Manual Installation
 
-1. Download the latest release
-2. Extract to `themes/chaos` in your Hugo site directory
+1. Download `chaos-theme-<version>.tar.xz` from the
+   [latest release](https://github.com/delphij/chaos-theme/releases)
+2. Extract it in your site's `themes/` directory; it unpacks to `chaos/`:
+   `tar -xJf chaos-theme-<version>.tar.xz -C themes`
+3. Set `theme = 'chaos'` in your site's `hugo.toml`
 
-### Configuration
-
-Update your site's `config.toml` or `hugo.toml`:
-
-```toml
-theme = "chaos"
-```
+The tool paths in this README (`themes/chaos/tools/...`) assume one of the last
+two. With Hugo Modules, run the tools from a checkout of this repository.
 
 ## Example Site
 
@@ -60,13 +80,14 @@ hugo server --source exampleSite
 
 ## Quick Start
 
-See `hugo.toml` in this theme directory for a complete example configuration. Key settings:
+`exampleSite/hugo.toml` is a complete configuration to start from. The settings
+a site must make itself, because Hugo does not take them from a theme:
 
 ```toml
 baseURL = 'https://example.org/'
 locale = 'zh-cn'
 defaultContentLanguage = 'zh-cn'
-title = 'My New Hugo Site'
+title = 'My Blog'
 
 # Required for CJK content: without it Hugo counts a whole Chinese sentence as
 # one word, so the reading stats are an order of magnitude too low and
@@ -739,7 +760,8 @@ themes/chaos/
 │   └── _3p/                 # Third-party dependencies
 │       └── katex/           # KaTeX for math rendering
 ├── tools/                   # Build steps, content tooling, checks (below)
-└── hugo.toml                # Example configuration
+├── go.mod                   # Hugo Module definition
+└── hugo.toml                # Theme defaults and minimum Hugo version
 ```
 
 `assets/js/` holds one entry point per thing the browser loads: `main.js`,
@@ -853,8 +875,14 @@ Contributions are welcome! Please follow these guidelines:
 
 1. Follow the existing code style (2-space indentation for HTML/TOML)
 2. Test changes with `hugo server`
-3. Ensure production build works: `hugo --gc --minify`
-4. Update documentation for new features
+3. Ensure the example site builds cleanly, and the self-checks pass:
+   ```bash
+   hugo --source exampleSite --destination /tmp/chaos-public \
+     --gc --minify --panicOnWarning --printI18nWarnings
+   python3 tools/check.py --public /tmp/chaos-public
+   ```
+   CI runs the same with the minimum and the latest Hugo release.
+4. Update documentation for new features, and add an entry to `CHANGELOG.md`
 5. Use conventional commit messages (`feat:`, `fix:`, `docs:`, etc.)
 
 ## License
