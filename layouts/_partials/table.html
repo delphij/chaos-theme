@@ -1,0 +1,49 @@
+{{- /*
+Renders a Markdown table, for every output format.
+
+Hugo's built-in table hook pretty-prints its output -- space-indented up to
+0.158, tab-indented later -- and that indentation is baked into .Content, which
+the feeds carry verbatim inside CDATA (see render-blockquote.html). This emits
+the same elements and attributes one per line with no indentation, so the table
+is identical on every supported Hugo version and in every output format.
+
+The newlines are not optional. .WordCount and .ReadingTime count a
+whitespace-separated token that contains CJK rune by rune, so cells run
+together -- "freebsd-boot" glued to a Chinese cell -- count every Latin letter
+as a word; one table put a post's count up by a tenth.
+
+Attribute values come from the author ({.class #id key="value"} after the
+table) and are escaped here; %q would write a quote as \", which HTML does
+not read as an escape.
+
+@context {table} The table render hook context.
+*/ -}}
+
+<table
+{{- range $k, $v := .Attributes -}}
+  {{- if $v }} {{ printf `%s="%s"` $k (htmlEscape $v) | safeHTMLAttr }}{{ end -}}
+{{- end -}}
+>
+{{- with .THead }}
+<thead>
+{{- range . }}
+<tr>
+{{- range . }}
+<th{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</th>
+{{- end }}
+</tr>
+{{- end }}
+</thead>
+{{- end }}
+{{- with .TBody }}
+<tbody>
+{{- range . }}
+<tr>
+{{- range . }}
+<td{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</td>
+{{- end }}
+</tr>
+{{- end }}
+</tbody>
+{{- end }}
+</table>

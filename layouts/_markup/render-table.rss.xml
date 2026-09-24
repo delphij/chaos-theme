@@ -1,0 +1,5 @@
+{{- /* Feed variant of the table render hook. Without it the feed formats
+       fall back to Hugo's built-in hook rather than the theme's HTML one.
+       Both feed formats need their own file: the ATOM format does not
+       inherit the RSS variant. */ -}}
+{{- partial "table.html" . -}}
