@@ -49,7 +49,19 @@ hugo --gc --minify          # Production build
 4. **Comments**: Document complex logic with `{{- /* comment */ }}`
 
 ### CSS
-**Organization**: Variables → Reset → Base → Layout → Components → Utilities → Dark mode → Print
+**Organization**: cascade layers, declared once at the top of `tokens.css`:
+`chaos.reset` (normalize.css) → `chaos.tokens` → `chaos.base` (bare element
+selectors in main.css) → `chaos.syntax` (Chroma colours) → `chaos.components`
+(everything with a class, state or id, then print). A later layer wins
+regardless of specificity, and unlayered CSS beats them all.
+
+**Nesting**: nest a component's states, children and breakpoints inside it.
+Only nest under a single selector or a list of equal specificity -- `&` takes
+the list's highest specificity, like `:is()` -- and put declarations before
+nested rules. Element selectors (with structural pseudo-classes such as
+`:nth-of-type` and pseudo-elements) go in `chaos.base`; anything naming a
+class, attribute, id or user state (`:hover`, `:focus`) in `chaos.components`. Breakpoints are listed at
+the top of main.css.
 
 **Performance Rules**:
 - Specific transitions (NOT `transition: all`)

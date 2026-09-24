@@ -99,6 +99,11 @@ Hardcoded text creates:
 3. **Modern viewport units** (`dvh`): Adjusts for mobile browser UI
 4. **CSS variables**: Single source of truth, reduces duplication
 5. **Shared utilities**: `.overlay-blur` used by menu and TOC
+6. **Cascade layers and nesting**: Theme CSS lives in `chaos.*` layers (order
+   declared in `tokens.css`), so a component never has to outbid an element
+   rule and a site overrides the theme with plain unlayered CSS. Nest states,
+   children and breakpoints inside the component they belong to, but never
+   under a selector list of mixed specificity (`&` takes the highest)
 
 **When to use CSS containment:**
 - ✅ Isolated components (TOC, alerts, cards)

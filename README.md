@@ -448,6 +448,15 @@ your-site/
         └── footer.html           # Override footer
 ```
 
+### Custom CSS
+
+The theme's stylesheets are in cascade layers (`chaos.reset`, `chaos.tokens`,
+`chaos.base`, `chaos.syntax`, `chaos.components`), and unlayered CSS beats any
+layer. A stylesheet your site adds after the theme's (for example from an
+overridden `layouts/_partials/head.html`) therefore wins with a plain selector
+-- no `!important`, no matching the theme's specificity. To change a colour,
+redefine its custom property from `tokens.css` on `:root` (or `html.dark`).
+
 ## Output Formats
 
 The theme provides multiple output formats:

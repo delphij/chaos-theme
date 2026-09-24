@@ -1,106 +1,110 @@
 /* Generated using: hugo gen chromastyles --style=github
    Consolidated duplicate color rules for smaller file size
-   Structural styles (lntable, lntd, lnlinks, line, lnt, ln) in main.css */
+   Structural styles (lntable, lntd, lnlinks, line, lnt, ln) in main.css
+   Layer chaos.syntax: below chaos.components, so a component restyles code
+   without outbidding these selectors. */
 
-/* Background */ .bg { background-color:var(--code-bg); }
-/* PreWrapper */ .chroma { background-color:var(--code-bg);-webkit-text-size-adjust:none; }
-/* Error */ .chroma .err { color:#f6f8fa;background-color:#82071e }
-/* LineHighlight */ .chroma .hl { background-color:#dedede }
-/* LineNumbersTable */ .chroma .lnt { color:#6B6B6B }
-/* LineNumbers */ .chroma .ln { color:#6B6B6B }
+@layer chaos.syntax {
+  /* Background */ .bg { background-color:var(--code-bg); }
+  /* PreWrapper */ .chroma { background-color:var(--code-bg);-webkit-text-size-adjust:none; }
+  /* Error */ .chroma .err { color:#f6f8fa;background-color:#82071e }
+  /* LineHighlight */ .chroma .hl { background-color:#dedede }
+  /* LineNumbersTable */ .chroma .lnt { color:#6B6B6B }
+  /* LineNumbers */ .chroma .ln { color:#6B6B6B }
 
-/* Keywords - GitHub red */
-.chroma .k,   /* Keyword */
-.chroma .kc,  /* KeywordConstant */
-.chroma .kd,  /* KeywordDeclaration */
-.chroma .kn,  /* KeywordNamespace */
-.chroma .kp,  /* KeywordPseudo */
-.chroma .kr,  /* KeywordReserved */
-.chroma .kt   /* KeywordType */
-{ color:#cf222e }
+  /* Keywords - GitHub red */
+  .chroma .k,   /* Keyword */
+  .chroma .kc,  /* KeywordConstant */
+  .chroma .kd,  /* KeywordDeclaration */
+  .chroma .kn,  /* KeywordNamespace */
+  .chroma .kp,  /* KeywordPseudo */
+  .chroma .kr,  /* KeywordReserved */
+  .chroma .kt   /* KeywordType */
+  { color:#cf222e }
 
-/* Comments - GitHub gray */
-.chroma .c,   /* Comment */
-.chroma .ch,  /* CommentHashbang */
-.chroma .cm,  /* CommentMultiline */
-.chroma .c1,  /* CommentSingle */
-.chroma .cs,  /* CommentSpecial */
-.chroma .cp,  /* CommentPreproc */
-.chroma .cpf  /* CommentPreprocFile */
-{ color:#57606a }
+  /* Comments - GitHub gray */
+  .chroma .c,   /* Comment */
+  .chroma .ch,  /* CommentHashbang */
+  .chroma .cm,  /* CommentMultiline */
+  .chroma .c1,  /* CommentSingle */
+  .chroma .cs,  /* CommentSpecial */
+  .chroma .cp,  /* CommentPreproc */
+  .chroma .cpf  /* CommentPreprocFile */
+  { color:#57606a }
 
-/* Strings - GitHub dark blue */
-.chroma .s,   /* LiteralString */
-.chroma .s1,  /* LiteralStringSingle */
-.chroma .s2,  /* LiteralStringDouble */
-.chroma .sa,  /* LiteralStringAffix */
-.chroma .sb,  /* LiteralStringBacktick */
-.chroma .sc,  /* LiteralStringChar */
-.chroma .dl,  /* LiteralStringDelimiter */
-.chroma .sd,  /* LiteralStringDoc */
-.chroma .se,  /* LiteralStringEscape */
-.chroma .sh,  /* LiteralStringHeredoc */
-.chroma .si,  /* LiteralStringInterpol */
-.chroma .sr,  /* LiteralStringRegex */
-.chroma .sx   /* LiteralStringOther */
-{ color:#0a3069 }
+  /* Strings - GitHub dark blue */
+  .chroma .s,   /* LiteralString */
+  .chroma .s1,  /* LiteralStringSingle */
+  .chroma .s2,  /* LiteralStringDouble */
+  .chroma .sa,  /* LiteralStringAffix */
+  .chroma .sb,  /* LiteralStringBacktick */
+  .chroma .sc,  /* LiteralStringChar */
+  .chroma .dl,  /* LiteralStringDelimiter */
+  .chroma .sd,  /* LiteralStringDoc */
+  .chroma .se,  /* LiteralStringEscape */
+  .chroma .sh,  /* LiteralStringHeredoc */
+  .chroma .si,  /* LiteralStringInterpol */
+  .chroma .sr,  /* LiteralStringRegex */
+  .chroma .sx   /* LiteralStringOther */
+  { color:#0a3069 }
 
-/* String.Symbol - darker blue */
-.chroma .ss { color:#032f62 }
+  /* String.Symbol - darker blue */
+  .chroma .ss { color:#032f62 }
 
-/* Operators, Numbers, Constants - GitHub blue */
-.chroma .o,   /* Operator */
-.chroma .ow,  /* OperatorWord */
-.chroma .or,  /* OperatorReserved */
-.chroma .m,   /* LiteralNumber */
-.chroma .mb,  /* LiteralNumberBin */
-.chroma .mf,  /* LiteralNumberFloat */
-.chroma .mh,  /* LiteralNumberHex */
-.chroma .mi,  /* LiteralNumberInteger */
-.chroma .il,  /* LiteralNumberIntegerLong */
-.chroma .mo,  /* LiteralNumberOct */
-.chroma .no,  /* NameConstant */
-.chroma .nd,  /* NameDecorator */
-.chroma .nt   /* NameTag */
-{ color:#0550ae }
+  /* Operators, Numbers, Constants - GitHub blue */
+  .chroma .o,   /* Operator */
+  .chroma .ow,  /* OperatorWord */
+  .chroma .or,  /* OperatorReserved */
+  .chroma .m,   /* LiteralNumber */
+  .chroma .mb,  /* LiteralNumberBin */
+  .chroma .mf,  /* LiteralNumberFloat */
+  .chroma .mh,  /* LiteralNumberHex */
+  .chroma .mi,  /* LiteralNumberInteger */
+  .chroma .il,  /* LiteralNumberIntegerLong */
+  .chroma .mo,  /* LiteralNumberOct */
+  .chroma .no,  /* NameConstant */
+  .chroma .nd,  /* NameDecorator */
+  .chroma .nt   /* NameTag */
+  { color:#0550ae }
 
-/* Names and Punctuation - GitHub black */
-.chroma .na,  /* NameAttribute */
-.chroma .nc,  /* NameClass */
-.chroma .nx,  /* NameOther */
-.chroma .p,   /* Punctuation */
-.chroma .ge,  /* GenericEmph */
-.chroma .go   /* GenericOutput */
-{ color:#1f2328 }
+  /* Names and Punctuation - GitHub black */
+  .chroma .na,  /* NameAttribute */
+  .chroma .nc,  /* NameClass */
+  .chroma .nx,  /* NameOther */
+  .chroma .p,   /* Punctuation */
+  .chroma .ge,  /* GenericEmph */
+  .chroma .go   /* GenericOutput */
+  { color:#1f2328 }
 
-/* NameNamespace - slightly lighter black */
-.chroma .nn { color:#24292e }
+  /* NameNamespace - slightly lighter black */
+  .chroma .nn { color:#24292e }
 
-/* Functions and Builtins - GitHub purple */
-.chroma .nf,  /* NameFunction */
-.chroma .fm,  /* NameFunctionMagic */
-.chroma .nb,  /* NameBuiltin */
-.chroma .ni   /* NameEntity */
-{ color:#6639ba }
+  /* Functions and Builtins - GitHub purple */
+  .chroma .nf,  /* NameFunction */
+  .chroma .fm,  /* NameFunctionMagic */
+  .chroma .nb,  /* NameBuiltin */
+  .chroma .ni   /* NameEntity */
+  { color:#6639ba }
 
-/* NameLabel - dark red, bold */
-.chroma .nl { color:#900;font-weight:bold }
+  /* NameLabel - dark red, bold */
+  .chroma .nl { color:#900;font-weight:bold }
 
-/* Variables - GitHub brown */
-.chroma .nv,  /* NameVariable */
-.chroma .vc,  /* NameVariableClass */
-.chroma .vg,  /* NameVariableGlobal */
-.chroma .vi,  /* NameVariableInstance */
-.chroma .vm   /* NameVariableMagic */
-{ color:#953800 }
+  /* Variables - GitHub brown */
+  .chroma .nv,  /* NameVariable */
+  .chroma .vc,  /* NameVariableClass */
+  .chroma .vg,  /* NameVariableGlobal */
+  .chroma .vi,  /* NameVariableInstance */
+  .chroma .vm   /* NameVariableMagic */
+  { color:#953800 }
 
-/* NameBuiltinPseudo - WCAG AA fix */
-.chroma .bp { color:#666666 } /* was #6a737d (4.42:1), now 5.27:1 */
+  /* NameBuiltinPseudo - WCAG AA fix */
+  .chroma .bp { color:#666666 } /* was #6a737d (4.42:1), now 5.27:1 */
 
-/* Diff colors */
-.chroma .gd { color:#82071e;background-color:#ffebe9 } /* GenericDeleted */
-.chroma .gi { color:#116329;background-color:#dafbe1 } /* GenericInserted */
-.chroma .gl { text-decoration:underline } /* GenericUnderline */
+  /* Diff colors */
+  .chroma .gd { color:#82071e;background-color:#ffebe9 } /* GenericDeleted */
+  .chroma .gi { color:#116329;background-color:#dafbe1 } /* GenericInserted */
+  .chroma .gl { text-decoration:underline } /* GenericUnderline */
 
-/* TextWhitespace */
-.chroma .w { color:#fff }
+  /* TextWhitespace */
+  .chroma .w { color:#fff }
+}

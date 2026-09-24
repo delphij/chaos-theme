@@ -2,145 +2,149 @@
    Consolidated duplicate color rules for smaller file size
    Scoped to html.dark for dark mode only
    Applies to screen only - print always uses light theme from syntax.css
-   Structural styles (lntable, lntd, lnlinks, line, lnt, ln) in main.css */
+   Structural styles (lntable, lntd, lnlinks, line, lnt, ln) in main.css
+   Layer chaos.syntax: below chaos.components, so a component restyles code
+   without outbidding these selectors. */
 
-@media screen {
-  /* Background */ html.dark .bg { color:var(--text);background-color:var(--code-bg); }
-  /* PreWrapper */ html.dark .chroma { color:var(--text);background-color:var(--code-bg);-webkit-text-size-adjust:none; }
-  /* Error */ html.dark .chroma .err { color:#f85149 }
-  /* LineHighlight */ html.dark .chroma .hl { background-color:#6e7681 }
-  /* LineNumbersTable */ html.dark .chroma .lnt { color:#8E8E8E }
-  /* LineNumbers */ html.dark .chroma .ln { color:#8E8E8E }
+@layer chaos.syntax {
+  @media screen {
+    /* Background */ html.dark .bg { color:var(--text);background-color:var(--code-bg); }
+    /* PreWrapper */ html.dark .chroma { color:var(--text);background-color:var(--code-bg);-webkit-text-size-adjust:none; }
+    /* Error */ html.dark .chroma .err { color:#f85149 }
+    /* LineHighlight */ html.dark .chroma .hl { background-color:#6e7681 }
+    /* LineNumbersTable */ html.dark .chroma .lnt { color:#8E8E8E }
+    /* LineNumbers */ html.dark .chroma .ln { color:#8E8E8E }
 
-  /* Keywords - red */
-  html.dark .chroma .k,   /* Keyword */
-  html.dark .chroma .kd,  /* KeywordDeclaration */
-  html.dark .chroma .kn,  /* KeywordNamespace */
-  html.dark .chroma .kr,  /* KeywordReserved */
-  html.dark .chroma .kt,  /* KeywordType */
-  html.dark .chroma .nn,  /* NameNamespace */
-  html.dark .chroma .gt   /* GenericTraceback */
-  { color:#ff7b72 }
+    /* Keywords - red */
+    html.dark .chroma .k,   /* Keyword */
+    html.dark .chroma .kd,  /* KeywordDeclaration */
+    html.dark .chroma .kn,  /* KeywordNamespace */
+    html.dark .chroma .kr,  /* KeywordReserved */
+    html.dark .chroma .kt,  /* KeywordType */
+    html.dark .chroma .nn,  /* NameNamespace */
+    html.dark .chroma .gt   /* GenericTraceback */
+    { color:#ff7b72 }
 
-  /* Keywords - cyan */
-  html.dark .chroma .kc,  /* KeywordConstant */
-  html.dark .chroma .kp   /* KeywordPseudo */
-  { color:#79c0ff }
+    /* Keywords - cyan */
+    html.dark .chroma .kc,  /* KeywordConstant */
+    html.dark .chroma .kp   /* KeywordPseudo */
+    { color:#79c0ff }
 
-  /* Variables and Properties - cyan */
-  html.dark .chroma .nv,  /* NameVariable */
-  html.dark .chroma .vc,  /* NameVariableClass */
-  html.dark .chroma .vg,  /* NameVariableGlobal */
-  html.dark .chroma .vi,  /* NameVariableInstance */
-  html.dark .chroma .vm,  /* NameVariableMagic */
-  html.dark .chroma .py   /* NameProperty */
-  { color:#79c0ff }
+    /* Variables and Properties - cyan */
+    html.dark .chroma .nv,  /* NameVariable */
+    html.dark .chroma .vc,  /* NameVariableClass */
+    html.dark .chroma .vg,  /* NameVariableGlobal */
+    html.dark .chroma .vi,  /* NameVariableInstance */
+    html.dark .chroma .vm,  /* NameVariableMagic */
+    html.dark .chroma .py   /* NameProperty */
+    { color:#79c0ff }
 
-  /* Constants and Labels - cyan bold */
-  html.dark .chroma .no,  /* NameConstant */
-  html.dark .chroma .nl,  /* NameLabel */
-  html.dark .chroma .gh   /* GenericHeading */
-  { color:#79c0ff;font-weight:bold }
+    /* Constants and Labels - cyan bold */
+    html.dark .chroma .no,  /* NameConstant */
+    html.dark .chroma .nl,  /* NameLabel */
+    html.dark .chroma .gh   /* GenericHeading */
+    { color:#79c0ff;font-weight:bold }
 
-  /* GenericSubheading - cyan, no bold (upstream change) */
-  html.dark .chroma .gu { color:#79c0ff }
+    /* GenericSubheading - cyan, no bold (upstream change) */
+    html.dark .chroma .gu { color:#79c0ff }
 
-  /* Functions and Decorators - purple bold */
-  html.dark .chroma .nf,  /* NameFunction */
-  html.dark .chroma .fm,  /* NameFunctionMagic */
-  html.dark .chroma .nd   /* NameDecorator */
-  { color:#d2a8ff;font-weight:bold }
+    /* Functions and Decorators - purple bold */
+    html.dark .chroma .nf,  /* NameFunction */
+    html.dark .chroma .fm,  /* NameFunctionMagic */
+    html.dark .chroma .nd   /* NameDecorator */
+    { color:#d2a8ff;font-weight:bold }
 
-  /* Classes and Exceptions - orange bold */
-  html.dark .chroma .nc,  /* NameClass */
-  html.dark .chroma .ne   /* NameException */
-  { color:#f0883e;font-weight:bold }
+    /* Classes and Exceptions - orange bold */
+    html.dark .chroma .nc,  /* NameClass */
+    html.dark .chroma .ne   /* NameException */
+    { color:#f0883e;font-weight:bold }
 
-  /* NameEntity - unique orange */
-  html.dark .chroma .ni { color:#ffa657 }
+    /* NameEntity - unique orange */
+    html.dark .chroma .ni { color:#ffa657 }
 
-  /* NameTag - green */
-  html.dark .chroma .nt { color:#7ee787 }
+    /* NameTag - green */
+    html.dark .chroma .nt { color:#7ee787 }
 
-  /* String literals - light blue */
-  html.dark .chroma .l,   /* Literal */
-  html.dark .chroma .s,   /* LiteralString */
-  html.dark .chroma .sb,  /* LiteralStringBacktick */
-  html.dark .chroma .sc,  /* LiteralStringChar */
-  html.dark .chroma .sd,  /* LiteralStringDoc */
-  html.dark .chroma .s2,  /* LiteralStringDouble */
-  html.dark .chroma .si,  /* LiteralStringInterpol */
-  html.dark .chroma .sx,  /* LiteralStringOther */
-  html.dark .chroma .s1,  /* LiteralStringSingle */
-  html.dark .chroma .ss   /* LiteralStringSymbol */
-  { color:#a5d6ff }
+    /* String literals - light blue */
+    html.dark .chroma .l,   /* Literal */
+    html.dark .chroma .s,   /* LiteralString */
+    html.dark .chroma .sb,  /* LiteralStringBacktick */
+    html.dark .chroma .sc,  /* LiteralStringChar */
+    html.dark .chroma .sd,  /* LiteralStringDoc */
+    html.dark .chroma .s2,  /* LiteralStringDouble */
+    html.dark .chroma .si,  /* LiteralStringInterpol */
+    html.dark .chroma .sx,  /* LiteralStringOther */
+    html.dark .chroma .s1,  /* LiteralStringSingle */
+    html.dark .chroma .ss   /* LiteralStringSymbol */
+    { color:#a5d6ff }
 
-  /* String escapes and special - cyan */
-  html.dark .chroma .sa,  /* LiteralStringAffix */
-  html.dark .chroma .dl,  /* LiteralStringDelimiter */
-  html.dark .chroma .se,  /* LiteralStringEscape */
-  html.dark .chroma .sh,  /* LiteralStringHeredoc */
-  html.dark .chroma .sr,  /* LiteralStringRegex */
-  html.dark .chroma .ld   /* LiteralDate */
-  { color:#79c0ff }
+    /* String escapes and special - cyan */
+    html.dark .chroma .sa,  /* LiteralStringAffix */
+    html.dark .chroma .dl,  /* LiteralStringDelimiter */
+    html.dark .chroma .se,  /* LiteralStringEscape */
+    html.dark .chroma .sh,  /* LiteralStringHeredoc */
+    html.dark .chroma .sr,  /* LiteralStringRegex */
+    html.dark .chroma .ld   /* LiteralDate */
+    { color:#79c0ff }
 
-  /* Numbers - light blue */
-  html.dark .chroma .m,   /* LiteralNumber */
-  html.dark .chroma .mb,  /* LiteralNumberBin */
-  html.dark .chroma .mf,  /* LiteralNumberFloat */
-  html.dark .chroma .mh,  /* LiteralNumberHex */
-  html.dark .chroma .mi,  /* LiteralNumberInteger */
-  html.dark .chroma .il,  /* LiteralNumberIntegerLong */
-  html.dark .chroma .mo   /* LiteralNumberOct */
-  { color:#a5d6ff }
+    /* Numbers - light blue */
+    html.dark .chroma .m,   /* LiteralNumber */
+    html.dark .chroma .mb,  /* LiteralNumberBin */
+    html.dark .chroma .mf,  /* LiteralNumberFloat */
+    html.dark .chroma .mh,  /* LiteralNumberHex */
+    html.dark .chroma .mi,  /* LiteralNumberInteger */
+    html.dark .chroma .il,  /* LiteralNumberIntegerLong */
+    html.dark .chroma .mo   /* LiteralNumberOct */
+    { color:#a5d6ff }
 
-  /* Operators - red bold */
-  html.dark .chroma .o,   /* Operator */
-  html.dark .chroma .ow,  /* OperatorWord */
-  html.dark .chroma .or   /* OperatorReserved */
-  { color:#ff7b72;font-weight:bold }
+    /* Operators - red bold */
+    html.dark .chroma .o,   /* Operator */
+    html.dark .chroma .ow,  /* OperatorWord */
+    html.dark .chroma .or   /* OperatorReserved */
+    { color:#ff7b72;font-weight:bold }
 
-  /* Comments - gray italic */
-  html.dark .chroma .c,   /* Comment */
-  html.dark .chroma .ch,  /* CommentHashbang */
-  html.dark .chroma .cm,  /* CommentMultiline */
-  html.dark .chroma .c1   /* CommentSingle */
-  { color:#8b949e;font-style:italic }
+    /* Comments - gray italic */
+    html.dark .chroma .c,   /* Comment */
+    html.dark .chroma .ch,  /* CommentHashbang */
+    html.dark .chroma .cm,  /* CommentMultiline */
+    html.dark .chroma .c1   /* CommentSingle */
+    { color:#8b949e;font-style:italic }
 
-  /* Comments special - gray bold italic */
-  html.dark .chroma .cs,  /* CommentSpecial */
-  html.dark .chroma .cp,  /* CommentPreproc */
-  html.dark .chroma .cpf  /* CommentPreprocFile */
-  { color:#8b949e;font-weight:bold;font-style:italic }
+    /* Comments special - gray bold italic */
+    html.dark .chroma .cs,  /* CommentSpecial */
+    html.dark .chroma .cp,  /* CommentPreproc */
+    html.dark .chroma .cpf  /* CommentPreprocFile */
+    { color:#8b949e;font-weight:bold;font-style:italic }
 
-  /* Output and Prompt - gray */
-  html.dark .chroma .go,  /* GenericOutput */
-  html.dark .chroma .gp   /* GenericPrompt */
-  { color:#8b949e }
+    /* Output and Prompt - gray */
+    html.dark .chroma .go,  /* GenericOutput */
+    html.dark .chroma .gp   /* GenericPrompt */
+    { color:#8b949e }
 
-  /* Error text - pink */
-  html.dark .chroma .gr { color:#ffa198 }
+    /* Error text - pink */
+    html.dark .chroma .gr { color:#ffa198 }
 
-  /* Diff colors */
-  html.dark .chroma .gd { color:#ffa198;background-color:#490202 } /* GenericDeleted */
-  html.dark .chroma .gi { color:#56d364;background-color:#0f5323 } /* GenericInserted */
+    /* Diff colors */
+    html.dark .chroma .gd { color:#ffa198;background-color:#490202 } /* GenericDeleted */
+    html.dark .chroma .gi { color:#56d364;background-color:#0f5323 } /* GenericInserted */
 
-  /* Text styles */
-  html.dark .chroma .ge { font-style:italic } /* GenericEmph */
-  html.dark .chroma .gs { font-weight:bold } /* GenericStrong */
-  html.dark .chroma .gl { text-decoration:underline } /* GenericUnderline */
+    /* Text styles */
+    html.dark .chroma .ge { font-style:italic } /* GenericEmph */
+    html.dark .chroma .gs { font-weight:bold } /* GenericStrong */
+    html.dark .chroma .gl { text-decoration:underline } /* GenericUnderline */
 
-  /* Names and Punctuation - must override light theme's near-black (#1f2328) */
-  html.dark .chroma .p,   /* Punctuation */
-  html.dark .chroma .na,  /* NameAttribute */
-  html.dark .chroma .nx   /* NameOther */
-  { color:var(--text) }
+    /* Names and Punctuation - must override light theme's near-black (#1f2328) */
+    html.dark .chroma .p,   /* Punctuation */
+    html.dark .chroma .na,  /* NameAttribute */
+    html.dark .chroma .nx   /* NameOther */
+    { color:var(--text) }
 
-  /* NameBuiltin - light theme sets purple, dark should use cyan */
-  html.dark .chroma .nb,  /* NameBuiltin */
-  html.dark .chroma .bp   /* NameBuiltinPseudo */
-  { color:#79c0ff }
+    /* NameBuiltin - light theme sets purple, dark should use cyan */
+    html.dark .chroma .nb,  /* NameBuiltin */
+    html.dark .chroma .bp   /* NameBuiltinPseudo */
+    { color:#79c0ff }
 
-  /* TextWhitespace */
-  html.dark .chroma .w { color:#6e7681 }
+    /* TextWhitespace */
+    html.dark .chroma .w { color:#6e7681 }
+  }
 }
