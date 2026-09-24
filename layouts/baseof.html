@@ -15,8 +15,12 @@
 <body data-copy-label="{{ T "copyCode" }}" data-copied-label="{{ T "copiedCode" }}" data-copy-failed-label="{{ T "copyFailed" }}">
   <a href="#main-content" class="skip-link">{{ T "skipToContent" }}</a>
   <div id="theme-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  {{- /* Not partialCached: the menu inside marks the current entry with
+         class="active" and aria-current, which differs on every page. Caching
+         it per language would bake whichever page Hugo rendered first into all
+         of them. */ -}}
   <header class="site-nav">
-    {{ partialCached "header.html" . site.Language.Lang }}
+    {{ partial "header.html" . }}
   </header>
   <main id="main-content" class="container {{ if .IsPage }}has-toc{{ else }}has-sidebar{{ end }}" tabindex="-1">
     {{- if .IsPage }}

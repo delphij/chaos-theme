@@ -131,6 +131,87 @@ def check_no_authored_inline_js(theme):
                                   f'put it in assets/js/ and load it through foot/script.html')
 
 
+def check_nav_active(public):
+    """The menu's active entry is the page's own.
+
+    `aria-current="page"` is a per-page statement, so any template that renders
+    the header once and reuses it -- partialCached keyed on anything but the
+    page -- ships one page's highlight to every other page, silently and
+    nondeterministically, because Hugo renders pages in parallel. Nothing in a
+    build objects: the markup is valid, just wrong, and wrong in a way that
+    reaches screen readers.
+
+    The converse is checked too, because it is the same statement read the
+    other way and it is what an unresolvable menu says: entries configured
+    with `url` rather than `pageRef` carry no page for Hugo to compare, so
+    `IsMenuCurrent` is false everywhere and no page ever marks its own entry.
+    """
+    attrs_re = re.compile(r'''([\w:-]+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))''')
+    nav_re = re.compile(r'<nav[^>]*main-links[^>]*>(.*?)</nav>', re.S)
+    canonical_re = re.compile(r'<link[^>]*rel=["\']?canonical["\']?[^>]*>', re.I)
+    pager_re = re.compile(r'(?:^|/)page/\d+/$')
+
+    def attrs(tag):
+        return {m.group(1).lower(): (m.group(2) or m.group(3) or m.group(4) or '')
+                for m in attrs_re.finditer(tag)}
+
+    def split_url(url):
+        """Host (empty when relative) and path, the path ending in a slash and
+        a pager folded onto the page it pages."""
+        host = ''
+        m = re.match(r'[a-z]+://([^/]*)', url, flags=re.I)
+        if m:
+            host, url = m.group(1), url[m.end():]
+        path = (url.split('?')[0].split('#')[0]) or '/'
+        if not path.endswith('/'):
+            path += '/'
+        return host, pager_re.sub('/', path)
+
+    checked = 0
+    wrong, unmarked = [], []
+    for f in sorted(public.rglob('*.html')):
+        text = f.read_text(encoding='utf-8', errors='replace')
+        nav = nav_re.search(text)
+        if not nav:
+            continue
+        entries = [attrs(a) for a in re.findall(r'<a\s[^>]*>', nav.group(1))]
+        entries = [a for a in entries if a.get('href')]
+        if not entries:
+            continue
+        # The canonical link is what the page says its own URL is, and that is
+        # what a menu entry has to agree with. A page without one -- 404.html
+        # -- has no URL to compare against and is left alone.
+        m = canonical_re.search(text)
+        if not m:
+            continue
+        host, own = split_url(attrs(m.group(0)).get('href', ''))
+        where = f.relative_to(public)
+        # An off-site entry -- the feed link, someone else's page -- is nobody's
+        # current page however its path reads.
+        here = [split_url(a['href']) for a in entries]
+        here = [path for h, path in here if h in ('', host)]
+        marked = [split_url(a['href'])[1] for a in entries
+                  if a.get('aria-current') == 'page']
+        mine = [path for path in here if path == own]
+        checked += 1
+        if len(marked) > 1:
+            wrong.append(f'{where} marks {len(marked)} entries')
+        wrong += [f'{where} marks {href}, not {own}' for href in marked if href != own]
+        if mine and not marked:
+            unmarked.append(f'{where} ({mine[0]})')
+    # One failure per kind: a header rendered once gets every page wrong, and a
+    # menu Hugo cannot resolve misses every page it names. Either way the list
+    # is as long as the site, and the first few say all of it.
+    if wrong:
+        fail('nav-active', f'{len(wrong)} page(s) mark a menu entry that is not their own '
+                           f'-- is the header partialCached? {"; ".join(wrong[:3])}')
+    if unmarked:
+        fail('nav-active', f'{len(unmarked)} page(s) leave their own menu entry unmarked; '
+                           f'entries need pageRef rather than url for Hugo to recognise '
+                           f'them: {"; ".join(unmarked[:3])}')
+    notes.append(f'nav-active: {checked} page(s) with a menu')
+
+
 def check_feed_whitespace(public):
     """No template indentation inside the feeds.
 
@@ -168,9 +249,12 @@ def main():
     check_no_cjk_literals(theme)
     check_no_authored_inline_js(theme)
     if args.public:
-        check_feed_whitespace(args.public.resolve())
+        public = args.public.resolve()
+        check_feed_whitespace(public)
+        check_nav_active(public)
     else:
         notes.append('feed-whitespace: skipped (no --public)')
+        notes.append('nav-active: skipped (no --public)')
 
     for n in notes:
         print(f'  ok    {n}')

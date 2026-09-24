@@ -139,8 +139,9 @@ The two added for this theme's own correctness:
 
 - `tools/check.py --public public` -- i18n key parity, unread translations,
   CJK literals, authored script left inline in a template, template
-  indentation leaking into the feeds. Python 3 only, exit 1 on failure, and
-  it belongs in the build right after `hugo`
+  indentation leaking into the feeds, a menu whose active entry is not the
+  page's own. Python 3 only, exit 1 on failure, and it belongs in the build
+  right after `hugo`
 - `tools/search_harness.mjs` -- runs `assets/js/search.js` against a real
   index in a stubbed DOM; `--compare <file>` checks a change against the
   version it replaces. Derives its queries from the index, so it carries no
@@ -179,7 +180,8 @@ one.
 - Syncs with CSS variables
 
 ### Content
-- Partial caching (header/footer)
+- Partial caching for what does not vary per page (the header is not in it:
+  its menu marks the current entry)
 - Lazy loading images with WebP
 - Conditional KaTeX loading
 - instant.page prefetching
