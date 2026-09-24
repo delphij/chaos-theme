@@ -1,15 +1,10 @@
-baseURL = 'https://example.org/'
-locale = 'zh-cn'
-defaultContentLanguage = 'zh-cn'
-title = 'My New Hugo Site'
+# Theme defaults. Hugo merges only some sections of a theme's configuration
+# into the site -- [params], [menus], [markup], [module], output formats and
+# media types among them -- and ignores the site-level keys (baseURL, title,
+# locale, hasCJKLanguage, outputs). Those belong in the site's own config;
+# exampleSite/hugo.toml is a complete one to start from.
 
-# Required for Chinese, Japanese and Korean content. Hugo otherwise counts
-# words by splitting on whitespace, which makes a whole CJK sentence one word:
-# .WordCount and .ReadingTime come out an order of magnitude too low, and
-# .Summary stops truncating at all, so list pages print entire articles. A
-# theme cannot set this for you -- Hugo does not inherit it from theme config.
-hasCJKLanguage = true
-
+# The default main menu, used when a site defines none of its own.
 [menus]
   [[menus.main]]
     identifier = 'home'
@@ -20,15 +15,6 @@ hasCJKLanguage = true
     identifier = 'tags'
     pageRef = '/tags'
     weight = 20
-
-# Hugo does not inherit [outputs] from a theme, so a site has to name the
-# formats itself. Without this the feeds render, but /feed.xsl, /sitemap.xsl
-# and /atom.xml -- which the theme provides templates for -- are never built.
-[outputs]
-  home = ['HTML', 'ATOM', 'sitemapxsl', 'RSS', 'feedxsl', 'REDIR']
-  section = ['HTML']
-  taxonomy = ['HTML']
-  term = ['HTML']
 
 [markup.highlight]
   noClasses = false
@@ -58,5 +44,5 @@ hasCJKLanguage = true
 [module]
   [module.hugoVersion]
     extended = false
-    # 0.158.0 is where `locale` replaced `languageCode`, which this config uses.
+    # 0.158.0 is where `locale` replaced `languageCode`, which the templates read.
     min = '0.158.0'
