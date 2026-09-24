@@ -13,7 +13,8 @@ Returns the pages a list page should list, already filtered.
 
 {{- $pages := slice -}}
 {{- if .IsHome -}}
-  {{- $pages = partial "_funcs/get-main-pages.html" . -}}
+  {{- /* Cached: the same collection for all ~200 pages of the homepage. */ -}}
+  {{- $pages = partialCached "_funcs/get-main-pages.html" . site.Language.Lang -}}
 {{- else -}}
   {{- if eq .Kind "section" -}}
     {{- $pages = .RegularPagesRecursive -}}

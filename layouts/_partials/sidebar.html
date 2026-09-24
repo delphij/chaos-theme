@@ -12,5 +12,9 @@ Dispatcher partial to select the appropriate contextual sidebar.
 {{- else if or (eq .Section "archives") (eq .Type "archives") -}}
   {{ partial "archives-sidebar.html" . }}
 {{- else -}}
-  {{ partial "home-sidebar.html" . }}
+  {{- /* Cached: the browsing guide is the same on every list page but one,
+         and ranking its terms is the costliest thing a list page does --
+         uncached, it was most of a full build. It varies only with whether
+         this is the /categories/ index, which drops the category widget. */ -}}
+  {{ partialCached "home-sidebar.html" . (and (eq .Kind "taxonomy") (eq .Data.Plural "categories")) site.Language.Lang }}
 {{- end -}}
