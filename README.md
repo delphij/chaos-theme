@@ -656,15 +656,21 @@ The theme is optimized for performance with modern best practices:
 
 ## Browser Support
 
-**Full Features (Glass Effect):**
-- Chrome/Edge 76+
-- Safari 9+ (with -webkit-backdrop-filter)
-- Firefox 103+
+The theme targets [Baseline Widely Available](https://web.dev/baseline): web
+platform features that have worked in every major engine for at least 30
+months. As of 2026 that is roughly **Chrome/Edge 122+, Firefox 124+ and
+Safari/iOS 17.4+**. The floor moves with the calendar, not with a pinned
+browser list.
 
-**Fallback Support:**
-- Firefox <103: Solid background instead of glass effect
-- Older browsers: Progressive enhancement with solid backgrounds
-- All core functionality works in IE11+ (though deprecated)
+- **Widely available features are used without fallbacks** when doing so buys
+  something real (less code, simpler CSS, better behaviour). Browsers below the
+  floor are not broken on purpose, but they are not preserved at a cost either.
+- **Newer features are progressive enhancements only**: the page must work
+  without them (e.g. view transitions, Speculation Rules with the instant.page
+  fallback, `text-wrap`, CJK `text-autospace`).
+- **JavaScript syntax** is lowered by esbuild to `es2024`, set in
+  `layouts/_partials/foot/script.html`. Runtime APIs are not polyfilled and are
+  held to the same Baseline rule.
 
 **Known Limitations:**
 - Chrome/Edge: CJK line-breaking rules not applied to inline math formulas. Chinese punctuation may appear at line start after KaTeX formulas. Works correctly in Safari and Firefox.

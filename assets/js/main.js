@@ -6,7 +6,7 @@
 // exposes a single init; this file is only the wiring, so what the theme
 // runs on a page can be read in one screen.
 //
-// Bundled by js.Build (esbuild, built into Hugo) via _partials/foot/js.html,
+// Bundled by js.Build (esbuild, built into Hugo) via _partials/foot/script.html,
 // which also fixes the syntax floor. No Node toolchain is involved: `hugo`
 // alone builds the theme.
 

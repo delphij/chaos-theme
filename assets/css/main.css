@@ -491,8 +491,9 @@ nav.main-links a:hover {
   backdrop-filter: blur(12px);
 }
 
-/* Fallback for browsers without backdrop-filter - use solid background for readability */
-@supports not (backdrop-filter: blur(12px)) {
+/* Fallback for browsers without backdrop-filter - use solid background for readability.
+   The prefixed form counts: Safari before 18 has only -webkit-backdrop-filter. */
+@supports not ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) {
   .overlay-blur {
     background: var(--bg);
   }

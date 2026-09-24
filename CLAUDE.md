@@ -68,8 +68,9 @@ hugo --gc --minify          # Production build
   every page
 - Bundled by `js.Build` (esbuild, built into Hugo), so no Node toolchain is
   involved: `hugo` alone builds the theme
-- Syntax floor is declared as `es2020` in `_partials/foot/js.html`; write newer
-  syntax freely and esbuild lowers it
+- Syntax floor is declared as `es2024` in `_partials/foot/script.html`; write
+  newer syntax freely and esbuild lowers it. Runtime APIs and CSS are held to
+  Baseline Widely Available (see Browser Support in README.md)
 - Apache 2.0 copyright header required
 - Cache DOM references at initialization
 - Modern DOM methods (`replaceChildren`, `append`)

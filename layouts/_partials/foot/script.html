@@ -10,12 +10,14 @@ so never saw js.Build at all.
 
 target fixes the syntax floor of the output. Without it the emitted syntax is
 whatever the source happens to be, so the baseline would be decided by
-accident. es2020 is where the sources already sit -- optional chaining and
-nullish coalescing are their newest syntax -- so newer syntax can be written
-freely from here on and esbuild lowers it, rather than silently raising what
-browsers the theme requires. It cannot express the real floor, which is set by
-runtime APIs rather than syntax (<dialog>, IntersectionObserver, CSS.escape,
-replaceChildren); those are a feature-detection concern, not a build one.
+accident. The theme targets Baseline Widely Available (see Browser Support in
+README.md); in 2026 that admits all syntax through es2024, the regexp v flag
+being its newest. Newer syntax may still be written: esbuild lowers it, rather
+than silently raising what browsers the theme requires. Not esnext, which would
+let ES2025 syntax (import attributes, regexp modifiers) through to Safari 17.
+It cannot express the real floor, which is set by runtime APIs rather than
+syntax; esbuild polyfills none of those, so they are held to the same Baseline
+rule by review, not by the build.
 
 @param {string} . The asset path, e.g. "js/main.js".
 
@@ -24,7 +26,7 @@ replaceChildren); those are a feature-detection concern, not a build one.
 {{- $opts := dict
   "minify" (not hugo.IsDevelopment)
   "sourceMap" (cond hugo.IsDevelopment "external" "")
-  "target" "es2020"
+  "target" "es2024"
   "targetPath" .
 -}}
 {{- with resources.Get . -}}

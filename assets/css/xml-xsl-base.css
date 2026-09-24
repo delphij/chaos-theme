@@ -146,7 +146,7 @@ img {
   z-index: 40;
 }
 
-@supports not (backdrop-filter: blur(6px)) {
+@supports not ((backdrop-filter: blur(6px)) or (-webkit-backdrop-filter: blur(6px))) {
   .site-header {
     background: var(--bg);
   }

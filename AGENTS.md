@@ -9,7 +9,7 @@ This document provides essential context for AI models and human contributors co
 * **Performance First**: Every byte counts - target <10KB total JavaScript, efficient CSS
 * **Accessibility Always**: WCAG 2.1 AA compliance is non-negotiable
 * **Internationalization by Default**: No hardcoded text; proper CJK typography support
-* **Progressive Enhancement**: Modern browsers first, graceful degradation for older ones
+* **Baseline Widely Available**: Use what every major engine has shipped for 30+ months; anything newer is progressive enhancement
 * **Self-Hosted**: Vendor dependencies for reliability and privacy (no CDNs)
 
 ### Target Audience
@@ -286,14 +286,20 @@ Reject changes that:
 
 ## 11. Browser Support Philosophy
 
-### Modern Browsers First
-Target: Chrome/Edge 112+, Firefox 117+, Safari 16.5+ (2023+)
+### Baseline Widely Available
+Target: [Baseline Widely Available](https://web.dev/baseline), a rolling floor.
+As of 2026: Chrome/Edge 122+, Firefox 124+, Safari/iOS 17.4+.
 
-**Rationale:**
-- Enables modern CSS/JS features
-- Reduces polyfill bloat
-- Most users on modern browsers
-- Legacy browser share <2% globally
+**Rules:**
+- A widely available feature may be used without a fallback when that buys a
+  real gain (less code, simpler CSS). Don't break older browsers gratuitously,
+  but don't keep workarounds for browsers below the floor either
+- A feature newer than the floor is a progressive enhancement: the page must
+  still work without it
+- JS syntax is lowered by esbuild to `es2024` (`_partials/foot/script.html`);
+  runtime APIs are not polyfilled, so check them against Baseline in review
+- Check a feature's status on [web-features](https://web-platform-dx.github.io/web-features-explorer/)
+  or MDN's Baseline badge before relying on it
 
 ### Progressive Enhancement
 - **Backdrop-filter**: Glass effect with solid background fallback
@@ -308,7 +314,7 @@ Target: Chrome/Edge 112+, Firefox 117+, Safari 16.5+ (2023+)
   Latin runs are stripped in `layouts/_partials/_funcs/typeset-content.html` so
   `text-autospace` can insert the proportional space instead. That partial also
   expands ruby annotations, and is shared by the HTML and feed pipelines.
-- JS: ES6+, optional chaining, nullish coalescing, modern array/DOM methods, Intersection Observer
+- JS: ES2024 syntax floor, ES modules, `<dialog>`, modern array/DOM methods, Intersection Observer
 
 ## 12. Quality Assurance Checklist
 
