@@ -16,6 +16,10 @@ on every build -- content/archives/_index.md sets title: "归档", which is a
 title, not a key. That warning is why the build could not be run under
 --panicOnWarning.
 
+The derived names are probed only when the theme ships a translation for them.
+Any other section ("pages", "notes") or taxonomy a site defines has no key, and
+probing it logged the same warning; its derived title is kept as Hugo made it.
+
 @context {page} page The page to resolve the title for.
 
 @returns {string} The localized display title.
@@ -24,7 +28,8 @@ title, not a key. That warning is why the build could not be run under
 */}}
 
 {{- $title := .Title -}}
-{{- if and (in (slice "section" "taxonomy") .Kind) (not .Params.title) -}}
+{{- $translated := slice "posts" "archives" "categories" "tags" "series" -}}
+{{- if and (in (slice "section" "taxonomy") .Kind) (not .Params.title) (in $translated (lower $title)) -}}
   {{- with T (lower $title) -}}
     {{- $title = . -}}
   {{- end -}}
