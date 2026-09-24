@@ -818,7 +818,7 @@ This is the one thing in the theme that needs Node, and the one script in
 
 All dependencies are vendored in `static/_3p/` and `tools/vendor/` to ensure reliability and privacy:
 
-- **KaTeX 0.17.0**: Mathematical typesetting for scientific content
+- **KaTeX 0.18.9**: Mathematical typesetting for scientific content
 - **instant.page 5.2.0**: Link prefetching for near-instant page transitions
 - **Mermaid 11.4.1**: Diagram and flowchart generation from text
 - **Noto Sans Mono 2.014**: Monospace font subset for code blocks and dates
