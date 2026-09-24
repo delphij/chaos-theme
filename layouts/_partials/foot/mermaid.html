@@ -1,6 +1,6 @@
 {{- if partial "_funcs/has-feature.html" (dict "page" . "markup" `<pre class="mermaid"`) -}}
 {{- /* The library, then the theme's glue. Both deferred, so they run in this
        order and the glue needs no DOMContentLoaded wrapper of its own. */ -}}
-<script src="{{ "/_3p/mermaid/11.4.1/mermaid.min.js" | relURL }}" defer></script>
+<script src="{{ "/_3p/mermaid/11.17.2/mermaid.min.js" | relURL }}" defer></script>
 {{ partial "foot/script.html" "js/mermaid.js" }}
 {{- end -}}
