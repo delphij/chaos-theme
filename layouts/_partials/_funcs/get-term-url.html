@@ -1,0 +1,22 @@
+{{- /*
+Returns the URL of a taxonomy term's page.
+
+The term's own page when it exists, so the link carries the trailing slash:
+hand-built URLs omitted it, so every taxonomy link in a post footer - 13,885
+of them - cost the reader a 301 redirect, and instant.page was prefetching
+the redirect rather than the page. The built URL is only the fallback for a
+term Hugo has no page for.
+
+@param {string} taxonomy The taxonomy, e.g. "categories" or "tags".
+@param {string} name     The term as written in front matter.
+
+@returns {string} The term page's relative URL.
+
+@example: {{ partial "_funcs/get-term-url.html" (dict "taxonomy" "tags" "name" "FreeBSD") }}
+*/ -}}
+{{- $path := printf "/%s/%s" .taxonomy (.name | urlize) -}}
+{{- $url := printf "%s/" $path | relLangURL -}}
+{{- with site.GetPage $path -}}
+  {{- $url = .RelPermalink -}}
+{{- end -}}
+{{- return $url -}}

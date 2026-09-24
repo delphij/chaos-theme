@@ -15,14 +15,9 @@ Returns the pages a list page should list, already filtered.
 {{- if .IsHome -}}
   {{- /* Cached: the same collection for all ~200 pages of the homepage. */ -}}
   {{- $pages = partialCached "_funcs/get-main-pages.html" . site.Language.Lang -}}
+{{- else if eq .Kind "section" -}}
+  {{- $pages = partial "_funcs/filter-listed-pages.html" .RegularPagesRecursive -}}
 {{- else -}}
-  {{- if eq .Kind "section" -}}
-    {{- $pages = .RegularPagesRecursive -}}
-  {{- else -}}
-    {{- $pages = .Pages -}}
-  {{- end -}}
-  {{- $excludedTypes := site.Params.excludedTypes | default (slice "page") -}}
-  {{- $pages = where $pages "Type" "not in" $excludedTypes -}}
-  {{- $pages = where $pages "Params.hidden" "ne" true -}}
+  {{- $pages = partial "_funcs/filter-listed-pages.html" .Pages -}}
 {{- end -}}
 {{- return $pages -}}

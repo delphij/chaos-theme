@@ -1,56 +1,27 @@
 {{- /*
-Renders taxonomy links (categories and tags) for a post.
+Renders a post's links for one taxonomy: its categories, comma-separated, or
+its tags, each prefixed with '#'. A tag that repeats one of the post's
+categories is left out.
 
-Displays clickable category and tag links with appropriate separators.
-Categories appear first, followed by tags prefixed with '#'.
-Duplicate tags that match category names are automatically filtered out.
-Supports optional tag limit for summary cards.
+@param {page}   page     The post.
+@param {string} taxonomy "categories" or "tags".
 
-@context {page|map} page The page context or dict with "page" and optional "limit".
-
-@example: {{ partial "taxonomy-links.html" . }}
-The hrefs come from each term's own page rather than being assembled from the
-term name: hand-built URLs omitted the trailing slash, so every taxonomy link
-in a post footer - 13,885 of them - cost the reader a 301 redirect, and
-instant.page was prefetching the redirect rather than the page.
-
-@example: {{ partial "taxonomy-links.html" (dict "page" . "limit" 3) }}
-*/}}
-
-{{- $page := . -}}
-{{- $limit := 0 -}}
-{{- $categoriesOnly := false -}}
-{{- $tagsOnly := false -}}
-{{- if reflect.IsMap . -}}
-  {{- $page = .page -}}
-  {{- $limit = .limit | default 0 -}}
-  {{- $categoriesOnly = .categoriesOnly | default false -}}
-  {{- $tagsOnly = .tagsOnly | default false -}}
-{{- end -}}
-
-{{- if and $page (ne $page.Type "page") -}}
-  {{- $categories := $page.Params.categories | default slice -}}
-  {{- if not $tagsOnly -}}
-    {{- with $page.Params.categories -}}
-      {{- range $i, $cat := . -}}
-        {{- if gt $i 0 -}}<span class="cat-sep">, </span>{{- end -}}
-        {{- $termPage := site.GetPage (printf "/categories/%s" ($cat | urlize)) -}}
-        <a class="taxo-link cat-link" href="{{ with $termPage }}{{ .RelPermalink }}{{ else }}{{ printf "/categories/%s/" ($cat | urlize) | relLangURL }}{{ end }}" title="{{ T `categoryTitle` (dict `Name` $cat) }}">{{ $cat }}</a>
-      {{- end -}}
-    {{- end -}}
+@example: {{ partial "taxonomy-links.html" (dict "page" . "taxonomy" "tags") }}
+*/ -}}
+{{- $page := .page -}}
+{{- $taxonomy := .taxonomy -}}
+{{- $isTags := eq $taxonomy "tags" -}}
+{{- if ne $page.Type "page" -}}
+  {{- $terms := index $page.Params $taxonomy | default slice -}}
+  {{- if $isTags -}}
+    {{- $terms = complement ($page.Params.categories | default slice) $terms -}}
   {{- end -}}
-  {{- if not $categoriesOnly -}}
-    {{- with $page.Params.tags -}}
-      {{- $count := 0 -}}
-      {{- range . -}}
-        {{- if not (in $categories .) -}}
-          {{- if or (le $limit 0) (lt $count $limit) -}}
-            {{- $termPage := site.GetPage (printf "/tags/%s" (. | urlize)) -}}
-            <a class="taxo-link tag-link" href="{{ with $termPage }}{{ .RelPermalink }}{{ else }}{{ printf "/tags/%s/" (. | urlize) | relLangURL }}{{ end }}" title="{{ T `tagTitle` (dict `Name` .) }}">#{{ . }}</a>
-            {{- $count = add $count 1 -}}
-          {{- end -}}
-        {{- end -}}
-      {{- end -}}
+  {{- range $i, $name := $terms -}}
+    {{- if $isTags -}}
+      <a class="taxo-link tag-link" href="{{ partial "_funcs/get-term-url.html" (dict "taxonomy" $taxonomy "name" $name) }}" title="{{ T `tagTitle` (dict `Name` $name) }}">#{{ $name }}</a>
+    {{- else -}}
+      {{- if gt $i 0 -}}<span class="cat-sep">, </span>{{- end -}}
+      <a class="taxo-link cat-link" href="{{ partial "_funcs/get-term-url.html" (dict "taxonomy" $taxonomy "name" $name) }}" title="{{ T `categoryTitle` (dict `Name` $name) }}">{{ $name }}</a>
     {{- end -}}
   {{- end -}}
 {{- end -}}

@@ -1,0 +1,43 @@
+{{- /*
+Renders the page's previous/next pager: the paginator's neighbours on a
+paginated list page, the newer and older post in its section on an article.
+One partial for both, so the two cannot drift apart in markup.
+
+Paginator links are labelled by their text alone; post links carry a longer
+aria-label naming the neighbouring post. Nothing is emitted when there is no
+neighbour on either side.
+
+@context {page} page The current page.
+
+@example: {{ partial "pager.html" . }}
+*/ -}}
+{{- $prev := false -}}
+{{- $next := false -}}
+{{- if .IsPage -}}
+  {{- with .NextInSection -}}
+    {{- $prev = dict "url" .RelPermalink "text" (T "newerPost" (dict "Title" .Title)) "label" (T "newerPostLabel" (dict "Title" .Title)) -}}
+  {{- end -}}
+  {{- with .PrevInSection -}}
+    {{- $next = dict "url" .RelPermalink "text" (T "olderPost" (dict "Title" .Title)) "label" (T "olderPostLabel" (dict "Title" .Title)) -}}
+  {{- end -}}
+{{- else -}}
+  {{- with .Store.Get "paginator" -}}
+    {{- with .Prev -}}
+      {{- $prev = dict "url" .URL "text" (T "previousPage") -}}
+    {{- end -}}
+    {{- with .Next -}}
+      {{- $next = dict "url" .URL "text" (T "nextPage") -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if or $prev $next }}
+<ul class="pager" aria-label="{{ T "paginationLabel" }}">
+  {{- with $prev }}
+  <li class="page-prev"><a href="{{ .url }}"{{ with .label }} aria-label="{{ . }}"{{ end }}>{{ .text }}</a></li>
+  {{- end }}
+  {{- with $next }}
+  <li class="page-next"><a href="{{ .url }}"{{ with .label }} aria-label="{{ . }}"{{ end }}>{{ .text }}</a></li>
+  {{- end }}
+</ul>
+{{- end -}}

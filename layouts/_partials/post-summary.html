@@ -11,16 +11,16 @@ Displays post title, date, taxonomy links, summary text, and optional
 
 <article class="post-entry">
   <h2 class="post-title"><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
-  <div class="meta">{{ partial "datetime.html" . }}{{ with .Params.categories }}<span class="meta-sep"> • </span>{{ partial "taxonomy-links.html" (dict "page" $ "categoriesOnly" true) }}{{ end }}</div>
+  {{ partial "post-meta.html" (dict "page" .) }}
   <div class="post-summary-content">
     {{ .Summary }}
   </div>
+  {{- /* A truncated summary leads on to the rest of the post; a complete one
+         has nothing more to read, so it leads to the discussion instead. */}}
+  {{- $more := cond .Truncated (slice "readMore" "readMoreAbout") (slice "joinDiscussion" "joinDiscussionAbout") }}
   <div class="post-more">
-  {{ if .Truncated }}
-    <a class="read-more" href="{{ .RelPermalink }}" aria-label="{{ T `readMoreAbout` (dict `Title` .LinkTitle) }}">{{ T "readMore" }}</a><span class="meta"> ({{ partial "reading-stats.html" . }})</span>
-  {{ else }}
-    <a class="read-more" href="{{ .RelPermalink }}" aria-label="{{ T `joinDiscussionAbout` (dict `Title` .LinkTitle) }}">{{ T "joinDiscussion" }}</a>
-  {{ end }}
+    <a class="read-more" href="{{ .RelPermalink }}" aria-label="{{ T (index $more 1) (dict `Title` .LinkTitle) }}">{{ T (index $more 0) }}</a>
+    {{- if .Truncated }}<span class="meta"> ({{ partial "reading-stats.html" . }})</span>{{ end }}
   </div>
 </article>
 

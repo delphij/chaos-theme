@@ -22,22 +22,20 @@
   <header class="site-nav">
     {{ partial "header.html" . }}
   </header>
-  <main id="main-content" class="container {{ if .IsPage }}has-toc{{ else }}has-sidebar{{ end }}" tabindex="-1">
-    {{- if .IsPage }}
+  <main id="main-content" class="container" tabindex="-1">
     <div class="content-layout">
+      {{- if .IsPage }}
       <article class="post">
         {{ block "main" . }}{{ end }}
       </article>
-      {{ partial "toc.html" . }}
-    </div>
-    {{- else }}
-    <div class="content-layout">
+      {{- else }}
       <div class="post-list">
         {{ block "main" . }}{{ end }}
       </div>
+      {{- end }}
+      {{- /* The TOC on an article, the matching sidebar anywhere else. */}}
       {{ partial "sidebar.html" . }}
     </div>
-    {{- end }}
   </main>
   <footer class="site-foot">
     {{ partial "footer.html" . }}
@@ -45,5 +43,7 @@
   {{- if site.Params.search.enable }}
     {{ partial "search.html" . }}
   {{- end }}
+  {{ partialCached "foot/js.html" . }}
+  {{ partial "foot/mermaid.html" . }}
 </body>
 </html>

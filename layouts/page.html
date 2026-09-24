@@ -1,7 +1,7 @@
 {{ define "main" }}
   <h1 class="post-title">{{ .Title }}</h1>
 
-  <div class="meta">{{ partial "datetime.html" . }}<span class="reading-stats"> • {{ partial "reading-stats.html" . }}</span>{{ with .Params.categories }}<span class="meta-sep"> • </span>{{ partial "taxonomy-links.html" (dict "page" $ "categoriesOnly" true) }}{{ end }}</div>
+  {{ partial "post-meta.html" (dict "page" . "stats" true) }}
   {{- /* The first image of an article is its likeliest LCP element, and
          loading="lazy" on the LCP image is the one case where lazy loading
          costs more than it saves: the request waits for layout. Promote just
@@ -14,5 +14,5 @@
   {{- partial "post-footer.html" . -}}
   <div id="print-references" class="print-only" data-heading="{{ T "printReferences" }}"></div>
   {{- partial "remark.html" . -}}
-  {{- partial "post-navigation.html" . -}}
+  {{- partial "pager.html" . -}}
 {{ end }}

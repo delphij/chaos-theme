@@ -19,8 +19,7 @@
               <a class="archive-post-title" href="{{ .RelPermalink }}">{{ .Title }}</a>
               {{ with .Params.categories }}
                 {{ range first 1 . }}
-                  {{- $termPage := site.GetPage (printf "/categories/%s" (. | urlize)) -}}
-                  <a class="archive-cat-label" href="{{ with $termPage }}{{ .RelPermalink }}{{ else }}{{ printf "/categories/%s/" (. | urlize) | relLangURL }}{{ end }}" title="{{ T `categoryTitle` (dict `Name` .) }}">{{ . }}</a>
+                  <a class="archive-cat-label" href="{{ partial "_funcs/get-term-url.html" (dict "taxonomy" "categories" "name" .) }}" title="{{ T `categoryTitle` (dict `Name` .) }}">{{ . }}</a>
                 {{ end }}
               {{ end }}
             </div>

@@ -1,0 +1,14 @@
+{{- /*
+Renders the metadata line under a post's title: date, reading stats when
+asked for, and categories. Shared by the article and its summary card.
+
+@param {page} page  The post.
+@param {bool} stats Whether to include the reading stats.
+
+@example: {{ partial "post-meta.html" (dict "page" . "stats" true) }}
+*/ -}}
+{{- $page := .page -}}
+<div class="meta">{{ partial "datetime.html" $page.Date }}
+  {{- if .stats }}<span class="reading-stats"> • {{ partial "reading-stats.html" $page }}</span>{{ end }}
+  {{- with $page.Params.categories }}<span class="meta-sep"> • </span>{{ partial "taxonomy-links.html" (dict "page" $page "taxonomy" "categories") }}{{ end -}}
+</div>

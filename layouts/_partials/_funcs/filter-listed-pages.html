@@ -1,0 +1,16 @@
+{{- /*
+Returns the pages that may be listed: the two listing filters the theme
+honours everywhere, applied in the one place they are written down.
+
+  - types in site.Params.excludedTypes (default: "page")
+  - pages marked `hidden` in front matter
+
+@context {page.Pages} pages The pages to filter.
+@returns {page.Pages} The pages that may be listed.
+
+@example: {{ partial "_funcs/filter-listed-pages.html" .Pages }}
+*/ -}}
+{{- $excludedTypes := site.Params.excludedTypes | default (slice "page") -}}
+{{- $pages := where . "Type" "not in" $excludedTypes -}}
+{{- $pages = where $pages "Params.hidden" "ne" true -}}
+{{- return $pages -}}

@@ -9,6 +9,4 @@ Shows Remark42 attribution on individual article pages when Remark42 is enabled.
 */}}
 
 {{ time.Now.Year }} {{ with site.Copyright }} {{ . | markdownify | safeHTML }} | {{ end }} {{ T "poweredBy" | safeHTML }}{{ if and (eq .Kind "page") site.Params.remarkURL }} {{ T "remarkAttribution" | safeHTML }}{{ end }}
-{{ partialCached "foot/js.html" . }}
-{{ partial "foot/mermaid.html" . }}
 

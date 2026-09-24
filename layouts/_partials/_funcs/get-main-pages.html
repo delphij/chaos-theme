@@ -5,15 +5,11 @@ Returns the site's main-section regular pages: the collection a blog treats as
 site.MainSections rather than site.Params.mainSections: it falls back to the
 section with the most pages when the site leaves it unset.
 
-Applies the two listing filters the theme honours everywhere: types listed in
-site.Params.excludedTypes, and pages marked `hidden` in front matter.
+Filtered by _funcs/filter-listed-pages.html. The same for every page, so
+callers may partialCached it.
 
 @context {page} page The page context (unused, kept for call-site symmetry).
 @returns {page.Pages} The filtered pages, in site order (newest first).
 */ -}}
 
-{{- $excludedTypes := site.Params.excludedTypes | default (slice "page") -}}
-{{- $pages := where site.RegularPages "Type" "in" site.MainSections -}}
-{{- $pages = where $pages "Type" "not in" $excludedTypes -}}
-{{- $pages = where $pages "Params.hidden" "ne" true -}}
-{{- return $pages -}}
+{{- return partial "_funcs/filter-listed-pages.html" (where site.RegularPages "Type" "in" site.MainSections) -}}

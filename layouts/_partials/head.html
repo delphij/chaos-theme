@@ -52,11 +52,10 @@
   {{- end -}}
 {{- end -}}
 {{ partialCached "head/css.html" . }}
-{{ with or (.OutputFormats.Get "rss") (site.Home.OutputFormats.Get "rss") -}}
+{{ range slice "rss" "atom" -}}
+  {{ with or ($.OutputFormats.Get .) (site.Home.OutputFormats.Get .) -}}
     {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
-{{ end -}}
-{{ with or (.OutputFormats.Get "atom") (site.Home.OutputFormats.Get "atom") -}}
-    {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
+  {{ end -}}
 {{ end -}}
 {{ if and (eq .Kind "page") site.Params.remarkURL -}}
 <link rel="preconnect" href="{{ site.Params.remarkURL }}" crossorigin>

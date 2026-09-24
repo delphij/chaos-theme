@@ -1,11 +1,9 @@
 {{- /*
-Renders a formatted datetime element.
+Renders a <time> element: machine-readable in the attribute, minutes in the
+text.
 
-@context {page} page The page context containing the Date field.
+@context {time} time The time to render, e.g. a page's .Date or .Lastmod.
 
-@example: {{ partial "datetime.html" . }}
-*/}}
-
-{{- $dateMachine := .Date | time.Format "2006-01-02T15:04:05-07:00" -}}
-{{- $dateHuman := .Date | time.Format "2006-01-02 15:04" -}}
-<time datetime="{{ $dateMachine }}">{{ $dateHuman }}</time>
+@example: {{ partial "datetime.html" .Date }}
+*/ -}}
+<time datetime="{{ time.Format "2006-01-02T15:04:05-07:00" . }}">{{ time.Format "2006-01-02 15:04" . }}</time>

@@ -17,7 +17,7 @@ same filtered collection, listed in full.
     {{ range .Pages }}
       {{ partial "post-summary.html" . }}
     {{ end }}
-    {{ partial "paginator.html" $ }}
+    {{ partial "pager.html" $ }}
   {{ else }}
     {{ range partial "_funcs/get-list-pages.html" $ }}
       {{ partial "post-summary.html" . }}
