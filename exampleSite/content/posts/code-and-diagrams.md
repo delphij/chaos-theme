@@ -1,10 +1,10 @@
-+++
-title = '代码高亮与 Mermaid 图表'
-date = '2025-11-23'
-description = '演示 Chaos 主题的语法高亮与 Mermaid 图表，两者都会跟随深浅色模式切换。'
-categories = ['写作']
-tags = ['代码高亮', 'Mermaid', 'Go', 'Python']
-+++
+---
+title: "代码高亮与 Mermaid 图表"
+date: 2025-11-23
+description: "演示 Chaos 主题的语法高亮与 Mermaid 图表，两者都会跟随深浅色模式切换。"
+categories: ["写作"]
+tags: ["代码高亮", "Mermaid", "Go", "Python"]
+---
 
 代码块使用 Hugo 内置的 Chroma 高亮，并为浅色和深色模式分别准备了配色；
 Mermaid 只会在包含图表的页面上加载。

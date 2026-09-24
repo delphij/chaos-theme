@@ -1,11 +1,11 @@
-+++
-title = '用 KaTeX 书写数学公式'
-date = '2026-07-18'
-description = '演示 Chaos 主题内置的 KaTeX 数学公式支持：行内公式与块级公式。'
-categories = ['写作']
-tags = ['KaTeX', '数学', 'Markdown']
-series = 'Chaos 主题指南'
-+++
+---
+title: "用 KaTeX 书写数学公式"
+date: 2026-07-18
+description: "演示 Chaos 主题内置的 KaTeX 数学公式支持：行内公式与块级公式。"
+categories: ["写作"]
+tags: ["KaTeX", "数学", "Markdown"]
+series: "Chaos 主题指南"
+---
 
 Chaos 内置了 KaTeX，公式在构建时由 Hugo 渲染为 HTML，读者的浏览器无需再执行任何脚本。
 

@@ -1,9 +1,9 @@
-+++
-title = '关于'
-date = '2026-01-01'
-type = 'page'
-url = '/about/'
-+++
+---
+title: "关于"
+date: 2026-01-01
+type: "page"
+url: "/about/"
+---
 
 这是 [Chaos](https://github.com/delphij/chaos-theme) 主题的示例站点。
 

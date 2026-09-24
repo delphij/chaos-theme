@@ -1,11 +1,11 @@
-+++
-title = '提示框：五种语气，一种语法'
-date = '2026-05-04'
-description = '演示 Chaos 主题的 GitHub 风格提示框：NOTE、TIP、IMPORTANT、WARNING 与 CAUTION。'
-categories = ['写作']
-tags = ['Markdown', '提示框']
-series = 'Chaos 主题指南'
-+++
+---
+title: "提示框：五种语气，一种语法"
+date: 2026-05-04
+description: "演示 Chaos 主题的 GitHub 风格提示框：NOTE、TIP、IMPORTANT、WARNING 与 CAUTION。"
+categories: ["写作"]
+tags: ["Markdown", "提示框"]
+series: "Chaos 主题指南"
+---
 
 Chaos 支持 GitHub 风格的提示框语法，标题文字会随站点语言自动本地化。
 
