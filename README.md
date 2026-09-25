@@ -644,9 +644,10 @@ The theme is optimized for performance with modern best practices:
 ### Page Load & Navigation
 - **Instant Prerendering**: Integrates W3C Speculation Rules API for native 0ms background prerendering, with seamless fallback to [instant.page](https://instant.page/) 5.2.0 on older browsers
 - **View Transitions**: Native cross-document view transitions (`@view-transition { navigation: auto; }`) for smooth app-like page transitions without JavaScript router overhead
-- **Minimal JavaScript**: ~3KB total for all features (theme switching + mobile menu + TOC)
+- **Minimal JavaScript**: Core baseline script is ~6KB (~2.5KB gzipped) covering theme switching, mobile menu, code copy, and TOC scrollspy. Optional modules (client-side search, on-demand Mermaid) load independently only when enabled or needed
 - **Partial Caching**: Header and footer cached per language for faster rendering
 - **Preconnect Links**: Early connection to external services (comment server)
+
 
 ### CSS Performance
 - **Shared Utility Classes**: Reusable `.overlay-blur` class reduces code duplication

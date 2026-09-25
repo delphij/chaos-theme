@@ -284,6 +284,7 @@
       vertical-align: bottom;
       background-color: var(--text);
       color: var(--bg);
+      white-space: nowrap;
     }
 
     /* Multiple table bodies - Visual separator */

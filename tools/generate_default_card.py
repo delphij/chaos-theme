@@ -82,7 +82,7 @@ def main():
 
     # Subtitle
     draw.text((left_margin, 260), "Clarity, performance, and typography.", font=font_sub, fill=(215, 218, 228, 255))
-    draw.text((left_margin, 302), "极简主义 · 和色美学 · 专注排版与极致性能", font=font_sub2, fill=(145, 150, 164, 255))
+    draw.text((left_margin, 302), "极简设计 · 和色美学 · 专注排版与阅读体验", font=font_sub2, fill=(145, 150, 164, 255))
 
     # Subtle Hairline
     draw.line([(left_margin, 375), (left_margin + 520, 375)], fill=(42, 46, 56, 255), width=1)

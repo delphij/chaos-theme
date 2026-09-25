@@ -53,6 +53,11 @@ enableGitInfo = false
     weight = 30
 
   [[menus.main]]
+    identifier = 'series'
+    pageRef = '/series'
+    weight = 35
+
+  [[menus.main]]
     identifier = 'tags'
     pageRef = '/tags'
     weight = 40
@@ -79,3 +84,7 @@ enableGitInfo = false
 
   [params.author]
     name = 'Chaos'
+
+  [params.search]
+    enable = true
+
