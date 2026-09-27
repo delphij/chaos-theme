@@ -28,6 +28,19 @@ here.
 
 ## [Unreleased]
 
+### Added
+
+- The Atom and RSS feeds load [polyxslt](https://github.com/delphij/polyxslt)
+  1.0.0, so a browser without XSLT still renders them through `feed.xsl`. A
+  browser that has XSLT never requests it, and feed readers ignore the element.
+
+### Changed
+
+- `render_xsl_companions.sh` skips a document that loads polyxslt, and removes
+  a companion an earlier build left beside it. Out of the box only the sitemap
+  gets a companion now. A server set up as README.md describes needs no change:
+  a feed without a companion is served as XML.
+
 ## [1.0.0] - 2026-09-23
 
 First stable release. Requires Hugo 0.158.0 or later, standard edition.

@@ -20,6 +20,11 @@
 # Safe to skip: if a companion is missing the server falls back to serving the
 # XML, which browsers that still have XSLT render themselves.
 #
+# The feeds take the other route and load polyxslt, which does the transform
+# in the browser; a companion would only duplicate it, so a document that loads
+# polyxslt gets none. What remains here is the sitemap, which has to stay a
+# plain sitemaps.org document and so cannot carry a <script>.
+#
 # Usage: render_xsl_companions.sh [public-dir]
 
 set -e
@@ -77,7 +82,22 @@ find_stylesheet() {
 # UTF-8 locale rejects as an illegal byte sequence -- hence LC_ALL=C, under
 # which the ASCII-only pattern still matches exactly the same text.
 find "$pub" -type f -name '*.xml' -print | while IFS= read -r xml; do
-	href=$(head -c 2048 "$xml" |
+	prolog=$(head -c 2048 "$xml")
+
+	# A document that loads polyxslt (the Atom and RSS templates)
+	# transforms itself in a browser without XSLT, so it gets no companion,
+	# and one left by an earlier build is removed so the server stops handing
+	# it out. Matched on the <script> element in the prolog slice only: a feed
+	# carries full post bodies, and a post merely mentioning polyxslt must not
+	# cost its feed the companion.
+	if printf '%s\n' "$prolog" |
+		LC_ALL=C grep -q '<script[^>]*src="[^"]*_3p/polyxslt/'; then
+		rm -f "$xml.html"
+		echo "render_xsl_companions: $xml: loads polyxslt, no companion needed"
+		continue
+	fi
+
+	href=$(printf '%s\n' "$prolog" |
 		LC_ALL=C sed -n 's/.*<?xml-stylesheet[^?]*href="\([^"]*\)".*/\1/p' |
 		head -1)
 

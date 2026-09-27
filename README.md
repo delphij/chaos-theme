@@ -509,8 +509,25 @@ than raw XML. Browsers are removing the XSLT engine behind that: Chrome stops
 running XSLT on stable in 158 (November 2026) and removes it in 176, and
 Firefox and WebKit have signalled the same.
 
-`tools/render_xsl_companions.sh` keeps those pages working without shipping an
-XSLT engine to the browser. Run it after `hugo`, on the built site:
+The theme keeps them readable by two routes, chosen by what each document is
+allowed to contain:
+
+- **The feeds** (`atom.xml`, `index.xml`) load
+  [polyxslt](https://github.com/delphij/polyxslt) through an XHTML `<script>`
+  element. A browser without XSLT still runs that script, and polyxslt
+  applies `feed.xsl` in its place. A browser that still has XSLT never
+  requests it. That is the browser's doing, not a check in polyxslt: once
+  it sees `<?xml-stylesheet?>` ahead of the root element, the feed's own
+  elements never enter a live document. Blink and WebKit stop building the
+  document there; Gecko builds the tree detached and hands it to the XSLT
+  processor. So the script never runs, not even when the transform fails.
+  The output of `feed.xsl` does not include the element either. Feed readers
+  ignore it as a foreign extension element. Nothing is needed on the server.
+- **The sitemap** has to stay a plain sitemaps.org document, so it cannot
+  carry a script. It gets a static HTML companion rendered at build time by
+  `tools/render_xsl_companions.sh`, which the server hands to browsers.
+
+Run the post-build step after `hugo`, on the built site:
 
 ```bash
 hugo --minify
@@ -532,14 +549,16 @@ which is what an XSLT processor already does with a stylesheet when it loads
 one, so the rendered output is unchanged. About 11% off each stylesheet.
 
 For every XML output carrying an `<?xml-stylesheet?>` instruction it runs that
-stylesheet with `xsltproc` and writes the result beside the XML —
-`public/atom.xml.html`, `public/sitemap.xml.html`. Nothing needs to list which
-outputs exist: the documents name their own stylesheets. Requires `xsltproc`
-(macOS ships it; FreeBSD `textproc/libxslt`, Debian `xsltproc`).
+stylesheet with `xsltproc` and writes the result beside the XML, e.g.
+`public/sitemap.xml.html`. Nothing needs to list which outputs exist: the
+documents name their own stylesheets, and a document that loads polyxslt is
+recognised by its `<script>` element and skipped (any companion an earlier
+build left for it is removed). Requires `xsltproc` (macOS ships it; FreeBSD
+`textproc/libxslt`, Debian `xsltproc`).
 
 The server then serves the companion to browser navigations and the untouched
-XML to everything else, so `/atom.xml` stays one URL that is readable to people
-and unchanged for feed readers and crawlers. In nginx:
+XML to everything else, so `/sitemap.xml` stays one URL that is readable to
+people and unchanged for crawlers. In nginx:
 
 ```nginx
 map $http_sec_fetch_dest $xslc_nav { default ""; document ".html"; }
@@ -555,15 +574,17 @@ by page script, and is absent from every non-browser HTTP client, so robots
 never reach the HTML branch. (A second `map` on `$http_user_agent` can force
 anything self-identifying as a robot back to the XML, for the case of a crawler
 that renders through a headless browser.) The second `try_files` candidate is
-the XML itself: if the render step never ran, browsers simply get the XML,
-which is what they get today.
+the XML itself: a document without a companion -- the feeds, or anything when
+the render step never ran -- is served as is. The block can therefore match
+every `.xml`; a site that wants the `Vary` header only where it matters can
+narrow it to `location = /sitemap.xml`.
 
 Note that an `add_header` in this block suppresses any `add_header` inherited
 from `server{}`, so repeat the site's other headers there if it has any.
 
-Because the companion is rendered *from the stylesheet*, there is no second
-copy of the design to drift out of step — the `.xsl` file stays the single
-source of truth for both paths.
+Either way the `.xsl` file stays the single source of truth: the companion is
+rendered from it and polyxslt runs it, so there is no second copy of the design
+to drift out of step.
 
 ## Printing
 
@@ -868,7 +889,7 @@ All dependencies are vendored in `static/_3p/` and `tools/vendor/` to ensure rel
 - No npm packages required
 - No JavaScript frameworks
 - No external CDNs (except optional comment system)
-- No build tools beyond Hugo for the site itself; two optional helpers run on the built output (`python3` for the search index, `xsltproc` for the XSLT companions)
+- No build tools beyond Hugo for the site itself; two optional helpers run on the built output (`python3` for the search index, `xsltproc` for the sitemap companion)
 - All assets self-hosted for performance and privacy
 
 ## Contributing
