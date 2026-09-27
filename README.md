@@ -860,6 +860,7 @@ All dependencies are vendored in `static/_3p/` and `tools/vendor/` to ensure rel
 - **instant.page 5.2.0**: Link prefetching for near-instant page transitions
 - **Mermaid 11.17.2**: Diagram and flowchart generation from text
 - **Noto Sans Mono 2.014**: Monospace font subset for code blocks and dates
+- **polyxslt 1.0.0**: XSLT 1.0 in the browser, so the feeds stay readable once browsers drop native XSLT
 - **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
 
 ### No External Dependencies

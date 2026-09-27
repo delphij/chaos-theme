@@ -61,4 +61,10 @@ See tools/vendor/jieba/LICENSE for full license text
 Website: https://github.com/fxsjy/jieba
 Chinese text segmentation for offline search index generator.
 
-
+polyxslt
+Copyright (c) 2026 Xin LI
+Licensed under the MIT License
+Location: static/_3p/polyxslt/1.0.0/
+See static/_3p/polyxslt/1.0.0/LICENSE for full license text
+Website: https://github.com/delphij/polyxslt
+XSLT 1.0 in the browser for the feeds, once browsers no longer run XSLT.

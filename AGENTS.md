@@ -197,6 +197,7 @@ Only for:
 - **instant.page 5.2.0**: Tiny (1KB), dramatic perceived performance improvement
 - **Mermaid 11.17.2**: Generation of diagram and flowchart from text, loaded conditionally
 - **Noto Sans Mono 2.014**: Clean Latin monospace subset with consistent character metrics
+- **polyxslt 1.0.0**: Keeps the styled feeds working after browsers drop XSLT; never requested by a browser that still has it
 - **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
 - **Remark42**: Optional, user's choice, not vendored (embedded script)
 
