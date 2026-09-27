@@ -58,11 +58,13 @@ DEFAULT_CONFIG = {
             'enabled': True,
             'cache_max_age_days': 30,
             'defang': True,
+            'expand_links': True,
             'lang': 'auto',
             'data_dir': 'data/x_embeds',
             'max_retries': 3,
             'retry_delay': 1.0,
             'timeout': 30,
+            'request_interval': 1.0,
         },
     },
     'worker': {

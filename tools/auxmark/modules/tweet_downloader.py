@@ -23,15 +23,20 @@ Core Logic:
 - Hugo language detection
 - Tweet ID extraction
 - oEmbed API fetching
+- t.co short link expansion
 - Cache management
 
 This module contains all the core logic. The standalone fetch_x_embed.py CLI
 tool is a thin wrapper that uses this module.
 """
 
+import html
 import json
+import random
 import re
 import sys
+import threading
+import time
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
 from pathlib import Path
@@ -212,6 +217,96 @@ def extract_tweet_id(input_str: str) -> str | None:
     return None
 
 
+class HostThrottle:
+    """
+    Spaces out requests to the same host, across threads and callers.
+
+    Each call reserves the next free slot for its host and sleeps until then,
+    so the lock is never held while sleeping. This covers every request the
+    module makes, whether it comes from the auxmark worker pool or from a
+    fetch_x_embed.py batch, and t.co lookups as well as oEmbed calls.
+    """
+
+    def __init__(self, interval: float = 1.0):
+        self.interval = interval
+        self._next_slot: dict[str, float] = {}
+        self._lock = threading.Lock()
+
+    def wait(self, url: str) -> None:
+        host = parse.urlparse(url).netloc
+        with self._lock:
+            now = time.monotonic()
+            start = max(now, self._next_slot.get(host, now))
+            self._next_slot[host] = start + self.interval
+        if start > now:
+            time.sleep(start - now)
+
+
+throttle = HostThrottle()
+
+RETRYABLE_STATUS = (429, 500, 502, 503, 504)
+MAX_RETRY_AFTER = 300.0
+
+
+def _retry_after(e: error.HTTPError) -> float | None:
+    """Seconds requested by a Retry-After header, if it holds a number."""
+    value = e.headers.get('Retry-After', '') if e.headers else ''
+    try:
+        return min(max(float(value), 0.0), MAX_RETRY_AFTER)
+    except ValueError:
+        return None  # Absent, or an HTTP date; fall back to our own backoff
+
+
+def request_with_retry(
+    url: str,
+    do_request,
+    what: str,
+    max_retries: int = 3,
+    retry_delay: float = 1.0,
+    retry_backoff: float = 2.0
+):
+    """
+    Call do_request() with per-host throttling and exponential backoff.
+
+    Network errors and HTTP 429/5xx are retried, waiting at least as long as
+    a Retry-After header asks, with a little jitter so parallel workers do
+    not retry in lockstep. Other HTTP errors are permanent. Returns whatever
+    do_request() returns, or None once it gives up.
+    """
+    delay = retry_delay
+
+    for attempt in range(max_retries):
+        throttle.wait(url)
+        try:
+            result = do_request()
+            if attempt > 0:
+                print(f"  ✓ Fetched {what} on attempt {attempt + 1}", file=sys.stderr)
+            return result
+        except error.HTTPError as e:
+            last_error = f"HTTP {e.code}: {e.reason}"
+            should_retry = e.code in RETRYABLE_STATUS
+            wait = max(delay, _retry_after(e) or 0.0)
+        except (error.URLError, OSError) as e:
+            last_error = str(getattr(e, 'reason', e))
+            should_retry = True
+            wait = delay
+
+        if not should_retry:
+            print(f"  ✗ Permanent error for {what} ({last_error}), not retrying", file=sys.stderr)
+            return None
+        if attempt == max_retries - 1:
+            print(f"  ✗ {what}: failed after {max_retries} attempts: {last_error}", file=sys.stderr)
+            return None
+
+        wait *= random.uniform(1.0, 1.25)
+        print(f"  ⚠ {what}: attempt {attempt + 1}/{max_retries} failed: {last_error}", file=sys.stderr)
+        print(f"    Retrying in {wait:.1f}s...", file=sys.stderr)
+        time.sleep(wait)
+        delay *= retry_backoff
+
+    return None
+
+
 def fetch_oembed(
     tweet_id: str,
     defang: bool = True,
@@ -233,8 +328,6 @@ def fetch_oembed(
         retry_backoff: Multiplier for exponential backoff
         timeout: Request timeout in seconds
     """
-    import time
-
     tweet_url = f'https://x.com/i/status/{tweet_id}'
 
     # Build query parameters
@@ -250,62 +343,20 @@ def fetch_oembed(
     query = parse.urlencode(params)
     oembed_url = f'https://publish.x.com/oembed?{query}'
 
-    delay = retry_delay
-    last_error = None
+    def do_request():
+        with request.urlopen(oembed_url, timeout=timeout) as response:
+            return response.read()
 
-    for attempt in range(max_retries):
-        try:
-            with request.urlopen(oembed_url, timeout=timeout) as response:
-                if response.status == 200:
-                    data = json.loads(response.read().decode('utf-8'))
-                    if attempt > 0:
-                        print(f"  ✓ Successfully fetched tweet {tweet_id} on attempt {attempt + 1}", file=sys.stderr)
-                    return data
-                else:
-                    last_error = f"HTTP {response.status}"
+    body = request_with_retry(oembed_url, do_request, f"tweet {tweet_id}",
+                              max_retries, retry_delay, retry_backoff)
+    if body is None:
+        return None
 
-                    # Determine if we should retry based on status code
-                    should_retry = response.status in (429, 500, 502, 503, 504)
-
-                    if attempt < max_retries - 1 and should_retry:
-                        print(f"  ⚠ Attempt {attempt + 1}/{max_retries} failed: {last_error}", file=sys.stderr)
-                        print(f"    Retrying in {delay:.1f}s...", file=sys.stderr)
-                        time.sleep(delay)
-                        delay *= retry_backoff
-                    elif not should_retry:
-                        print(f"  ✗ Permanent error ({last_error}), not retrying", file=sys.stderr)
-                        return None
-                    else:
-                        print(f"  ✗ Failed after {max_retries} attempts: {last_error}", file=sys.stderr)
-                        return None
-
-        except (error.URLError, error.HTTPError) as e:
-            last_error = str(e)
-            if isinstance(e, error.HTTPError):
-                last_error = f"HTTP {e.code}: {e.reason}"
-
-            # Determine if we should retry
-            should_retry = True
-            if isinstance(e, error.HTTPError) and 400 <= e.code < 500 and e.code != 429:
-                should_retry = False  # Client errors are permanent
-
-            if attempt < max_retries - 1 and should_retry:
-                print(f"  ⚠ Attempt {attempt + 1}/{max_retries} failed: {last_error}", file=sys.stderr)
-                print(f"    Retrying in {delay:.1f}s...", file=sys.stderr)
-                time.sleep(delay)
-                delay *= retry_backoff
-            elif not should_retry:
-                print(f"  ✗ Permanent error ({last_error}), not retrying", file=sys.stderr)
-                return None
-            else:
-                print(f"  ✗ Failed after {max_retries} attempts: {last_error}", file=sys.stderr)
-                return None
-
-        except json.JSONDecodeError as e:
-            print(f"  ✗ Error decoding JSON response: {e}", file=sys.stderr)
-            return None
-
-    return None
+    try:
+        return json.loads(body.decode('utf-8'))
+    except json.JSONDecodeError as e:
+        print(f"  ✗ Error decoding JSON response: {e}", file=sys.stderr)
+        return None
 
 
 def sanitize_html(html: str) -> str:
@@ -315,12 +366,89 @@ def sanitize_html(html: str) -> str:
     return parser.get_sanitized_html()
 
 
-def save_embed_data(tweet_id: str, oembed_data: dict, data_dir: Path, defang: bool = True) -> None:
-    """Save oEmbed data to data directory."""
+TCO_URL_RE = re.compile(r'https?://t\.co/[A-Za-z0-9]+')
+
+
+class _NoRedirect(request.HTTPRedirectHandler):
+    """Surface redirects as HTTPError instead of following them."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def resolve_tco(
+    url: str,
+    max_retries: int = 3,
+    retry_delay: float = 1.0,
+    retry_backoff: float = 2.0,
+    timeout: int = 30
+) -> str | None:
+    """
+    Resolve a t.co short link to its destination.
+
+    X offers no free API for this, but t.co itself answers a non-browser
+    client with a plain 301 whose Location is the destination. Only that one
+    hop is taken: the destination is what the author linked to, even if it
+    is itself a redirect.
+    """
+    opener = request.build_opener(_NoRedirect)
+    req = request.Request(url, method='HEAD', headers={'User-Agent': 'auxmark'})
+
+    def do_request():
+        try:
+            with opener.open(req, timeout=timeout):
+                return ''  # A 2xx means t.co did not redirect
+        except error.HTTPError as e:
+            if e.code not in (301, 302, 303, 307, 308):
+                raise
+            location = e.headers.get('Location', '')
+            if parse.urlparse(location).scheme in ('http', 'https'):
+                return location
+            return ''
+
+    return request_with_retry(url, do_request, url,
+                              max_retries, retry_delay, retry_backoff) or None
+
+
+def expand_tco_links(html_content: str, **retry_opts) -> str:
+    """
+    Replace t.co short links in embed HTML with their destinations.
+
+    The oEmbed HTML uses the t.co URL as both the href and the link text, so
+    every occurrence is replaced. Links that fail to resolve are left as-is.
+    retry_opts are passed on to resolve_tco().
+    """
+    expanded = {}
+    for url in dict.fromkeys(TCO_URL_RE.findall(html_content)):
+        target = resolve_tco(url, **retry_opts)
+        if target:
+            expanded[url] = html.escape(target, quote=True)
+        else:
+            print(f"  ⚠ Could not expand {url}, keeping it", file=sys.stderr)
+
+    if not expanded:
+        return html_content
+    return TCO_URL_RE.sub(lambda m: expanded.get(m.group(0), m.group(0)), html_content)
+
+
+def save_embed_data(
+    tweet_id: str,
+    oembed_data: dict,
+    data_dir: Path,
+    defang: bool = True,
+    expand_links: bool = True,
+    **retry_opts
+) -> None:
+    """
+    Save oEmbed data to data directory.
+
+    retry_opts (max_retries, retry_delay, retry_backoff, timeout) apply to
+    the t.co lookups made when expand_links is set.
+    """
     # Ensure directory exists
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save full JSON
+    # Save full JSON (the unmodified oEmbed response)
     json_path = data_dir / f'{tweet_id}.json'
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(oembed_data, f, ensure_ascii=False, indent=2)
@@ -330,6 +458,8 @@ def save_embed_data(tweet_id: str, oembed_data: dict, data_dir: Path, defang: bo
         html_content = oembed_data['html']
         if defang:
             html_content = sanitize_html(html_content)
+        if expand_links:
+            html_content = expand_tco_links(html_content, **retry_opts)
 
         html_path = data_dir / f'{tweet_id}.html'
         with open(html_path, 'w', encoding='utf-8') as f:
@@ -346,7 +476,8 @@ def process_single_tweet(
     max_retries: int = 3,
     retry_delay: float = 1.0,
     retry_backoff: float = 2.0,
-    timeout: int = 30
+    timeout: int = 30,
+    expand_links: bool = True
 ) -> bool:
     """
     Process a single tweet URL or ID.
@@ -362,6 +493,7 @@ def process_single_tweet(
         retry_delay: Initial delay between retries (seconds)
         retry_backoff: Multiplier for exponential backoff
         timeout: Request timeout in seconds
+        expand_links: Replace t.co short links with their destinations
 
     Returns:
         True if successful, False otherwise
@@ -395,7 +527,12 @@ def process_single_tweet(
     )
 
     if oembed_data:
-        save_embed_data(tweet_id, oembed_data, data_dir, defang)
+        save_embed_data(tweet_id, oembed_data, data_dir, defang,
+                        expand_links=expand_links,
+                        max_retries=max_retries,
+                        retry_delay=retry_delay,
+                        retry_backoff=retry_backoff,
+                        timeout=timeout)
         print(f"Saved JSON: {data_dir / f'{tweet_id}.json'}")
         print(f"Saved HTML: {data_dir / f'{tweet_id}.html'} (defanged={defang})")
         return True
@@ -409,7 +546,8 @@ def process_batch(
     data_dir: Path,
     site_root: Path | None = None,
     defang: bool = True,
-    force: bool = False
+    force: bool = False,
+    expand_links: bool = True
 ) -> bool:
     """
     Process multiple tweets from a file (one URL/ID per line).
@@ -420,6 +558,7 @@ def process_batch(
         site_root: Hugo site root for language detection
         defang: Remove scripts and tracking
         force: Force refresh even if cached
+        expand_links: Replace t.co short links with their destinations
 
     Returns:
         True if all succeeded, False if any failed
@@ -433,7 +572,8 @@ def process_batch(
 
     success_count = 0
     for line in lines:
-        if process_single_tweet(line, data_dir, site_root, defang, lang=None, force=force):
+        if process_single_tweet(line, data_dir, site_root, defang, lang=None, force=force,
+                                expand_links=expand_links):
             success_count += 1
 
     print(f"\nProcessed {success_count}/{len(lines)} tweets successfully")
@@ -450,7 +590,8 @@ def fetch_tweet_cached(
     max_retries: int = 3,
     retry_delay: float = 1.0,
     retry_backoff: float = 2.0,
-    timeout: int = 30
+    timeout: int = 30,
+    expand_links: bool = True
 ) -> bool:
     """
     Fetch and cache a tweet (module-friendly interface).
@@ -469,6 +610,7 @@ def fetch_tweet_cached(
         retry_delay: Initial delay between retries (seconds)
         retry_backoff: Multiplier for exponential backoff
         timeout: Request timeout in seconds
+        expand_links: Replace t.co short links with their destinations
 
     Returns:
         True if successful (cached or fetched), False otherwise
@@ -497,7 +639,8 @@ def fetch_tweet_cached(
         max_retries=max_retries,
         retry_delay=retry_delay,
         retry_backoff=retry_backoff,
-        timeout=timeout
+        timeout=timeout,
+        expand_links=expand_links
     )
 
 
@@ -528,6 +671,8 @@ class TweetDownloaderModule(BaseModule):
         self.retry_delay = self.config.get('retry_delay', 1.0)
         self.retry_backoff = self.config.get('retry_backoff', 2.0)
         self.timeout = self.config.get('timeout', 30)
+        self.expand_links = self.config.get('expand_links', True)
+        throttle.interval = self.config.get('request_interval', 1.0)
 
         # Detect paths
         self.git_root = self._find_git_root()
@@ -612,7 +757,8 @@ class TweetDownloaderModule(BaseModule):
                 max_retries=self.max_retries,
                 retry_delay=self.retry_delay,
                 retry_backoff=self.retry_backoff,
-                timeout=self.timeout
+                timeout=self.timeout,
+                expand_links=self.expand_links
             )
 
             if success:

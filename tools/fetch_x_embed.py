@@ -68,6 +68,8 @@ def main() -> int:
     parser.add_argument('--batch', type=Path, help='Process multiple tweets from file')
     parser.add_argument('--refresh', action='store_true', help='Refresh existing cache')
     parser.add_argument('--no-defang', action='store_true', help='Keep scripts (not recommended)')
+    parser.add_argument('--no-expand-links', action='store_true',
+                        help='Keep t.co short links instead of expanding them')
     parser.add_argument('--data-dir', type=Path, default=None,
                         help='Data directory (default: auto-detect Hugo site root)')
 
@@ -102,7 +104,8 @@ def main() -> int:
             data_dir=data_dir,
             site_root=site_root,
             defang=defang,
-            force=args.refresh
+            force=args.refresh,
+            expand_links=not args.no_expand_links
         )
     elif args.input:
         success = process_single_tweet(
@@ -111,7 +114,8 @@ def main() -> int:
             site_root=site_root,
             defang=defang,
             lang=None,  # Auto-detected
-            force=args.refresh
+            force=args.refresh,
+            expand_links=not args.no_expand_links
         )
     else:
         parser.print_help()

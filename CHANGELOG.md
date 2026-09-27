@@ -33,6 +33,10 @@ here.
 - The Atom and RSS feeds load [polyxslt](https://github.com/delphij/polyxslt)
   1.0.0, so a browser without XSLT still renders them through `feed.xsl`. A
   browser that has XSLT never requests it, and feed readers ignore the element.
+- auxmark and `fetch_x_embed.py` replace the t.co short links in a cached X
+  embed with their destinations, so readers are not sent through X first.
+  `--no-expand-links`, or `expand_links = false` in `.auxmark.toml`, keeps the
+  short links. The cached JSON is still X's response as received.
 
 ### Changed
 
@@ -40,6 +44,9 @@ here.
   a companion an earlier build left beside it. Out of the box only the sitemap
   gets a companion now. A server set up as README.md describes needs no change:
   a feed without a companion is served as XML.
+- The tweet downloader spaces its requests at least `request_interval` seconds
+  (default 1) apart per host, `fetch_x_embed.py --batch` included, and its
+  retries honour `Retry-After`.
 
 ## [1.0.0] - 2026-09-23
 

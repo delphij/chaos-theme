@@ -20,6 +20,7 @@ Detects Hugo X/Twitter shortcodes and pre-caches embed data locally.
 - Saves to `data/x_embeds/` for offline use
 - Auto-detects Hugo's `languageCode` for localized embeds
 - Sanitizes HTML (removes tracking scripts)
+- Expands t.co short links to their destinations
 - Respects cache age (default: 30 days)
 
 ## Requirements
@@ -95,8 +96,10 @@ block_subdomains = false
 enabled = true
 cache_max_age_days = 30
 defang = true
+expand_links = true
 lang = "auto"
 data_dir = "data/x_embeds"
+request_interval = 1.0   # Minimum seconds between requests to one host
 
 [worker]
 max_workers = 4
@@ -271,7 +274,20 @@ Location: `data/x_embeds/`
 
 Files created:
 - `{tweet_id}.json` - Full oEmbed response
-- `{tweet_id}.html` - Sanitized HTML (scripts removed)
+- `{tweet_id}.html` - Sanitized HTML (scripts removed, t.co links expanded)
+
+t.co short links in the HTML are replaced with their destinations, so
+readers go straight to the linked site instead of bouncing through X. X has
+no free API for this; auxmark sends t.co a `HEAD` request and takes the
+`Location` of its redirect. A link that fails to resolve is left unchanged.
+Set `expand_links = false`, or pass `--no-expand-links` to
+`fetch_x_embed.py`, to keep the short links. The JSON file always holds the
+unmodified oEmbed response.
+
+Requests to X (oEmbed) and t.co are spaced at least `request_interval`
+seconds apart per host, including in `fetch_x_embed.py --batch` runs.
+Network errors and HTTP 429/5xx are retried with exponential backoff,
+honouring any `Retry-After` header.
 
 Cache age:
 - Default: 30 days
