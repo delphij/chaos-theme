@@ -1,10 +1,25 @@
-// Copy-to-clipboard for the feed address on the page feed.xsl renders.
-//
-// 
+// Script for the page feed.xsl renders: parses entry HTML that the XSLT
+// engine left as text, and copies the feed address to the clipboard.
 //
 // Executed as a template (resources.ExecuteAsTemplate) for the localised
 // strings, then minified and inlined into an XML document inside a CDATA
 // section -- so nothing here may contain the string that would close one.
+
+// The feed carries entry bodies as escaped HTML, and the stylesheet emits them
+// with disable-output-escaping. libxslt (Chrome, Safari) and polyxslt honour
+// that; Firefox's XSLT engine builds the result tree directly and cannot, so
+// the markup arrives as a text node (Mozilla bug 98168). An element holding
+// only text is re-parsed as HTML -- the same trust the stylesheet already
+// grants the feed -- and where the markup was honoured this finds nothing.
+(function() {
+  var targets = document.querySelectorAll('[data-feed-html]');
+  for (var i = 0; i < targets.length; i++) {
+    var el = targets[i];
+    if (el.childElementCount === 0 && el.textContent.trim() !== '') {
+      el.innerHTML = el.textContent;
+    }
+  }
+})();
 
 (function() {
   var box = document.getElementById('feedUrlCopy');

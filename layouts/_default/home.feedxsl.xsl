@@ -141,7 +141,7 @@
             <xsl:attribute name="href">
               <xsl:value-of select="atom:link[not(@rel) or @rel='alternate']/@href | link" />
             </xsl:attribute>
-            <xsl:value-of select="atom:title | title" disable-output-escaping="yes" />
+            <xsl:value-of select="atom:title | title" />
           </a>
         </h3>
 
@@ -205,7 +205,10 @@
           </xsl:if>
         </div>
 
-        <div class="feed-entry-content">
+        {{- /* data-feed-html marks where escaped HTML lands. Firefox's XSLT
+               engine ignores disable-output-escaping (bug 98168) and leaves it
+               as text; xml-xsl-feed.js parses it into markup there. */}}
+        <div class="feed-entry-content" data-feed-html="">
           <xsl:choose>
             <xsl:when test="atom:content">
               <xsl:value-of select="atom:content" disable-output-escaping="yes" />
@@ -214,7 +217,7 @@
               <xsl:value-of select="content:encoded" disable-output-escaping="yes" />
             </xsl:when>
             <xsl:when test="atom:summary">
-              <p><xsl:value-of select="atom:summary" disable-output-escaping="yes" /></p>
+              <p data-feed-html=""><xsl:value-of select="atom:summary" disable-output-escaping="yes" /></p>
             </xsl:when>
             <xsl:otherwise>
               <xsl:value-of select="description" disable-output-escaping="yes" />
