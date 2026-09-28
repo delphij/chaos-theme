@@ -204,24 +204,29 @@ img {
    COMPONENTS
    ========================================================================== */
 
-/* Intro banner, built like .alert in main.css: a tinted ground and one accent
-   edge, no surrounding box. */
+/* Intro banner, the same on every XSLT page: built like a quote in main.css,
+   on the quiet warm ground with no surrounding box, and headed by a line
+   icon in the primary colour. */
 .info-card {
-  background: var(--alert-note-bg);
-  border-left: 4px solid var(--alert-note-border);
-  border-radius: 0.5em;
-  padding: 1em;
+  background: var(--ground);
+  border: none;
+  border-radius: var(--radius-card);
+  padding: 1em 1.25em;
   margin: 0 0 32px;
   line-height: var(--line-height);
 }
 
-.info-card.accent-primary {
-  border-left-color: var(--primary);
-}
-
 .info-card h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: var(--h3-size);
   margin: 0 0 8px;
+}
+
+.info-card h1 svg {
+  color: var(--primary);
+  flex-shrink: 0;
 }
 
 .info-card p {
@@ -234,7 +239,7 @@ img {
   margin-bottom: 0;
 }
 
-/* Tables: bare, striped, with the inverted header the main site uses. */
+/* Tables: bare, striped, with the same header as the main site. */
 table {
   width: 100%;
   margin: 1em 0;
@@ -253,8 +258,8 @@ table td {
 table thead th {
   border-bottom: 2px solid var(--border-color);
   vertical-align: bottom;
-  background-color: var(--text);
-  color: var(--bg);
+  background-color: var(--table-head-bg);
+  color: var(--table-head-fg);
 }
 
 table tbody tr:nth-of-type(even) {
@@ -262,13 +267,22 @@ table tbody tr:nth-of-type(even) {
 }
 
 blockquote {
-  border-left: 4px solid var(--accent);
-  margin: 16px 0;
-  padding: 12px 16px;
-  background: var(--paper);
-  border-radius: var(--radius-md);
+  border: none;
+  margin: 1.5em 0;
+  padding: 1em 1.25em;
+  background: var(--blockquote-bg);
+  border-radius: var(--radius-card);
   color: var(--blockquote-fg);
   font-size: 0.95em;
+}
+
+blockquote > :first-child {
+  margin-top: 0;
+}
+
+blockquote > :last-child,
+.feed-entry-content blockquote > :last-child {
+  margin-bottom: 0;
 }
 
 blockquote ol,
@@ -299,4 +313,50 @@ pre code,
 .highlight code,
 .chroma code {
   font-size: inherit;
+}
+
+/* Feed callouts retain the same labelled, tinted cards as article callouts. */
+.alert {
+  font-size: var(--font-size-base);
+}
+
+.alert .alert-heading {
+  margin: 0 0 0.4em;
+  font-weight: 600;
+  color: var(--alert-accent, var(--heading));
+}
+
+.alert-note,
+.alert-historical {
+  --alert-accent: var(--alert-note-border);
+  background: var(--alert-note-bg);
+}
+
+.alert-tip {
+  --alert-accent: var(--alert-tip-border);
+  background: var(--alert-tip-bg);
+}
+
+.alert-important {
+  --alert-accent: var(--alert-important-border);
+  background: var(--alert-important-bg);
+}
+
+.alert-warning,
+.alert-disclaimer {
+  --alert-accent: var(--alert-warning-border);
+  background: var(--alert-warning-bg);
+}
+
+.alert-caution {
+  --alert-accent: var(--alert-caution-border);
+  background: var(--alert-caution-bg);
+}
+
+/* System colours drop the tinted grounds that are a card's only edge. */
+@media (forced-colors: active) {
+  .info-card,
+  blockquote {
+    border: 1px solid CanvasText;
+  }
 }

@@ -56,44 +56,59 @@
     color-scheme: light;
 
     /* Color palette - Light mode
-       Primary brand colors with Japanese traditional color names */
-    --bg: #FAFAFA;                    /* 白練 Shiro-neri (page background) */
-    --surface: #FFFFFF;               /* 純白 Junpaku (card/panel surfaces) */
-    --text: #222222;                  /* 墨 Sumi (body text, 15.3:1 contrast on #FAFAFA) */
-    --heading: #111111;               /* 漆黑 Shikkoku (headings and titles, 18.2:1 contrast) */
-    --muted: #545454;                 /* 墨灰 Sumi-hai (secondary text, captions, 5.8:1 contrast) */
-    --primary: #A23E48;               /* 红緋 Hi-iro (primary brand color) */
-    --primary-hover: #7E2F37;         /* 红緋 deepened - hover for primary-coloured links */
-    --primary-fg: #FFFFFF;            /* High contrast text on primary in light mode (6.2:1) */
-    --accent: #2E5A88;                /* 瑠璃色 Ruri-iro (accent color) */
-    --paper: #F0E6D2;                 /* 生成色 Kinari-iro (paper texture background) */
+       Traditional colours at their published values (和色大辞典,
+       colordic.org/w). A colour tuned away from its reference loses the
+       name: say what it was derived from instead. */
+    --bg: #FBFAF5;                    /* 生成り色 Kinari-iro (page background) */
+    --surface: #FFFFFF;               /* 白 Shiro (card/panel surfaces) */
+    --text: #2B2B2B;                  /* 黒 Kuro (body text, 13.5:1) */
+    --heading: #16160E;               /* 暗黒色 Ankoku-shoku (headings, 17.4:1) */
+    --muted: #595857;                 /* 墨 Sumi (secondary text, 6.8:1; 5.6:1 on --paper) */
+    --primary: #9E3D3F;               /* 蘇芳 Suō (primary brand color) */
+    --primary-hover: #6C2C2F;         /* 葡萄茶 Ebi-cha, the deeper red for hover */
+    --primary-fg: #FFFFFF;            /* Text on primary (6.6:1) */
+    --accent: #165E83;                /* 藍色 Ai-iro (accent color) */
+    --paper: #EDE4CD;                 /* 練色 Neri-iro (active and hover grounds) */
 
-    /* Links - High contrast accessible blue palette (7.2:1 on #FAFAFA, WCAG AAA) */
-    --link: #0050A5;                  /* Default link color */
-    --link-hover: #003875;            /* Link hover state */
+    /* Links share the 藍 accent; dotted underlines identify prose links. */
+    --link: var(--accent);            /* Default link color */
+    --link-hover: #223A70;            /* 紺色 Kon-iro, 藍 dyed deeper */
 
     /* UI elements - Borders and backgrounds */
-    --table-stripe: #F2F2F2;           /* Alternating table row background */
-    --blockquote-fg: #333333;          /* Blockquote text color */
+    --table-stripe: var(--ground);     /* Table rows carry prose, so they take the paper tint;
+                                          only code needs a neutral ground */
+    --blockquote-fg: var(--text);      /* Quotes are set smaller, not fainter */
+    --table-head-bg: var(--text);      /* Table header: inverted ink by day... */
+    --table-head-fg: var(--bg);
+    --ground: #F5F2EB;                 /* Quiet ground for borderless blocks and chrome: a
+                                          warm tint toward 練色, no traditional name of its
+                                          own. The tinted grounds share one tier, about 1.07
+                                          against --bg, where the standard pale colours below
+                                          fall; the hue carries the rest of the edge. */
+    --blockquote-bg: var(--ground);    /* Blockquote ground */
     --border-color: rgba(0,0,0,0.1);     /* Border colour, for widths other than 1px */
     --border: 1px solid var(--border-color); /* Subtle border for light mode */
     --code-bg: #F0F0F0;                          /* Code block ground. Deliberately neutral:
                                                     a warm tint reads as yellow cast behind
-                                                    syntax colours. Separated from --bg enough
-                                                    to register as a block (1.09 vs 1.03). */
-    --mark-bg: rgba(204, 102, 0, 0.15);          /* Text & search highlight (山吹色 Yamabuki) */
+                                                    syntax colours. A step above the tinted
+                                                    grounds (1.09 against --bg). */
+    --mark-bg: rgba(248, 181, 0, 0.25);          /* Text & search highlight (山吹色 Yamabuki) */
 
-    /* Alert colors - Semantic color system for different message types */
-    --alert-note-bg: #F0F4FF;          /* Note/Historical background */
-    --alert-note-border: #3366CC;      /* Note border */
-    --alert-tip-bg: #F0FFF4;           /* Tip background */
-    --alert-tip-border: #228B22;       /* Tip border */
-    --alert-important-bg: #FFF8E5;     /* Important background */
-    --alert-important-border: #CC6600; /* Important border */
-    --alert-warning-bg: #FFF0F0;       /* Warning/Disclaimer background */
-    --alert-warning-border: #CC3333;   /* Warning border */
-    --alert-caution-bg: #FAF0FF;       /* Caution background */
-    --alert-caution-border: #8844AA;   /* Caution border */
+    /* Callouts. The historical -border tokens colour the headings; keep them
+       legible as small text on their grounds. 月白 and 薄桜 set the ground
+       lightness and chroma; the others are tints matched to them, since the
+       standard pale greens, purples and 鳥の子色 are either off that tier or
+       noticeably more saturated. */
+    --alert-note-bg: #EAF4FC;          /* 月白 Geppaku */
+    --alert-note-border: var(--accent);  /* 藍色 Ai-iro */
+    --alert-tip-bg: #EBF5ED;           /* Tint of 千歳緑 */
+    --alert-tip-border: #316745;       /* 千歳緑 Chitose-midori */
+    --alert-important-bg: #FDF0E5;     /* Tint between 柿茶 and 鳥の子色 */
+    --alert-important-border: #954E2A; /* 柿茶 Kaki-cha */
+    --alert-warning-bg: #FDEFF2;       /* 薄桜 Usu-zakura */
+    --alert-warning-border: var(--primary); /* 蘇芳 Suō */
+    --alert-caution-bg: #F4F1FC;       /* Tint of 菖蒲色 */
+    --alert-caution-border: #674196;   /* 菖蒲色 Shōbu-iro */
 
     /* Layout dimensions - Spacing and container widths */
     --max-width: 1280px;               /* Maximum container width for header/footer/nav */
@@ -102,7 +117,8 @@
                                           paired with the 1.7 line-height to stay readable. */
     --gutter: 24px;                    /* Horizontal padding */
     --nav-height: 80px;                /* Sticky navigation height for scroll offsets */
-    --radius: 10px;                    /* Border radius for cards */
+    --radius-card: 8px;                /* Shared shape for content cards and panels */
+    --radius: var(--radius-card);      /* Compatibility alias */
     --radius-sm: 4px;                  /* Small border radius */
     --radius-md: 6px;                  /* Medium border radius */
     --radius-lg: 8px;                  /* Large border radius */
@@ -139,8 +155,8 @@
     --z-modal: 60;                     /* Floating buttons (TOC toggle) */
     --z-top: 100;                      /* Top layer (skip link, announcements) */
 
-    /* Focus styles - High contrast for keyboard navigation accessibility (WCAG 2.4.11) */
-    --focus-outline: 2px solid var(--primary);
+    /* Visible keyboard focus, separate from hover and selection (WCAG 2.4.7). */
+    --focus-outline: 2px solid var(--link); /* Blue in both modes; red stays with brand and warnings */
     --focus-offset: 3px;
 
     /* Elevation and shadows */
@@ -156,40 +172,43 @@
       /* Color scheme - Tells browser to use native dark UI for controls */
       color-scheme: dark;
 
-      --bg: #1C1C1C;                     /* Dark background */
-      --surface: #222222;                /* Elevated surfaces */
-      --text: #E8E8E8;                   /* Neutral off-white, 13.9:1 (was GitHub's blue-grey) */
-      --heading: #FFFFFF;                /* High-contrast headings (17.5:1 contrast) */
-      --muted: #A8A8A8;                  /* Muted text (7.0:1 contrast on #1C1C1C) */
-      --primary: #FF6F61;                /* 珊瑚橙 (coral orange) */
-      --primary-hover: #FF9488;          /* Coral lightened - hover in dark mode (8.0:1) */
-      --primary-fg: #1C1C1C;             /* High contrast text on primary in dark mode (8.4:1) */
-      --accent: #8AB4F8;                 /* Lighter blue for dark mode */
-      --paper: #2A2A2A;                  /* Subtle background variation */
-      --link: #66B3FF;                   /* Brighter link meeting WCAG AAA (7.8:1 contrast) */
-      --link-hover: #99CCFF;             /* Link hover in dark mode */
-      --table-stripe: #242424;           /* Darker stripe for tables */
-      --blockquote-fg: #CCCCCC;          /* Lighter quote text */
+      --bg: #1F1E1D;                     /* Near-neutral warm charcoal; warmth stays subordinate to accents */
+      --surface: #252422;                /* Elevated surfaces (subtle warm charcoal elevation) */
+      --text: #DCDDDD;                   /* 白鼠 Shiro-nezu (12.2:1 on --bg) */
+      --heading: #F3F3F2;                /* 白練 Shiro-neri (15.0:1) */
+      --muted: #A3A3A2;                  /* 薄墨色 Usuzumi-iro (6.6:1; 5.7:1 on --paper) */
+      --primary: #D69090;                /* 退紅 Arazome, the pale red to light mode's 蘇芳 */
+      --primary-hover: #D4ACAD;          /* 薄柿 Usugaki: lighter, less chroma */
+      --primary-fg: #1F1E1D;             /* Dark ink on the rose accent (6.5:1) */
+      --accent: #84B9CB;                 /* 浅縹 Asa-hanada, the pale 藍 dye to light mode's 藍色 (7.8:1) */
+      --paper: #2B2925;                  /* Active and hover grounds (warm charcoal, unnamed) */
+      --link: var(--accent);             /* Same blue family as light mode */
+      --link-hover: #ABCED8;             /* 秘色色 Hisoku-iro: lighter, less chroma */
+      --ground: #282623;                 /* Warm charcoal, same tier as the alert grounds (~1.10) */
+      --table-head-bg: #34322D;          /* ...a raised warm charcoal by night, not a glaring
+                                            light bar: 1.30 against --bg, a step above the
+                                            stripes and --paper (unnamed) */
+      --table-head-fg: var(--heading);   /* 11.5:1 */
       --border-color: rgba(255,255,255,0.1);
       --border: 1px solid var(--border-color); /* Subtle dark border */
-      --code-bg: #242424;                /* Neutral, and lighter than --surface: code now sits
-                                            on the same elevation ladder as every other panel
-                                            instead of being darker than the page (#0d1117) */
-      --mark-bg: rgba(255, 184, 77, 0.25);
-      --focus-outline: 2px solid var(--link);
+      --code-bg: #262626;                /* Neutral like light mode; 1.10:1 against --bg */
+      --mark-bg: rgba(248, 181, 0, 0.16);  /* 山吹色 Yamabuki; stronger and muted text on it drops below AA */
       --shadow-dialog: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
 
-      /* Alert colors adapted for dark mode with higher contrast */
-      --alert-note-bg: #1E2A40;
-      --alert-note-border: #6699FF;
-      --alert-tip-bg: #1F2D1F;
-      --alert-tip-border: #66CC66;
-      --alert-important-bg: #332B1E;
-      --alert-important-border: #FFB84D;
-      --alert-warning-bg: #3A1E1E;
-      --alert-warning-border: #FF6666;
-      --alert-caution-bg: #2A1E33;
-      --alert-caution-border: #B266CC;
+      /* Grounds sit at one tier (~1.10 against --bg) so no callout type
+         outweighs another or a quote. The inks are traditional colours of
+         matching lightness (OKLCH L 0.71-0.76), each the dark-mode kin of
+         its light-mode hue. */
+      --alert-note-bg: #1F2730;
+      --alert-note-border: var(--accent);
+      --alert-tip-bg: #1F2823;
+      --alert-tip-border: #93B69C;      /* 薄青 Usu-ao */
+      --alert-important-bg: #2C251C;
+      --alert-important-border: #D8A373; /* 伽羅色 Kyara-iro */
+      --alert-warning-bg: #302326;
+      --alert-warning-border: var(--primary);
+      --alert-caution-bg: #2A2430;
+      --alert-caution-border: #A59ACA;  /* 藤紫 Fuji-murasaki */
     }
   }
 

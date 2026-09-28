@@ -54,8 +54,8 @@
         </header>
 
         <main class="container">
-          <section class="info-card accent-primary">
-            <h1 class="feed-notice-title">
+          <section class="info-card">
+            <h1>
               {{- /* The namespace is spelled out for Firefox, whose XSLT engine
                      builds the result tree directly: without it this is an
                      unknown HTML element and draws nothing. libxslt output

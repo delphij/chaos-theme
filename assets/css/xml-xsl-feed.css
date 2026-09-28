@@ -77,19 +77,6 @@
 
 /* ----- Feed-specific layout ----- */
 
-/* Icon sits on the baseline of the banner heading; size, colour and
-   spacing come from .info-card h1 in the shared partial. */
-.feed-notice-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.feed-notice-title svg {
-  color: var(--primary);
-  flex-shrink: 0;
-}
-
 /* The feed address, built like the article code-copy button: a quiet
    inset field that copies itself when clicked. */
 .feed-url-box {

@@ -200,6 +200,11 @@
     [tabindex]:focus-visible {
       outline: 2px solid Highlight;
     }
+
+    /* System colours drop the tinted grounds that are a quote's only edge. */
+    blockquote {
+      border: 1px solid CanvasText;
+    }
   }
 
   /* Anything that can be jumped to clears the sticky navigation: headings from
@@ -208,21 +213,29 @@
     scroll-margin-top: var(--nav-height);
   }
 
-  /* Blockquotes - Styled quote blocks with left border accent and background tint.
+  /* Blockquotes - Styled quote blocks with harmonious paper ground tint.
      Ahead of the lists below on purpose: on mobile a nested list inside a quote
      takes the nested-list indent, which needs `ul ul` to come after
      `blockquote ul` (the two tie on specificity). */
   blockquote {
-    border-left: 4px solid var(--accent);
-    margin: 16px 0;
-    padding: 12px 16px;
-    background: var(--paper);
-    border-radius: var(--radius-md);
+    border: none;
+    margin: 1.5em 0;
+    padding: 1em 1.25em;
+    background: var(--blockquote-bg);
+    border-radius: var(--radius-card);
     color: var(--blockquote-fg);
     font-style: normal;
     font-size: 0.95em;
 
-    /* Lists inside blockquotes - Indented to prevent markers colliding with borders */
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+
+    /* Lists inside blockquotes - Indented for clean reading texture */
     ol,
     ul {
       padding-left: 1.5em;
@@ -261,7 +274,7 @@
 
   /* ==========================================================================
      TABLES
-     Responsive table styling with striped rows and inverted header colors.
+     Responsive table styling with striped rows and a strong header row.
      ========================================================================== */
 
   table {
@@ -278,12 +291,12 @@
       vertical-align: top;
     }
 
-    /* Table header - Inverted colors for visual hierarchy */
+    /* Table header - Inverted in light mode, raised in dark (see tokens.css) */
     thead th {
       border-bottom: 2px solid var(--border-color);
       vertical-align: bottom;
-      background-color: var(--text);
-      color: var(--bg);
+      background-color: var(--table-head-bg);
+      color: var(--table-head-fg);
       white-space: nowrap;
     }
 
@@ -500,11 +513,11 @@
 
   .cat-link {
     font-weight: 600;
-    color: var(--primary);
+    color: var(--accent);
 
     &:hover,
     &:focus-visible {
-      color: var(--primary-hover);
+      color: var(--primary);
     }
   }
 
@@ -786,8 +799,8 @@
     overflow-y: auto;
     padding: 16px;
     background: var(--surface);
-    border: var(--border);
-    border-radius: var(--radius-lg);
+    border: var(--border);             /* White on --bg is 1.04: the hairline is the edge */
+    border-radius: var(--radius-card);
     contain: layout style;             /* Optimize rendering performance */
   }
 
@@ -931,7 +944,6 @@
     font-size: var(--text-sm);
     margin: 0;
     padding-bottom: 6px;
-    border-bottom: var(--border);
   }
 
   .sidebar-tags-cloud {
@@ -953,13 +965,12 @@
 
   .sidebar-more-link {
     font-size: var(--text-xs);
-    color: var(--primary);
+    color: var(--link);
     font-weight: 500;
-    transition: opacity var(--transition-fast);
+    transition: color var(--transition-fast);
 
     &:hover {
       color: var(--link-hover);
-      opacity: 0.8;
       text-decoration: underline;
     }
   }
@@ -1271,19 +1282,18 @@
 
   /* Card container */
   .x-card {
-    margin: 28px auto;
+    margin: 1.5em auto;
     max-width: 550px;
     width: 100%;
     background: var(--surface);
     border: var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-card);
     overflow: hidden;
     contain: layout style;
 
     @media (max-width: 768px) {
-      margin: 20px 0;
+      margin: 1.5em 0;
       max-width: 100%;
-      border-radius: var(--radius-md);
     }
   }
 
@@ -1291,12 +1301,12 @@
   .x-card-header {
     display: flex;
     align-items: center;
-    padding: 8px 16px;
+    padding: 8px 1.25em;
     background: var(--table-stripe);
     font-size: var(--small-size);
 
     @media (max-width: 768px) {
-      padding: 8px 12px;
+      padding: 8px 1em;
     }
   }
 
@@ -1328,10 +1338,10 @@
 
   /* Body and blockquote styling */
   .x-card-body {
-    padding: 16px 18px 14px;
+    padding: 1em 1.25em;
 
     @media (max-width: 768px) {
-      padding: 12px 14px;
+      padding: 0.9em 1em;
     }
   }
 
@@ -1352,12 +1362,12 @@
   }
 
   article.post blockquote.twitter-tweet:not(.x-card blockquote) {
-    margin: 28px auto;
+    margin: 1.5em auto;
     max-width: 550px;
-    padding: 16px 18px 14px;
+    padding: 1em 1.25em;
     background: var(--surface);
     border: var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-card);
   }
 
   blockquote.twitter-tweet {
@@ -1413,49 +1423,67 @@
      Color-coded for different message types with consistent styling.
      ========================================================================== */
 
-  /* Base alert styles - Left border with rounded corners */
+  /* Base alert styles - Borderless paper ground sheet with rounded corners */
   .alert {
-    border-left: 4px solid;
-    padding: 1em;
+    border: none;
+    padding: 1em 1.25em;
     margin: 1.5em 0;
-    border-radius: 0.5em;
+    border-radius: var(--radius-card);
     font-size: var(--font-size-base);
     line-height: var(--line-height);
     contain: layout style;             /* Optimize rendering performance */
 
-    /* Lists inside alerts - Indented to prevent markers colliding with borders */
+    .alert-heading {
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 0.4em;
+      color: var(--alert-accent, var(--heading));
+      display: flex;
+      align-items: center;
+      gap: 0.35em;
+    }
+
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+
+    /* Lists inside alerts - Indented to prevent markers colliding with container bounds */
     ol,
     ul {
       padding-left: 1.5em;
     }
   }
 
-  /* Alert variants - Different colors for semantic meaning */
+  /* Alert variants - Distinct paper ground tints for semantic meaning */
   .alert-note,
   .alert-historical {
+    --alert-accent: var(--alert-note-border);
     background: var(--alert-note-bg);
-    border-color: var(--alert-note-border);
   }
 
   .alert-tip {
+    --alert-accent: var(--alert-tip-border);
     background: var(--alert-tip-bg);
-    border-color: var(--alert-tip-border);
   }
 
   .alert-important {
+    --alert-accent: var(--alert-important-border);
     background: var(--alert-important-bg);
-    border-color: var(--alert-important-border);
   }
 
   .alert-warning,
   .alert-disclaimer {
+    --alert-accent: var(--alert-warning-border);
     background: var(--alert-warning-bg);
-    border-color: var(--alert-warning-border);
   }
 
   .alert-caution {
+    --alert-accent: var(--alert-caution-border);
     background: var(--alert-caution-bg);
-    border-color: var(--alert-caution-border);
   }
 
   /* ==========================================================================
@@ -1678,7 +1706,7 @@
       justify-content: center;
       min-height: 44px;
       padding: 8px 18px;
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-md);
       font-weight: 600;
       border: var(--border);
       color: var(--heading);
@@ -2034,8 +2062,9 @@
       --muted: #444444;
       --border-color: #CCCCCC;
       --blockquote-fg: #111111;
+      --blockquote-bg: transparent;
       --paper: #F5F5F5;
-      --primary: #A23E48;
+      --primary: #9E3D3F;
       --primary-fg: #FFFFFF;
       --accent: #1C3B5E;
       --link: #003366;
@@ -2043,7 +2072,7 @@
       --table-stripe: #F9F9F9;
       --mark-bg: #FFE58F;
       --code-bg: #F2F2F2;
-      --primary-hover: #7E2F37;
+      --primary-hover: #6C2C2F;
 
       /* Alert colors for print: crisp, high-contrast, paper-friendly */
       --alert-note-bg: #F4F7FC;
