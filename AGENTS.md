@@ -7,6 +7,11 @@ This document provides essential context for AI models and human contributors co
 ### Design Principles
 * **Minimalism**: Add features only when necessary; prefer simplicity over complexity
 * **Performance First**: Every byte counts - target <10KB total JavaScript, efficient CSS
+* **Visual language**: Use `--radius-card` for content cards and panels, small
+  radii for controls, and square neutral backgrounds for code blocks. Keep
+  prose lists open and unboxed. Use the shared light/dark palette in
+  `assets/css/tokens.css`; verify text against tinted and selected backgrounds
+  as well as the page background.
 * **Accessibility Always**: WCAG 2.1 AA compliance is non-negotiable
 * **Internationalization by Default**: No hardcoded text; proper CJK typography support
 * **Baseline Widely Available**: Use what every major engine has shipped for 30+ months; anything newer is progressive enhancement
