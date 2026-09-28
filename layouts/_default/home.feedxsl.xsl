@@ -112,9 +112,9 @@
 
           <h2 class="feed-section-heading">{{ T "feedLatestPosts" }}</h2>
 
-          <ul class="feed-entries">
+          <div class="feed-entries">
             <xsl:apply-templates select="atom:feed/atom:entry | rss/channel/item" />
-          </ul>
+          </div>
 
           <footer class="page-footer">
             <p>
@@ -138,107 +138,105 @@
   </xsl:template>
 
   <xsl:template match="atom:entry | item">
-    <li class="feed-entry">
-      <article>
-        <h3 class="feed-entry-title">
-          <a class="link-plain">
-            <xsl:attribute name="href">
-              <xsl:value-of select="atom:link[not(@rel) or @rel='alternate']/@href | link" />
-            </xsl:attribute>
-            <xsl:value-of select="atom:title | title" />
-          </a>
-        </h3>
+    <article>
+      <h3 class="feed-entry-title">
+        <a class="link-plain">
+          <xsl:attribute name="href">
+            <xsl:value-of select="atom:link[not(@rel) or @rel='alternate']/@href | link" />
+          </xsl:attribute>
+          <xsl:value-of select="atom:title | title" />
+        </a>
+      </h3>
 
-        <div class="feed-entry-meta">
-          <time>
-            <xsl:choose>
-              <xsl:when test="atom:published">
-                <xsl:value-of select="substring(atom:published, 1, 10)" />
-                <xsl:if test="string-length(atom:published) &gt;= 16">
-                  <xsl:text> </xsl:text>
-                  <xsl:value-of select="substring(atom:published, 12, 5)" />
-                </xsl:if>
-              </xsl:when>
-              <xsl:when test="atom:updated">
-                <xsl:value-of select="substring(atom:updated, 1, 10)" />
-                <xsl:if test="string-length(atom:updated) &gt;= 16">
-                  <xsl:text> </xsl:text>
-                  <xsl:value-of select="substring(atom:updated, 12, 5)" />
-                </xsl:if>
-              </xsl:when>
-              <xsl:when test="pubDate">
-                <xsl:choose>
-                  <xsl:when test="string-length(pubDate) &gt;= 16">
-                    <xsl:value-of select="substring(pubDate, 1, 16)" />
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <xsl:value-of select="pubDate" />
-                  </xsl:otherwise>
-                </xsl:choose>
-              </xsl:when>
-            </xsl:choose>
-          </time>
-
-          <xsl:variable name="author-name">
-            <xsl:choose>
-              <xsl:when test="atom:author/atom:name">
-                <xsl:value-of select="atom:author/atom:name" />
-              </xsl:when>
-              <xsl:when test="dc:creator">
-                <xsl:value-of select="dc:creator" />
-              </xsl:when>
-              <xsl:when test="author">
-                <xsl:value-of select="author" />
-              </xsl:when>
-            </xsl:choose>
-          </xsl:variable>
-          <xsl:if test="normalize-space($author-name) != ''">
-            <span>•</span>
-            <span><xsl:value-of select="$author-name" /></span>
-          </xsl:if>
-
-          <xsl:if test="atom:category | category">
-            <span>•</span>
-            <span class="feed-entry-tags">
-              {{- /* Tags are flat muted text, like .tag-link on the site; the
-                     flex gap on .feed-entry-tags does the separating. */}}
-              <xsl:for-each select="atom:category/@term | category">
-                <span><xsl:value-of select="." /></span>
-              </xsl:for-each>
-            </span>
-          </xsl:if>
-        </div>
-
-        {{- /* data-feed-html marks where escaped HTML lands. Firefox's XSLT
-               engine ignores disable-output-escaping (bug 98168) and leaves it
-               as text; xml-xsl-feed.js parses it into markup there. */}}
-        <div class="feed-entry-content" data-feed-html="">
+      <div class="feed-entry-meta">
+        <time>
           <xsl:choose>
-            <xsl:when test="atom:content">
-              <xsl:value-of select="atom:content" disable-output-escaping="yes" />
+            <xsl:when test="atom:published">
+              <xsl:value-of select="substring(atom:published, 1, 10)" />
+              <xsl:if test="string-length(atom:published) &gt;= 16">
+                <xsl:text> </xsl:text>
+                <xsl:value-of select="substring(atom:published, 12, 5)" />
+              </xsl:if>
             </xsl:when>
-            <xsl:when test="content:encoded">
-              <xsl:value-of select="content:encoded" disable-output-escaping="yes" />
+            <xsl:when test="atom:updated">
+              <xsl:value-of select="substring(atom:updated, 1, 10)" />
+              <xsl:if test="string-length(atom:updated) &gt;= 16">
+                <xsl:text> </xsl:text>
+                <xsl:value-of select="substring(atom:updated, 12, 5)" />
+              </xsl:if>
             </xsl:when>
-            <xsl:when test="atom:summary">
-              <p data-feed-html=""><xsl:value-of select="atom:summary" disable-output-escaping="yes" /></p>
+            <xsl:when test="pubDate">
+              <xsl:choose>
+                <xsl:when test="string-length(pubDate) &gt;= 16">
+                  <xsl:value-of select="substring(pubDate, 1, 16)" />
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="pubDate" />
+                </xsl:otherwise>
+              </xsl:choose>
             </xsl:when>
-            <xsl:otherwise>
-              <xsl:value-of select="description" disable-output-escaping="yes" />
-            </xsl:otherwise>
           </xsl:choose>
-        </div>
+        </time>
 
-        <div class="feed-entry-more">
-          <a class="feed-read-more">
-            <xsl:attribute name="href">
-              <xsl:value-of select="atom:link[not(@rel) or @rel='alternate']/@href | link" />
-            </xsl:attribute>
-            {{ T "feedReadMore" }}
-          </a>
-        </div>
-      </article>
-    </li>
+        <xsl:variable name="author-name">
+          <xsl:choose>
+            <xsl:when test="atom:author/atom:name">
+              <xsl:value-of select="atom:author/atom:name" />
+            </xsl:when>
+            <xsl:when test="dc:creator">
+              <xsl:value-of select="dc:creator" />
+            </xsl:when>
+            <xsl:when test="author">
+              <xsl:value-of select="author" />
+            </xsl:when>
+          </xsl:choose>
+        </xsl:variable>
+        <xsl:if test="normalize-space($author-name) != ''">
+          <span>•</span>
+          <span><xsl:value-of select="$author-name" /></span>
+        </xsl:if>
+
+        <xsl:if test="atom:category | category">
+          <span>•</span>
+          <span class="feed-entry-tags">
+            {{- /* Tags are flat muted text, like .tag-link on the site; the
+                   flex gap on .feed-entry-tags does the separating. */}}
+            <xsl:for-each select="atom:category/@term | category">
+              <span><xsl:value-of select="." /></span>
+            </xsl:for-each>
+          </span>
+        </xsl:if>
+      </div>
+
+      {{- /* data-feed-html marks where escaped HTML lands. Firefox's XSLT
+             engine ignores disable-output-escaping (bug 98168) and leaves it
+             as text; xml-xsl-feed.js parses it into markup there. */}}
+      <div class="feed-entry-content" data-feed-html="">
+        <xsl:choose>
+          <xsl:when test="atom:content">
+            <xsl:value-of select="atom:content" disable-output-escaping="yes" />
+          </xsl:when>
+          <xsl:when test="content:encoded">
+            <xsl:value-of select="content:encoded" disable-output-escaping="yes" />
+          </xsl:when>
+          <xsl:when test="atom:summary">
+            <p data-feed-html=""><xsl:value-of select="atom:summary" disable-output-escaping="yes" /></p>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="description" disable-output-escaping="yes" />
+          </xsl:otherwise>
+        </xsl:choose>
+      </div>
+
+      <div class="feed-entry-more">
+        <a class="feed-read-more">
+          <xsl:attribute name="href">
+            <xsl:value-of select="atom:link[not(@rel) or @rel='alternate']/@href | link" />
+          </xsl:attribute>
+          {{ T "feedReadMore" }}
+        </a>
+      </div>
+    </article>
   </xsl:template>
 
 </xsl:stylesheet>

@@ -102,11 +102,9 @@
 }
 
 /* Entries are spaced like .post-entry on the homepage: whitespace
-   only, no rules or cards between them. */
+   only, no rules or cards between them. A plain block of articles, not a
+   list, so the lists inside an entry keep their first-level markers. */
 .feed-entries {
-  list-style: none;
-  padding: 0;
-  margin: 0;
   display: flex;
   flex-direction: column;
   gap: 48px;
