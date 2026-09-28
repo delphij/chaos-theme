@@ -16,7 +16,7 @@ styles (no single style styles every token), then reports:
   * classes syntax.css maps that no style emits any more (stale);
   * classes whose token name in syntax.css's comment no longer matches
     Chroma's (a short name reassigned);
-  * structural classes main.css is expected to lay out but does not;
+  * structural classes prose.css is expected to lay out but does not;
   * --syntax-* inks below 4.5:1 on the code ground or a highlighted line,
     in either mode.
 
@@ -42,7 +42,7 @@ STYLES = [
     'witchhazel', 'doom-one2', 'base16-snazzy',
 ]
 
-# Laid out in main.css rather than coloured in syntax.css.
+# Laid out in prose.css rather than coloured in syntax.css.
 STRUCTURAL = {'lntable', 'lntd', 'lnlinks', 'line'}
 
 # Wrappers, not tokens.
@@ -168,7 +168,7 @@ def main():
 
     css = args.theme / 'assets' / 'css'
     syntax_css = (css / 'syntax.css').read_text(encoding='utf-8')
-    main_css = (css / 'main.css').read_text(encoding='utf-8')
+    prose_css = (css / 'prose.css').read_text(encoding='utf-8')
     tokens_css = (css / 'tokens.css').read_text(encoding='utf-8')
     notes_md = (css / 'syntax-upgrade.md').read_text(encoding='utf-8')
 
@@ -192,9 +192,9 @@ def main():
             issue(f'renamed: .{cls} is {emitted[cls]} in Chroma but {mapped[cls]} in syntax.css')
     for cls in sorted(STRUCTURAL):
         if cls not in emitted:
-            issue(f'structural: .{cls} is no longer emitted; main.css may lay out a dead class')
-        elif not re.search(rf'\.{cls}\b', main_css):
-            issue(f'structural: .{cls} is emitted but main.css does not lay it out')
+            issue(f'structural: .{cls} is no longer emitted; prose.css may lay out a dead class')
+        elif not re.search(rf'\.{cls}\b', prose_css):
+            issue(f'structural: .{cls} is emitted but prose.css does not lay it out')
 
     check_contrast(tokens_css)
 

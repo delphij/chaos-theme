@@ -1,0 +1,469 @@
+/* ==========================================================================
+   PROSE
+   Everything the body of an article needs, shared by the site bundle and
+   the XSLT-rendered pages (the feed shows whole entries), so the two render
+   Markdown output from the same rules rather than from parallel copies.
+
+     chaos.base        Element defaults: element selectors and their
+                       states, the global focus ring and anchor offset.
+     chaos.components  The prose components Markdown renders: callouts and
+                       the layout of highlighted code (colours: syntax.css).
+
+   Loaded right after tokens.css, which declares the layer order. Nesting
+   and breakpoints follow the conventions at the top of main.css.
+   ========================================================================== */
+
+@layer chaos.base {
+  /* ==========================================================================
+     BASE STYLES
+     Foundation styles for html and body elements.
+     Sets up font stack, smoothing, and Chinese typography features.
+     ========================================================================== */
+
+  html {
+    height: 100%;                      /* Full viewport height */
+    scroll-behavior: smooth;           /* Smooth scrolling for anchor links */
+    scrollbar-gutter: stable;          /* Prevent layout shift when scrollbars appear */
+
+    @media (prefers-reduced-motion: reduce) {
+      scroll-behavior: auto;           /* Instant scrolling for reduced motion */
+    }
+  }
+
+  body {
+    height: 100%;                      /* Full viewport height */
+
+    /* Font stack: Noto Sans SC for Chinese, with high quality CJK system font fallbacks */
+    font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height);
+
+    /* Font smoothing for better rendering on macOS and WebKit browsers */
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+
+    /* Chinese text best practices - Modern CSS features for CJK typography
+       - text-autospace: Automatic spacing between CJK and Latin characters
+       - hanging-punctuation: Allow punctuation to hang outside margins
+       - overflow-wrap / word-break: Natural character-grid breaking without artificial phrase gaps */
+    text-autospace: normal;
+    hanging-punctuation: first allow-end last;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  /* ==========================================================================
+     TYPOGRAPHY
+     Text styling hierarchy including headings, paragraphs, links, and lists.
+     Optimized for readability in both English and Chinese.
+     ========================================================================== */
+
+  /* Headings - Shared styles for all heading levels */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--heading);
+    font-weight: 700;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+
+  /* Heading spacing is set in em so it tracks the responsive size steps, and the
+     space above is deliberately far larger than the 1.15em gap between paragraphs:
+     with the previous px values a paragraph followed by an h3 was separated by
+     exactly as much air as two paragraphs, so the heading grouped with nothing. */
+
+  /* H1 - Page and article titles */
+  h1 {
+    font-size: var(--h1-size);
+    margin: 0.6em 0 0.4em;
+    font-weight: 700;
+    letter-spacing: -0.01em;           /* Tighter spacing for large text */
+  }
+
+  /* H2 - Major section headings */
+  h2 {
+    font-size: var(--h2-size);
+    margin: 2em 0 0.5em;
+  }
+
+  /* H3 - Sub-section headings */
+  h3 {
+    font-size: var(--h3-size);
+    margin: 1.7em 0 0.4em;
+  }
+
+  /* H4-H6 - Previously unstyled, so they inherited the global margin reset and
+     sat flush against the surrounding text. */
+  h4,
+  h5,
+  h6 {
+    font-size: var(--font-size-base);
+    margin: 1.5em 0 0.4em;
+  }
+
+  /* Paragraphs - Body text with orphan/widow control for better typography */
+  p {
+    margin: 0 0 1.15em;
+    orphans: 2;                        /* Minimum 2 lines at bottom of column */
+    widows: 2;                         /* Minimum 2 lines at top of column */
+  }
+
+  /* Links - Dotted underline with smooth transition to solid on hover.
+     Here in the base layer, a link state loses to any component rule, so a
+     component that drops the underline need not drop it again for :hover. */
+  a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--link);
+    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+
+    &:hover {
+      color: var(--link-hover);
+      border-bottom-style: solid;
+      border-bottom-color: var(--link-hover);
+    }
+  }
+
+  /* Focus ring for keyboard navigation accessibility */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  [tabindex]:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-offset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  /* High Contrast Mode support. Flat: the list above mixes specificities. */
+  @media (forced-colors: active) {
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 2px solid Highlight;
+    }
+
+    /* System colours drop the tinted grounds that are a quote's only edge. */
+    blockquote {
+      border: 1px solid CanvasText;
+    }
+  }
+
+  /* Anything that can be jumped to clears the sticky navigation: headings from
+     the TOC, the skip link's #main-content, footnotes and their back-links. */
+  [id] {
+    scroll-margin-top: var(--nav-height);
+  }
+
+  /* Blockquotes - a card on the quiet ground, no rail. Callouts are
+     blockquotes too and take their shape from here.
+     Ahead of the lists below on purpose: on mobile a nested list inside a quote
+     takes the nested-list indent, which needs `ul ul` to come after
+     `blockquote ul` (the two tie on specificity). */
+  blockquote {
+    margin: 1.5em 0;
+    padding: 1em 1.25em;
+    background: var(--blockquote-bg);
+    border-radius: var(--radius-card);
+    color: var(--blockquote-fg);
+    font-size: 0.95em;
+
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+
+    /* Lists inside a card indent, so markers cannot hang off its edge */
+    ol,
+    ul {
+      padding-left: 1.5em;
+    }
+  }
+
+  /* Lists - Hanging indent: list markers appear in the margin, text is flush with paragraph measure */
+  ul,
+  ol {
+    margin: 1em 0;                      /* Consistent spacing before and after lists */
+    font-variant-numeric: tabular-nums; /* Consistent number width */
+    padding-left: 0;
+
+    /* Lists on mobile - Indent safely to prevent markers from clipping at the screen edge */
+    @media (max-width: 768px) {
+      padding-left: 1.4em;
+    }
+
+    &::marker {
+      color: var(--muted);              /* Subtle marker tone for classical print feel */
+    }
+  }
+
+  /* Nested lists: indent child items to preserve visual hierarchy */
+  ul ul,
+  ul ol,
+  ol ul,
+  ol ol {
+    padding-left: 1.5em;
+    margin: 0.3em 0;
+
+    @media (max-width: 768px) {
+      padding-left: 1.2em;
+    }
+  }
+
+  /* ==========================================================================
+     TABLES
+     Responsive table styling with striped rows and a strong header row.
+     ========================================================================== */
+
+  table {
+    width: 100%;
+    margin: 1em 0;
+    font-variant-numeric: tabular-nums; /* Columns of figures must align */
+
+    /* Table cells - Consistent padding and borders */
+    th,
+    td {
+      border-bottom: var(--border);
+      padding: 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    /* Table header - Inverted in light mode, raised in dark (see tokens.css) */
+    thead th {
+      border-bottom: 2px solid var(--border-color);
+      vertical-align: bottom;
+      background-color: var(--table-head-bg);
+      color: var(--table-head-fg);
+      white-space: nowrap;
+    }
+
+    /* Multiple table bodies - Visual separator */
+    tbody + tbody {
+      border-top: 2px solid var(--border-color);
+    }
+
+    /* Striped rows - Zebra striping for easier row scanning */
+    tbody tr:nth-of-type(even) {
+      background-color: var(--table-stripe);
+    }
+  }
+
+  /* ==========================================================================
+     CODE
+     ========================================================================== */
+
+  /* Code elements share the monospace stack. Declaring the family explicitly
+     also cancels the UA monospace quirk, which otherwise renders code a few
+     pixels smaller than the surrounding CJK text. */
+  pre,
+  code,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+  }
+
+  /* Code blocks: a square, neutral, scrollable slab in a smaller size */
+  pre {
+    margin: 1.5em 0;
+    padding: 12px;
+    background: var(--code-bg);
+    border-radius: 0;
+    overflow-x: auto;
+    font-size: var(--small-size);
+    hanging-punctuation: none;         /* Disable for monospace code blocks */
+  }
+
+  /* Inline code - no backdrop of its own: the monospace face already separates
+     it from running CJK text, and a tint would only add noise mid-paragraph.
+     The block-level background on .highlight stays, since a block is its own
+     unit. Size is an optical adjustment (mono x-height runs large next to CJK),
+     set in em so it tracks its context: body, heading or list item. */
+  code {
+    font-size: 0.9em;
+    overflow-wrap: break-word;
+  }
+
+  /* Code inside a block inherits the block's size, not the inline adjustment */
+  pre code {
+    font-size: inherit;
+  }
+
+  /* ==========================================================================
+     CHINESE TYPOGRAPHY
+     Ruby annotations (phonetic guides) and highlighted text.
+     ========================================================================== */
+
+  /* Ruby annotations - Phonetic notation marks
+     Used for showing pronunciation above Chinese characters */
+  ruby {
+    ruby-position: over;               /* Position annotations above base text */
+    font-variant-east-asian: ruby;
+  }
+
+  /* Ruby text - The small pronunciation guide */
+  rt {
+    font-size: 0.65em;
+    line-height: 1;
+    color: var(--muted);
+    font-weight: normal;
+    letter-spacing: 0.05em;
+    padding: 0 0.1em;
+  }
+
+  /* Highlighted text - search matches and marked text in content */
+  mark {
+    background: var(--mark-bg);
+    color: var(--heading);
+    padding: 0 3px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+@layer chaos.components {
+  /* ==========================================================================
+     CALLOUTS
+     GitHub-style alerts, rendered as blockquote.alert by render-blockquote.html,
+     so the quote card above gives them their shape. Each type sets its tint
+     and the colour of its labelled heading; the label and icon carry the
+     meaning, not the colour alone.
+     ========================================================================== */
+
+  .alert {
+    font-size: var(--font-size-base);  /* Body size: a callout is not a quotation */
+    contain: layout style;             /* Optimize rendering performance */
+
+    .alert-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.35em;
+      margin-bottom: 0.4em;
+      font-weight: 600;
+      color: var(--alert-accent, var(--heading));
+    }
+  }
+
+  .alert-note,
+  .alert-historical {
+    --alert-accent: var(--alert-note-border);
+    background: var(--alert-note-bg);
+  }
+
+  .alert-tip {
+    --alert-accent: var(--alert-tip-border);
+    background: var(--alert-tip-bg);
+  }
+
+  .alert-important {
+    --alert-accent: var(--alert-important-border);
+    background: var(--alert-important-bg);
+  }
+
+  .alert-warning,
+  .alert-disclaimer {
+    --alert-accent: var(--alert-warning-border);
+    background: var(--alert-warning-bg);
+  }
+
+  .alert-caution {
+    --alert-accent: var(--alert-caution-border);
+    background: var(--alert-caution-bg);
+  }
+
+  /* ==========================================================================
+     HIGHLIGHTED CODE
+     Chroma's markup: the wrapper, line numbers and horizontal scroll. The
+     slab itself is the base pre above; colours are in syntax.css.
+     ========================================================================== */
+
+  /* The wrapper carries the block spacing, so consecutive blocks keep it,
+     and anchors the site's copy button. */
+  .highlight {
+    position: relative;
+    margin: 1.5em 0;
+
+    pre {
+      margin: 0;
+    }
+  }
+
+  /* Chroma structural styles - Layout for syntax highlighting components */
+  .chroma {
+    /* Line number links - The base link underline is a border */
+    .lnlinks {
+      border-bottom: none;
+      color: inherit;
+    }
+
+    /* Line number table cells - Reset spacing */
+    .lntd {
+      vertical-align: top;
+      padding: 0;
+      margin: 0;
+      border: 0;
+    }
+
+    /* Line number table - Horizontal scroll container with hanging indent on desktop only */
+    .lntable {
+      border-spacing: 0;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      overflow-x: auto;
+      display: block;
+      max-width: 100%;                   /* Keep code column at original width */
+
+      /* Hanging indent for line numbers on screens > 768px where there's space
+         Synchronized with list hanging indent breakpoint (769px) */
+      @media (min-width: 769px) {
+        margin: 0 0 0 -3em;              /* Shift left so line numbers hang in margin */
+      }
+    }
+
+    /* Line numbers - Unselectable with consistent spacing */
+    .lnt,
+    .ln {
+      white-space: pre;
+      -webkit-user-select: none;
+      user-select: none;
+      padding: 0 0 0 0.4em;
+    }
+
+    /* Line-number column: hangs in the page margin on wide screens, on the
+       page ground so the indent leaves no code-coloured strip; hidden on
+       narrow ones to keep the reading width. */
+    .lntd:first-child {
+      @media (min-width: 769px) {
+        pre {
+          background: var(--bg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        display: none;
+      }
+    }
+
+    /* Code lines - Flex layout for alignment */
+    .line {
+      display: flex;
+    }
+  }
+}

@@ -51,9 +51,9 @@ hugo --gc --minify          # Production build
 ### CSS
 **Organization**: cascade layers, declared once at the top of `tokens.css`:
 `chaos.reset` (normalize.css) → `chaos.tokens` → `chaos.base` (element
-defaults in main.css) → `chaos.syntax` (Chroma colours) → `chaos.components`
-(everything with a class or id, then print). A later layer wins
-regardless of specificity, and unlayered CSS beats them all.
+defaults in prose.css) → `chaos.syntax` (Chroma classes onto the `--syntax-*`
+roles) → `chaos.components` (everything with a class or id, then print). A
+later layer wins regardless of specificity, and unlayered CSS beats them all.
 
 **Nesting**: nest a component's states, children and breakpoints inside it.
 Only nest under a single selector or a list of equal specificity -- `&` takes
@@ -157,9 +157,10 @@ The two added for this theme's own correctness:
 
 - `tools/check.py --public public` -- i18n key parity, unread translations,
   version parity (theme.toml vs hugo.toml), CJK literals, authored script left
-  inline in a template, template indentation leaking into the feeds, a menu
-  whose active entry is not the page's own. Python 3 only, exit 1 on failure,
-  and it belongs in the build right after `hugo`
+  inline in a template, template indentation leaking into the feeds, an XSL
+  stylesheet that no longer parses as XML, a menu whose active entry is not
+  the page's own. Python 3 only, exit 1 on failure, and it belongs in the
+  build right after `hugo`
 - `tools/search_harness.mjs` -- runs `assets/js/search.js` against a real
   index in a stubbed DOM; `--compare <file>` checks a change against the
   version it replaces. Derives its queries from the index, so it carries no
@@ -184,7 +185,7 @@ one.
 ## Performance Optimizations
 
 ### CSS
-- Shared utility classes (`.overlay-blur`)
+- One `prose.css` shared by the site and the XSLT pages
 - CSS containment on isolated components
 - Specific transition properties
 - Dynamic viewport units (`dvh`)

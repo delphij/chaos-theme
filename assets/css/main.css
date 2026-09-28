@@ -6,13 +6,11 @@
    specificity, and any unlayered rule beats them all -- so a site restyles
    the theme by writing plain CSS, with no specificity to outbid.
 
-   This file fills two of them:
-
-     chaos.base        Element defaults: element selectors and their
-                       states (a:hover, :focus-visible), the global focus
-                       ring and anchor offset. A component restyles any of
-                       it by naming a class, never by outbidding it.
-     chaos.components  Everything that names a class or id.
+   This file fills chaos.components: everything that names a class or id,
+   then print. Element defaults (chaos.base) and the prose components that
+   Markdown renders are in prose.css, which the XSLT pages share; a
+   component here restyles a default by naming a class, never by outbidding
+   it.
 
    Rules are nested where the parent is a single selector (or a list whose
    members share one specificity). A nested rule's `&` takes the highest
@@ -28,7 +26,7 @@
                    becomes the floating toggle and drawer
       960px  max   the brand subtitle stops fitting beside the title
       769px  min   the one min-width query: the code block line-number
-                   column. Complementary with 768px max, which hides that
+                   column (prose.css). Complementary with 768px max, which hides that
                    column outright -- which is why it is 769 and not 768,
                    so the two can never both apply
       768px  max   the mobile layout proper: stacked nav behind the menu
@@ -38,9 +36,10 @@
       600px  max   the archive timeline's date column only: narrowed, and
                    the full date swapped for the short one
 
-   Also: (prefers-reduced-motion: reduce) with the view transition and
-   scroll behaviour, (forced-colors: active) with the :focus-visible styles,
-   (hover: none) with the code copy button, and print at the end.
+   Also: (prefers-reduced-motion: reduce) with the view transition here and
+   the rest in prose.css, (forced-colors: active) with the :focus-visible
+   styles in prose.css and the search dialog here, (hover: none) with the
+   code copy button, and print at the end.
    ========================================================================== */
 
 /* Document-level at-rules. They configure the document rather than style an
@@ -63,326 +62,6 @@
   @page {
     size: auto;
     margin: 20mm 15mm;
-  }
-}
-
-@layer chaos.base {
-  /* ==========================================================================
-     BASE STYLES
-     Foundation styles for html and body elements.
-     Sets up font stack, smoothing, and Chinese typography features.
-     ========================================================================== */
-
-  html {
-    height: 100%;                      /* Full viewport height */
-    scroll-behavior: smooth;           /* Smooth scrolling for anchor links */
-    scrollbar-gutter: stable;          /* Prevent layout shift when scrollbars appear */
-
-    @media (prefers-reduced-motion: reduce) {
-      scroll-behavior: auto;           /* Instant scrolling for reduced motion */
-    }
-  }
-
-  body {
-    height: 100%;                      /* Full viewport height */
-
-    /* Font stack: Noto Sans SC for Chinese, with high quality CJK system font fallbacks */
-    font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    font-size: var(--font-size-base);
-    line-height: var(--line-height);
-
-    /* Font smoothing for better rendering on macOS and WebKit browsers */
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-font-smoothing: antialiased;
-
-    /* Chinese text best practices - Modern CSS features for CJK typography
-       - text-autospace: Automatic spacing between CJK and Latin characters
-       - hanging-punctuation: Allow punctuation to hang outside margins
-       - overflow-wrap / word-break: Natural character-grid breaking without artificial phrase gaps */
-    text-autospace: normal;
-    hanging-punctuation: first allow-end last;
-    word-break: normal;
-    overflow-wrap: break-word;
-  }
-
-  /* ==========================================================================
-     TYPOGRAPHY
-     Text styling hierarchy including headings, paragraphs, links, and lists.
-     Optimized for readability in both English and Chinese.
-     ========================================================================== */
-
-  /* Headings - Shared styles for all heading levels */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    color: var(--heading);
-    font-weight: 700;
-    line-height: 1.35;
-    text-wrap: balance;
-  }
-
-  /* Heading spacing is set in em so it tracks the responsive size steps, and the
-     space above is deliberately far larger than the 1.15em gap between paragraphs:
-     with the previous px values a paragraph followed by an h3 was separated by
-     exactly as much air as two paragraphs, so the heading grouped with nothing. */
-
-  /* H1 - Page and article titles */
-  h1 {
-    font-size: var(--h1-size);
-    margin: 0.6em 0 0.4em;
-    font-weight: 700;
-    letter-spacing: -0.01em;           /* Tighter spacing for large text */
-  }
-
-  /* H2 - Major section headings */
-  h2 {
-    font-size: var(--h2-size);
-    margin: 2em 0 0.5em;
-  }
-
-  /* H3 - Sub-section headings */
-  h3 {
-    font-size: var(--h3-size);
-    margin: 1.7em 0 0.4em;
-  }
-
-  /* H4-H6 - Previously unstyled, so they inherited the global margin reset and
-     sat flush against the surrounding text. */
-  h4,
-  h5,
-  h6 {
-    font-size: var(--font-size-base);
-    margin: 1.5em 0 0.4em;
-  }
-
-  /* Paragraphs - Body text with orphan/widow control for better typography */
-  p {
-    margin: 0 0 1.15em;
-    orphans: 2;                        /* Minimum 2 lines at bottom of column */
-    widows: 2;                         /* Minimum 2 lines at top of column */
-  }
-
-  /* Links - Dotted underline with smooth transition to solid on hover.
-     Here in the base layer, a link state loses to any component rule, so a
-     component that drops the underline need not drop it again for :hover. */
-  a {
-    color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
-
-    &:hover {
-      color: var(--link-hover);
-      border-bottom-style: solid;
-      border-bottom-color: var(--link-hover);
-    }
-  }
-
-  /* Focus ring for keyboard navigation accessibility */
-  a:focus-visible,
-  button:focus-visible,
-  input:focus-visible,
-  [tabindex]:focus-visible {
-    outline: var(--focus-outline);
-    outline-offset: var(--focus-offset);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      transition: none !important;
-      animation: none !important;
-    }
-  }
-
-  /* High Contrast Mode support. Flat: the list above mixes specificities. */
-  @media (forced-colors: active) {
-    a:focus-visible,
-    button:focus-visible,
-    input:focus-visible,
-    [tabindex]:focus-visible {
-      outline: 2px solid Highlight;
-    }
-
-    /* System colours drop the tinted grounds that are a quote's only edge. */
-    blockquote {
-      border: 1px solid CanvasText;
-    }
-  }
-
-  /* Anything that can be jumped to clears the sticky navigation: headings from
-     the TOC, the skip link's #main-content, footnotes and their back-links. */
-  [id] {
-    scroll-margin-top: var(--nav-height);
-  }
-
-  /* Blockquotes - Styled quote blocks with harmonious paper ground tint.
-     Ahead of the lists below on purpose: on mobile a nested list inside a quote
-     takes the nested-list indent, which needs `ul ul` to come after
-     `blockquote ul` (the two tie on specificity). */
-  blockquote {
-    border: none;
-    margin: 1.5em 0;
-    padding: 1em 1.25em;
-    background: var(--blockquote-bg);
-    border-radius: var(--radius-card);
-    color: var(--blockquote-fg);
-    font-style: normal;
-    font-size: 0.95em;
-
-    > :first-child {
-      margin-top: 0;
-    }
-
-    > :last-child {
-      margin-bottom: 0;
-    }
-
-    /* Lists inside blockquotes - Indented for clean reading texture */
-    ol,
-    ul {
-      padding-left: 1.5em;
-    }
-  }
-
-  /* Lists - Hanging indent: list markers appear in the margin, text is flush with paragraph measure */
-  ul,
-  ol {
-    margin: 1em 0;                      /* Consistent spacing before and after lists */
-    font-variant-numeric: tabular-nums; /* Consistent number width */
-    padding-left: 0;
-
-    /* Lists on mobile - Indent safely to prevent markers from clipping at the screen edge */
-    @media (max-width: 768px) {
-      padding-left: 1.4em;
-    }
-
-    &::marker {
-      color: var(--muted);              /* Subtle marker tone for classical print feel */
-    }
-  }
-
-  /* Nested lists: indent child items to preserve visual hierarchy */
-  ul ul,
-  ul ol,
-  ol ul,
-  ol ol {
-    padding-left: 1.5em;
-    margin: 0.3em 0;
-
-    @media (max-width: 768px) {
-      padding-left: 1.2em;
-    }
-  }
-
-  /* ==========================================================================
-     TABLES
-     Responsive table styling with striped rows and a strong header row.
-     ========================================================================== */
-
-  table {
-    width: 100%;
-    margin: 1em 0;
-    font-variant-numeric: tabular-nums; /* Columns of figures must align */
-
-    /* Table cells - Consistent padding and borders */
-    th,
-    td {
-      border-bottom: var(--border);
-      padding: 0.75rem;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    /* Table header - Inverted in light mode, raised in dark (see tokens.css) */
-    thead th {
-      border-bottom: 2px solid var(--border-color);
-      vertical-align: bottom;
-      background-color: var(--table-head-bg);
-      color: var(--table-head-fg);
-      white-space: nowrap;
-    }
-
-    /* Multiple table bodies - Visual separator */
-    tbody + tbody {
-      border-top: 2px solid var(--border-color);
-    }
-
-    /* Striped rows - Zebra striping for easier row scanning */
-    tbody tr:nth-of-type(even) {
-      background-color: var(--table-stripe);
-    }
-  }
-
-  /* ==========================================================================
-     CODE
-     ========================================================================== */
-
-  /* Code elements share the monospace stack. Declaring the family explicitly
-     also cancels the UA monospace quirk, which otherwise renders code a few
-     pixels smaller than the surrounding CJK text. */
-  pre,
-  code,
-  kbd,
-  samp {
-    font-family: var(--font-mono);
-  }
-
-  /* Code blocks use smaller font for compact display */
-  pre {
-    margin: 1.5em 0;
-    padding: 12px;
-    background: var(--code-bg);
-    border-radius: 0;
-    overflow-x: auto;
-    font-size: var(--small-size);
-    hanging-punctuation: none;         /* Disable for monospace code blocks */
-  }
-
-  /* Inline code - no backdrop of its own: the monospace face already separates
-     it from running CJK text, and a tint would only add noise mid-paragraph.
-     The block-level background on .highlight stays, since a block is its own
-     unit. Size is an optical adjustment (mono x-height runs large next to CJK),
-     set in em so it tracks its context: body, heading or list item. */
-  code {
-    font-size: 0.9em;
-    overflow-wrap: break-word;
-  }
-
-  /* ==========================================================================
-     CHINESE TYPOGRAPHY
-     Ruby annotations (phonetic guides) and highlighted text.
-     ========================================================================== */
-
-  /* Ruby annotations - Phonetic notation marks
-     Used for showing pronunciation above Chinese characters */
-  ruby {
-    ruby-position: over;               /* Position annotations above base text */
-    font-variant-east-asian: ruby;
-  }
-
-  /* Ruby text - The small pronunciation guide */
-  rt {
-    font-size: 0.65em;
-    line-height: 1;
-    color: var(--muted);
-    font-weight: normal;
-    letter-spacing: 0.05em;
-    padding: 0 0.1em;
-  }
-
-  /* Highlighted text - search matches and <mark> in content */
-  mark {
-    background: var(--mark-bg);
-    color: var(--heading);
-    padding: 0 3px;
-    border-radius: var(--radius-sm);
   }
 }
 
@@ -425,12 +104,16 @@
     transition: color var(--transition-fast), background-color var(--transition-fast);
   }
 
+  /* The same hover lights up every quiet control: header links and icon
+     buttons as well as the row links. Flat: the list mixes specificities. */
   .sidebar-tag-item:hover,
   .sidebar-nav-jump:hover,
   .sidebar-az-item:hover,
   .sidebar-year-item:hover,
   .tag-flat-item:hover,
-  .toc-content a:hover {
+  .toc-content a:hover,
+  nav.main-links a:hover,
+  .btn-icon:hover {
     color: var(--primary);
     background: var(--paper);
   }
@@ -683,12 +366,6 @@
         padding: 12px 16px;
         font-size: var(--font-size-base);
         width: 100%;
-        box-sizing: border-box;
-      }
-
-      &:hover {
-        color: var(--primary);
-        background: var(--paper);
       }
     }
   }
@@ -709,23 +386,6 @@
     color: var(--heading);
     background: transparent;
     transition: background var(--transition-fast), color var(--transition-fast);
-
-    &:hover {
-      background: var(--paper);
-      color: var(--primary);
-    }
-  }
-
-  /* Shared overlay styles for modals and dropdowns - consistent with header glass effect */
-  .overlay-blur {
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-
-    /* Fallback for browsers without backdrop-filter - use solid background for readability.
-       The prefixed form counts: Safari before 18 has only -webkit-backdrop-filter. */
-    @supports not ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) {
-      background: var(--bg);
-    }
   }
 
   /* Menu toggle button - Hamburger menu for mobile */
@@ -733,15 +393,10 @@
     display: none;                     /* Hidden by default on desktop */
     font-size: 20px;
     line-height: 1;
-    color: var(--heading);             /* Use heading color for visibility in both modes */
 
     /* Show hamburger menu toggle on mobile */
     @media (max-width: 768px) {
       display: inline-flex;
-    }
-
-    &:hover {
-      color: var(--primary);
     }
   }
 
@@ -1429,98 +1084,9 @@
   }
 
   /* ==========================================================================
-     COMPONENTS - ALERTS
-     Semantic alert boxes for notes, tips, warnings, and other callouts.
-     Color-coded for different message types with consistent styling.
+     COMPONENTS - CODE COPY BUTTON
+     Code block layout and colours are in prose.css and syntax.css.
      ========================================================================== */
-
-  /* Base alert styles - Borderless paper ground sheet with rounded corners */
-  .alert {
-    border: none;
-    padding: 1em 1.25em;
-    margin: 1.5em 0;
-    border-radius: var(--radius-card);
-    font-size: var(--font-size-base);
-    line-height: var(--line-height);
-    contain: layout style;             /* Optimize rendering performance */
-
-    .alert-heading {
-      font-weight: 600;
-      margin-top: 0;
-      margin-bottom: 0.4em;
-      color: var(--alert-accent, var(--heading));
-      display: flex;
-      align-items: center;
-      gap: 0.35em;
-    }
-
-    > :first-child {
-      margin-top: 0;
-    }
-
-    > :last-child {
-      margin-bottom: 0;
-    }
-
-    /* Lists inside alerts - Indented to prevent markers colliding with container bounds */
-    ol,
-    ul {
-      padding-left: 1.5em;
-    }
-  }
-
-  /* Alert variants - Distinct paper ground tints for semantic meaning */
-  .alert-note,
-  .alert-historical {
-    --alert-accent: var(--alert-note-border);
-    background: var(--alert-note-bg);
-  }
-
-  .alert-tip {
-    --alert-accent: var(--alert-tip-border);
-    background: var(--alert-tip-bg);
-  }
-
-  .alert-important {
-    --alert-accent: var(--alert-important-border);
-    background: var(--alert-important-bg);
-  }
-
-  .alert-warning,
-  .alert-disclaimer {
-    --alert-accent: var(--alert-warning-border);
-    background: var(--alert-warning-bg);
-  }
-
-  .alert-caution {
-    --alert-accent: var(--alert-caution-border);
-    background: var(--alert-caution-bg);
-  }
-
-  /* ==========================================================================
-     COMPONENTS - CODE HIGHLIGHTING
-     Code blocks from Chroma: line numbers, horizontal scroll, copy button and
-     selection behavior. Colours are in syntax.css (layer chaos.syntax).
-     ========================================================================== */
-
-  /* Code inside a block inherits the block's size, not the inline adjustment */
-  pre code,
-  .highlight code,
-  .chroma code {
-    font-size: inherit;
-  }
-
-  /* Code block wrapper - Scroll container for wide code */
-  .highlight {
-    position: relative;
-
-    pre {
-      margin: 0;
-      padding: 12px;
-      overflow-x: auto;
-      max-width: 100%;
-    }
-  }
 
   /* Code copy button - Floating subtle button in top right */
   .code-copy-btn {
@@ -1573,82 +1139,6 @@
     opacity: 1;
   }
 
-  /* Chroma structural styles - Layout for syntax highlighting components */
-  .chroma {
-    /* Line number links - Remove default link styling */
-    .lnlinks {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    /* Line number table cells - Reset spacing */
-    .lntd {
-      vertical-align: top;
-      padding: 0;
-      margin: 0;
-      border: 0;
-    }
-
-    /* Line number table - Horizontal scroll container with hanging indent on desktop only */
-    .lntable {
-      border-spacing: 0;
-      padding: 0;
-      margin: 0;
-      border: 0;
-      overflow-x: auto;
-      display: block;
-      max-width: 100%;                   /* Keep code column at original width */
-
-      /* Hanging indent for line numbers on screens > 768px where there's space
-         Synchronized with list hanging indent breakpoint (769px) */
-      @media (min-width: 769px) {
-        margin: 0 0 0 -3em;              /* Shift left so line numbers hang in margin */
-      }
-    }
-
-    /* Line numbers - Unselectable with consistent spacing */
-    .lnt,
-    .ln {
-      white-space: pre;
-      -webkit-user-select: none;
-      user-select: none;
-      margin-right: 0;               /* Reduced gap between numbers and code */
-      padding: 0 0 0 0.4em;
-
-      /* Page background, to cover the gap the hanging indent leaves */
-      @media (min-width: 769px) {
-        background: var(--bg);
-      }
-    }
-
-    /* Line number column - Default spacing for inline layout */
-    .lntd:first-child {
-      padding-right: 1em;
-
-      /* Hanging indent: page background and minimal gap on desktop */
-      @media (min-width: 769px) {
-        padding-right: 0;
-        background: var(--bg);
-      }
-
-      /* Code blocks on mobile - Hide line numbers to maximize reading width and avoid horizontal scroll */
-      @media (max-width: 768px) {
-        display: none;
-      }
-
-      pre {
-        @media (min-width: 769px) {
-          background: var(--bg);
-        }
-      }
-    }
-
-    /* Code lines - Flex layout for alignment */
-    .line {
-      display: flex;
-    }
-  }
-
   /* ==========================================================================
      COMPONENTS - MERMAID DIAGRAMS
      Clean container layout for Mermaid SVG flowcharts.
@@ -1659,8 +1149,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: transparent !important;
-    border: none !important;
+    background: transparent;           /* Not a code slab: no ground, no frame */
+    border: none;
     padding: 1.5rem 0;
     margin: 1.5rem 0;
     overflow-x: auto;
@@ -1813,8 +1303,6 @@
       color: var(--primary-fg);
       font-weight: 600;
       border-radius: 0 0 var(--radius-sm) 0;
-      outline: var(--focus-outline);
-      outline-offset: var(--focus-offset);
     }
   }
 
@@ -1894,19 +1382,12 @@
     }
   }
 
+  /* A .btn-icon: size, hover and touch target come from there */
   .search-close {
-    min-width: 44px;
-    min-height: 44px;
     padding: 4px;
     font-size: var(--text-md);
     color: var(--muted);
     border-radius: var(--radius-sm);
-    background: transparent;
-
-    &:hover {
-      background: var(--paper);
-      color: var(--primary);
-    }
   }
 
   .search-results {
@@ -2068,8 +1549,10 @@
      ========================================================================== */
 
   @media print {
-    /* Force light mode colors and Chinese print typography standards. No
-       !important needed: chaos.components outranks the chaos.tokens layer. */
+    /* Print takes the light palette (the dark tokens are screen-only) on
+       white paper, with black ink for text; only what differs from the
+       light values is restated. No !important needed: chaos.components
+       outranks the chaos.tokens layer. */
     :root,
     html.dark {
       color-scheme: light;
@@ -2079,30 +1562,6 @@
       --heading: #000000;
       --muted: #444444;
       --border-color: #CCCCCC;
-      --blockquote-fg: #111111;
-      --blockquote-bg: transparent;
-      --paper: #F5F5F5;
-      --primary: #9E3D3F;
-      --primary-fg: #FFFFFF;
-      --accent: #1C3B5E;
-      --link: #003366;
-      --link-hover: #000000;
-      --table-stripe: #F9F9F9;
-      --mark-bg: #FFE58F;
-      --code-bg: #F2F2F2;
-      --primary-hover: #6C2C2F;
-
-      /* Alert colors for print: crisp, high-contrast, paper-friendly */
-      --alert-note-bg: #F4F7FC;
-      --alert-note-border: #2255AA;
-      --alert-tip-bg: #F2F9F2;
-      --alert-tip-border: #1B7A1B;
-      --alert-important-bg: #FFFBF0;
-      --alert-important-border: #B35500;
-      --alert-warning-bg: #FFF5F5;
-      --alert-warning-border: #B32424;
-      --alert-caution-bg: #FBF5FF;
-      --alert-caution-border: #732E99;
 
       /* Print typography scale */
       --line-height: 1.6;              /* Slightly tighter for print */
@@ -2278,9 +1737,8 @@
       contain: none;                   /* Prevent margin/spacing issues in print */
     }
 
-    /* Blockquotes - Remove decorative border for cleaner print */
+    /* Quotes print as an indent, without the ground; callouts keep theirs */
     blockquote {
-      border-left: none;
       background: transparent;
       margin: 0.5em 0;
       padding-left: 1em;
@@ -2314,7 +1772,7 @@
     blockquote .highlight {
       margin: 0.5em 0;
       padding: 8px;
-      background: var(--paper);
+      background: var(--code-bg);
     }
 
     /* Pre elements - Reset styles (container provides styling) */
@@ -2336,7 +1794,8 @@
       border: none;
       border-spacing: 0;
       border-collapse: collapse;
-      margin: 0 0 0 -3em;              /* Hanging indent for print too */
+      margin: 0;                       /* A page is under 769px, so the line-number
+                                          column is hidden: nothing to hang */
       padding: 0;
       width: 100%;
     }
@@ -2374,12 +1833,7 @@
       padding: 0;
     }
 
-    /* Syntax highlighting for print: the dark --syntax-* roles are scoped to
-       @media screen, so every reader prints the light-mode code colours. */
-
-    /* Reset background colors */
-    body {
-      background: var(--bg);
-    }
+    /* Syntax highlighting needs nothing here: the dark --syntax-* roles are
+       scoped to @media screen, so every reader prints the light colours. */
   }
 }

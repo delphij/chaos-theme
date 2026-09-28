@@ -671,7 +671,7 @@ The theme is optimized for performance with modern best practices:
 
 
 ### CSS Performance
-- **Shared Utility Classes**: Reusable `.overlay-blur` class reduces code duplication
+- **One Set of Prose Rules**: `prose.css` (element defaults, quotes, callouts, code layout) serves both the site and the XSLT-rendered feed and sitemap, instead of a parallel copy
 - **CSS Containment**: Applied to isolated components (`.toc`, `.alert`) for optimized rendering
 - **Specific Transitions**: Only animates properties that change (not `transition: all`)
 - **Modern Viewport Units**: Uses `dvh` (dynamic viewport height) for mobile-friendly layouts
@@ -836,6 +836,9 @@ python3 themes/chaos/tools/check.py --public public
   `js.Build` cannot reach it
 - no space-indented tag in a built feed, the signature of a template shipping
   its indentation through CDATA (needs `--public`)
+- every built `.xsl` parses as XML: their CSS is inlined, and an unescaped
+  `&` or `<` in it breaks the page in the browser while Hugo builds happily
+  (needs `--public`)
 - every page's menu marks that page's own entry as current, and only that one
   — a header rendered once and reused marks the wrong entry everywhere, and
   menu entries configured with `url` instead of `pageRef` mark none at all
@@ -848,7 +851,7 @@ Exit status is 1 on failure, so a build script can stop on it.
 Run after upgrading Hugo, or after changing the syntax colours. It compares
 `syntax.css` with the token classes the installed Hugo's Chroma emits, and
 reports classes that are new and unmapped, gone, or reassigned to another
-token, structural classes `main.css` no longer matches, and any `--syntax-*`
+token, structural classes `prose.css` no longer matches, and any `--syntax-*`
 ink under 4.5:1 on the code ground or a highlighted line in either mode:
 
 ```bash

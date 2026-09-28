@@ -98,7 +98,9 @@ Hardcoded text creates:
 2. **CSS containment**: Isolates component layout calculations from rest of page
 3. **Modern viewport units** (`dvh`): Adjusts for mobile browser UI
 4. **CSS variables**: Single source of truth, reduces duplication
-5. **Shared utilities**: `.overlay-blur` used by menu and TOC
+5. **Shared prose rules**: `prose.css` holds the element defaults and the
+   components Markdown renders, and the XSLT pages inline it rather than
+   keeping their own copy
 6. **Cascade layers and nesting**: Theme CSS lives in `chaos.*` layers (order
    declared in `tokens.css`), so a component never has to outbid an element
    rule and a site overrides the theme with plain unlayered CSS. Nest states,

@@ -4,10 +4,8 @@
    The sitemap's table, type pills and filter toolbar. Concatenated after
    the tokens and the shared base.
 
-   Inlined into an XML document, which imposes one rule: no angle
-   brackets anywhere in this file. A literal tag name would be parsed as
-   markup. The caller minifies, so these comments are for whoever
-   maintains the file, not for every reader of the page.
+   Inlined, minified and XML-escaped by _funcs/get-xsl-css.html, so it is
+   written as ordinary CSS.
    ========================================================================== */
 
 /* ----- Sitemap-specific layout ----- */

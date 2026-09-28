@@ -21,6 +21,7 @@ Hugo has no opinion about.
 import argparse
 import re
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 CJK = re.compile(r'[㐀-䶿一-鿿぀-ヿ가-힯]')
@@ -269,6 +270,23 @@ def check_feed_whitespace(public):
             notes.append(f'feed-whitespace: {name} clean')
 
 
+def check_xsl_wellformed(public):
+    """Every XSLT stylesheet the site ships parses as XML.
+
+    Their CSS is inlined into the XSL, and a stray `&` from CSS nesting or a
+    `<` in a stylesheet made both unparseable while Hugo built them without
+    complaint; a browser then shows a parse error instead of the page.
+    _funcs/get-xsl-css.html escapes them now; this keeps it that way.
+    """
+    for f in sorted(public.glob('*.xsl')):
+        try:
+            ET.parse(f)
+        except ET.ParseError as e:
+            fail('xsl-wellformed', f'{f.name}: {e}')
+        else:
+            notes.append(f'xsl-wellformed: {f.name}')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -286,9 +304,11 @@ def main():
     if args.public:
         public = args.public.resolve()
         check_feed_whitespace(public)
+        check_xsl_wellformed(public)
         check_nav_active(public)
     else:
         notes.append('feed-whitespace: skipped (no --public)')
+        notes.append('xsl-wellformed: skipped (no --public)')
         notes.append('nav-active: skipped (no --public)')
 
     for n in notes:

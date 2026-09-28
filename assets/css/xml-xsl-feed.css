@@ -2,68 +2,13 @@
    FEED PAGE STYLES
 
    The feed-specific half of what feed.xsl renders. Concatenated after the
-   tokens, the shared base, and the site's own syntax highlighting, so code
-   in a feed entry reads as it does in the article.
+   tokens, prose.css, the shared XSL base and the site's syntax colours, so
+   an entry's quotes, callouts and code read as they do in the article
+   without a copy of their rules here.
 
-   Inlined into an XML document, which imposes one rule: no angle
-   brackets anywhere in this file. A literal tag name would be parsed as
-   markup. The caller minifies, so these comments are for whoever
-   maintains the file, not for every reader of the page.
+   Inlined, minified and XML-escaped by _funcs/get-xsl-css.html, so it is
+   written as ordinary CSS.
    ========================================================================== */
-
-/* Code blocks: a tinted, unframed, horizontally scrollable slab, as in
-   the article. The main site hangs the line-number column into the
-   margin on wide screens; that flourish is skipped here. */
-.highlight pre {
-  margin: 0;
-  padding: 12px;
-  overflow-x: auto;
-  max-width: 100%;
-}
-
-.chroma .lntable {
-  border-spacing: 0;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  display: block;
-  overflow-x: auto;
-  max-width: 100%;
-}
-
-.chroma .lntd {
-  vertical-align: top;
-  padding: 0;
-  margin: 0;
-  border: 0;
-}
-
-.chroma .lntd:first-child {
-  padding-right: 1em;
-}
-
-.chroma .lnt,
-.chroma .ln {
-  white-space: pre;
-  -webkit-user-select: none;
-  user-select: none;
-  padding: 0 0 0 0.4em;
-}
-
-.chroma .line {
-  display: flex;
-}
-
-/* The feed pipeline hands us formulas and diagrams as plain preformatted
-   blocks rather than as Chroma output, so they need the code ground
-   that .chroma would otherwise supply. (No angle brackets in this
-   file's CSS: it is XML, and a literal tag name would be parsed.) */
-.feed-entry-content pre:not(.chroma) {
-  margin: 1.5rem 0;
-  padding: 12px;
-  background: var(--code-bg);
-  overflow-x: auto;
-}
 
 .feed-entry-content figure {
   margin: 1.5rem 0;
@@ -191,10 +136,6 @@
 
 .feed-entry-content {
   margin: 14px 0;
-}
-
-.feed-entry-content p {
-  margin: 0 0 1.15em;
 }
 
 .feed-entry-content img {

@@ -12,7 +12,7 @@
    Every class Chroma emits is listed below, even those that stay body text,
    so tools/check_chroma.py can tell a class this file forgot from a class a
    newer Chroma added. Hugo upgrades: see syntax-upgrade.md beside this file.
-   Structural classes (lntable, lntd, lnlinks, line) are laid out in main.css.
+   Structural classes (lntable, lntd, lnlinks, line) are laid out in prose.css.
 
    Layer chaos.syntax: below chaos.components, so a component restyles code
    without outbidding these selectors. */

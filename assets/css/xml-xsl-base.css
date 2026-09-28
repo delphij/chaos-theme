@@ -1,65 +1,17 @@
 /* ==========================================================================
    XSL PAGE STYLES -- SHARED BASE
 
-   Shared by feed.xsl and sitemap.xsl. The design tokens it builds on are
-   concatenated in front of it by xml-xsl-style.html, from the same
-   assets/css/tokens.css the site stylesheet uses, so a palette change
-   lands in one place rather than two.
+   Shared by feed.xsl and sitemap.xsl. Concatenated after tokens.css,
+   normalize.css and prose.css, the same files the site bundle starts with,
+   so the palette, the reset and every element default (type, links, lists,
+   tables, quotes, callouts, code) land in one place rather than two. What is here is only what an XSLT page has
+   and an article page does not: its own chrome and intro banner. These
+   rules are unlayered, so they win over the layered defaults without any
+   specificity contest.
 
-   Inlined into an XML document, which imposes one rule: no angle
-   brackets anywhere in this file. A literal tag name would be parsed as
-   markup. The caller minifies, so these comments are for whoever
-   maintains the file, not for every reader of the page.
+   Inlined, minified and XML-escaped by _funcs/get-xsl-css.html, so it is
+   written as ordinary CSS.
    ========================================================================== */
-
-/* ==========================================================================
-   BASE
-   ========================================================================== */
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
-  font-size: var(--font-size-base);
-  line-height: var(--line-height);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  /* CJK typography, as on the main site */
-  text-autospace: normal;
-  hanging-punctuation: first allow-end last;
-  word-break: normal;
-  overflow-wrap: break-word;
-}
-
-h1,
-h2,
-h3 {
-  color: var(--heading);
-  font-weight: 700;
-  line-height: 1.35;
-  text-wrap: balance;
-}
-
-/* Links carry the site's signature dotted underline that firms up on hover. */
-a {
-  color: var(--link);
-  text-decoration: none;
-  border-bottom: 1px dotted var(--link);
-  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
-}
-
-a:hover {
-  color: var(--link-hover);
-  border-bottom-style: solid;
-  border-bottom-color: var(--link-hover);
-}
 
 /* Chrome and row links stay plain and turn primary on hover, matching the
    .link-plain family in main.css. */
@@ -73,63 +25,6 @@ a:hover {
   color: var(--primary);
 }
 
-a:focus-visible,
-button:focus-visible,
-[tabindex]:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-offset);
-}
-
-@media (forced-colors: active) {
-  a:focus-visible,
-  button:focus-visible,
-  [tabindex]:focus-visible {
-    outline: 2px solid Highlight;
-  }
-}
-
-/* Lists keep the site's rhythm: markers hang in the margin on wide screens
-   and tuck back in on narrow ones so they cannot clip at the screen edge. */
-ul,
-ol {
-  margin: 1em 0;
-  padding-left: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-ul::marker,
-ol::marker {
-  color: var(--muted);
-}
-
-ul ul,
-ul ol,
-ol ul,
-ol ol {
-  padding-left: 1.5em;
-  margin: 0.3em 0;
-}
-
-@media (max-width: 768px) {
-  ul,
-  ol {
-    padding-left: 1.4em;
-  }
-
-  ul ul,
-  ul ol,
-  ol ul,
-  ol ol {
-    padding-left: 1.2em;
-  }
-}
-
-img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
 /* ==========================================================================
    LAYOUT - HEADER, CONTAINER, FOOTER
    ========================================================================== */
@@ -141,7 +36,7 @@ img {
   border-bottom: var(--border);
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: var(--z-nav);
 }
 
 .site-header-inner {
@@ -196,16 +91,14 @@ img {
    COMPONENTS
    ========================================================================== */
 
-/* Intro banner, the same on every XSLT page: built like a quote in main.css,
+/* Intro banner, the same on every XSLT page: built like a quote in prose.css,
    on the quiet warm ground with no surrounding box, and headed by a line
    icon in the primary colour. */
 .info-card {
   background: var(--ground);
-  border: none;
   border-radius: var(--radius-card);
   padding: 1em 1.25em;
   margin: 0 0 32px;
-  line-height: var(--line-height);
 }
 
 .info-card h1 {
@@ -231,133 +124,10 @@ img {
   margin-bottom: 0;
 }
 
-/* Tables: bare, striped, with the same header as the main site. */
-table {
-  width: 100%;
-  margin: 1em 0;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
-
-table th,
-table td {
-  border-bottom: var(--border);
-  padding: 0.75rem;
-  text-align: left;
-  vertical-align: top;
-}
-
-table thead th {
-  border-bottom: 2px solid var(--border-color);
-  vertical-align: bottom;
-  background-color: var(--table-head-bg);
-  color: var(--table-head-fg);
-}
-
-table tbody tr:nth-of-type(even) {
-  background-color: var(--table-stripe);
-}
-
-blockquote {
-  border: none;
-  margin: 1.5em 0;
-  padding: 1em 1.25em;
-  background: var(--blockquote-bg);
-  border-radius: var(--radius-card);
-  color: var(--blockquote-fg);
-  font-size: 0.95em;
-}
-
-blockquote > :first-child {
-  margin-top: 0;
-}
-
-blockquote > :last-child,
-.feed-entry-content blockquote > :last-child {
-  margin-bottom: 0;
-}
-
-blockquote ol,
-blockquote ul {
-  padding-left: 1.5em;
-}
-
-/* Code: the monospace stack cancels the UA size quirk; inline code carries no
-   backdrop of its own, and blocks are tinted but unframed, as on the site. */
-pre,
-code,
-kbd,
-samp {
-  font-family: var(--font-mono);
-}
-
-pre {
-  font-size: var(--small-size);
-  hanging-punctuation: none;
-}
-
-code {
-  font-size: 0.9em;
-  overflow-wrap: break-word;
-}
-
-pre code,
-.highlight code,
-.chroma code {
-  font-size: inherit;
-}
-
-/* Feed callouts retain the same labelled, tinted cards as article callouts. */
-.alert {
-  font-size: var(--font-size-base);
-}
-
-.alert .alert-heading {
-  margin: 0 0 0.4em;
-  font-weight: 600;
-  color: var(--alert-accent, var(--heading));
-}
-
-.alert-note,
-.alert-historical {
-  --alert-accent: var(--alert-note-border);
-  background: var(--alert-note-bg);
-}
-
-.alert-tip {
-  --alert-accent: var(--alert-tip-border);
-  background: var(--alert-tip-bg);
-}
-
-.alert-important {
-  --alert-accent: var(--alert-important-border);
-  background: var(--alert-important-bg);
-}
-
-.alert-warning,
-.alert-disclaimer {
-  --alert-accent: var(--alert-warning-border);
-  background: var(--alert-warning-bg);
-}
-
-.alert-caution {
-  --alert-accent: var(--alert-caution-border);
-  background: var(--alert-caution-bg);
-}
-
-/* System colours drop the tinted grounds that are a card's only edge. */
+/* System colours drop the tinted ground that is the banner's only edge;
+   prose.css does the same for quotes and callouts. */
 @media (forced-colors: active) {
-  .info-card,
-  blockquote {
+  .info-card {
     border: 1px solid CanvasText;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition: none !important;
-    animation: none !important;
   }
 }

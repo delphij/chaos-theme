@@ -39,7 +39,7 @@ output is used as a reference to check against, never pasted in.
    the role of its new token.
 5. For a **structural** report, compare `hugo gen chromastyles` output for
    `lntable`, `lntd`, `lnlinks` and `line` with the `.chroma` block in
-   `main.css` (and `xml-xsl-feed.css`, which restates it for the feed).
+   `prose.css`, which the site and the feed share.
 6. Rebuild and compare the sample with the screenshots from step 1, in both
    modes, on a wide screen (hanging line numbers) and a narrow one (numbers
    hidden), and in print preview (light colours whatever the mode).
