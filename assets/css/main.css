@@ -192,6 +192,15 @@
     outline-offset: var(--focus-offset);
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+
   /* High Contrast Mode support. Flat: the list above mixes specificities. */
   @media (forced-colors: active) {
     a:focus-visible,
@@ -547,15 +556,13 @@
 
   /* ==========================================================================
      LAYOUT - NAVIGATION
-     Sticky header with blur effect and flexbox-based navigation menu.
+     Sticky header with flexbox-based navigation menu.
      ========================================================================== */
 
-  /* Site navigation - Sticky header with backdrop blur */
+  /* Opaque sticky header keeps text legible over scrolling content. */
   .site-nav {
     width: 100%;
-    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.02));
-    -webkit-backdrop-filter: blur(6px); /* Safari < 18 compatibility */
-    backdrop-filter: blur(6px);
+    background: var(--bg);
     position: sticky;
     top: 0;
     z-index: var(--z-nav);
@@ -896,10 +903,9 @@
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       z-index: var(--z-modal);
-      transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+      transition: box-shadow var(--transition-normal);
 
       &:hover {
-        transform: scale(1.08);
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
       }
     }
@@ -1538,9 +1544,9 @@
     z-index: 5;
     user-select: none;
 
-    /* No hover to reveal it on touch screens, so it stays faintly visible */
+    /* Touch users need the same readable label as mouse and keyboard users. */
     @media (hover: none) {
-      opacity: 0.7;
+      opacity: 1;
     }
 
     &:hover {
@@ -1571,7 +1577,6 @@
   .chroma {
     /* Line number links - Remove default link styling */
     .lnlinks {
-      outline: none;
       text-decoration: none;
       color: inherit;
     }
@@ -1819,10 +1824,10 @@
      ========================================================================== */
 
   dialog.search-dialog {
-    border: var(--border);
+    border: none;
     background: var(--surface);
     color: var(--text);
-    border-radius: var(--radius);
+    border-radius: var(--radius-card);
     width: min(680px, 92vw);
     max-width: 680px;
     padding: 0;
@@ -1849,9 +1854,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 20px;
-    border-bottom: var(--border);
-    background: var(--surface);
+    padding: 16px;
+    background: var(--ground);
 
     .search-icon {
       display: inline-flex;
@@ -1864,15 +1868,17 @@
 
   .search-input {
     flex: 1;
-    background: transparent;
+    padding: 10px 12px;
+    background: var(--surface);
     border: none;
     color: var(--heading);
-    font-size: var(--h3-size);
+    font-size: var(--font-size-base);
     font-family: inherit;
-    font-weight: 500;
+    font-weight: 400;
     min-width: 0;
     caret-color: var(--primary);
     appearance: none;
+    border-radius: var(--radius-sm);
 
     /* WebKit's own search-field decorations */
     &::-webkit-search-decoration,
@@ -1882,20 +1888,15 @@
       display: none;
     }
 
-    /* The dialog is the focus indicator */
-    &:focus-visible {
-      outline: none;
-    }
-
     &::placeholder {
       color: var(--muted);
-      opacity: 0.65;
+      opacity: 1;
     }
   }
 
   .search-close {
-    min-width: 32px;
-    min-height: 32px;
+    min-width: 44px;
+    min-height: 44px;
     padding: 4px;
     font-size: var(--text-md);
     color: var(--muted);
@@ -1938,16 +1939,16 @@
   .search-item {
     border-radius: var(--radius-md);
     margin-bottom: 4px;
-    border-left: 3px solid transparent;
-    transition: background var(--transition-fast), border-color var(--transition-fast);
+    transition: background var(--transition-fast);
 
     &:hover,
     &.is-selected {
       background: var(--paper);
-      border-left-color: var(--primary);
 
       .search-item-title {
         color: var(--primary);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
       }
     }
   }
@@ -2002,8 +2003,8 @@
   .search-badge-deprecated {
     line-height: 1.4;
     border-radius: var(--radius-sm);
-    background: var(--surface);
-    border: var(--border);
+    background: var(--ground);
+    border: none;
     color: var(--muted);
   }
 
@@ -2026,10 +2027,10 @@
     align-items: center;
     gap: 16px;
     padding: 10px 20px;
-    border-top: var(--border);
     font-size: var(--text-xs);
     color: var(--muted);
-    background: var(--paper);
+    background: var(--ground);
+    flex-wrap: wrap;
   }
 
   .search-shortcut kbd {
@@ -2040,9 +2041,21 @@
     color: var(--heading);
     padding: 1px 5px;
     border-radius: var(--radius-sm);
-    border: var(--border);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    border: none;
     margin: 0 2px;
+  }
+
+  /* System colours suppress the tinted grounds; retain clear boundaries there. */
+  @media (forced-colors: active) {
+    dialog.search-dialog,
+    .search-input {
+      border: 1px solid CanvasText;
+    }
+
+    .search-item.is-selected {
+      outline: 1px solid Highlight;
+      outline-offset: -2px;
+    }
   }
 
   /* ==========================================================================
