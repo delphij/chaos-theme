@@ -9,6 +9,20 @@ hides this because --minify collapses it afterwards - the feed is where the
 hook's real output shows. So the markup is emitted without any whitespace the
 document does not need, and both output formats get the same clean result.
 
+An alert's title is whatever Hugo finds on the first line of its first
+paragraph. With markup.goldmark.extensions.cjk.eastAsianLineBreaks enabled,
+every soft line break in that paragraph is dropped before Hugo looks, so the
+whole paragraph reads as one line and becomes the title:
+
+  > [!TIP]
+  > This is the body.        -> title "This is the body.", no body
+
+So the hook reads the marker line back from the source: text after [!TYPE]
+there is the real title, and anything .AlertTitle holds beyond it is body text
+and is restored as the first paragraph. Where the source cannot be read (a
+file outside the project, such as a module mount), the title stands as Hugo
+gave it.
+
 @context {blockquote} The blockquote render hook context.
 */ -}}
 
@@ -23,13 +37,26 @@ document does not need, and both output formats get the same clean result.
 -}}
 
 {{- if eq .Type "alert" -}}
-  {{- $title := "" -}}
+  {{- $default := or (i18n .AlertType) (title .AlertType) -}}
+  {{- $title := $default -}}
+  {{- $lead := "" -}}
   {{- with .AlertTitle -}}
     {{- $title = . -}}
-  {{- else -}}
-    {{- $title = or (i18n .AlertType) (title .AlertType) -}}
+    {{- /* os.ReadFile takes paths relative to the project, not absolute ones */ -}}
+    {{- $file := strings.TrimPrefix (printf "%s/" hugo.WorkingDir) $.Position.Filename -}}
+    {{- if and $file (gt $.Position.LineNumber 0) (fileExists $file) -}}
+      {{- $line := index (split (os.ReadFile $file) "\n") (sub $.Position.LineNumber 1) -}}
+      {{- $own := trim (replaceRE `^\s*>\s*\[![A-Za-z]+\][+-]?` "" $line) " \t\r" -}}
+      {{- if not $own -}}
+        {{- $title = $default -}}
+        {{- $lead = . -}}
+      {{- else if and (hasPrefix . $own) (ne . $own) -}}
+        {{- $title = $own -}}
+        {{- $lead = trim (strings.TrimPrefix $own .) " " -}}
+      {{- end -}}
+    {{- end -}}
   {{- end -}}
-  <blockquote class="alert alert-{{ .AlertType }}"><p class="alert-heading">{{ transform.Emojify (index $emojis .AlertType) }} {{ $title }}</p>{{ .Text }}</blockquote>
+  <blockquote class="alert alert-{{ .AlertType }}"><p class="alert-heading">{{ transform.Emojify (index $emojis .AlertType) }} {{ $title }}</p>{{ with $lead }}<p>{{ . }}</p>{{ end }}{{ .Text }}</blockquote>
 {{- else -}}
   <blockquote>{{ .Text }}</blockquote>
 {{- end -}}
