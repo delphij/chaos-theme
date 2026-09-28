@@ -1,8 +1,16 @@
-{{- $lineCount := len (split .Inner "\n") -}}
-{{- $linenos := cond (lt $lineCount 5) false true -}}
-{{- if isset .Attributes "linenos" -}}
-  {{- $linenos = .Attributes.linenos -}}
+{{- /*
+Renders a fenced code block through Chroma.
+
+Line numbers are on by default only from five lines up; a fence that sets
+linenos itself (which lands in .Options, not .Attributes) keeps its choice.
+Only that default is passed on: transform.HighlightCodeBlock merges the
+fence's own options already, and handing .Options back to it applies
+hl_lines' line-number offset a second time, highlighting the line below.
+
+@context {codeblock} The code block render hook context.
+*/ -}}
+{{- $opts := dict -}}
+{{- if not (isset .Options "linenos") -}}
+  {{- $opts = dict "linenos" (ge (len (split .Inner "\n")) 5) -}}
 {{- end -}}
-{{- $opts := merge .Options (dict "linenos" $linenos) -}}
-{{- $result := transform.HighlightCodeBlock . $opts -}}
-{{- $result.Wrapped -}}
+{{- (transform.HighlightCodeBlock . $opts).Wrapped -}}
