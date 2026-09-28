@@ -3,7 +3,7 @@
        plain sheets. It goes first: everything after it resolves var()s it
        defines. */ -}}
 {{- $tokens := resources.Get "css/tokens.css" | resources.ExecuteAsTemplate "css/tokens.css" . -}}
-{{- $cssFiles := slice "css/normalize.css" "css/main.css" "css/syntax.css" "css/syntax-dark.css" -}}
+{{- $cssFiles := slice "css/normalize.css" "css/main.css" "css/syntax.css" -}}
 
 {{- if hugo.IsDevelopment }}
   <link rel="stylesheet" href="{{ $tokens.RelPermalink }}"></link>

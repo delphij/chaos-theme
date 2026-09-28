@@ -593,7 +593,7 @@ The theme provides optimized print output for articles, ensuring a clean and rea
 - **Print-Friendly Layout**: Automatically hides navigation, interactive elements, and other non-essential components for a clutter-free printout.
 - **Automatic Footnotes with Bidirectional Links**: External links within the article are automatically converted into a numbered "References" section at the end of the printed document. Each link in the text shows a clickable `[1]` reference, and each footnote includes a clickable `^` symbol that links back to the original reference (Wikipedia-style navigation).
 - **Smart Code Block Pagination**: Code blocks shorter than 14 lines stay together on one page. Longer blocks break naturally across pages with minimum 7 lines on each side, preventing awkward fragments while avoiding wasted blank space.
-- **GitHub Syntax Highlighting**: Code blocks use GitHub's color scheme for print, optimized for both color and monochrome printers. All colors meet WCAG AA contrast standards for excellent readability.
+- **Light-Mode Syntax Colours**: Code prints in the light-mode colours whatever mode the reader is in, all meeting WCAG AA.
 - **Optimized Typography**: Adjusts font sizes, line spacing, and page breaks for optimal readability on paper.
 
 ## Mobile Navigation
@@ -811,7 +811,8 @@ not work without them:
 preprocesses and expands Markdown under git control, and
 `generate_default_card.py` renders the default social sharing card.
 
-**Diagnostics**, never part of a build: `search_harness.mjs`, below.
+**Diagnostics**, never part of a build: `search_harness.mjs` and
+`check_chroma.py`, below.
 
 `hugo` alone still builds the theme. None of this is a dependency of the
 theme's templates — the build steps produce content and post-process output,
@@ -841,6 +842,21 @@ python3 themes/chaos/tools/check.py --public public
   (needs `--public`)
 
 Exit status is 1 on failure, so a build script can stop on it.
+
+#### `check_chroma.py`
+
+Run after upgrading Hugo, or after changing the syntax colours. It compares
+`syntax.css` with the token classes the installed Hugo's Chroma emits, and
+reports classes that are new and unmapped, gone, or reassigned to another
+token, structural classes `main.css` no longer matches, and any `--syntax-*`
+ink under 4.5:1 on the code ground or a highlighted line in either mode:
+
+```bash
+python3 themes/chaos/tools/check_chroma.py
+```
+
+It needs the `hugo` that builds the site. The procedure around it, including
+the visual pass no script replaces, is in `assets/css/syntax-upgrade.md`.
 
 #### `search_harness.mjs`
 

@@ -147,7 +147,8 @@ README.md for the full list.
   `render_xsl_companions.sh`), and `check.py`
 - **Content tooling**, run by hand while writing: `fetch_x_embed.py`,
   `auxmark.py`, `generate_default_card.py`
-- **Diagnostics**, never in a build: `search_harness.mjs`
+- **Diagnostics**, never in a build: `search_harness.mjs`, and
+  `check_chroma.py` after a Hugo upgrade (see `assets/css/syntax-upgrade.md`)
 
 `hugo` alone still builds the theme; none of these is a dependency of the
 templates.

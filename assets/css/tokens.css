@@ -24,7 +24,7 @@
      chaos.reset       normalize.css
      chaos.tokens      this file: custom properties, light, dark and mobile
      chaos.base        main.css: element defaults and their states
-     chaos.syntax      syntax.css, syntax-dark.css: Chroma colours
+     chaos.syntax      syntax.css: Chroma classes onto the --syntax-* roles
      chaos.components  main.css: everything with a class or id
 
    The XSLT-rendered pages inline this file too, ahead of unlayered sheets
@@ -109,6 +109,23 @@
     --alert-warning-border: var(--primary); /* 蘇芳 Suō */
     --alert-caution-bg: #F4F1FC;       /* Tint of 菖蒲色 */
     --alert-caution-border: #674196;   /* 菖蒲色 Shōbu-iro */
+
+    /* Syntax highlighting: GitHub's roles, and hues near its Primer palette,
+       in traditional colours. syntax.css maps Chroma's token classes onto
+       these roles. Each ink clears 4.5:1 on --code-bg and on a highlighted
+       line; in dark mode the inks share one lightness band at lower chroma
+       than GitHub's, which is what keeps them from glaring. */
+    --syntax-text: var(--text);
+    --syntax-comment: var(--muted);    /* 墨 by day, 薄墨色 by night */
+    --syntax-keyword: #A73836;         /* 紅海老茶 Beni-ebicha */
+    --syntax-string: #192F60;          /* 紺青 Konjō */
+    --syntax-constant: #1E50A2;        /* 瑠璃色 Ruri-iro */
+    --syntax-function: #674196;        /* 菖蒲色 Shōbu-iro */
+    --syntax-variable: #783C1D;        /* 唐茶 Kara-cha */
+    --syntax-tag: #316745;             /* 千歳緑 Chitose-midori */
+    --syntax-line-hl: rgba(248, 181, 0, 0.25); /* 山吹色 Yamabuki, as <mark> */
+    --syntax-inserted-bg: var(--alert-tip-bg);
+    --syntax-deleted-bg: var(--alert-warning-bg);
 
     /* Layout dimensions - Spacing and container widths */
     --max-width: 1280px;               /* Maximum container width for header/footer/nav */
@@ -209,6 +226,14 @@
       --alert-warning-border: var(--primary);
       --alert-caution-bg: #2A2430;
       --alert-caution-border: #A59ACA;  /* 藤紫 Fuji-murasaki */
+
+      --syntax-keyword: #F2A0A1;         /* 紅梅色 Kōbai-iro */
+      --syntax-string: #A0D8EF;          /* 空色 Sora-iro */
+      --syntax-constant: #89C3EB;        /* 勿忘草色 Wasurenagusa-iro */
+      --syntax-function: #C0A2C7;        /* 薄葡萄 Usu-budō */
+      --syntax-variable: #F7B977;        /* 杏色 Anzu-iro */
+      --syntax-tag: #A8C97F;             /* 柳色 Yanagi-iro */
+      --syntax-line-hl: rgba(248, 181, 0, 0.12); /* Weaker than light: comments on it keep AA */
     }
   }
 

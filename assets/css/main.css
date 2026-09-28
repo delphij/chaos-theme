@@ -327,6 +327,11 @@
 
   /* Code blocks use smaller font for compact display */
   pre {
+    margin: 1.5em 0;
+    padding: 12px;
+    background: var(--code-bg);
+    border-radius: 0;
+    overflow-x: auto;
     font-size: var(--small-size);
     hanging-punctuation: none;         /* Disable for monospace code blocks */
   }
@@ -2356,10 +2361,8 @@
       padding: 0;
     }
 
-    /* Syntax highlighting for print
-       Light theme (syntax.css) naturally applies to print media.
-       Dark theme (syntax-dark.css) is scoped to @media screen, so it doesn't apply to print.
-       This ensures all users get readable light-themed code when printing. */
+    /* Syntax highlighting for print: the dark --syntax-* roles are scoped to
+       @media screen, so every reader prints the light-mode code colours. */
 
     /* Reset background colors */
     body {

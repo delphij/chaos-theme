@@ -39,7 +39,7 @@
         {{ partial "xml-xsl-theme.html" . }}
         {{- /* Minified: the source of these styles is documented, the copy that
                reaches every reader of the feed does not need to be. */ -}}
-        <style>{{ partial "_funcs/get-xsl-css.html" (dict "page" . "name" "feed" "sheets" (slice "css/syntax.css" "css/syntax-dark.css" "css/xml-xsl-feed.css")) }}</style>
+        <style>{{ partial "_funcs/get-xsl-css.html" (dict "page" . "name" "feed" "sheets" (slice "css/syntax.css" "css/xml-xsl-feed.css")) }}</style>
       </head>
       <body>
         <header class="site-header">

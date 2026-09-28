@@ -1,38 +1,74 @@
-/* Generated using: hugo gen chromastyles --style=github
-   Consolidated duplicate color rules for smaller file size
-   Structural styles (lntable, lntd, lnlinks, line, lnt, ln) in main.css
+/* Syntax highlighting: Chroma's token classes mapped onto the --syntax-*
+   roles in tokens.css. The colours live there, once per mode, so this file
+   carries no hex values and no dark-mode copy of itself; print takes the
+   light roles because the dark ones are scoped to screen.
+
+   The roles follow GitHub's (Primer's) grouping, so code reads the way it
+   does on github.com: keywords and operators red, strings deep blue,
+   constants and numbers blue, functions purple, variables and types brown,
+   markup tags green, comments grey. C preprocessor lines split as they do
+   there too: the directive is a keyword, the included file a string.
+
+   Every class Chroma emits is listed below, even those that stay body text,
+   so tools/check_chroma.py can tell a class this file forgot from a class a
+   newer Chroma added. Hugo upgrades: see syntax-upgrade.md beside this file.
+   Structural classes (lntable, lntd, lnlinks, line) are laid out in main.css.
+
    Layer chaos.syntax: below chaos.components, so a component restyles code
    without outbidding these selectors. */
 
 @layer chaos.syntax {
-  /* Background */ .bg { background-color:var(--code-bg); }
-  /* PreWrapper */ .chroma { background-color:var(--code-bg);-webkit-text-size-adjust:none; }
-  /* Error */ .chroma .err { color:#f6f8fa;background-color:#82071e }
-  /* LineHighlight */ .chroma .hl { background-color:#dedede }
-  /* LineNumbersTable */ .chroma .lnt { color:#6B6B6B }
-  /* LineNumbers */ .chroma .ln { color:#6B6B6B }
+  .bg,
+  .chroma {
+    color: var(--syntax-text);
+    background-color: var(--code-bg);
+    -webkit-text-size-adjust: none;
+  }
 
-  /* Keywords - GitHub red */
-  .chroma .k,   /* Keyword */
-  .chroma .kc,  /* KeywordConstant */
-  .chroma .kd,  /* KeywordDeclaration */
-  .chroma .kn,  /* KeywordNamespace */
-  .chroma .kp,  /* KeywordPseudo */
-  .chroma .kr,  /* KeywordReserved */
-  .chroma .kt   /* KeywordType */
-  { color:#cf222e }
+  .chroma .hl { background-color: var(--syntax-line-hl); }
 
-  /* Comments - GitHub gray */
+  /* Line numbers hang on the page ground on wide screens: --muted is set
+     against --bg and --paper, so it holds there as well as on --code-bg. */
+  .chroma .lnt,
+  .chroma .ln { color: var(--muted); }
+
+  /* Body text: names, punctuation and anything Chroma leaves unclassified. */
+  .chroma .n,   /* Name */
+  .chroma .nx,  /* NameOther */
+  .chroma .nn,  /* NameNamespace */
+  .chroma .p,   /* Punctuation */
+  .chroma .x,   /* Other */
+  .chroma .cl,  /* CodeLine */
+  .chroma .g,   /* Generic */
+  .chroma .ge,  /* GenericEmph */
+  .chroma .gs   /* GenericStrong */
+  { color: var(--syntax-text) }
+
   .chroma .c,   /* Comment */
   .chroma .ch,  /* CommentHashbang */
   .chroma .cm,  /* CommentMultiline */
   .chroma .c1,  /* CommentSingle */
   .chroma .cs,  /* CommentSpecial */
-  .chroma .cp,  /* CommentPreproc */
-  .chroma .cpf  /* CommentPreprocFile */
-  { color:#57606a }
+  .chroma .go,  /* GenericOutput */
+  .chroma .gp,  /* GenericPrompt */
+  .chroma .w    /* TextWhitespace */
+  { color: var(--syntax-comment) }
 
-  /* Strings - GitHub dark blue */
+  .chroma .k,   /* Keyword */
+  .chroma .kd,  /* KeywordDeclaration */
+  .chroma .kn,  /* KeywordNamespace */
+  .chroma .kp,  /* KeywordPseudo */
+  .chroma .kr,  /* KeywordReserved */
+  .chroma .kt,  /* KeywordType */
+  .chroma .o,   /* Operator */
+  .chroma .ow,  /* OperatorWord */
+  .chroma .or,  /* OperatorReserved */
+  .chroma .cp,  /* CommentPreproc: #include, #define */
+  .chroma .nl,  /* NameLabel */
+  .chroma .gr,  /* GenericError */
+  .chroma .gt   /* GenericTraceback */
+  { color: var(--syntax-keyword) }
+
   .chroma .s,   /* LiteralString */
   .chroma .s1,  /* LiteralStringSingle */
   .chroma .s2,  /* LiteralStringDouble */
@@ -41,20 +77,19 @@
   .chroma .sc,  /* LiteralStringChar */
   .chroma .dl,  /* LiteralStringDelimiter */
   .chroma .sd,  /* LiteralStringDoc */
-  .chroma .se,  /* LiteralStringEscape */
   .chroma .sh,  /* LiteralStringHeredoc */
   .chroma .si,  /* LiteralStringInterpol */
-  .chroma .sr,  /* LiteralStringRegex */
-  .chroma .sx   /* LiteralStringOther */
-  { color:#0a3069 }
+  .chroma .sx,  /* LiteralStringOther */
+  .chroma .ss,  /* LiteralStringSymbol */
+  .chroma .cpf  /* CommentPreprocFile: <sys/param.h> */
+  { color: var(--syntax-string) }
 
-  /* String.Symbol - darker blue */
-  .chroma .ss { color:#032f62 }
-
-  /* Operators, Numbers, Constants - GitHub blue */
-  .chroma .o,   /* Operator */
-  .chroma .ow,  /* OperatorWord */
-  .chroma .or,  /* OperatorReserved */
+  .chroma .kc,  /* KeywordConstant: true, NULL */
+  .chroma .no,  /* NameConstant */
+  .chroma .bp,  /* NameBuiltinPseudo: self, this */
+  .chroma .py,  /* NameProperty */
+  .chroma .l,   /* Literal */
+  .chroma .ld,  /* LiteralDate */
   .chroma .m,   /* LiteralNumber */
   .chroma .mb,  /* LiteralNumberBin */
   .chroma .mf,  /* LiteralNumberFloat */
@@ -62,49 +97,40 @@
   .chroma .mi,  /* LiteralNumberInteger */
   .chroma .il,  /* LiteralNumberIntegerLong */
   .chroma .mo,  /* LiteralNumberOct */
-  .chroma .no,  /* NameConstant */
-  .chroma .nd,  /* NameDecorator */
-  .chroma .nt   /* NameTag */
-  { color:#0550ae }
+  .chroma .se,  /* LiteralStringEscape */
+  .chroma .sr,  /* LiteralStringRegex */
+  .chroma .gh,  /* GenericHeading */
+  .chroma .gu   /* GenericSubheading */
+  { color: var(--syntax-constant) }
 
-  /* Names and Punctuation - GitHub black */
-  .chroma .na,  /* NameAttribute */
-  .chroma .nc,  /* NameClass */
-  .chroma .nx,  /* NameOther */
-  .chroma .p,   /* Punctuation */
-  .chroma .ge,  /* GenericEmph */
-  .chroma .go   /* GenericOutput */
-  { color:#1f2328 }
-
-  /* NameNamespace - slightly lighter black */
-  .chroma .nn { color:#24292e }
-
-  /* Functions and Builtins - GitHub purple */
   .chroma .nf,  /* NameFunction */
   .chroma .fm,  /* NameFunctionMagic */
   .chroma .nb,  /* NameBuiltin */
-  .chroma .ni   /* NameEntity */
-  { color:#6639ba }
+  .chroma .nd,  /* NameDecorator */
+  .chroma .na   /* NameAttribute */
+  { color: var(--syntax-function) }
 
-  /* NameLabel - dark red, bold */
-  .chroma .nl { color:#900;font-weight:bold }
-
-  /* Variables - GitHub brown */
   .chroma .nv,  /* NameVariable */
   .chroma .vc,  /* NameVariableClass */
   .chroma .vg,  /* NameVariableGlobal */
   .chroma .vi,  /* NameVariableInstance */
-  .chroma .vm   /* NameVariableMagic */
-  { color:#953800 }
+  .chroma .vm,  /* NameVariableMagic */
+  .chroma .nc,  /* NameClass */
+  .chroma .ne,  /* NameException */
+  .chroma .ni   /* NameEntity */
+  { color: var(--syntax-variable) }
 
-  /* NameBuiltinPseudo - WCAG AA fix */
-  .chroma .bp { color:#666666 } /* was #6a737d (4.42:1), now 5.27:1 */
+  .chroma .nt { color: var(--syntax-tag) } /* NameTag */
 
-  /* Diff colors */
-  .chroma .gd { color:#82071e;background-color:#ffebe9 } /* GenericDeleted */
-  .chroma .gi { color:#116329;background-color:#dafbe1 } /* GenericInserted */
-  .chroma .gl { text-decoration:underline } /* GenericUnderline */
+  /* Diffs reuse the tip and warning callout grounds. */
+  .chroma .gi { color: var(--syntax-tag); background-color: var(--syntax-inserted-bg) } /* GenericInserted */
+  .chroma .gd { color: var(--syntax-keyword); background-color: var(--syntax-deleted-bg) } /* GenericDeleted */
 
-  /* TextWhitespace */
-  .chroma .w { color:#fff }
+  /* A lexer error marks, rather than fills, the offending text. */
+  .chroma .err { color: var(--syntax-keyword); text-decoration: underline wavy } /* Error */
+
+  /* Typography is the same in both modes; only the inks change. */
+  .chroma .ge { font-style: italic }
+  .chroma .gs { font-weight: bold }
+  .chroma .gl { text-decoration: underline } /* GenericUnderline */
 }
