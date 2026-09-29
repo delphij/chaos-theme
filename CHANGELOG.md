@@ -28,6 +28,13 @@ here.
 
 ## [Unreleased]
 
+### Added
+
+- `search.fingerprint = false` publishes the search indexes from `assets/` at
+  fixed URLs. Every page embeds their URLs, so with a fingerprint any post edit
+  changes every page; without one, the server must have browsers revalidate the
+  two files. README.md has an nginx example. The default is unchanged.
+
 ## [1.1.0] - 2026-09-27
 
 A new palette and code colours, feeds that render without browser XSLT, and

@@ -2,13 +2,22 @@
 Renders the client-side search dialog modal for Chaos theme.
 Only rendered when site.Params.search.enable is true.
 */}}
+{{- /* The indexes in assets/ are fingerprinted unless the site sets
+       search.fingerprint = false. A fingerprint lets the server cache them
+       forever, but every page embeds the URL, so any post edit changes every
+       page. Without one, the server must make browsers revalidate them. */ -}}
+{{- $fingerprint := ne site.Params.search.fingerprint false -}}
 {{- $indexURL := site.Params.search.indexURL | default "/search-index.json" | relURL -}}
 {{- with resources.Get "search-index.json" -}}
-  {{- $indexURL = (. | resources.Fingerprint).RelPermalink -}}
+  {{- $res := . -}}
+  {{- if $fingerprint }}{{ $res = . | resources.Fingerprint }}{{ end -}}
+  {{- $indexURL = $res.RelPermalink -}}
 {{- end -}}
 {{- $bodyIndexURL := "" -}}
 {{- with resources.Get "search-index-body.json" -}}
-  {{- $bodyIndexURL = (. | resources.Fingerprint).RelPermalink -}}
+  {{- $res := . -}}
+  {{- if $fingerprint }}{{ $res = . | resources.Fingerprint }}{{ end -}}
+  {{- $bodyIndexURL = $res.RelPermalink -}}
 {{- else -}}
   {{- with site.Params.search.bodyIndexURL -}}
     {{- $bodyIndexURL = . | relURL -}}

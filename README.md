@@ -159,6 +159,7 @@ hasCJKLanguage = true
   [params.search]
     enable = true                      # Enable search button and '/' hotkey
     indexURL = "/search-index.json"    # Default: "/search-index.json"
+    # fingerprint = false              # Serve the indexes from assets/ at fixed URLs (default: true)
 
 [params.social]
   facebook_app_id = "..."
@@ -355,6 +356,22 @@ Add to `config.toml` (or `hugo.toml`):
   # Optional: Hugo automatically fingerprints search-index-body.json
   # if placed in assets/. Explicit path override is also supported:
   # bodyIndexURL = "/search-index-body.json"
+  # Optional: publish the indexes from assets/ without a fingerprint
+  # fingerprint = false
+```
+
+Every page carries the index URLs. With the default fingerprint, adding or
+editing any post changes the index, its URL, and so every page of the site --
+which a deploy that skips unchanged files (rsync, a CDN) then has to ship in
+full. `fingerprint = false` publishes them as `/search-index.json` and
+`/search-index-body.json` instead, and pages change only when their own content
+does. The server must then make browsers revalidate those two files, or readers
+keep searching a stale index. For nginx:
+
+```nginx
+location ~* ^/search-index(-body)?\.json$ {
+    add_header Cache-Control "no-cache" always;
+}
 ```
 
 #### 2. Generate Search Index During Build
