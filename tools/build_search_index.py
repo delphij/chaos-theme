@@ -34,14 +34,25 @@ except ImportError:
         )
         sys.exit(1)
 
-# Minimal Chinese stop words
-STOP_WORDS = {
-    "的", "了", "和", "是", "在", "我", "有", "也", "就", "不", "人", "都",
-    "一", "一个", "上", "很", "到", "说", "要", "去", "你", "会", "着",
-    "没有", "看", "好", "自己", "这", "那", "与", "及", "等", "之", "为",
-    "以", "所", "其", "但", "而", "则", "又", "或", "把", "被", "从", "对",
-    "向", "给", "让", "得", "过", "只", "更", "已", "再", "便", "若", "虽",
-}
+# Regular expression for exact cryptographic hashes (MD5, SHA-1, SHA-256)
+HEX_HASH_RE = re.compile(r"^[0-9a-fA-F]{32}$|^[0-9a-fA-F]{40}$|^[0-9a-fA-F]{64}$")
+
+
+def load_stopwords_file(filepath: str) -> set:
+    """Reads stopwords from file, ignoring comments starting with '#' and blank lines."""
+    words = set()
+    if not filepath or not os.path.isfile(filepath):
+        return words
+    try:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                words.add(line.lower())
+    except Exception as e:
+        sys.stderr.write(f"Warning: Failed to read stopwords from {filepath}: {e}\n")
+    return words
 
 
 def clean_markdown(text: str) -> str:
@@ -171,27 +182,47 @@ for _ts in TECH_SYMBOLS:
     jieba.add_word(_ts)
 
 
-def tokenize(text: str) -> set:
-    """Segments text into lowercase searchable tokens, skipping stop words."""
+def is_valid_token(w: str, stop_words: set) -> bool:
+    """Evaluates if a token is valid for the search inverted index.
+
+    Filters out:
+    1. Pure punctuation or strings lacking any alphanumeric or CJK character.
+    2. Words in the active stop words set.
+    3. Machine-generated hashes (MD5, SHA-1, SHA-256) and extreme token lengths (> 64).
+    4. Pure integers whose significant digits < 3 (filters 0-9 and leading-zero fragments,
+       while preserving HTTP status codes like 404, RFC numbers like 821/3522, and years).
+    """
+    if not w or w in stop_words:
+        return False
+    # Must contain at least one semantic character (CJK, Latin letter, or digit)
+    if not re.search(r"[\u4e00-\u9fa5a-zA-Z0-9]", w):
+        return False
+    # Exclude machine hashes and extreme run lengths
+    if len(w) > 64 or HEX_HASH_RE.match(w):
+        return False
+    # Pure numbers: require at least 3 significant digits
+    if w.isdigit():
+        if len(w.lstrip("0")) < 3:
+            return False
+    return True
+
+
+def tokenize(text: str, stop_words: set) -> set:
+    """Segments text into lowercase searchable tokens, skipping stop words and invalid tokens."""
     tokens = set()
     if not text:
         return tokens
 
     # Pre-extract alphanumeric tokens with technical symbols (e.g. Google+, C++, C#, .NET)
     for sym in re.findall(r"\b[a-zA-Z0-9_\-\.]+(?:\+\+|[+#])", text):
-        tokens.add(sym.lower())
+        s = sym.lower()
+        if is_valid_token(s, stop_words):
+            tokens.add(s)
 
     for word in jieba.cut_for_search(text):
         w = word.strip().lower()
-        if not w:
-            continue
-        # Skip pure whitespace, single-letter punctuation or stop words
-        if w in STOP_WORDS:
-            continue
-        # Only retain words with meaningful length (>= 2 chars, or alphanumeric/CJK non-stopword)
-        if len(w) == 1 and not re.match(r"[\u4e00-\u9fa5a-zA-Z0-9\+#]", w):
-            continue
-        tokens.add(w)
+        if is_valid_token(w, stop_words):
+            tokens.add(w)
     return tokens
 
 
@@ -204,6 +235,8 @@ def main():
     parser.add_argument("--single-file", action="store_true", help="Generate legacy monolithic single-file index instead of two-tier")
     parser.add_argument("--base-url", default="/", help="Base URL for site links (default: /)")
     parser.add_argument("--max-body-chars", type=int, default=6000, help="Max body characters to index per post (default: 6000)")
+    parser.add_argument("--stopwords", default="", help="Path to custom stopwords file (overrides default)")
+    parser.add_argument("--extra-stopwords", default="", help="Path to extra stopwords file (augments default)")
     args = parser.parse_args()
 
     content_dir = os.path.abspath(args.content)
@@ -218,6 +251,39 @@ def main():
         root, ext = os.path.splitext(output_path)
         output_body_path = f"{root}-body{ext or '.json'}"
 
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    default_stopwords_file = os.path.join(script_dir, "stopwords.txt")
+
+    if args.stopwords:
+        stop_words = load_stopwords_file(args.stopwords)
+    else:
+        stop_words = load_stopwords_file(default_stopwords_file)
+        if not stop_words:
+            # Fallback if stopwords.txt was missing
+            stop_words = {
+                "的", "了", "和", "是", "在", "我", "有", "也", "就", "不", "人", "都",
+                "一", "一个", "上", "很", "到", "说", "要", "去", "你", "会", "着",
+                "没有", "看", "好", "自己", "这", "那", "与", "及", "等", "之", "为",
+                "以", "所", "其", "但", "而", "则", "又", "或", "把", "被", "从", "对",
+                "向", "给", "让", "得", "过", "只", "更", "已", "再", "便", "若", "虽",
+                "http", "https", "www", "com", "html", "href",
+            }
+        # Auto-detect data/stopwords.txt in site directory (parent of content or cwd)
+        site_root = os.path.dirname(content_dir)
+        auto_site_stopwords = os.path.join(site_root, "data", "stopwords.txt")
+        if os.path.isfile(auto_site_stopwords):
+            site_words = load_stopwords_file(auto_site_stopwords)
+            if site_words:
+                print(f"Loaded {len(site_words)} extra stopwords from {auto_site_stopwords}")
+                stop_words.update(site_words)
+
+    if args.extra_stopwords:
+        extra_words = load_stopwords_file(args.extra_stopwords)
+        if extra_words:
+            print(f"Loaded {len(extra_words)} extra stopwords from {args.extra_stopwords}")
+            stop_words.update(extra_words)
+
+    print(f"Active stop words: {len(stop_words)} terms")
     print(f"Scanning markdown files in {content_dir}...")
     files = glob.glob(os.path.join(content_dir, "**", "*.md"), recursive=True)
 
@@ -273,12 +339,10 @@ def main():
     for post in parsed_posts:
         doc_id = len(docs)
         doc_entry = {
-            "id": doc_id,
             "title": post["title"],
             "url": post["url"],
             "date": post["date"],
             "tags": post["tags"],
-            "categories": post["categories"],
         }
         if post["summary"]:
             doc_entry["summary"] = post["summary"]
@@ -288,11 +352,11 @@ def main():
 
         # Tier 1 tokens: Title, Tags, Categories
         tier1_tokens = set()
-        tier1_tokens.update(tokenize(post["title"]))
+        tier1_tokens.update(tokenize(post["title"], stop_words))
         for tag in post["tags"]:
-            tier1_tokens.update(tokenize(tag))
+            tier1_tokens.update(tokenize(tag, stop_words))
         for cat in post["categories"]:
-            tier1_tokens.update(tokenize(cat))
+            tier1_tokens.update(tokenize(cat, stop_words))
 
         for token in tier1_tokens:
             if token not in tier1_index:
@@ -300,7 +364,7 @@ def main():
             tier1_index[token].append(doc_id)
 
         # Body tokens: up to max_body_chars
-        body_tokens = tokenize(post["clean_body"][: args.max_body_chars])
+        body_tokens = tokenize(post["clean_body"][: args.max_body_chars], stop_words)
 
         if args.single_file:
             # Monolithic index: combine all tokens into tier1_index

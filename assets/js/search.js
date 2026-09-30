@@ -107,7 +107,11 @@ function initSearch() {
     try {
       const res = await fetch(indexUrl);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      indexData = await res.json();
+      const raw = await res.json();
+      indexData = {
+        docs: raw.docs,
+        index: Object.assign(Object.create(null), raw.index)
+      };
       isLoading = false;
       resultsContainer.innerHTML = initialHTML;
       scheduleLoadBodyIndex();
@@ -178,18 +182,24 @@ function initSearch() {
     const cjkChars = q.replace(/[a-z0-9_\-\.\+#\s]+/gi, '');
     if (cjkChars && indexData?.index) {
       const len = cjkChars.length;
-      // Multi-gram forward matching (longest match)
+      const covered = new Set();
+      // Multi-gram forward matching (length >= 2, longest first)
       for (let i = 0; i < len; i++) {
         for (let l = Math.min(6, len - i); l >= 2; l--) {
           const sub = cjkChars.slice(i, i + l);
           if (Array.isArray(indexData.index[sub])) {
             tokens.push(sub);
+            for (let k = 0; k < l; k++) covered.add(i + k);
           }
         }
-        // Also check single character
-        const single = cjkChars.charAt(i);
-        if (Array.isArray(indexData.index[single])) {
-          tokens.push(single);
+      }
+      // Only extract single characters that were not covered by any multi-gram match
+      for (let i = 0; i < len; i++) {
+        if (!covered.has(i)) {
+          const single = cjkChars.charAt(i);
+          if (Array.isArray(indexData.index[single])) {
+            tokens.push(single);
+          }
         }
       }
     }
@@ -243,15 +253,17 @@ function initSearch() {
           addHit(id, 1.0 * idf, token);
         }
       } else if (token.length >= 2) {
-        // Partial/prefix search for latin tokens with length >= 2
+        // Prefix search for tokens with length >= 2 (bounded candidate pool)
+        let prefixMatches = 0;
         for (const key in index) {
-          if (Array.isArray(index[key]) && key.includes(token)) {
+          if (key.startsWith(token) && Array.isArray(index[key])) {
             const pIds = index[key];
             const pDf = pIds.length;
             const pIdf = Math.max(0.3, Math.log(1 + (totalDocs - pDf + 0.5) / (pDf + 0.5)));
             for (const pid of pIds) {
               addHit(pid, 0.35 * pIdf, token);
             }
+            if (++prefixMatches >= 50) break;
           }
         }
       }
