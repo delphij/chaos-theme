@@ -392,7 +392,7 @@ python3 themes/chaos/tools/build_search_index.py --content content --output asse
 | `--output` | `assets/search-index.json` | Path to Tier 1 core search index |
 | `--output-body` | `<stem>-body.json` | Path to Tier 2 body search index (defaults to `assets/search-index-body.json`) |
 | `--single-file` | `false` | Generate a legacy single monolithic index file instead of two-tier |
-| `--max-body-chars` | `6000` | Maximum body characters to index per post (covers 95%+ of full posts) |
+| `--max-body-chars` | `0` | Maximum body characters to index per post; `0` indexes the whole body. A limit makes the index smaller, and words past it unfindable |
 | `--base-url` | `/` | Base URL prefix for post links |
 
 #### 3. Technical Code & Keyword Preservation

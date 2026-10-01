@@ -260,7 +260,7 @@ def main():
     parser.add_argument("--output-body", default="", help="Path to output Tier 2 / body search-index.json (default: auto derived as <stem>-body.json)")
     parser.add_argument("--single-file", action="store_true", help="Generate legacy monolithic single-file index instead of two-tier")
     parser.add_argument("--base-url", default="/", help="Base URL for site links (default: /)")
-    parser.add_argument("--max-body-chars", type=int, default=6000, help="Max body characters to index per post (default: 6000)")
+    parser.add_argument("--max-body-chars", type=int, default=0, help="Max body characters to index per post; 0 indexes the whole body (default: 0)")
     parser.add_argument("--stopwords", default="", help="Path to custom stopwords file (overrides default)")
     parser.add_argument("--extra-stopwords", default="", help="Path to extra stopwords file (augments default)")
     args = parser.parse_args()
@@ -378,7 +378,12 @@ def main():
         tier1_tokens = set()
         for text in (post["title"], *post["tags"], *post["categories"]):
             tier1_tokens |= tokenize(text, stop_words)
-        body_tokens = tokenize(post["clean_body"][: args.max_body_chars], stop_words)
+        # The whole body unless the site asks for a limit: a word past the
+        # limit cannot be found, however plainly the post says it.
+        body = post["clean_body"]
+        if args.max_body_chars > 0:
+            body = body[: args.max_body_chars]
+        body_tokens = tokenize(body, stop_words)
 
         for token in tier1_tokens:
             tier1_index[token].append(doc_id)

@@ -45,6 +45,9 @@ here.
   Brotli) and loads in about a third of the time; results are unchanged. An
   index must be rebuilt with this version's `build_search_index.py`: `search.js`
   reports one from an earlier version as an unsupported format.
+- `build_search_index.py` indexes the whole body of a post. It stopped at 6,000
+  characters, so a word further into a long post could not be found.
+  `--max-body-chars` still sets a limit, and `0`, now the default, means none.
 
 ### Fixed
 
