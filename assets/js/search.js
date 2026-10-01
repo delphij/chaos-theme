@@ -216,14 +216,33 @@ function initSearch() {
     }
   });
 
+  function startsTerm(word) {
+    if (!indexData) return false;
+    if (indexData.index.has(word)) return true;
+    for (const term of indexData.index.keys()) {
+      if (term.startsWith(word)) return true;
+    }
+    return false;
+  }
+
   // Query tokenization using inverted index dictionary
   function extractTokens(query) {
     const q = query.trim().toLowerCase();
     if (!q) return [];
 
     const tokens = [];
-    // 1. Extract alphanumeric tokens including technical symbols (+, #, -, _)
-    tokens.push(...(q.match(/[a-z0-9_\-\.\+#]+/gi) || []));
+    // 1. Extract alphanumeric tokens. The index never joins words across - or
+    //    _, and across . + # only for the few terms that are one (x.509, c++,
+    //    .net), so a word with those is kept whole only while it is a term or
+    //    the start of one, and is otherwise the words between them: utf-8 is
+    //    utf and 8, node.js is node and js.
+    for (const word of q.match(/[a-z0-9.+#]+/g) || []) {
+      if (!/[.+#]/.test(word) || startsTerm(word)) {
+        tokens.push(word);
+      } else {
+        tokens.push(...word.split(/[.+#]+/));
+      }
+    }
 
     // 2. Extract CJK phrases using dictionary matching against the index terms
     const cjkChars = q.replace(/[a-z0-9_\-\.\+#\s]+/gi, '');
@@ -255,13 +274,17 @@ function initSearch() {
     return [...new Set(tokens)].filter(Boolean);
   }
 
+  // Matches in the text as written, each piece escaped afterwards: matching
+  // in escaped text finds tokens inside its entities, the amp of &amp;.
   function highlightText(text, tokens) {
-    const escaped = escapeHTML(text);
-    if (!tokens || tokens.length === 0) return escaped;
+    if (!tokens || tokens.length === 0) return escapeHTML(text);
 
     const sortedTokens = [...tokens].sort((a, b) => b.length - a.length);
     const pattern = `(${sortedTokens.map(escapeRegExp).join('|')})`;
-    return escaped.replace(new RegExp(pattern, 'gi'), '<mark>$1</mark>');
+    // With one capturing group, split leaves the matches at the odd indexes.
+    return String(text ?? '').split(new RegExp(pattern, 'gi'))
+      .map((part, i) => (i % 2 ? `<mark>${escapeHTML(part)}</mark>` : escapeHTML(part)))
+      .join('');
   }
 
   function performSearch(query) {

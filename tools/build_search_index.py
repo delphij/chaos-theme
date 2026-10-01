@@ -330,6 +330,9 @@ def main():
 
     parsed_posts = []
     for filepath in files:
+        # A section's or the home page's own content, not a post
+        if os.path.basename(filepath) == "_index.md":
+            continue
         try:
             with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read()

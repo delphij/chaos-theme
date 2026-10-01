@@ -46,6 +46,16 @@ here.
   index must be rebuilt with this version's `build_search_index.py`: `search.js`
   reports one from an earlier version as an unsupported format.
 
+### Fixed
+
+- A search for a word with a hyphen, an underscore or a full stop in it found
+  nothing: `utf-8`, `x86_64`, `node.js`. The index holds the words between
+  them, and the query was looked up whole.
+- `build_search_index.py` indexed each `_index.md` as a post, with a URL that
+  does not exist.
+- A search term could be highlighted inside an HTML entity of a result's title
+  or summary, breaking the entity.
+
 ## [1.1.0] - 2026-09-27
 
 A new palette and code colours, feeds that render without browser XSLT, and
