@@ -16,6 +16,7 @@ import os
 import re
 import sys
 import warnings
+from collections import defaultdict
 
 # Suppress invalid escape sequence warnings from vendored jieba on Python 3.12+
 warnings.filterwarnings("ignore", category=SyntaxWarning, module=".*jieba.*")
@@ -80,80 +81,63 @@ def clean_markdown(text: str) -> str:
 
 
 def parse_frontmatter(content: str):
-    """Extracts frontmatter and body from Markdown string."""
+    """Extracts the front matter fields the index needs, and the body.
+
+    Read with regular expressions rather than a YAML or TOML parser, so that
+    the script needs nothing beyond the standard library and the vendored
+    jieba. That covers what posts are written with -- `key: value` or
+    `key = value`, inline arrays and YAML block lists -- and not nested tables
+    or multi-line strings.
+    """
     fm_match = re.match(r"^(?:---|\+\+\+)\s*\n([\s\S]*?)\n(?:---|\+\+\+)\s*\n([\s\S]*)$", content)
     if not fm_match:
         return {}, content
 
     fm_raw, body = fm_match.groups()
-    meta = {}
 
-    def parse_bool(key: str) -> bool:
-        m = re.search(rf'^(?:{key})\s*[:=]\s*(true|false)\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
-        return m.group(1).lower() == "true" if m else False
+    def unquote(value: str) -> str:
+        return value.strip("\"' ")
 
-    # Extract title
-    m = re.search(r'^(?:title)\s*[:=]\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
-    if m:
-        meta["title"] = m.group(1).strip("\"' ")
+    def scalar(key: str) -> str:
+        """The value of `key` (a regex, so `a|b` reads either), or an empty string."""
+        m = re.search(rf'^(?:{key})\s*[:=]\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
+        return unquote(m.group(1)) if m else ""
 
-    # Extract date
-    m = re.search(r'^(?:date)\s*[:=]\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
-    if m:
-        d = m.group(1).strip("\"' ")
-        meta["date"] = d.split("T")[0]
+    def flag(key: str) -> bool:
+        return scalar(key).lower() == "true"
 
-    # Extract draft
-    meta["draft"] = parse_bool("draft")
-
-    # Extract noindex / private (Tier 3: completely exclude from search engines and on-site search)
-    m_robots = re.search(r'^(?:robots)\s*[:=]\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
-    has_noindex_robots = bool(m_robots and "noindex" in m_robots.group(1).lower())
-    meta["noindex"] = parse_bool("noindex") or parse_bool("private") or has_noindex_robots
-
-    # Extract searchHidden / search_hidden / search = false (Tier 2: exclude from on-site search only)
-    m_search = re.search(r'^(?:search)\s*[:=]\s*(true|false)\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
-    search_disabled = bool(m_search and m_search.group(1).lower() == "false")
-    meta["search_hidden"] = parse_bool("searchHidden") or parse_bool("search_hidden") or search_disabled
-
-    # Extract deprecated / outdated (Tier 1: penalize search score and mark badge)
-    meta["deprecated"] = parse_bool("deprecated") or parse_bool("outdated")
-
-    # Extract description
-    m = re.search(r'^(?:description)\s*[:=]\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
-    if m:
-        meta["description"] = m.group(1).strip("\"' ")
-
-    # Extract custom url or slug
-    m = re.search(r'^(?:url|slug)\s*[:=]\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE | re.IGNORECASE)
-    if m:
-        meta["slug"] = m.group(1).strip("\"' ")
-
-    # Extract tags (TOML / YAML array)
-    m = re.search(r'tags\s*[:=]\s*\[(.*?)\]', fm_raw, re.DOTALL | re.IGNORECASE)
-    if m:
-        meta["tags"] = [t.strip("\"' ") for t in m.group(1).split(",") if t.strip("\"' ")]
-    else:
-        # YAML list format: - tag
-        tags_yaml = re.findall(r'^\s*-\s*["\']?(.*?)["\']?\s*$', fm_raw, re.MULTILINE)
-        if tags_yaml and "tags" in fm_raw.lower():
-            meta["tags"] = tags_yaml
+    def items(key: str) -> list:
+        """The values of an inline array `key: [a, b]`, or of a YAML block list."""
+        m = re.search(rf"^[ \t]*{key}\s*[:=]\s*\[(.*?)\]", fm_raw, re.MULTILINE | re.DOTALL | re.IGNORECASE)
+        if m:
+            values = m.group(1).split(",")
         else:
-            meta["tags"] = []
+            m = re.search(rf"^[ \t]*{key}[ \t]*:[ \t]*\n((?:[ \t]*-[ \t]+.*(?:\n|$))+)", fm_raw, re.MULTILINE | re.IGNORECASE)
+            values = re.findall(r"^[ \t]*-[ \t]+(.*)$", m.group(1), re.MULTILINE) if m else []
+        return [unquote(v) for v in values if unquote(v)]
 
-    # Extract categories
-    m = re.search(r'categories\s*[:=]\s*\[(.*?)\]', fm_raw, re.DOTALL | re.IGNORECASE)
-    if m:
-        meta["categories"] = [c.strip("\"' ") for c in m.group(1).split(",") if c.strip("\"' ")]
-    else:
-        meta["categories"] = []
-
+    meta = {
+        "title": scalar("title"),
+        "date": scalar("date").split("T")[0],
+        "description": scalar("description"),
+        "slug": scalar("url|slug"),
+        "tags": items("tags"),
+        "categories": items("categories"),
+        "draft": flag("draft"),
+        # Three ways to keep a post out, or down. noindex / private / robots:
+        # out of search engines and of this index alike.
+        "noindex": flag("noindex") or flag("private") or "noindex" in scalar("robots").lower(),
+        # searchHidden / search_hidden / search = false: out of this index only.
+        "search_hidden": flag("searchHidden") or flag("search_hidden") or scalar("search").lower() == "false",
+        # deprecated / outdated: indexed, but ranked lower and badged.
+        "deprecated": flag("deprecated") or flag("outdated"),
+    }
     return meta, body
 
 
 def compute_post_url(filepath: str, base_content_dir: str, meta: dict, base_url: str) -> str:
     """Computes clean URL matching Hugo's default output path."""
-    if "slug" in meta and meta["slug"].startswith("/"):
+    if meta.get("slug", "").startswith("/"):
         return meta["slug"]
 
     rel = os.path.relpath(filepath, base_content_dir)
@@ -239,9 +223,10 @@ def pack_index(index: dict) -> dict:
     """Packs {term: [doc ids]} into two space-joined strings, in the same order.
 
     Two strings parse far faster in the browser than an array per term, and
-    search.js decodes a posting list only when a query asks for its term.
+    search.js decodes a posting list only when a query asks for its term. The
+    terms are sorted so that the same content always builds the same file.
     """
-    terms = list(index)
+    terms = sorted(index)
     return {
         "terms": " ".join(terms),
         "postings": " ".join(encode_postings(index[term]) for term in terms),
@@ -295,28 +280,15 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     default_stopwords_file = os.path.join(script_dir, "stopwords.txt")
 
-    if args.stopwords:
-        stop_words = load_stopwords_file(args.stopwords)
-    else:
-        stop_words = load_stopwords_file(default_stopwords_file)
-        if not stop_words:
-            # Fallback if stopwords.txt was missing
-            stop_words = {
-                "的", "了", "和", "是", "在", "我", "有", "也", "就", "不", "人", "都",
-                "一", "一个", "上", "很", "到", "说", "要", "去", "你", "会", "着",
-                "没有", "看", "好", "自己", "这", "那", "与", "及", "等", "之", "为",
-                "以", "所", "其", "但", "而", "则", "又", "或", "把", "被", "从", "对",
-                "向", "给", "让", "得", "过", "只", "更", "已", "再", "便", "若", "虽",
-                "http", "https", "www", "com", "html", "href",
-            }
-        # Auto-detect data/stopwords.txt in site directory (parent of content or cwd)
-        site_root = os.path.dirname(content_dir)
-        auto_site_stopwords = os.path.join(site_root, "data", "stopwords.txt")
-        if os.path.isfile(auto_site_stopwords):
-            site_words = load_stopwords_file(auto_site_stopwords)
-            if site_words:
-                print(f"Loaded {len(site_words)} extra stopwords from {auto_site_stopwords}")
-                stop_words.update(site_words)
+    # --stopwords replaces the theme's list outright, so the site's own
+    # data/stopwords.txt is added only to the default one.
+    stop_words = load_stopwords_file(args.stopwords or default_stopwords_file)
+    if not args.stopwords:
+        auto_site_stopwords = os.path.join(os.path.dirname(content_dir), "data", "stopwords.txt")
+        site_words = load_stopwords_file(auto_site_stopwords)
+        if site_words:
+            print(f"Loaded {len(site_words)} extra stopwords from {auto_site_stopwords}")
+            stop_words.update(site_words)
 
     if args.extra_stopwords:
         extra_words = load_stopwords_file(args.extra_stopwords)
@@ -352,6 +324,9 @@ def main():
 
         date = meta.get("date", "")
         tags = meta.get("tags", [])
+        # A tag with a symbol in it (C++, C#) is taught to jieba as one word.
+        # Every post is read before any is tokenized below, so the word holds
+        # in all of them, whichever post carried the tag.
         for tag in tags:
             if any(ch in tag for ch in "+#"):
                 jieba.add_word(tag.strip().lower())
@@ -373,15 +348,21 @@ def main():
             "deprecated": meta.get("deprecated", False),
         })
 
-    # Sort posts chronologically: newer posts first
+    # Newest first, and a post's position is its doc id. search.js breaks a tie
+    # in score by the lower id, so by the newer post; and posts on a subject
+    # tend to come close together in time, which keeps the gaps in a posting
+    # list small.
     parsed_posts.sort(key=lambda p: (p["date"] or "", p["title"]), reverse=True)
 
+    # Two tiers, so that the dialog is usable after a small download. Tier 1
+    # has the documents and the terms of their titles, tags and categories;
+    # tier 2 the terms of their bodies, several times the size, which
+    # search.js fetches afterwards.
     docs = []
-    tier1_index = {}
-    tier2_index = {}
+    tier1_index = defaultdict(list)
+    tier2_index = defaultdict(list)
 
-    for post in parsed_posts:
-        doc_id = len(docs)
+    for doc_id, post in enumerate(parsed_posts):
         doc_entry = {
             "title": post["title"],
             "url": post["url"],
@@ -394,77 +375,44 @@ def main():
             doc_entry["deprecated"] = True
         docs.append(doc_entry)
 
-        # Tier 1 tokens: Title, Tags, Categories
         tier1_tokens = set()
-        tier1_tokens.update(tokenize(post["title"], stop_words))
-        for tag in post["tags"]:
-            tier1_tokens.update(tokenize(tag, stop_words))
-        for cat in post["categories"]:
-            tier1_tokens.update(tokenize(cat, stop_words))
-
-        for token in tier1_tokens:
-            if token not in tier1_index:
-                tier1_index[token] = []
-            tier1_index[token].append(doc_id)
-
-        # Body tokens: up to max_body_chars
+        for text in (post["title"], *post["tags"], *post["categories"]):
+            tier1_tokens |= tokenize(text, stop_words)
         body_tokens = tokenize(post["clean_body"][: args.max_body_chars], stop_words)
 
-        if args.single_file:
-            # Monolithic index: combine all tokens into tier1_index
-            for token in body_tokens:
-                if token not in tier1_tokens:
-                    if token not in tier1_index:
-                        tier1_index[token] = []
-                    tier1_index[token].append(doc_id)
-        else:
-            # Two-tier disjoint index: only record body tokens that are NOT in tier1_tokens for this doc
-            tier2_tokens = body_tokens - tier1_tokens
-            for token in tier2_tokens:
-                if token not in tier2_index:
-                    tier2_index[token] = []
-                tier2_index[token].append(doc_id)
+        for token in tier1_tokens:
+            tier1_index[token].append(doc_id)
+        # A term the post has in tier 1 stays out of its tier 2 list: search.js
+        # joins a term's two lists, and a doc id in both would be counted twice.
+        for token in body_tokens - tier1_tokens:
+            tier2_index[token].append(doc_id)
 
-    # Sort index keys alphabetically for deterministic output
-    sorted_tier1_index = {k: sorted(tier1_index[k]) for k in sorted(tier1_index.keys())}
+    if args.single_file:
+        # The same two tiers in one file. A term's lists do not overlap, but
+        # their ids interleave, and encode_postings wants them ascending.
+        for token, doc_ids in tier2_index.items():
+            tier1_index[token] = sorted(tier1_index[token] + doc_ids)
 
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    t1_payload = {
-        "docs": docs,
-        **pack_index(sorted_tier1_index),
-    }
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(t1_payload, f, ensure_ascii=False, separators=(",", ":"))
+    def write_index(path: str, payload: dict) -> float:
+        """Writes one index file and returns its size in KB."""
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+        return os.path.getsize(path) / 1024
 
-    t1_size_kb = os.path.getsize(output_path) / 1024
+    t1_size_kb = write_index(output_path, {"docs": docs, **pack_index(tier1_index)})
 
     if args.single_file:
         print("Successfully generated monolithic search index:")
         print(f"  - Total indexed posts: {len(docs)}")
-        print(f"  - Total unique terms:  {len(sorted_tier1_index)}")
+        print(f"  - Total unique terms:  {len(tier1_index)}")
         print(f"  - Output file:         {output_path} ({t1_size_kb:.1f} KB)")
     else:
-        sorted_tier2_index = {k: sorted(tier2_index[k]) for k in sorted(tier2_index.keys())}
-        os.makedirs(os.path.dirname(output_body_path), exist_ok=True)
-        t2_payload = pack_index(sorted_tier2_index)
-        with open(output_body_path, "w", encoding="utf-8") as f:
-            json.dump(t2_payload, f, ensure_ascii=False, separators=(",", ":"))
-
-        t2_size_kb = os.path.getsize(output_body_path) / 1024
-
-        # Sanity check: Ensure strict disjointness between Tier 1 and Tier 2 posting lists
-        conflicts = 0
-        for term, doc_ids in sorted_tier1_index.items():
-            if term in sorted_tier2_index:
-                overlap = set(doc_ids) & set(sorted_tier2_index[term])
-                if overlap:
-                    conflicts += len(overlap)
-
+        t2_size_kb = write_index(output_body_path, pack_index(tier2_index))
         print("Successfully generated two-tier search index:")
         print(f"  - Total indexed posts: {len(docs)}")
-        print(f"  - Tier 1 (Core):       {output_path} ({t1_size_kb:.1f} KB, {len(sorted_tier1_index)} terms)")
-        print(f"  - Tier 2 (Body):       {output_body_path} ({t2_size_kb:.1f} KB, {len(sorted_tier2_index)} terms)")
-        print(f"  - Disjoint check:      {conflicts} overlapping posting pairs (strictly 0)")
+        print(f"  - Tier 1 (Core):       {output_path} ({t1_size_kb:.1f} KB, {len(tier1_index)} terms)")
+        print(f"  - Tier 2 (Body):       {output_body_path} ({t2_size_kb:.1f} KB, {len(tier2_index)} terms)")
 
 
 if __name__ == "__main__":

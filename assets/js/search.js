@@ -84,10 +84,12 @@ function initSearch() {
     return;
   }
 
+  // { docs, index } once the core index has loaded. index is a Map from a
+  // term to its posting lists, still encoded; a Map rather than an object so
+  // that a term such as "constructor" finds nothing inherited.
   let indexData = null;
-  let isLoading = false;
-  let isBodyLoading = false;
-  let hasBodyIndex = false;
+  let coreLoad = null;
+  let bodyRequested = false;
   let selectedIndex = -1;
   let currentResults = [];
   let debounceTimer = null;
@@ -101,81 +103,67 @@ function initSearch() {
     msgDeprecated = 'Deprecated'
   } = dialog.dataset;
 
-  function scheduleLoadBodyIndex() {
-    if (hasBodyIndex || isBodyLoading || !indexData) return;
-    const bodyUrl = dialog.dataset.bodyIndexUrl;
-    if (!bodyUrl) return;
+  async function fetchJSON(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
 
-    const startFetch = () => loadBodyIndex(bodyUrl);
+  // Resolves true once the core index is usable. The promise is kept, so
+  // opening the dialog again while it loads, or after, starts nothing new; a
+  // failure drops it, and the next opening tries again.
+  function loadIndex() {
+    coreLoad ??= (async () => {
+      resultsContainer.innerHTML = `<div class="search-loading">${escapeHTML(msgLoading)}</div>`;
+      try {
+        const raw = await fetchJSON(dialog.dataset.indexUrl || '/search-index.json');
+        if (!Array.isArray(raw.docs)) throw new Error('unsupported index format');
+        const index = new Map();
+        addPostings(index, raw);
+        indexData = { docs: raw.docs, index };
+        resultsContainer.innerHTML = initialHTML;
+        return true;
+      } catch (err) {
+        coreLoad = null;
+        resultsContainer.innerHTML = `<div class="search-error">${escapeHTML(msgError)} (${escapeHTML(err.message)})</div>`;
+        return false;
+      }
+    })();
+    return coreLoad;
+  }
+
+  // The body index is several times the size of the core one and is wanted
+  // only for matches in a post's text, so it waits for the core index and
+  // then for the browser to be idle. Titles and tags are searchable meanwhile.
+  function scheduleBodyLoad() {
+    const bodyUrl = dialog.dataset.bodyIndexUrl;
+    if (bodyRequested || !bodyUrl) return;
+    bodyRequested = true;
+
+    const load = async () => {
+      try {
+        addPostings(indexData.index, await fetchJSON(bodyUrl));
+        // What is on screen was ranked without the body index.
+        if (dialog.open) performSearch(input.value);
+      } catch {
+        // Search still works on the core index; the next opening tries again.
+        bodyRequested = false;
+      }
+    };
 
     if (window.requestIdleCallback) {
-      window.requestIdleCallback(startFetch, { timeout: 1500 });
+      window.requestIdleCallback(load, { timeout: 1500 });
     } else {
-      setTimeout(startFetch, 150);
-    }
-  }
-
-  async function loadBodyIndex(bodyUrl) {
-    if (hasBodyIndex || isBodyLoading || !indexData) return;
-    isBodyLoading = true;
-
-    try {
-      const res = await fetch(bodyUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      isBodyLoading = false;
-      hasBodyIndex = true;
-
-      if (indexData?.index) {
-        addPostings(indexData.index, data);
-        // If the search dialog is currently open and has user input, re-run search with full body index
-        if (dialog.open && input.value.trim()) {
-          performSearch(input.value.trim());
-        }
-      }
-    } catch {
-      isBodyLoading = false;
-      // Non-fatal: search remains operational with Tier 1 (Core) index
-    }
-  }
-
-  // Resolves true once the core index is usable.
-  async function loadIndex() {
-    if (indexData) {
-      scheduleLoadBodyIndex();
-      return true;
-    }
-    if (isLoading) return false;
-
-    isLoading = true;
-    resultsContainer.innerHTML = `<div class="search-loading">${escapeHTML(msgLoading)}</div>`;
-
-    const indexUrl = dialog.dataset.indexUrl || '/search-index.json';
-    try {
-      const res = await fetch(indexUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const raw = await res.json();
-      const index = new Map();
-      addPostings(index, raw);
-      indexData = { docs: raw.docs, index };
-      isLoading = false;
-      resultsContainer.innerHTML = initialHTML;
-      scheduleLoadBodyIndex();
-      return true;
-    } catch (err) {
-      isLoading = false;
-      resultsContainer.innerHTML = `<div class="search-error">${escapeHTML(msgError)} (${escapeHTML(err.message)})</div>`;
-      return false;
+      setTimeout(load, 150);
     }
   }
 
   async function openSearch() {
     dialog.showModal();
     input.focus();
-    if (await loadIndex() && input.value.trim()) {
-      performSearch(input.value.trim());
-    }
+    if (!await loadIndex()) return;
+    scheduleBodyLoad();
+    performSearch(input.value);
   }
 
   // Every way out -- the close button, a click on the backdrop, Escape --
@@ -217,7 +205,6 @@ function initSearch() {
   });
 
   function startsTerm(word) {
-    if (!indexData) return false;
     if (indexData.index.has(word)) return true;
     for (const term of indexData.index.keys()) {
       if (term.startsWith(word)) return true;
@@ -225,11 +212,14 @@ function initSearch() {
     return false;
   }
 
-  // Query tokenization using inverted index dictionary
+  // Splits a query into index terms. Called only once the index has loaded:
+  // there is no word segmenter here, and the index's own terms stand in for
+  // its dictionary.
   function extractTokens(query) {
     const q = query.trim().toLowerCase();
     if (!q) return [];
 
+    const { index } = indexData;
     const tokens = [];
     // 1. Extract alphanumeric tokens. The index never joins words across - or
     //    _, and across . + # only for the few terms that are one (x.509, c++,
@@ -244,28 +234,29 @@ function initSearch() {
       }
     }
 
-    // 2. Extract CJK phrases using dictionary matching against the index terms
-    const cjkChars = q.replace(/[a-z0-9_\-\.\+#\s]+/gi, '');
-    if (cjkChars && indexData?.index) {
+    // 2. Extract CJK phrases: what is left of the query without its Latin
+    //    words. Every run of 2 to 6 characters that is a term becomes a
+    //    token, overlapping ones included -- the indexer emits a long word
+    //    and the shorter words inside it, so all of them are there to match.
+    const cjkChars = q.replace(/[a-z0-9_\-.+#\s]+/g, '');
+    if (cjkChars) {
       const len = cjkChars.length;
       const covered = new Set();
-      // Multi-gram forward matching (length >= 2, longest first)
       for (let i = 0; i < len; i++) {
         for (let l = Math.min(6, len - i); l >= 2; l--) {
           const sub = cjkChars.slice(i, i + l);
-          if (indexData.index.has(sub)) {
+          if (index.has(sub)) {
             tokens.push(sub);
             for (let k = 0; k < l; k++) covered.add(i + k);
           }
         }
       }
-      // Only extract single characters that were not covered by any multi-gram match
+      // A single character only where no longer term covers it: on its own
+      // it matches far too much to help a query that has a real word in it.
       for (let i = 0; i < len; i++) {
-        if (!covered.has(i)) {
-          const single = cjkChars.charAt(i);
-          if (indexData.index.has(single)) {
-            tokens.push(single);
-          }
+        const single = cjkChars.charAt(i);
+        if (!covered.has(i) && index.has(single)) {
+          tokens.push(single);
         }
       }
     }
@@ -274,15 +265,18 @@ function initSearch() {
     return [...new Set(tokens)].filter(Boolean);
   }
 
+  // One pattern for a whole render. Longest token first, so that where two
+  // start at the same place the longer is the one marked.
+  function highlightPattern(tokens) {
+    const sortedTokens = [...tokens].sort((a, b) => b.length - a.length);
+    return new RegExp(`(${sortedTokens.map(escapeRegExp).join('|')})`, 'gi');
+  }
+
   // Matches in the text as written, each piece escaped afterwards: matching
   // in escaped text finds tokens inside its entities, the amp of &amp;.
-  function highlightText(text, tokens) {
-    if (!tokens || tokens.length === 0) return escapeHTML(text);
-
-    const sortedTokens = [...tokens].sort((a, b) => b.length - a.length);
-    const pattern = `(${sortedTokens.map(escapeRegExp).join('|')})`;
+  function highlightText(text, pattern) {
     // With one capturing group, split leaves the matches at the odd indexes.
-    return String(text ?? '').split(new RegExp(pattern, 'gi'))
+    return String(text ?? '').split(pattern)
       .map((part, i) => (i % 2 ? `<mark>${escapeHTML(part)}</mark>` : escapeHTML(part)))
       .join('');
   }
@@ -305,36 +299,36 @@ function initSearch() {
     const docTermHits = {}; // docId -> Set of tokens
     const docs = indexData.docs;
     const index = indexData.index;
-    const totalDocs = docs?.length || 2000;
 
+    // Smoothed BM25-style IDF: a term in few documents says more about them
+    // than one in most. The floor keeps a common term from counting for nothing.
+    const idf = (df, floor) => Math.max(floor, Math.log(1 + (docs.length - df + 0.5) / (df + 0.5)));
+
+    // The Set is for the coverage bonus below, which counts the query's
+    // tokens a document matched: a prefix reaches one document through
+    // several terms, and that is still one token.
     const addHit = (id, weight, token) => {
       scores[id] = (scores[id] || 0) + weight;
       (docTermHits[id] ??= new Set()).add(token);
     };
 
     for (const token of tokens) {
-      const matchedDocIds = index.has(token) ? decodePostings(index.get(token)) : null;
-      const df = matchedDocIds?.length || 0;
-      // Smoothed BM25-style IDF: give rare words significantly higher discriminative weight
-      const idf = Math.max(0.6, Math.log(1 + (totalDocs - df + 0.5) / (df + 0.5)));
-
-      if (matchedDocIds) {
-        for (const id of matchedDocIds) {
-          addHit(id, 1.0 * idf, token);
-        }
+      if (index.has(token)) {
+        const ids = decodePostings(index.get(token));
+        const weight = idf(ids.length, 0.6);
+        for (const id of ids) addHit(id, weight, token);
       } else if (token.length >= 2) {
-        // Prefix search for tokens with length >= 2 (bounded candidate pool)
+        // Not a term, so perhaps the start of one: a word still being typed.
+        // Each term it starts counts for about a third of an exact match, and
+        // the scan stops at 50 of them -- a short prefix starts hundreds, and
+        // none of them is what the reader meant yet.
         let prefixMatches = 0;
-        for (const [key, postings] of index) {
-          if (key.startsWith(token)) {
-            const pIds = decodePostings(postings);
-            const pDf = pIds.length;
-            const pIdf = Math.max(0.3, Math.log(1 + (totalDocs - pDf + 0.5) / (pDf + 0.5)));
-            for (const pid of pIds) {
-              addHit(pid, 0.35 * pIdf, token);
-            }
-            if (++prefixMatches >= 50) break;
-          }
+        for (const [term, postings] of index) {
+          if (!term.startsWith(token)) continue;
+          const ids = decodePostings(postings);
+          const weight = 0.35 * idf(ids.length, 0.3);
+          for (const id of ids) addHit(id, weight, token);
+          if (++prefixMatches >= 50) break;
         }
       }
     }
@@ -416,9 +410,10 @@ function initSearch() {
       return;
     }
 
+    const pattern = highlightPattern(tokens);
     const items = results.map((doc, idx) => {
-      const titleHighlighted = highlightText(doc.title, tokens);
-      const summaryHighlighted = doc.summary ? highlightText(doc.summary, tokens) : '';
+      const titleHighlighted = highlightText(doc.title, pattern);
+      const summaryHighlighted = doc.summary ? highlightText(doc.summary, pattern) : '';
 
       const tagsHTML = doc.tags?.length
         ? `<span class="search-item-tags">${

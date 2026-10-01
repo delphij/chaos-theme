@@ -53,6 +53,9 @@ here.
   them, and the query was looked up whole.
 - `build_search_index.py` indexed each `_index.md` as a post, with a URL that
   does not exist.
+- `build_search_index.py` took every list in a post's front matter for its
+  tags when they were written as a YAML block list, and read no categories
+  written that way.
 - A search term could be highlighted inside an HTML entity of a result's title
   or summary, breaking the entity.
 
