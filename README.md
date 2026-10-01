@@ -330,17 +330,19 @@ To balance instant interaction speed with full technical recall, Chaos uses a **
    - **Zero Redundancy**: Posting lists for terms already matched in a post's Title or Tag are strictly omitted (`P_T1(w) ∩ P_T2(w) = ∅`), and document metadata is never duplicated.
    - Streamed asynchronously in the background via `requestIdleCallback` after the modal opens; merges into the memory index in <15ms without blocking user keystrokes.
 
+Both files hold their inverted index as two strings rather than an object of arrays: the terms, and one posting list per term in the same order, both joined by spaces. A posting list is the gaps between ascending document ids as base-32 digits, mostly one character per document. The browser parses two strings instead of one array per term, and `search.js` decodes a posting list only when a query asks for its term. The format is private to `build_search_index.py` and `search.js`, which change together: rebuild the index after updating the theme.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Tier 1 (Core Index)               ~10–15% of total index   │
 │  ├─ docs: [ {id, title, date, url, tags, description} ]     │
-│  └─ index: { term -> [doc_ids from Title/Tags/Categories] } │
+│  └─ terms, postings: doc ids from Title/Tags/Categories     │
 └──────────────────────────────┬──────────────────────────────┘
                                │ Immediate modal open (TTI < 50ms)
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Tier 2 (Body Index)               Remaining body postings  │
-│  └─ index: { term -> [doc_ids ONLY in Body/Code] }          │
+│  └─ terms, postings: doc ids ONLY in Body/Code              │
 └─────────────────────────────────────────────────────────────┘
                                ▲ Background idle stream & merge
 ```
@@ -954,6 +956,9 @@ node themes/chaos/tools/search_harness.mjs \
   --index assets/search-index.json --body assets/search-index-body.json \
   --compare /tmp/search-old.js
 ```
+
+When the change is to the index format too, the old `search.js` needs an index
+from the old `build_search_index.py`: pass it as `--old-index` and `--old-body`.
 
 With no `--query`, queries are derived from the index itself, sampled across
 the frequency range plus a multi-token query, a single character and one

@@ -18,6 +18,59 @@ function escapeRegExp(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// The index arrives as two strings rather than an object of arrays -- the
+// terms, and one posting list for each in the same order, both joined by
+// spaces -- which the browser parses as two values instead of one array per
+// term. A posting list is the gaps between ascending doc ids, less one, each
+// written least significant digit first in base 32 over the 64 characters
+// below; a digit of 32 or more has another after it. It stays text until a
+// query asks for the term, and build_search_index.py is the encoder.
+const POSTING_DIGITS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
+const DIGIT_VALUES = new Uint8Array(128);
+for (let i = 0; i < POSTING_DIGITS.length; i++) {
+  DIGIT_VALUES[POSTING_DIGITS.charCodeAt(i)] = i;
+}
+
+// A term in both tiers holds its two lists joined by a space, and each list
+// counts its gaps from the start again.
+function decodePostings(text) {
+  const ids = [];
+  let prev = -1;
+  let gap = 0;
+  let shift = 0;
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (code === 32) {
+      prev = -1;
+      continue;
+    }
+    const digit = DIGIT_VALUES[code];
+    gap |= (digit & 31) << shift;
+    if (digit & 32) {
+      shift += 5;
+    } else {
+      prev += gap + 1;
+      ids.push(prev);
+      gap = 0;
+      shift = 0;
+    }
+  }
+  return ids;
+}
+
+function addPostings(index, data) {
+  if (typeof data?.terms !== 'string' || typeof data.postings !== 'string') {
+    throw new Error('unsupported index format');
+  }
+  if (!data.terms) return;
+  const terms = data.terms.split(' ');
+  const lists = data.postings.split(' ');
+  for (let i = 0; i < terms.length; i++) {
+    const prior = index.get(terms[i]);
+    index.set(terms[i], prior === undefined ? lists[i] : `${prior} ${lists[i]}`);
+  }
+}
+
 // Named rather than a bare module body: the element check below is an early
 // return, which a module's top level cannot do.
 function initSearch() {
@@ -74,13 +127,8 @@ function initSearch() {
       isBodyLoading = false;
       hasBodyIndex = true;
 
-      if (data?.index && indexData?.index) {
-        const targetIndex = indexData.index;
-        for (const [term, ids] of Object.entries(data.index)) {
-          targetIndex[term] = Array.isArray(targetIndex[term])
-            ? targetIndex[term].concat(ids)
-            : ids;
-        }
+      if (indexData?.index) {
+        addPostings(indexData.index, data);
         // If the search dialog is currently open and has user input, re-run search with full body index
         if (dialog.open && input.value.trim()) {
           performSearch(input.value.trim());
@@ -108,10 +156,9 @@ function initSearch() {
       const res = await fetch(indexUrl);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const raw = await res.json();
-      indexData = {
-        docs: raw.docs,
-        index: Object.assign(Object.create(null), raw.index)
-      };
+      const index = new Map();
+      addPostings(index, raw);
+      indexData = { docs: raw.docs, index };
       isLoading = false;
       resultsContainer.innerHTML = initialHTML;
       scheduleLoadBodyIndex();
@@ -178,7 +225,7 @@ function initSearch() {
     // 1. Extract alphanumeric tokens including technical symbols (+, #, -, _)
     tokens.push(...(q.match(/[a-z0-9_\-\.\+#]+/gi) || []));
 
-    // 2. Extract CJK phrases using dictionary matching against indexData.index keys
+    // 2. Extract CJK phrases using dictionary matching against the index terms
     const cjkChars = q.replace(/[a-z0-9_\-\.\+#\s]+/gi, '');
     if (cjkChars && indexData?.index) {
       const len = cjkChars.length;
@@ -187,7 +234,7 @@ function initSearch() {
       for (let i = 0; i < len; i++) {
         for (let l = Math.min(6, len - i); l >= 2; l--) {
           const sub = cjkChars.slice(i, i + l);
-          if (Array.isArray(indexData.index[sub])) {
+          if (indexData.index.has(sub)) {
             tokens.push(sub);
             for (let k = 0; k < l; k++) covered.add(i + k);
           }
@@ -197,7 +244,7 @@ function initSearch() {
       for (let i = 0; i < len; i++) {
         if (!covered.has(i)) {
           const single = cjkChars.charAt(i);
-          if (Array.isArray(indexData.index[single])) {
+          if (indexData.index.has(single)) {
             tokens.push(single);
           }
         }
@@ -243,7 +290,7 @@ function initSearch() {
     };
 
     for (const token of tokens) {
-      const matchedDocIds = Array.isArray(index[token]) ? index[token] : null;
+      const matchedDocIds = index.has(token) ? decodePostings(index.get(token)) : null;
       const df = matchedDocIds?.length || 0;
       // Smoothed BM25-style IDF: give rare words significantly higher discriminative weight
       const idf = Math.max(0.6, Math.log(1 + (totalDocs - df + 0.5) / (df + 0.5)));
@@ -255,9 +302,9 @@ function initSearch() {
       } else if (token.length >= 2) {
         // Prefix search for tokens with length >= 2 (bounded candidate pool)
         let prefixMatches = 0;
-        for (const key in index) {
-          if (key.startsWith(token) && Array.isArray(index[key])) {
-            const pIds = index[key];
+        for (const [key, postings] of index) {
+          if (key.startsWith(token)) {
+            const pIds = decodePostings(postings);
             const pDf = pIds.length;
             const pIdf = Math.max(0.3, Math.log(1 + (totalDocs - pDf + 0.5) / (pDf + 0.5)));
             for (const pid of pIds) {

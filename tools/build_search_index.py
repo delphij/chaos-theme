@@ -5,7 +5,8 @@ build_search_index.py: Offline search index generator for Chaos theme.
 
 Scans Hugo content directory, extracts post metadata, performs Chinese & English
 tokenization using Jieba, and generates a compact inverted index JSON file
-for client-side full-text search.
+for client-side full-text search. The index is two strings, the terms and
+their posting lists (see pack_index); assets/js/search.js is the decoder.
 """
 
 import argparse
@@ -191,8 +192,12 @@ def is_valid_token(w: str, stop_words: set) -> bool:
     3. Machine-generated hashes (MD5, SHA-1, SHA-256) and extreme token lengths (> 64).
     4. Pure integers whose significant digits < 3 (filters 0-9 and leading-zero fragments,
        while preserving HTTP status codes like 404, RFC numbers like 821/3522, and years).
+    5. Anything holding whitespace, which separates the terms in the index.
     """
     if not w or w in stop_words:
+        return False
+    # Terms are joined by spaces in the index, so none may hold whitespace
+    if any(ch.isspace() for ch in w):
         return False
     # Must contain at least one semantic character (CJK, Latin letter, or digit)
     if not re.search(r"[\u4e00-\u9fa5a-zA-Z0-9]", w):
@@ -205,6 +210,42 @@ def is_valid_token(w: str, stop_words: set) -> bool:
         if len(w.lstrip("0")) < 3:
             return False
     return True
+
+
+# The 64 digits of a posting list. assets/js/search.js holds the same string.
+POSTING_DIGITS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
+
+
+def encode_postings(doc_ids: list) -> str:
+    """Encodes ascending doc ids as text: the gap from each id to the next, less one.
+
+    A gap is written least significant digit first in base 32; a digit with 32
+    added has another after it. Nearby ids -- most of them, in a list sorted by
+    date -- take one character each instead of a decimal number and a comma.
+    """
+    out = []
+    prev = -1
+    for doc_id in doc_ids:
+        gap = doc_id - prev - 1
+        prev = doc_id
+        while gap > 31:
+            out.append(POSTING_DIGITS[32 | (gap & 31)])
+            gap >>= 5
+        out.append(POSTING_DIGITS[gap])
+    return "".join(out)
+
+
+def pack_index(index: dict) -> dict:
+    """Packs {term: [doc ids]} into two space-joined strings, in the same order.
+
+    Two strings parse far faster in the browser than an array per term, and
+    search.js decodes a posting list only when a query asks for its term.
+    """
+    terms = list(index)
+    return {
+        "terms": " ".join(terms),
+        "postings": " ".join(encode_postings(index[term]) for term in terms),
+    }
 
 
 def tokenize(text: str, stop_words: set) -> set:
@@ -387,7 +428,7 @@ def main():
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     t1_payload = {
         "docs": docs,
-        "index": sorted_tier1_index,
+        **pack_index(sorted_tier1_index),
     }
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(t1_payload, f, ensure_ascii=False, separators=(",", ":"))
@@ -402,9 +443,7 @@ def main():
     else:
         sorted_tier2_index = {k: sorted(tier2_index[k]) for k in sorted(tier2_index.keys())}
         os.makedirs(os.path.dirname(output_body_path), exist_ok=True)
-        t2_payload = {
-            "index": sorted_tier2_index,
-        }
+        t2_payload = pack_index(sorted_tier2_index)
         with open(output_body_path, "w", encoding="utf-8") as f:
             json.dump(t2_payload, f, ensure_ascii=False, separators=(",", ":"))
 

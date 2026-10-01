@@ -34,6 +34,17 @@ here.
   fixed URLs. Every page embeds their URLs, so with a fingerprint any post edit
   changes every page; without one, the server must have browsers revalidate the
   two files. README.md has an nginx example. The default is unchanged.
+- `tools/search_harness.mjs --old-index` and `--old-body` give the `--compare`
+  script its own index, for a change to the index format.
+
+### Changed
+
+- The search indexes hold their terms and posting lists as two strings, with
+  each posting list gap-encoded, instead of an object of arrays. On a blog of
+  1,950 posts the body index went from 1.8 MB to 0.9 MB (527 KB to 432 KB with
+  Brotli) and loads in about a third of the time; results are unchanged. An
+  index must be rebuilt with this version's `build_search_index.py`: `search.js`
+  reports one from an earlier version as an unsupported format.
 
 ## [1.1.0] - 2026-09-27
 

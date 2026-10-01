@@ -20,6 +20,13 @@
 //          --body path/to/search-index-body.json \
 //          --compare /tmp/search-old.js
 //
+//   The same when the change is to the index format as well, so that the old
+//   search.js needs an index built by the old build_search_index.py:
+//     node tools/search_harness.mjs --index new/search-index.json \
+//          --body new/search-index-body.json \
+//          --compare /tmp/search-old.js \
+//          --old-index old/search-index.json --old-body old/search-index-body.json
+//
 // The index is whatever tools/build_search_index.py produced -- a built site
 // has it under assets/ or, fingerprinted, in public/.
 //
@@ -132,11 +139,25 @@ export async function run({ script, index, body, queries }) {
 
 // -------------------------------------------------------- derived queries
 
+// [term, how many documents hold it] for every term of an index. The count
+// needs no decoding: a posting list has one digit below 32, of the 64 in
+// search.js, for each document. An index from before the two strings held an
+// array of doc ids per term, and is still read so that it can be compared.
+function termFrequencies(index) {
+  if (typeof index.terms !== 'string') {
+    return Object.entries(index.index || {})
+      .filter(([, ids]) => Array.isArray(ids))
+      .map(([term, ids]) => [term, ids.length]);
+  }
+  const lists = index.postings.split(' ');
+  return index.terms.split(' ').map((term, i) => [term, lists[i].replace(/[w-zA-Z_-]/g, '').length]);
+}
+
 // Sampled from the index so the harness carries no site's content.
 function deriveQueries(index, count = 12) {
-  const terms = Object.entries(index.index || {})
-    .filter(([term, ids]) => Array.isArray(ids) && term.length >= 1)
-    .sort((a, b) => b[1].length - a[1].length);
+  const terms = termFrequencies(index)
+    .filter(([term]) => term.length >= 1)
+    .sort((a, b) => b[1] - a[1]);
   if (terms.length === 0) return ['nothing-matches-this-qzx'];
 
   const picks = [];
@@ -166,6 +187,8 @@ function parseArgs(argv) {
       case '--body': opts.body = value(); break;
       case '--script': opts.script = value(); break;
       case '--compare': opts.compare = value(); break;
+      case '--old-index': opts.oldIndex = value(); break;
+      case '--old-body': opts.oldBody = value(); break;
       case '--query': opts.queries.push(value()); break;
       case '-h': case '--help': opts.help = true; break;
       default: throw new Error(`unknown argument: ${flag}`);
@@ -206,10 +229,18 @@ async function main() {
 
   const differs = (a, b) => queries.filter(q => JSON.stringify(a[q]) !== JSON.stringify(b[q]));
   const label = { old: opts.compare, new: script };
+  const readJSON = file => JSON.parse(fs.readFileSync(file, 'utf8'));
+  const indexes = {
+    new: { index, body },
+    old: {
+      index: opts.oldIndex ? readJSON(opts.oldIndex) : index,
+      body: opts.oldBody ? readJSON(opts.oldBody) : body
+    }
+  };
 
   // A comparison means nothing until each side is repeatable on its own.
   for (const side of ['old', 'new']) {
-    const base = { script: label[side], index, body, queries };
+    const base = { script: label[side], ...indexes[side], queries };
     const unstable = differs(await run(base), await run(base));
     if (unstable.length) {
       console.error(`harness is not repeatable for ${label[side]}: ${unstable.join(', ')}`);
@@ -218,8 +249,8 @@ async function main() {
     console.log(`  repeatable  ${label[side]}`);
   }
 
-  const before = await run({ script: label.old, index, body, queries });
-  const after = await run({ script: label.new, index, body, queries });
+  const before = await run({ script: label.old, ...indexes.old, queries });
+  const after = await run({ script: label.new, ...indexes.new, queries });
   const changed = differs(before, after);
 
   // A query with one result cannot show a change in ranking, only one in
