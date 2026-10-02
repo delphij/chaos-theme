@@ -400,6 +400,7 @@ python3 themes/chaos/tools/build_search_index.py --content content --output asse
 Unlike generic blog themes that strip code, Chaos **fully indexes technical code content**:
 - **Inline Code (`` `identifier` ``)**: Variable names, struct members, error constants, and CLI flags are preserved.
 - **Code Blocks (```` ```lang ... ``` ````)**: Kernel function names, panic backtraces, data structures (e.g. `fatEntry`, `kmem_alloc`), and configuration blocks are fully searchable.
+- **Part of a word**: A piece of a CJK word that the index holds whole, such as two characters of a three-character name, matches the words that contain it.
 - **CJK Segmentation**: Vendored `jieba` segments mixed Chinese and English prose with domain-specific technical symbol preservation (e.g. `C++`, `C#`, `.NET`, `Google+`, `TCP/IP`).
 
 #### 4. Ranking Algorithm & Scoring Weights

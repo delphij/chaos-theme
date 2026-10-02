@@ -54,6 +54,10 @@ here.
 - A search for a word with a hyphen, an underscore or a full stop in it found
   nothing: `utf-8`, `x86_64`, `node.js`. The index holds the words between
   them, and the query was looked up whole.
+- A search for part of a CJK word the index holds whole found unrelated posts:
+  two characters of a three-character name were looked up one character at a
+  time. A piece of the query that is no term but is inside one now matches the
+  terms that hold it, weighted like a prefix.
 - `build_search_index.py` indexed each `_index.md` as a post, with a URL that
   does not exist.
 - `build_search_index.py` took every list in a post's front matter for its

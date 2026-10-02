@@ -58,11 +58,15 @@ function decodePostings(text) {
   return ids;
 }
 
-function addPostings(index, data) {
+// The terms string is kept as well, a space at each end, so that every term
+// in it has one on both sides: looking for part of a term is then one indexOf
+// over the string instead of a walk over the Map's keys.
+function addPostings({ index, vocab }, data) {
   if (typeof data?.terms !== 'string' || typeof data.postings !== 'string') {
     throw new Error('unsupported index format');
   }
   if (!data.terms) return;
+  vocab.push(` ${data.terms} `);
   const terms = data.terms.split(' ');
   const lists = data.postings.split(' ');
   for (let i = 0; i < terms.length; i++) {
@@ -84,9 +88,10 @@ function initSearch() {
     return;
   }
 
-  // { docs, index } once the core index has loaded. index is a Map from a
-  // term to its posting lists, still encoded; a Map rather than an object so
-  // that a term such as "constructor" finds nothing inherited.
+  // { docs, index, vocab } once the core index has loaded. index is a Map
+  // from a term to its posting lists, still encoded; a Map rather than an
+  // object so that a term such as "constructor" finds nothing inherited.
+  // vocab is the terms of each tier as one string, for findTerms.
   let indexData = null;
   let coreLoad = null;
   let bodyRequested = false;
@@ -118,9 +123,8 @@ function initSearch() {
       try {
         const raw = await fetchJSON(dialog.dataset.indexUrl || '/search-index.json');
         if (!Array.isArray(raw.docs)) throw new Error('unsupported index format');
-        const index = new Map();
-        addPostings(index, raw);
-        indexData = { docs: raw.docs, index };
+        indexData = { docs: raw.docs, index: new Map(), vocab: [] };
+        addPostings(indexData, raw);
         resultsContainer.innerHTML = initialHTML;
         return true;
       } catch (err) {
@@ -142,7 +146,7 @@ function initSearch() {
 
     const load = async () => {
       try {
-        addPostings(indexData.index, await fetchJSON(bodyUrl));
+        addPostings(indexData, await fetchJSON(bodyUrl));
         // What is on screen was ranked without the body index.
         if (dialog.open) performSearch(input.value);
       } catch {
@@ -204,12 +208,36 @@ function initSearch() {
     }
   });
 
-  function startsTerm(word) {
-    if (indexData.index.has(word)) return true;
-    for (const term of indexData.index.keys()) {
-      if (term.startsWith(word)) return true;
+  // Latin words, which the index holds whole or not at all: a query word
+  // that is not a term can only be the start of one. Anything else is CJK,
+  // where it can be any part of one -- see extractTokens.
+  const LATIN_WORD = /^[a-z0-9.+#]+$/;
+
+  // The terms that have text in them, or that start with it, up to limit of
+  // them: the core tier's first, each tier's in the order of the index.
+  function findTerms(text, limit, atStart) {
+    const found = new Set();
+    const needle = atStart ? ` ${text}` : text;
+    for (const vocab of indexData.vocab) {
+      let from = 0;
+      while (found.size < limit) {
+        const at = vocab.indexOf(needle, from);
+        if (at === -1) break;
+        const start = atStart ? at + 1 : vocab.lastIndexOf(' ', at) + 1;
+        // The space that ends this term is also the one before the next.
+        from = vocab.indexOf(' ', start);
+        found.add(vocab.slice(start, from));
+      }
     }
-    return false;
+    return found;
+  }
+
+  function startsTerm(word) {
+    return indexData.index.has(word) || findTerms(word, 1, true).size > 0;
+  }
+
+  function insideTerm(text) {
+    return findTerms(text, 1, false).size > 0;
   }
 
   // Splits a query into index terms. Called only once the index has loaded:
@@ -251,7 +279,25 @@ function initSearch() {
           }
         }
       }
-      // A single character only where no longer term covers it: on its own
+      // What no term covers may still be part of one. The indexer keeps a
+      // word it has no shorter words for whole, a name above all, so two
+      // characters of a three-character name are no term themselves. The
+      // longest piece of each uncovered run that is inside a term becomes a
+      // token, for performSearch to look up in the terms that hold it.
+      for (let i = 0; i < len; i++) {
+        if (covered.has(i)) continue;
+        let end = i + 1;
+        while (end < len && !covered.has(end)) end++;
+        for (let l = end - i; l >= 2; l--) {
+          const sub = cjkChars.slice(i, i + l);
+          if (insideTerm(sub)) {
+            tokens.push(sub);
+            for (let k = 0; k < l; k++) covered.add(i + k);
+            break;
+          }
+        }
+      }
+      // A single character only where nothing longer covers it: on its own
       // it matches far too much to help a query that has a real word in it.
       for (let i = 0; i < len; i++) {
         const single = cjkChars.charAt(i);
@@ -318,17 +364,15 @@ function initSearch() {
         const weight = idf(ids.length, 0.6);
         for (const id of ids) addHit(id, weight, token);
       } else if (token.length >= 2) {
-        // Not a term, so perhaps the start of one: a word still being typed.
-        // Each term it starts counts for about a third of an exact match, and
+        // Not a term, so perhaps part of one: the start of a word still being
+        // typed, or in CJK any piece of a word the indexer kept whole. Each
+        // term it is part of counts for about a third of an exact match, and
         // the scan stops at 50 of them -- a short prefix starts hundreds, and
         // none of them is what the reader meant yet.
-        let prefixMatches = 0;
-        for (const [term, postings] of index) {
-          if (!term.startsWith(token)) continue;
-          const ids = decodePostings(postings);
+        for (const term of findTerms(token, 50, LATIN_WORD.test(token))) {
+          const ids = decodePostings(index.get(term));
           const weight = 0.35 * idf(ids.length, 0.3);
           for (const id of ids) addHit(id, weight, token);
-          if (++prefixMatches >= 50) break;
         }
       }
     }
