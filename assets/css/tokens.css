@@ -117,7 +117,7 @@
        line; in dark mode the inks share one lightness band at lower chroma
        than GitHub's, which is what keeps them from glaring. */
     --syntax-text: var(--text);
-    --syntax-comment: var(--muted);    /* 墨 by day, 薄墨色 by night */
+    --syntax-comment: var(--muted);    /* 墨 by day, an unnamed grey by night */
     --syntax-keyword: #A73836;         /* 紅海老茶 Beni-ebicha */
     --syntax-string: #192F60;          /* 紺青 Konjō */
     --syntax-constant: #1E50A2;        /* 瑠璃色 Ruri-iro */
@@ -190,49 +190,49 @@
       /* Color scheme - Tells browser to use native dark UI for controls */
       color-scheme: dark;
 
-      --bg: #1F1E1D;                     /* Near-neutral warm charcoal; warmth stays subordinate to accents */
-      --surface: #252422;                /* Elevated surfaces (subtle warm charcoal elevation) */
-      --text: #DCDDDD;                   /* 白鼠 Shiro-nezu (12.2:1 on --bg) */
-      --heading: #F3F3F2;                /* 白練 Shiro-neri (15.0:1) */
-      --muted: #A3A3A2;                  /* 薄墨色 Usuzumi-iro (6.6:1; 5.7:1 on --paper) */
+      --bg: #151514;                     /* Deep, calm warm charcoal; eliminates gray haze at night */
+      --surface: #1B1B19;                /* Elevated surfaces (subtle warm charcoal elevation) */
+      --text: #CFCFCE;                   /* Unnamed grey, a step under the headings (11.7:1 on --bg) */
+      --heading: #DCDDDD;                /* 白鼠 Shiro-nezumi (13.4:1 on --bg) */
+      --muted: #989896;                  /* Muted secondary text (6.3:1 on --bg; 5.4:1 on --paper) */
       --primary: #D69090;                /* 退紅 Arazome, the pale red to light mode's 蘇芳 */
       --primary-hover: #D4ACAD;          /* 薄柿 Usugaki: lighter, less chroma */
-      --primary-fg: #1F1E1D;             /* Dark ink on the rose accent (6.5:1) */
-      --accent: #84B9CB;                 /* 浅縹 Asa-hanada, the pale 藍 dye to light mode's 藍色 (7.8:1) */
-      --paper: #2B2925;                  /* Active and hover grounds (warm charcoal, unnamed) */
+      --primary-fg: #151514;             /* Dark ink on the rose accent (matches --bg) */
+      --accent: #84B9CB;                 /* 浅縹 Asa-hanada, the pale 藍 dye to light mode's 藍色 (8.5:1) */
+      --paper: #252320;                  /* Active and hover grounds (warm charcoal) */
       --link: var(--accent);             /* Same blue family as light mode */
       --link-hover: #ABCED8;             /* 秘色色 Hisoku-iro: lighter, less chroma */
-      --ground: #282623;                 /* Warm charcoal, same tier as the alert grounds (~1.10) */
-      --table-head-bg: #34322D;          /* ...a raised warm charcoal by night, not a glaring
-                                            light bar: 1.30 against --bg, a step above the
+      --ground: #1F1E1C;                 /* Warm charcoal, same tier as the alert grounds (~1.09) */
+      --table-head-bg: #2D2C28;          /* ...a raised warm charcoal by night, not a glaring
+                                            light bar: 1.31 against --bg, a step above the
                                             stripes and --paper (unnamed) */
-      --table-head-fg: var(--heading);   /* 11.5:1 */
-      --border-color: rgba(255,255,255,0.1);
+      --table-head-fg: var(--heading);   /* 10.3:1 */
+      --border-color: rgba(255,255,255,0.08);
       --border: 1px solid var(--border-color); /* Subtle dark border */
-      --code-bg: #262626;                /* Neutral like light mode; 1.10:1 against --bg */
+      --code-bg: #1D1D1C;                /* Neutral, quiet dark ground (1.08:1 against --bg) */
       --mark-bg: rgba(248, 181, 0, 0.16);  /* 山吹色 Yamabuki; stronger and muted text on it drops below AA */
-      --shadow-dialog: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      --shadow-dialog: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
 
-      /* Grounds sit at one tier (~1.10 against --bg) so no callout type
+      /* Grounds sit at one tier (~1.09 against --bg) so no callout type
          outweighs another or a quote. The inks are traditional colours of
          matching lightness (OKLCH L 0.71-0.76), each the dark-mode kin of
          its light-mode hue. */
-      --alert-note-bg: #1F2730;
+      --alert-note-bg: #171E26;
       --alert-note-border: var(--accent);
-      --alert-tip-bg: #1F2823;
+      --alert-tip-bg: #17201B;
       --alert-tip-border: #93B69C;      /* 薄青 Usu-ao */
-      --alert-important-bg: #2C251C;
+      --alert-important-bg: #231D16;
       --alert-important-border: #D8A373; /* 伽羅色 Kyara-iro */
-      --alert-warning-bg: #302326;
+      --alert-warning-bg: #261B1E;
       --alert-warning-border: var(--primary);
-      --alert-caution-bg: #2A2430;
+      --alert-caution-bg: #211B26;
       --alert-caution-border: #A59ACA;  /* 藤紫 Fuji-murasaki */
 
       --syntax-keyword: #F2A0A1;         /* 紅梅色 Kōbai-iro */
-      --syntax-string: #A0D8EF;          /* 空色 Sora-iro */
+      --syntax-string: #83CCD2;          /* 白群 Byakugun */
       --syntax-constant: #89C3EB;        /* 勿忘草色 Wasurenagusa-iro */
       --syntax-function: #C0A2C7;        /* 薄葡萄 Usu-budō */
-      --syntax-variable: #F7B977;        /* 杏色 Anzu-iro */
+      --syntax-variable: #DEB068;        /* 飴色 Ame-iro */
       --syntax-tag: #A8C97F;             /* 柳色 Yanagi-iro */
       --syntax-line-hl: rgba(248, 181, 0, 0.12); /* Weaker than light: comments on it keep AA */
     }

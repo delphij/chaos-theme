@@ -29,10 +29,13 @@
    LAYOUT - HEADER, CONTAINER, FOOTER
    ========================================================================== */
 
-/* Same opaque reading ground as .site-nav on the main site. */
+/* Sticky header with frosted-glass effect, matching .site-nav on the main site. */
 .site-header {
   width: 100%;
   background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
   border-bottom: var(--border);
   position: sticky;
   top: 0;

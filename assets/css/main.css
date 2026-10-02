@@ -242,10 +242,14 @@
      Sticky header with flexbox-based navigation menu.
      ========================================================================== */
 
-  /* Opaque sticky header keeps text legible over scrolling content. */
+  /* Frosted-glass sticky header: the page shows through an 82% --bg, blurred.
+     The opaque declaration is the fallback where color-mix() is unsupported. */
   .site-nav {
     width: 100%;
     background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
     position: sticky;
     top: 0;
     z-index: var(--z-nav);

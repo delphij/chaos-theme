@@ -61,6 +61,17 @@ here.
 - `build_search_index.py` indexes the whole body of a post. It stopped at 6,000
   characters, so a word further into a long post could not be found.
   `--max-body-chars` still sets a limit, and `0`, now the default, means none.
+- The sticky header, on the site and on the feed and sitemap pages, is frosted
+  glass again: `--bg` at 82% over a 16px backdrop blur, in place of the opaque
+  ground of 1.1.0.
+- The dark palette is deeper, so the page does not glow at night: `--bg` is
+  `#151514`, and the surfaces, grounds, callout grounds and code ground step
+  down with it, keeping their tiers. Headings are 白鼠 `#DCDDDD`, body text
+  `#CFCFCE` and secondary text `#989896`; the table header is `#2D2C28`.
+  Strings in code are 白群 `#83CCD2` and variables 飴色 `#DEB068`, so that no
+  syntax colour is brighter than body text on the deeper ground. A site
+  that redefines only some of the dark colour properties should check them
+  against the new ones.
 
 ### Fixed
 

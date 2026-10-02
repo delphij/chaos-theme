@@ -463,25 +463,27 @@ by what they derive from.
 
 | Role | Light | Dark |
 | :--- | :--- | :--- |
-| Page / panel | 生成り色 `#FBFAF5` / 白 `#FFFFFF` | `#1F1E1D` / `#252422` |
-| Headings | 暗黒色 `#16160E` | 白練 `#F3F3F2` |
-| Body / secondary text | 黒 `#2B2B2B` / 墨 `#595857` | 白鼠 `#DCDDDD` / 薄墨色 `#A3A3A2` |
+| Page / panel | 生成り色 `#FBFAF5` / 白 `#FFFFFF` | `#151514` / `#1B1B19` |
+| Headings | 暗黒色 `#16160E` | 白鼠 `#DCDDDD` |
+| Body / secondary text | 黒 `#2B2B2B` / 墨 `#595857` | `#CFCFCE` / `#989896` |
 | Primary accent / hover | 蘇芳 `#9E3D3F` / 葡萄茶 `#6C2C2F` | 退紅 `#D69090` / 薄柿 `#D4ACAD` |
 | Blue accent and links / hover | 藍色 `#165E83` / 紺色 `#223A70` | 浅縹 `#84B9CB` / 秘色色 `#ABCED8` |
-| Active and hover ground | 練色 `#EDE4CD` | `#2B2925` |
-| Quote and chrome ground | `#F5F2EB` (tint toward 練色) | `#282623` |
-| Table header | 黒 bar, 生成り色 text | `#34322D` bar, 白練 text |
+| Active and hover ground | 練色 `#EDE4CD` | `#252320` |
+| Quote and chrome ground | `#F5F2EB` (tint toward 練色) | `#1F1E1C` |
+| Table header | 黒 bar, 生成り色 text | `#2D2C28` bar, 白鼠 text |
 | Callout inks | 藍色, 千歳緑, 柿茶, 蘇芳, 菖蒲色 | 浅縹, 薄青, 伽羅色, 退紅, 藤紫 |
 | Callout grounds | 月白, tint, tint, 薄桜, tint | tints |
 | Highlight | 山吹色 at 25% | 山吹色 at 16% |
 
-Dark mode keeps the roles rather than inverting the values: a near-neutral
-warm charcoal page, off-white rather than white ink, and each accent swapped
+Dark mode keeps the roles rather than inverting the values: a deep,
+near-neutral charcoal page that does not glow at night, grey rather than white
+ink, and each accent swapped
 for a paler colour of the same family (蘇芳 → 退紅, 藍 → 浅縹). The dark
 accents and callout inks share one lightness band, so none glares over the
 others. Tinted grounds share one tier per mode, about 1.07:1 against the
 page in light mode and 1.10:1 in dark; code sits at the same or one step
-above. Every text colour clears 4.5:1 on each ground it is used on.
+above in light mode and just under the tier in dark, and the dark table header
+at 1.31:1. Every text colour clears 4.5:1 on each ground it is used on.
 
 ### Shapes and hierarchy
 
@@ -500,8 +502,11 @@ above. Every text colour clears 4.5:1 on each ground it is used on.
 - Search uses tinted input and footer areas, an open results area and filled
   selection states rather than separator rules or outlined badges. Focus
   outlines remain visible; forced-colour mode restores essential boundaries.
-- Sticky headers have an opaque ground so underlying content cannot compromise
-  text contrast. Shadows are reserved for floating controls and overlays.
+- Sticky headers are frosted glass: the page ground at 82% over a 16px
+  backdrop blur, so scrolling content shows through faintly. Over the page's
+  own grounds the header text keeps its contrast; a strongly contrasting image
+  passing underneath can take secondary text below 4.5:1 until it scrolls on.
+  Shadows are reserved for floating controls and overlays.
 
 ### Accessibility
 
@@ -523,12 +528,12 @@ reads as it does on github.com, but in traditional colours:
 | Role | Light | Dark |
 | :--- | :--- | :--- |
 | Keyword, operator, `#include` | 紅海老茶 `#A73836` | 紅梅色 `#F2A0A1` |
-| String, included file | 紺青 `#192F60` | 空色 `#A0D8EF` |
+| String, included file | 紺青 `#192F60` | 白群 `#83CCD2` |
 | Constant, number, escape | 瑠璃色 `#1E50A2` | 勿忘草色 `#89C3EB` |
 | Function, builtin, attribute | 菖蒲色 `#674196` | 薄葡萄 `#C0A2C7` |
-| Variable, class, entity | 唐茶 `#783C1D` | 杏色 `#F7B977` |
+| Variable, class, entity | 唐茶 `#783C1D` | 飴色 `#DEB068` |
 | Markup tag | 千歳緑 `#316745` | 柳色 `#A8C97F` |
-| Comment, line number | 墨 `#595857` | 薄墨色 `#A3A3A2` |
+| Comment, line number | 墨 `#595857` | `#989896` |
 
 Highlighted lines take a 山吹色 wash, as `<mark>` does. The dark inks share
 one lightness band at lower chroma than GitHub Dark's, which is what keeps
