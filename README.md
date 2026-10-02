@@ -394,12 +394,14 @@ python3 themes/chaos/tools/build_search_index.py --content content --output asse
 | `--single-file` | `false` | Generate a legacy single monolithic index file instead of two-tier |
 | `--max-body-chars` | `0` | Maximum body characters to index per post; `0` indexes the whole body. A limit makes the index smaller, and words past it unfindable |
 | `--base-url` | `/` | Base URL prefix for post links |
+| `--keep-traditional` | `false` | Index Traditional Chinese characters as written, not as their Simplified forms. A search then finds only posts in the script of the query |
 
 #### 3. Technical Code & Keyword Preservation
 
 Unlike generic blog themes that strip code, Chaos **fully indexes technical code content**:
 - **Inline Code (`` `identifier` ``)**: Variable names, struct members, error constants, and CLI flags are preserved.
 - **Code Blocks (```` ```lang ... ``` ````)**: Kernel function names, panic backtraces, data structures (e.g. `fatEntry`, `kmem_alloc`), and configuration blocks are fully searchable.
+- **Simplified and Traditional Chinese**: A search in either script finds posts in either. The index holds Traditional characters as their Simplified forms, from the character table of the vendored [OpenCC](https://github.com/BYVoid/OpenCC) (Apache License 2.0), and carries the pairs a query can need, about 5 KB compressed on a blog of 1,950 posts, with a `foldCredit` string naming their source and license. Results show titles as they were written.
 - **Part of a word**: A piece of a CJK word that the index holds whole, such as two characters of a three-character name, matches the words that contain it.
 - **CJK Segmentation**: Vendored `jieba` segments mixed Chinese and English prose with domain-specific technical symbol preservation (e.g. `C++`, `C#`, `.NET`, `Google+`, `TCP/IP`).
 
@@ -984,6 +986,7 @@ All dependencies are vendored in `static/_3p/` and `tools/vendor/` to ensure rel
 - **Noto Sans Mono 2.014**: Monospace font subset for code blocks and dates
 - **polyxslt 1.0.0**: XSLT 1.0 in the browser, so the feeds stay readable once browsers drop native XSLT
 - **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
+- **OpenCC 1.4.2** (character table only): Traditional to Simplified Chinese characters for the offline search index generator (in `tools/vendor/opencc/`)
 
 ### No External Dependencies
 

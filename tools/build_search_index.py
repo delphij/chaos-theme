@@ -7,6 +7,11 @@ Scans Hugo content directory, extracts post metadata, performs Chinese & English
 tokenization using Jieba, and generates a compact inverted index JSON file
 for client-side full-text search. The index is two strings, the terms and
 their posting lists (see pack_index); assets/js/search.js is the decoder.
+
+Traditional Chinese characters are indexed as their Simplified forms, from the
+vendored OpenCC character table (see load_fold_table), so that a query in
+either script finds a post in either. The pairs a query may need go into the
+index for search.js to fold the query with.
 """
 
 import argparse
@@ -35,6 +40,50 @@ except ImportError:
             "Error: 'jieba' not found in system Python or themes/chaos/tools/vendor/jieba.\n"
         )
         sys.exit(1)
+
+OPENCC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vendor", "opencc")
+
+# Goes into an index beside the pairs taken from the table, which are a part of
+# OpenCC redistributed: its Apache License asks that whoever receives them is
+# told where they are from and under what terms.
+FOLD_CREDIT = (
+    "fold: Traditional to Simplified Chinese character pairs from "
+    "TSCharacters.txt of OpenCC {version} (https://github.com/BYVoid/OpenCC), "
+    "Copyright the OpenCC authors, licensed under the Apache License, "
+    "Version 2.0 (https://www.apache.org/licenses/LICENSE-2.0)"
+)
+
+
+def load_fold_table(directory: str = OPENCC_DIR):
+    """Reads OpenCC's TSCharacters.txt as ({traditional: simplified}, version).
+
+    A line is a character, a tab, and its Simplified forms separated by
+    spaces, the usual one first; that one is taken. Which form is right depends
+    on the word, and OpenCC settles it with a phrase table. An index needs
+    only that the text and the query fold alike, so the first form will do:
+    at worst two words become one term, and a query finds both.
+
+    A pair with a character outside the Basic Multilingual Plane is left out.
+    search.js folds a string one UTF-16 unit at a time and relies on the
+    result being as long as the original, to highlight a match in a title as
+    it was written.
+    """
+    table = {}
+    with open(os.path.join(directory, "TSCharacters.txt"), "r", encoding="utf-8") as f:
+        for line in f:
+            if line.startswith("#") or "\t" not in line:
+                continue
+            key, values = line.rstrip("\n").split("\t", 1)
+            value = values.split(" ")[0]
+            if len(key) != 1 or len(value) != 1 or key == value:
+                continue
+            if ord(key) > 0xFFFF or ord(value) > 0xFFFF:
+                continue
+            table[key] = value
+    with open(os.path.join(directory, "VERSION"), "r", encoding="utf-8") as f:
+        version = f.read().strip()
+    return table, version
+
 
 # Regular expression for exact cryptographic hashes (MD5, SHA-1, SHA-256)
 HEX_HASH_RE = re.compile(r"^[0-9a-fA-F]{32}$|^[0-9a-fA-F]{40}$|^[0-9a-fA-F]{64}$")
@@ -219,25 +268,50 @@ def encode_postings(doc_ids: list) -> str:
     return "".join(out)
 
 
-def pack_index(index: dict) -> dict:
+def pack_index(index: dict, fold: dict = None, credit: str = "", sent: set = None) -> dict:
     """Packs {term: [doc ids]} into two space-joined strings, in the same order.
 
     Two strings parse far faster in the browser than an array per term, and
     search.js decodes a posting list only when a query asks for its term. The
     terms are sorted so that the same content always builds the same file.
+
+    With fold, the index also gets the pairs of it that a query could need:
+    those whose Simplified character is in one of these terms, as one string
+    of the two characters of each pair in turn. A Traditional character whose
+    Simplified form is in no term matches nothing folded or not. sent holds
+    the Traditional characters an earlier tier has already given, which are
+    skipped here and added to.
     """
     terms = sorted(index)
-    return {
+    packed = {
         "terms": " ".join(terms),
         "postings": " ".join(encode_postings(index[term]) for term in terms),
     }
+    if fold:
+        used = set(packed["terms"])
+        pairs = sorted(
+            (trad, simp) for trad, simp in fold.items()
+            if simp in used and (sent is None or trad not in sent)
+        )
+        if pairs:
+            packed["fold"] = "".join(trad + simp for trad, simp in pairs)
+            packed["foldCredit"] = credit
+            if sent is not None:
+                sent.update(trad for trad, _ in pairs)
+    return packed
 
 
-def tokenize(text: str, stop_words: set) -> set:
-    """Segments text into lowercase searchable tokens, skipping stop words and invalid tokens."""
+def tokenize(text: str, stop_words: set, fold: dict = None) -> set:
+    """Segments text into lowercase searchable tokens, skipping stop words and invalid tokens.
+
+    fold is a str.translate table. Folding comes before segmentation: jieba's
+    dictionary is of Simplified words, and cuts those better.
+    """
     tokens = set()
     if not text:
         return tokens
+    if fold:
+        text = text.translate(fold)
 
     # Pre-extract alphanumeric tokens with technical symbols (e.g. Google+, C++, C#, .NET)
     for sym in re.findall(r"\b[a-zA-Z0-9_\-\.]+(?:\+\+|[+#])", text):
@@ -263,6 +337,7 @@ def main():
     parser.add_argument("--max-body-chars", type=int, default=0, help="Max body characters to index per post; 0 indexes the whole body (default: 0)")
     parser.add_argument("--stopwords", default="", help="Path to custom stopwords file (overrides default)")
     parser.add_argument("--extra-stopwords", default="", help="Path to extra stopwords file (augments default)")
+    parser.add_argument("--keep-traditional", action="store_true", help="Index Traditional Chinese characters as written instead of as their Simplified forms")
     args = parser.parse_args()
 
     content_dir = os.path.abspath(args.content)
@@ -295,6 +370,14 @@ def main():
         if extra_words:
             print(f"Loaded {len(extra_words)} extra stopwords from {args.extra_stopwords}")
             stop_words.update(extra_words)
+
+    # Stop words are matched after folding, so they are folded as well.
+    fold, fold_credit = {}, ""
+    if not args.keep_traditional:
+        fold, opencc_version = load_fold_table()
+        fold_credit = FOLD_CREDIT.format(version=opencc_version)
+        stop_words = {"".join(fold.get(ch, ch) for ch in word) for word in stop_words}
+    fold_ords = str.maketrans(fold)
 
     print(f"Active stop words: {len(stop_words)} terms")
     print(f"Scanning markdown files in {content_dir}...")
@@ -377,13 +460,13 @@ def main():
 
         tier1_tokens = set()
         for text in (post["title"], *post["tags"], *post["categories"]):
-            tier1_tokens |= tokenize(text, stop_words)
+            tier1_tokens |= tokenize(text, stop_words, fold_ords)
         # The whole body unless the site asks for a limit: a word past the
         # limit cannot be found, however plainly the post says it.
         body = post["clean_body"]
         if args.max_body_chars > 0:
             body = body[: args.max_body_chars]
-        body_tokens = tokenize(body, stop_words)
+        body_tokens = tokenize(body, stop_words, fold_ords)
 
         for token in tier1_tokens:
             tier1_index[token].append(doc_id)
@@ -405,7 +488,10 @@ def main():
             json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
         return os.path.getsize(path) / 1024
 
-    t1_size_kb = write_index(output_path, {"docs": docs, **pack_index(tier1_index)})
+    # The body index leaves out the pairs the core one has: search.js has
+    # loaded the core index by the time it reads this one.
+    fold_sent = set()
+    t1_size_kb = write_index(output_path, {"docs": docs, **pack_index(tier1_index, fold, fold_credit, fold_sent)})
 
     if args.single_file:
         print("Successfully generated monolithic search index:")
@@ -413,7 +499,7 @@ def main():
         print(f"  - Total unique terms:  {len(tier1_index)}")
         print(f"  - Output file:         {output_path} ({t1_size_kb:.1f} KB)")
     else:
-        t2_size_kb = write_index(output_body_path, pack_index(tier2_index))
+        t2_size_kb = write_index(output_body_path, pack_index(tier2_index, fold, fold_credit, fold_sent))
         print("Successfully generated two-tier search index:")
         print(f"  - Total indexed posts: {len(docs)}")
         print(f"  - Tier 1 (Core):       {output_path} ({t1_size_kb:.1f} KB, {len(tier1_index)} terms)")

@@ -61,6 +61,17 @@ See tools/vendor/jieba/LICENSE for full license text
 Website: https://github.com/fxsjy/jieba
 Chinese text segmentation for offline search index generator.
 
+OpenCC (Open Chinese Convert) character table
+Copyright the OpenCC authors (see tools/vendor/opencc/AUTHORS)
+Licensed under the Apache License, Version 2.0
+Location: tools/vendor/opencc/
+See tools/vendor/opencc/LICENSE for full license text
+Website: https://github.com/BYVoid/OpenCC
+Version 1.4.2. Only data/dictionary/TSCharacters.txt is included, unmodified.
+The search index generator reads it to index Traditional Chinese characters as
+their Simplified forms, and copies the pairs a query can need into the search
+index it writes, with a credit beside them.
+
 polyxslt
 Copyright (c) 2026 Xin LI
 Licensed under the MIT License

@@ -34,6 +34,12 @@ here.
   fixed URLs. Every page embeds their URLs, so with a fingerprint any post edit
   changes every page; without one, the server must have browsers revalidate the
   two files. README.md has an nginx example. The default is unchanged.
+- A search in Simplified or Traditional Chinese finds posts in either script.
+  `build_search_index.py` indexes Traditional characters as their Simplified
+  forms, from the character table of OpenCC 1.4.2, now vendored in
+  `tools/vendor/opencc/`, and puts the pairs a query can need in the index,
+  where `search.js` folds the query with them. `--keep-traditional` turns this
+  off. An index built earlier still works, without the folding.
 - `tools/search_harness.mjs --old-index` and `--old-body` give the `--compare`
   script its own index, for a change to the index format.
 

@@ -207,6 +207,7 @@ Only for:
 - **Noto Sans Mono 2.014**: Clean Latin monospace subset with consistent character metrics
 - **polyxslt 1.0.0**: Keeps the styled feeds working after browsers drop XSLT; never requested by a browser that still has it
 - **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
+- **OpenCC 1.4.2** (character table only): lets a search in Simplified or Traditional Chinese find posts in either, at about 5 KB of index (in `tools/vendor/opencc/`)
 - **Remark42**: Optional, user's choice, not vendored (embedded script)
 
 ### Attribution Standards

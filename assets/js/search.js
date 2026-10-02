@@ -61,9 +61,18 @@ function decodePostings(text) {
 // The terms string is kept as well, a space at each end, so that every term
 // in it has one on both sides: looking for part of a term is then one indexOf
 // over the string instead of a walk over the Map's keys.
-function addPostings({ index, vocab }, data) {
+//
+// An index built with Traditional Chinese folded into Simplified brings the
+// pairs a query may need, as one string of the two characters of each pair in
+// turn, every one of them a single UTF-16 unit.
+function addPostings({ index, vocab, fold }, data) {
   if (typeof data?.terms !== 'string' || typeof data.postings !== 'string') {
     throw new Error('unsupported index format');
+  }
+  if (typeof data.fold === 'string') {
+    for (let i = 0; i + 1 < data.fold.length; i += 2) {
+      fold.set(data.fold[i], data.fold[i + 1]);
+    }
   }
   if (!data.terms) return;
   vocab.push(` ${data.terms} `);
@@ -91,8 +100,13 @@ function initSearch() {
   // { docs, index, vocab } once the core index has loaded. index is a Map
   // from a term to its posting lists, still encoded; a Map rather than an
   // object so that a term such as "constructor" finds nothing inherited.
-  // vocab is the terms of each tier as one string, for findTerms.
+  // vocab is the terms of each tier as one string, for findTerms, and fold
+  // maps a Traditional Chinese character to the Simplified one the index has
+  // in its place.
   let indexData = null;
+  // What a query is matched against in each document, by doc id: its title,
+  // summary and tags in lower case and folded. Filled as documents come up.
+  let docText = [];
   let coreLoad = null;
   let bodyRequested = false;
   let selectedIndex = -1;
@@ -123,7 +137,8 @@ function initSearch() {
       try {
         const raw = await fetchJSON(dialog.dataset.indexUrl || '/search-index.json');
         if (!Array.isArray(raw.docs)) throw new Error('unsupported index format');
-        indexData = { docs: raw.docs, index: new Map(), vocab: [] };
+        indexData = { docs: raw.docs, index: new Map(), vocab: [], fold: new Map() };
+        docText = [];
         addPostings(indexData, raw);
         resultsContainer.innerHTML = initialHTML;
         return true;
@@ -147,6 +162,8 @@ function initSearch() {
     const load = async () => {
       try {
         addPostings(indexData, await fetchJSON(bodyUrl));
+        // Folded with the core index's pairs alone.
+        docText = [];
         // What is on screen was ranked without the body index.
         if (dialog.open) performSearch(input.value);
       } catch {
@@ -208,6 +225,28 @@ function initSearch() {
     }
   });
 
+  // The index has Simplified characters where a post has Traditional ones, so
+  // whatever is compared with its terms is folded the same way. A pair is one
+  // UTF-16 unit for another: the result is as long as the text, and a place
+  // in one is the same place in the other.
+  function foldText(text) {
+    const { fold } = indexData;
+    if (fold.size === 0) return text;
+    let out = '';
+    for (let i = 0; i < text.length; i++) {
+      out += fold.get(text[i]) ?? text[i];
+    }
+    return out;
+  }
+
+  function matchText(id) {
+    return docText[id] ??= (({ title, summary, tags }) => ({
+      title: foldText((title || '').toLowerCase()),
+      summary: foldText((summary || '').toLowerCase()),
+      tags: foldText((tags || []).join(' ').toLowerCase())
+    }))(indexData.docs[id]);
+  }
+
   // Latin words, which the index holds whole or not at all: a query word
   // that is not a term can only be the start of one. Anything else is CJK,
   // where it can be any part of one -- see extractTokens.
@@ -244,7 +283,7 @@ function initSearch() {
   // there is no word segmenter here, and the index's own terms stand in for
   // its dictionary.
   function extractTokens(query) {
-    const q = query.trim().toLowerCase();
+    const q = foldText(query.trim().toLowerCase());
     if (!q) return [];
 
     const { index } = indexData;
@@ -318,13 +357,20 @@ function initSearch() {
     return new RegExp(`(${sortedTokens.map(escapeRegExp).join('|')})`, 'gi');
   }
 
-  // Matches in the text as written, each piece escaped afterwards: matching
-  // in escaped text finds tokens inside its entities, the amp of &amp;.
+  // Matches are found in the folded text and marked in the text as written,
+  // which has them at the same places. Each piece is escaped afterwards:
+  // matching in escaped text finds tokens inside its entities, the amp of
+  // &amp;.
   function highlightText(text, pattern) {
-    // With one capturing group, split leaves the matches at the odd indexes.
-    return String(text ?? '').split(pattern)
-      .map((part, i) => (i % 2 ? `<mark>${escapeHTML(part)}</mark>` : escapeHTML(part)))
-      .join('');
+    const written = String(text ?? '');
+    let html = '';
+    let last = 0;
+    for (const match of foldText(written).matchAll(pattern)) {
+      const end = match.index + match[0].length;
+      html += `${escapeHTML(written.slice(last, match.index))}<mark>${escapeHTML(written.slice(match.index, end))}</mark>`;
+      last = end;
+    }
+    return html + escapeHTML(written.slice(last));
   }
 
   function performSearch(query) {
@@ -335,7 +381,7 @@ function initSearch() {
       return;
     }
 
-    const cleanQuery = query.trim().toLowerCase();
+    const cleanQuery = foldText(query.trim().toLowerCase());
     let tokens = extractTokens(query);
     if (tokens.length === 0) {
       tokens = [cleanQuery];
@@ -385,9 +431,7 @@ function initSearch() {
       const doc = docs[id];
       if (!doc) continue;
 
-      const titleLower = (doc.title || '').toLowerCase();
-      const summaryLower = (doc.summary || '').toLowerCase();
-      const tagsLower = (doc.tags || []).join(' ').toLowerCase();
+      const { title: titleLower, summary: summaryLower, tags: tagsLower } = matchText(id);
 
       // 1. Exact query phrase match (Highest user intent indicator)
       if (cleanQuery.length >= 2) {
