@@ -40,6 +40,10 @@ here.
   `tools/vendor/opencc/`, and puts the pairs a query can need in the index,
   where `search.js` folds the query with them. `--keep-traditional` turns this
   off. An index built earlier still works, without the folding.
+- A misspelt Latin word in a search is matched to the terms one edit away: a
+  character missing, extra or wrong, or two swapped, so `freebds` finds
+  FreeBSD. Only for a word of four characters or more that is neither a term
+  nor the start of one, so no search that found something before changes.
 - `tools/search_harness.mjs --old-index` and `--old-body` give the `--compare`
   script its own index, for a change to the index format.
 

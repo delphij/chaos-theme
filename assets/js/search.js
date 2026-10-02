@@ -84,6 +84,29 @@ function addPostings({ index, vocab, fold }, data) {
   }
 }
 
+// Whether word is one edit from the term at vocab[start, end): a character
+// more or fewer, another in its place, or two neighbours swapped. Past what
+// the two have in common at the start and at the end, one edit leaves at
+// most that much. Compared in place, as this runs for every term there is.
+function oneEditApart(vocab, start, end, word) {
+  let head = 0;
+  const shorter = Math.min(end - start, word.length);
+  while (head < shorter && vocab.charCodeAt(start + head) === word.charCodeAt(head)) head++;
+  let termEnd = end - start;
+  let wordEnd = word.length;
+  while (termEnd > head && wordEnd > head
+      && vocab.charCodeAt(start + termEnd - 1) === word.charCodeAt(wordEnd - 1)) {
+    termEnd--;
+    wordEnd--;
+  }
+  const termLeft = termEnd - head;
+  const wordLeft = wordEnd - head;
+  if (termLeft + wordLeft === 1 || (termLeft === 1 && wordLeft === 1)) return true;
+  return termLeft === 2 && wordLeft === 2
+    && vocab.charCodeAt(start + head) === word.charCodeAt(head + 1)
+    && vocab.charCodeAt(start + head + 1) === word.charCodeAt(head);
+}
+
 // Named rather than a bare module body: the element check below is an early
 // return, which a module's top level cannot do.
 function initSearch() {
@@ -271,6 +294,27 @@ function initSearch() {
     return found;
   }
 
+  // A word worth correcting: letters and digits, long enough that one edit
+  // leaves most of it, and not a number, where one digit off is another
+  // number and not a slip.
+  const MISSPELLABLE = /^(?=.*[a-z])[a-z0-9]{4,}$/;
+
+  // The terms one edit from word, up to limit of them, in findTerms' order.
+  function nearTerms(word, limit) {
+    const found = new Set();
+    for (const vocab of indexData.vocab) {
+      let start = 1;
+      while (start < vocab.length && found.size < limit) {
+        const end = vocab.indexOf(' ', start);
+        if (Math.abs(end - start - word.length) <= 1 && oneEditApart(vocab, start, end, word)) {
+          found.add(vocab.slice(start, end));
+        }
+        start = end + 1;
+      }
+    }
+    return found;
+  }
+
   function startsTerm(word) {
     return indexData.index.has(word) || findTerms(word, 1, true).size > 0;
   }
@@ -389,6 +433,7 @@ function initSearch() {
 
     const scores = {};
     const docTermHits = {}; // docId -> Set of tokens
+    const corrections = [];
     const docs = indexData.docs;
     const index = indexData.index;
 
@@ -415,15 +460,30 @@ function initSearch() {
         // term it is part of counts for about a third of an exact match, and
         // the scan stops at 50 of them -- a short prefix starts hundreds, and
         // none of them is what the reader meant yet.
-        for (const term of findTerms(token, 50, LATIN_WORD.test(token))) {
+        const partOf = findTerms(token, 50, LATIN_WORD.test(token));
+        for (const term of partOf) {
           const ids = decodePostings(index.get(term));
           const weight = 0.35 * idf(ids.length, 0.3);
           for (const id of ids) addHit(id, weight, token);
+        }
+        // Part of nothing either, so perhaps misspelt: the terms one edit
+        // away, at a fifth of an exact match and no more than 8 of them. A
+        // guess, made only when the word as typed would find nothing.
+        if (partOf.size === 0 && MISSPELLABLE.test(token)) {
+          for (const term of nearTerms(token, 8)) {
+            const ids = decodePostings(index.get(term));
+            const weight = 0.2 * idf(ids.length, 0.3);
+            for (const id of ids) addHit(id, weight, token);
+            corrections.push(term);
+          }
         }
       }
     }
 
     const numTokens = tokens.length;
+    // A token and what it was corrected to stand for each other where a
+    // title or a tag is looked at, and both are marked in the results.
+    const fieldTokens = [...tokens, ...corrections];
 
     // Multi-field boosting & Exact Phrase Matching
     for (const idStr of Object.keys(scores)) {
@@ -449,7 +509,7 @@ function initSearch() {
       }
 
       // 2. Individual token matches in Title, Tags, Categories
-      for (const token of tokens) {
+      for (const token of fieldTokens) {
         if (titleLower.includes(token)) {
           scores[id] += 18;
           if (titleLower.startsWith(token)) {
@@ -488,7 +548,7 @@ function initSearch() {
 
     currentResults = rankedIds.slice(0, 25).map(id => docs[id]);
 
-    renderResults(currentResults, tokens);
+    renderResults(currentResults, fieldTokens);
   }
 
   function renderResults(results, tokens) {

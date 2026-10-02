@@ -402,6 +402,7 @@ Unlike generic blog themes that strip code, Chaos **fully indexes technical code
 - **Inline Code (`` `identifier` ``)**: Variable names, struct members, error constants, and CLI flags are preserved.
 - **Code Blocks (```` ```lang ... ``` ````)**: Kernel function names, panic backtraces, data structures (e.g. `fatEntry`, `kmem_alloc`), and configuration blocks are fully searchable.
 - **Simplified and Traditional Chinese**: A search in either script finds posts in either. The index holds Traditional characters as their Simplified forms, from the character table of the vendored [OpenCC](https://github.com/BYVoid/OpenCC) (Apache License 2.0), and carries the pairs a query can need, about 5 KB compressed on a blog of 1,950 posts, with a `foldCredit` string naming their source and license. Results show titles as they were written.
+- **Misspelt words**: A Latin word of four characters or more that is neither in the index nor the start of a word in it is matched to the words one edit away (a character missing, extra or wrong, or two swapped), at a lower weight: `freebds` finds FreeBSD.
 - **Part of a word**: A piece of a CJK word that the index holds whole, such as two characters of a three-character name, matches the words that contain it.
 - **CJK Segmentation**: Vendored `jieba` segments mixed Chinese and English prose with domain-specific technical symbol preservation (e.g. `C++`, `C#`, `.NET`, `Google+`, `TCP/IP`).
 
