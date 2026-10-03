@@ -1,6 +1,6 @@
 ---
 title: "样张：主题组件一览"
-date: 2026-10-02
+date: 2024-01-01
 description: "在一页之内按固定顺序排出 Chaos 主题渲染的全部组件，供调整配色与排版时对照检查。"
 categories: ["指南"]
 tags: ["Chaos", "Markdown", "样张"]
