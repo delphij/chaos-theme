@@ -56,13 +56,13 @@ hasCJKLanguage = true
 
 本系列文章分别介绍主题的各项功能与对应配置方法：
 
-1. **[中文排版：汉字、西文与标点的混排处理](/posts/chinese-typography/)**：中西文间距、标点悬挂、振假名与拼音注音、源码断行空格净化。
-2. **[提示框的语义类型与语法](/posts/alerts-and-callouts/)**：NOTE、TIP、IMPORTANT、WARNING、CAUTION、HISTORICAL与DISCLAIMER，以及自定义标题支持。
-3. **[代码语法高亮与Mermaid图表](/posts/code-and-diagrams/)**：静态语法高亮、代码一键复制与Mermaid图表。
-4. **[用KaTeX书写数学公式](/posts/math-with-katex/)**：行内与块级公式、Goldmark passthrough配置与洛伦兹方程组。
-5. **[文章元数据与内容控制](/posts/front-matter-and-metadata/)**：`deprecated`（过时降权）、`searchHidden`（隐藏检索）、`noindex`（避免收录）、`series`（系列）与标题锚点ID。
-6. **[全文检索与阅读交互](/posts/search-and-reading-experience/)**：两层离线全文检索、快捷键、打印时外链自动转尾注与页面预渲染。
-7. **[少即是多：静态博客的依赖取舍](/posts/on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
+1. **[中文排版：汉字、西文与标点的混排处理](../chinese-typography/)**：中西文间距、标点悬挂、振假名与拼音注音、源码断行空格净化。
+2. **[提示框的语义类型与语法](../alerts-and-callouts/)**：NOTE、TIP、IMPORTANT、WARNING、CAUTION、HISTORICAL与DISCLAIMER，以及自定义标题支持。
+3. **[代码语法高亮与Mermaid图表](../code-and-diagrams/)**：静态语法高亮、代码一键复制与Mermaid图表。
+4. **[用KaTeX书写数学公式](../math-with-katex/)**：行内与块级公式、Goldmark passthrough配置与洛伦兹方程组。
+5. **[文章元数据与内容控制](../front-matter-and-metadata/)**：`deprecated`（过时降权）、`searchHidden`（隐藏检索）、`noindex`（避免收录）、`series`（系列）与标题锚点ID。
+6. **[全文检索与阅读交互](../search-and-reading-experience/)**：两层离线全文检索、快捷键、打印时外链自动转尾注与页面预渲染。
+7. **[少即是多：静态博客的依赖取舍](../on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
 
 
 
