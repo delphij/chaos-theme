@@ -37,7 +37,7 @@ joinDiscussion = '參與評論'
 readingStats = '本文約 {{ .WordCount }} 字，閱讀大致需要 {{ .ReadingTime }} 分鐘'
 
 # Print references
-printReferences = '參考文獻'
+printReferences = '註釋'
 
 # Footer
 poweredBy = '本站使用 <a href="https://gohugo.io">Hugo</a> 構建，主題為 <a href="https://github.com/delphij/chaos-theme">Chaos</a>。'

@@ -37,7 +37,7 @@ joinDiscussion = '参与评论'
 readingStats = '本文约 {{ .WordCount }} 字，阅读大致需要 {{ .ReadingTime }} 分钟'
 
 # Print references
-printReferences = '参考文献'
+printReferences = '注释'
 
 # Footer
 poweredBy = '本站使用 <a href="https://gohugo.io">Hugo</a> 构建，主题为 <a href="https://github.com/delphij/chaos-theme">Chaos</a>。'

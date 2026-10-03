@@ -37,7 +37,7 @@ joinDiscussion = 'コメントに参加'
 readingStats = 'この記事は約 {{ .WordCount }} 文字で、読むのに約 {{ .ReadingTime }} 分かかります'
 
 # Print references
-printReferences = '参考文献'
+printReferences = '注'
 
 # Footer
 poweredBy = 'このサイトは <a href="https://gohugo.io">Hugo</a> で構築され、テーマは <a href="https://github.com/delphij/chaos-theme">Chaos</a> を使用しています。'

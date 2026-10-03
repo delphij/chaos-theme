@@ -17,7 +17,7 @@ Screenshots are taken from the bundled [example site](#example-site).
 - **Table of Contents**: Automatic TOC for article pages with sticky sidebar and active section highlighting
 - **Instant Page Transitions & Prerendering**: Native 0ms navigation via W3C Speculation Rules API with fallback to [instant.page](https://instant.page/)
 - **View Transitions**: Native cross-document transitions between pages via CSS `@view-transition`
-- **Print-Ready Articles**: Automatic conversion of external links to footnotes for clean, readable printouts
+- **Print-Ready Articles**: Footnotes and external links printed as one numbered list of notes, for clean, readable printouts
 - **Chinese Typography**: Modern CSS features for CJK text (text-autospace, hanging-punctuation, auto-phrase)
 - **Mathematics Support**: Built-in KaTeX integration for scientific content
 - **SEO & Licensing**: Comprehensive OpenGraph (with territory-cased locale, primary image alt, and alternates), Twitter Cards, Schema.org (JSON-LD BlogPosting/WebSite/BreadcrumbList with complete publisher metadata), multilingual hreflang and default-language x-default clusters, W3C-compliant XML sitemap, and machine-readable CC licensing support
@@ -696,7 +696,7 @@ to drift out of step.
 The theme provides optimized print output for articles, ensuring a clean and readable experience:
 
 - **Print-Friendly Layout**: Automatically hides navigation, interactive elements, and other non-essential components for a clutter-free printout.
-- **Automatic Footnotes with Bidirectional Links**: External links within the article are automatically converted into a numbered "References" section at the end of the printed document. Each link in the text shows a clickable `[1]` reference, and each footnote includes a clickable `^` symbol that links back to the original reference (Wikipedia-style navigation).
+- **Notes**: The article's Markdown footnotes and its external links are numbered as one sequence, in the order they appear, and listed together under "Notes" after the text and before the tags. A footnote's note is its text; a link's note is its URL, and a link inside a footnote has its URL set in brackets after it rather than a note of its own. Each mark in the text links to its note and each note links back, which a PDF keeps. Only the printout changes: on screen the footnotes stay as written.
 - **Smart Code Block Pagination**: Code blocks shorter than 14 lines stay together on one page. Longer blocks break naturally across pages with minimum 7 lines on each side, preventing awkward fragments while avoiding wasted blank space.
 - **Light-Mode Syntax Colours**: Code prints in the light-mode colours whatever mode the reader is in, all meeting WCAG AA.
 - **Optimized Typography**: Adjusts font sizes, line spacing, and page breaks for optimal readability on paper.

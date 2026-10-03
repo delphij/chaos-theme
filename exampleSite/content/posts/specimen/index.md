@@ -18,7 +18,7 @@ tags: ["Chaos", "Markdown", "样张"]
 链接分为[站内链接](../../archives/)与[站外链接](https://gohugo.io/ "Hugo官方网站")两种。
 中文与English、数字2026之间不手动加空格，由CSS自动留出间距。
 注音有[漢字]{かんじ}、[汉字]^(hàn zì)与[临时方案]{永久保留}三种用法。
-脚注标记出现在句末[^note]，正文末尾会列出脚注内容。
+脚注标记出现在句末[^note]，正文末尾会列出脚注内容；脚注里也可以有链接[^link]。
 
 A paragraph in English checks the Latin side of the type: quotation marks "like these",
 an em dash --- like this --- and an ellipsis... all pass through the typographer.
@@ -230,3 +230,4 @@ X（Twitter）的帖子从构建时缓存的数据渲染成静态卡片，不加
 分隔线下方的段落。
 
 [^note]: 脚注的内容出现在文章末尾，带有返回正文的链接。
+[^link]: 脚注语法见[CommonMark的扩展说明](https://github.github.com/gfm/)。打印时，脚注与正文中的外部链接合编为同一组「注释」。

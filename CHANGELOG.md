@@ -52,6 +52,13 @@ here.
 
 ### Changed
 
+- In print, an article's footnotes and its external links are numbered as one
+  sequence and listed together as "Notes" (注释), after the text and before
+  the tags. They were two lists, both counting from 1 and separated by the
+  tags, headed "References" (参考文献) though the second held link URLs. A
+  link inside a footnote now has its URL in brackets after it instead of a
+  note of its own. The screen is unchanged. The `printReferences` i18n key
+  keeps its name; a site that overrides it should reword it to match.
 - The search indexes hold their terms and posting lists as two strings, with
   each posting list gap-encoded, instead of an object of arrays. On a blog of
   1,950 posts the body index went from 1.8 MB to 0.9 MB (527 KB to 432 KB with

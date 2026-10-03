@@ -37,7 +37,7 @@ joinDiscussion = 'Join discussion'
 readingStats = 'Approximately {{ .WordCount }} words, {{ .ReadingTime }} min read'
 
 # Print references
-printReferences = 'References'
+printReferences = 'Notes'
 
 # Footer
 poweredBy = 'Powered by <a href="https://gohugo.io">Hugo</a> with <a href="https://github.com/delphij/chaos-theme">Chaos</a> theme.'

@@ -11,8 +11,10 @@
   {{- $content := partial "_funcs/typeset-content.html" .Content -}}
   {{- $content = replaceRE `loading="lazy" decoding="async"` `fetchpriority="high"` $content 1 -}}
   {{- $content | safeHTML -}}
-  {{- partial "post-footer.html" . -}}
+  {{- /* Filled while printing: the footnotes and external links as one list
+         of notes, ahead of the post footer (print-footnotes.js). */}}
   <div id="print-references" class="print-only" data-heading="{{ T "printReferences" }}"></div>
+  {{- partial "post-footer.html" . -}}
   {{- partial "remark.html" . -}}
   {{- partial "pager.html" . -}}
 {{ end }}

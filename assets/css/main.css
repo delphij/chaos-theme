@@ -1713,29 +1713,24 @@
       color: var(--text);
     }
 
-    /* Print footnote styling - External links converted to footnotes */
-
-    /* Footnote superscript reference numbers in text [1] [2] etc. */
-    .print-footnote-ref {
-      font-size: 0.75em;
-      vertical-align: super;
+    /* Notes: footnotes and external links numbered as one sequence by
+       print-footnotes.js. A Markdown footnote's mark and a link's mark look
+       alike, since they lead to the same list. */
+    a.footnote-ref,
+    .print-note-ref a {
       color: var(--primary);
       font-weight: 600;
-      margin-left: 0.1em;
-      text-decoration: none;
-      border-bottom: 1px solid var(--primary);
     }
 
-    /* Clickable footnote numbers in References section (1. 2. etc.) */
-    .print-footnote-backref {
+    .print-note-backref {
       color: var(--primary);
-      font-weight: 700;
-      text-decoration: none;
-      border-bottom: 1px solid var(--primary);
-      margin-right: 0.5em;
     }
 
-    /* Print references section */
+    /* Print references section; an article with no notes prints none */
+    .print-only:empty {
+      display: none;
+    }
+
     .print-only {
       display: block;
       margin-top: 3em;
@@ -1759,9 +1754,13 @@
 
       li {
         margin-bottom: 0.5em;
-        word-break: break-all;
-        overflow-wrap: break-word;
+        overflow-wrap: anywhere;       /* A URL breaks where it must; prose as usual */
         page-break-inside: avoid;
+      }
+
+      /* A footnote's paragraphs, set as tightly as the list around them */
+      li p {
+        margin: 0;
       }
     }
 
