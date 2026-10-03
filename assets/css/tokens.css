@@ -61,7 +61,7 @@
        colordic.org/w). A colour tuned away from its reference loses the
        name: say what it was derived from instead. */
     --bg: #FBFAF5;                    /* 生成り色 Kinari-iro (page background) */
-    --surface: #FFFFFF;               /* 白 Shiro (card/panel surfaces) */
+    --surface: #FFFFFF;               /* 白 Shiro (floating surfaces and input fields) */
     --text: #2B2B2B;                  /* 黒 Kuro (body text, 13.5:1) */
     --heading: #16160E;               /* 暗黒色 Ankoku-shoku (headings, 17.4:1) */
     --muted: #595857;                 /* 墨 Sumi (secondary text, 6.8:1; 5.6:1 on --paper) */
@@ -86,6 +86,11 @@
                                           own. The tinted grounds share one tier, about 1.07
                                           against --bg, where the standard pale colours below
                                           fall; the hue carries the rest of the edge. */
+    --ground-head: #EEEAE0;            /* Header band of a block on --ground: the panel
+                                          labels and the X card's source row, like the
+                                          title slip on a book cover. The same warm tint a
+                                          step deeper, 1.15 against --bg, between --ground
+                                          and --paper; no traditional name of its own. */
     --blockquote-bg: var(--ground);    /* Blockquote ground */
     --border-color: rgba(0,0,0,0.1);     /* Border colour, for widths other than 1px */
     --border: 1px solid var(--border-color); /* Subtle border for light mode */
@@ -191,7 +196,7 @@
       color-scheme: dark;
 
       --bg: #151514;                     /* Deep, calm warm charcoal; eliminates gray haze at night */
-      --surface: #1B1B19;                /* Elevated surfaces (subtle warm charcoal elevation) */
+      --surface: #1B1B19;                /* Floating surfaces and input fields */
       --text: #CFCFCE;                   /* Unnamed grey, a step under the headings (11.7:1 on --bg) */
       --heading: #DCDDDD;                /* 白鼠 Shiro-nezumi (13.4:1 on --bg) */
       --muted: #989896;                  /* Muted secondary text (6.3:1 on --bg; 5.4:1 on --paper) */
@@ -203,6 +208,7 @@
       --link: var(--accent);             /* Same blue family as light mode */
       --link-hover: #ABCED8;             /* 秘色色 Hisoku-iro: lighter, less chroma */
       --ground: #1F1E1C;                 /* Warm charcoal, same tier as the alert grounds (~1.09) */
+      --ground-head: #292825;            /* A step above --ground and --paper (1.24), under the table header */
       --table-head-bg: #2D2C28;          /* ...a raised warm charcoal by night, not a glaring
                                             light bar: 1.31 against --bg, a step above the
                                             stripes and --paper (unnamed) */

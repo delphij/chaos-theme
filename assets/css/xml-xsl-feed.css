@@ -23,7 +23,8 @@
 /* ----- Feed-specific layout ----- */
 
 /* The feed address, built like the article code-copy button: a quiet
-   inset field that copies itself when clicked. */
+   inset field that copies itself when clicked. It is cut out of the banner
+   to the page ground, and the hint is a pill of the banner's ground on it. */
 .feed-url-box {
   display: flex;
   align-items: center;
@@ -32,8 +33,8 @@
   width: 100%;
   margin-top: 14px;
   padding: 8px 12px;
-  background: var(--surface);
-  border: var(--border);
+  background: var(--bg);
+  border: 0;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: var(--text-sm);
@@ -41,11 +42,12 @@
   color: var(--text);
   text-align: left;
   cursor: pointer;
-  transition: border-color var(--transition-fast);
 }
 
-.feed-url-box:hover {
-  border-color: var(--primary);
+@media (forced-colors: active) {
+  .feed-url-box {
+    border: 1px solid ButtonBorder;
+  }
 }
 
 .feed-url-label {
@@ -71,27 +73,23 @@
   font-size: var(--text-xs);
   line-height: 1.4;
   color: var(--muted);
-  background: var(--surface);
-  border: var(--border);
+  background: var(--ground);
   border-radius: var(--radius-sm);
   user-select: none;
-  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
 
 .feed-url-box:hover .feed-url-hint {
   color: var(--heading);
   background: var(--paper);
-  border-color: var(--primary);
 }
 
 .feed-url-box.copied .feed-url-hint {
   color: var(--alert-tip-border);
-  border-color: var(--alert-tip-border);
 }
 
 .feed-url-box.failed .feed-url-hint {
   color: var(--alert-warning-border);
-  border-color: var(--alert-warning-border);
 }
 
 /* Section label above the list: deliberately quieter than the entry

@@ -61,6 +61,15 @@ here.
 - `build_search_index.py` indexes the whole body of a post. It stopped at 6,000
   characters, so a word further into a long post could not be found.
   `--max-body-chars` still sets a limit, and `0`, now the default, means none.
+- Sidebar panels, the table of contents, X embeds, the pagination and
+  code-copy buttons and the feed address box are blocks of ground with no
+  hairline border, as quotes and callouts already were: panels and embeds on
+  `--ground` instead of a bordered `--surface`. In forced-colours mode they
+  take a system-colour border.
+- The labels of the table of contents and the sidebar panels, and the X
+  embed's source row, are bands of a new `--ground-head` across the block's
+  full width: the same warm tint as `--ground`, a step deeper. A panel's
+  first label caps it and the rest divide it.
 - The sticky header, on the site and on the feed and sitemap pages, is frosted
   glass again: `--bg` at 82% over a 16px backdrop blur, in place of the opaque
   ground of 1.1.0.

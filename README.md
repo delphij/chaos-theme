@@ -463,13 +463,14 @@ by what they derive from.
 
 | Role | Light | Dark |
 | :--- | :--- | :--- |
-| Page / panel | 生成り色 `#FBFAF5` / 白 `#FFFFFF` | `#151514` / `#1B1B19` |
+| Page / floating surface | 生成り色 `#FBFAF5` / 白 `#FFFFFF` | `#151514` / `#1B1B19` |
 | Headings | 暗黒色 `#16160E` | 白鼠 `#DCDDDD` |
 | Body / secondary text | 黒 `#2B2B2B` / 墨 `#595857` | `#CFCFCE` / `#989896` |
 | Primary accent / hover | 蘇芳 `#9E3D3F` / 葡萄茶 `#6C2C2F` | 退紅 `#D69090` / 薄柿 `#D4ACAD` |
 | Blue accent and links / hover | 藍色 `#165E83` / 紺色 `#223A70` | 浅縹 `#84B9CB` / 秘色色 `#ABCED8` |
 | Active and hover ground | 練色 `#EDE4CD` | `#252320` |
-| Quote and chrome ground | `#F5F2EB` (tint toward 練色) | `#1F1E1C` |
+| Quote, panel and chrome ground | `#F5F2EB` (tint toward 練色) | `#1F1E1C` |
+| Panel label and embed header band | `#EEEAE0` (the same tint, a step deeper) | `#292825` |
 | Table header | 黒 bar, 生成り色 text | `#2D2C28` bar, 白鼠 text |
 | Callout inks | 藍色, 千歳緑, 柿茶, 蘇芳, 菖蒲色 | 浅縹, 薄青, 伽羅色, 退紅, 藤紫 |
 | Callout grounds | 月白, tint, tint, 薄桜, tint | tints |
@@ -490,6 +491,17 @@ at 1.31:1. Every text colour clears 4.5:1 on each ground it is used on.
 - Content cards (quotes, callouts, embeds), sidebar panels and the search dialog
   share `--radius-card` (8px). Controls use 4–6px corners; edge-to-edge mobile
   drawers stay square. `--radius` remains an alias for the card radius.
+- Edges are made by blocks of ground, not by lines. Quotes, callouts, embeds,
+  sidebar panels and buttons sit on a quiet tinted ground with no hairline
+  around them; `--surface` is kept for what floats above the page (the search
+  dialog, the mobile menu) and for input fields. A block's heading is a band
+  of a deeper ground, `--ground-head`, across its full width, like the title
+  slip on a book cover: the labels of the table of contents and the sidebar
+  panels, the first capping the panel and the rest dividing it, and the
+  source row of an X embed. The lines that remain are structure, not frames:
+  the table grid and the bottom edge of the sticky header. Forced-colour mode
+  drops the grounds, so each of these blocks takes a system-colour border
+  there.
 - Quotes and callouts use quiet tinted grounds without accent rails. Callouts
   retain explicit titles and icons, with matching coloured headings; colour is
   not the only indication of meaning. The feed uses the same treatment.
