@@ -78,6 +78,12 @@ The `exampleSite/` directory holds a small demo blog that exercises the theme's 
 hugo server --source exampleSite
 ```
 
+`posts/specimen/` is a specimen page rather than a guide: every component the
+theme renders, in a fixed order on one page, to look through in both colour
+modes after a change to the palette or the typography. Each release publishes
+the example site to GitHub Pages, where the specimen of the released version
+can be compared with a local build.
+
 ## Quick Start
 
 `exampleSite/hugo.toml` is a complete configuration to start from. The settings

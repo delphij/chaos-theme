@@ -3,6 +3,8 @@ name: CI
 on:
   push:
   pull_request:
+  # Run by hand to publish the demo site from the branch it is run on.
+  workflow_dispatch:
   schedule:
     # Weekly, so a new Hugo release that breaks the theme shows up before a
     # user reports it.
@@ -55,6 +57,46 @@ jobs:
 
       - name: Self-checks
         run: python3 tools/check.py --public "$RUNNER_TEMP/public"
+
+      # The demo site on GitHub Pages: built as a real site is, with the
+      # search index and the post-build steps, and under the repository's
+      # subpath, which checks that every URL the theme emits respects it.
+      # Only for a release or a manual run, so the demo shows what a site
+      # installing the theme gets, and stays put as a baseline in between.
+      - name: Build demo site
+        if: matrix.hugo == 'latest' && (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v'))
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends xsltproc
+          python3 tools/build_search_index.py --content exampleSite/content \
+            --output exampleSite/assets/search-index.json
+          hugo --source exampleSite --destination "$RUNNER_TEMP/pages" \
+            --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" \
+            --gc --minify --panicOnWarning
+          sh tools/post_build.sh "$RUNNER_TEMP/pages"
+          python3 tools/check.py --public "$RUNNER_TEMP/pages"
+
+      - name: Upload demo site
+        if: matrix.hugo == 'latest' && (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v'))
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/pages
+
+  pages:
+    # Publishes what the build job uploaded. The github-pages environment
+    # must allow v* tags as well as the default branch.
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
 
   release:
     # A v* tag publishes a release, once the theme has built on both versions.

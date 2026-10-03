@@ -30,6 +30,9 @@ here.
 
 ### Added
 
+- A specimen page in the example site, `posts/specimen/`, with every component
+  the theme renders on one page. Each release, and a manual run of the CI
+  workflow, publishes the example site to GitHub Pages.
 - `search.fingerprint = false` publishes the search indexes from `assets/` at
   fixed URLs. Every page embeds their URLs, so with a fingerprint any post edit
   changes every page; without one, the server must have browsers revalidate the
@@ -69,7 +72,6 @@ here.
   the default social image; and the fallback search index URL. All of them
   were built from a path with a leading slash, which `relURL` and `absURL`
   resolve against the host rather than the `baseURL`.
-
 
 - A search for a word with a hyphen, an underscore or a full stop in it found
   nothing: `utf-8`, `x86_64`, `node.js`. The index holds the words between
