@@ -69,7 +69,8 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y -q --no-install-recommends xsltproc
           python3 tools/build_search_index.py --content exampleSite/content \
-            --output exampleSite/assets/search-index.json
+            --output exampleSite/assets/search-index.json \
+            --base-url "/${{ github.event.repository.name }}/"
           hugo --source exampleSite --destination "$RUNNER_TEMP/pages" \
             --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" \
             --gc --minify --panicOnWarning
