@@ -31,8 +31,8 @@ here.
 ### Added
 
 - A specimen page in the example site, `posts/specimen/`, with every component
-  the theme renders on one page. Each release, and a manual run of the CI
-  workflow, publishes the example site to GitHub Pages.
+  the theme renders on one page. Every push to `main`, and a manual run of the
+  CI workflow, publishes the example site to GitHub Pages.
 - `search.fingerprint = false` publishes the search indexes from `assets/` at
   fixed URLs. Every page embeds their URLs, so with a fingerprint any post edit
   changes every page; without one, the server must have browsers revalidate the
