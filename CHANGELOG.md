@@ -72,6 +72,8 @@ here.
   the default social image; and the fallback search index URL. All of them
   were built from a path with a leading slash, which `relURL` and `absURL`
   resolve against the host rather than the `baseURL`.
+- `build_search_index.py --base-url` did not prefix a page whose front matter
+  sets `url`, so under a subpath its search result linked outside the site.
 
 - A search for a word with a hyphen, an underscore or a full stop in it found
   nothing: `utf-8`, `x86_64`, `node.js`. The index holds the words between

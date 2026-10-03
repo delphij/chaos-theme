@@ -187,22 +187,23 @@ def parse_frontmatter(content: str):
 def compute_post_url(filepath: str, base_content_dir: str, meta: dict, base_url: str) -> str:
     """Computes clean URL matching Hugo's default output path."""
     if meta.get("slug", "").startswith("/"):
-        return meta["slug"]
-
-    rel = os.path.relpath(filepath, base_content_dir)
-    # Strip posts/ prefix if present
-    if rel.startswith("posts/"):
-        rel = rel[6:]
-
-    if rel.endswith("/index.md"):
-        slug_path = rel[:-9]
-    elif rel.endswith(".md"):
-        slug_path = rel[:-3]
+        # A front matter url: Hugo publishes it under the baseURL's path too.
+        url = meta["slug"]
     else:
-        slug_path = rel
+        rel = os.path.relpath(filepath, base_content_dir)
+        # Strip posts/ prefix if present
+        if rel.startswith("posts/"):
+            rel = rel[6:]
 
-    # Hugo defaults to /posts/<slug>/
-    url = f"/posts/{slug_path}/"
+        if rel.endswith("/index.md"):
+            slug_path = rel[:-9]
+        elif rel.endswith(".md"):
+            slug_path = rel[:-3]
+        else:
+            slug_path = rel
+
+        # Hugo defaults to /posts/<slug>/
+        url = f"/posts/{slug_path}/"
     if base_url and base_url != "/":
         url = base_url.rstrip("/") + url
     return url
