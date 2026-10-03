@@ -41,6 +41,6 @@ the source unreferenced (see build.publishResources).
   {{- end -}}
 {{- end -}}
 {{- if eq (len $images) 0 -}}
-  {{- $images = $images | append ("/images/default-card.png" | absURL) -}}
+  {{- $images = $images | append ("images/default-card.png" | absURL) -}}
 {{- end -}}
 {{- return $images -}}

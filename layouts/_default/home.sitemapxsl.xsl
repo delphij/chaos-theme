@@ -34,8 +34,8 @@
       <body>
         <header class="site-header">
           <div class="site-header-inner">
-            <a class="site-brand link-plain" href="{{ "/" | relLangURL }}">{{ site.Title }}</a>
-            <a class="back-link link-plain" href="{{ "/" | relLangURL }}">{{ T "visitBlogHome" }}</a>
+            <a class="site-brand link-plain" href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a>
+            <a class="back-link link-plain" href="{{ site.Home.RelPermalink }}">{{ T "visitBlogHome" }}</a>
           </div>
         </header>
 

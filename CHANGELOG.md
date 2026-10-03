@@ -61,6 +61,16 @@ here.
 
 ### Fixed
 
+- A site deployed under a subpath (`baseURL = "https://example.org/blog/"`)
+  had links that left it: a category link whose term page was not found by
+  its urlized name, which is every non-Latin category; the "all categories"
+  and "all tags" links in the sidebars; the home links on the 404, feed and
+  sitemap pages; the Atom feed's `id` and author `uri`; the Mermaid script;
+  the default social image; and the fallback search index URL. All of them
+  were built from a path with a leading slash, which `relURL` and `absURL`
+  resolve against the host rather than the `baseURL`.
+
+
 - A search for a word with a hyphen, an underscore or a full stop in it found
   nothing: `utf-8`, `x86_64`, `node.js`. The index holds the words between
   them, and the query was looked up whole.

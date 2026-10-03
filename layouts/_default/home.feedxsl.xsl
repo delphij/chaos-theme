@@ -44,10 +44,10 @@
       <body>
         <header class="site-header">
           <div class="site-header-inner">
-            <a class="site-brand link-plain" href="{{ "/" | relLangURL }}">
+            <a class="site-brand link-plain" href="{{ site.Home.RelPermalink }}">
               <xsl:value-of select="$feed-title" />
             </a>
-            <a class="back-link link-plain" href="{{ "/" | relLangURL }}">
+            <a class="back-link link-plain" href="{{ site.Home.RelPermalink }}">
               {{ T "visitBlogHome" }}
             </a>
           </div>

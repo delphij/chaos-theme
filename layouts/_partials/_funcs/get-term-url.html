@@ -14,9 +14,8 @@ term Hugo has no page for.
 
 @example: {{ partial "_funcs/get-term-url.html" (dict "taxonomy" "tags" "name" "FreeBSD") }}
 */ -}}
-{{- $path := printf "/%s/%s" .taxonomy (.name | urlize) -}}
-{{- $url := printf "%s/" $path | relLangURL -}}
-{{- with site.GetPage $path -}}
+{{- $url := printf "%s/%s/" .taxonomy (.name | urlize) | relLangURL -}}
+{{- with site.GetPage (printf "/%s/%s" .taxonomy .name) -}}
   {{- $url = .RelPermalink -}}
 {{- end -}}
 {{- return $url -}}

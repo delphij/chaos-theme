@@ -7,7 +7,7 @@ Only rendered when site.Params.search.enable is true.
        forever, but every page embeds the URL, so any post edit changes every
        page. Without one, the server must make browsers revalidate them. */ -}}
 {{- $fingerprint := ne site.Params.search.fingerprint false -}}
-{{- $indexURL := site.Params.search.indexURL | default "/search-index.json" | relURL -}}
+{{- $indexURL := site.Params.search.indexURL | default "search-index.json" | relURL -}}
 {{- with resources.Get "search-index.json" -}}
   {{- $res := . -}}
   {{- if $fingerprint }}{{ $res = . | resources.Fingerprint }}{{ end -}}

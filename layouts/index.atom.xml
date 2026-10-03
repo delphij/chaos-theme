@@ -13,10 +13,10 @@
   {{- with site.Params.subtitle }}
   <subtitle>{{ . }}</subtitle>
   {{- end }}
-  <id>{{ "/" | absLangURL }}</id>
+  <id>{{ site.Home.Permalink }}</id>
   <author>
     <name>{{ site.Title }}</name>
-    <uri>{{ "/" | absLangURL }}</uri>
+    <uri>{{ site.Home.Permalink }}</uri>
   </author>
   <generator>Hugo gohugo.io</generator>
   {{- with site.Copyright }}
@@ -40,7 +40,7 @@
     <title>{{ .Title }}</title>
     <author>
       <name>{{ or site.Params.author.name site.Title }}</name>
-      <uri>{{ or site.Params.author.uri (absLangURL "/") }}</uri>
+      <uri>{{ or site.Params.author.uri site.Home.Permalink }}</uri>
     </author>
     <id>{{ .Permalink }}</id>
     <link rel="alternate" type="text/html" href="{{ .Permalink }}"/>
@@ -53,7 +53,7 @@
     <published>{{ .Date.UTC.Format "2006-01-02T15:04:05Z" | safeHTML }}</published>
     {{- /* type="html" is not a CDATA section: the markup must stay escaped here. */}}
     <summary type="html">{{ partial "_funcs/typeset-content.html" (trim .Summary "\n") }}</summary>
-    <content type="html" xml:base="{{ "/" | absLangURL }}">{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" .Content | safeHTML }}{{ "]]>" | safeHTML }}</content>
+    <content type="html" xml:base="{{ site.Home.Permalink }}">{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" .Content | safeHTML }}{{ "]]>" | safeHTML }}</content>
   </entry>
   {{- end }}
 </feed>

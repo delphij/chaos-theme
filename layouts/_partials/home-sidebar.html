@@ -14,7 +14,7 @@ Provides quick navigation to core categories (on non-category pages) and popular
         {{ end }}
       </div>
       <div class="sidebar-widget-footer">
-        <a class="sidebar-more-link" href="{{ "/categories/" | relLangURL }}">{{ T "allCategoriesLink" (dict "Count" (len site.Taxonomies.categories)) }}</a>
+        <a class="sidebar-more-link" href="{{ "categories/" | relLangURL }}">{{ T "allCategoriesLink" (dict "Count" (len site.Taxonomies.categories)) }}</a>
       </div>
     </div>
     {{ end }}
@@ -28,7 +28,7 @@ Provides quick navigation to core categories (on non-category pages) and popular
         {{ end }}
       </div>
       <div class="sidebar-widget-footer">
-        <a class="sidebar-more-link" href="{{ "/tags/" | relLangURL }}">{{ T "allTagsLink" (dict "Count" (len site.Taxonomies.tags)) }}</a>
+        <a class="sidebar-more-link" href="{{ "tags/" | relLangURL }}">{{ T "allTagsLink" (dict "Count" (len site.Taxonomies.tags)) }}</a>
       </div>
     </div>
   </div>
