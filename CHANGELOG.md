@@ -28,6 +28,14 @@ here.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-03
+
+A search that reads both Chinese scripts, forgives a misspelt word and loads
+an index half the size; a deeper dark palette, with panels and embeds as
+blocks of ground; and links that stay inside a site deployed under a subpath.
+Requires Hugo 0.158.0 or later, as before. The search index must be rebuilt
+with this version's `build_search_index.py`.
+
 ### Added
 
 - A specimen page in the example site, `posts/specimen/`, with every component
@@ -47,6 +55,12 @@ here.
   character missing, extra or wrong, or two swapped, so `freebds` finds
   FreeBSD. Only for a word of four characters or more that is neither a term
   nor the start of one, so no search that found something before changes.
+- The stop words `build_search_index.py` leaves out of the index are in
+  `tools/stopwords.txt`, and a site's own `data/stopwords.txt` is added to
+  them. `--extra-stopwords` adds another file, and `--stopwords` replaces the
+  theme's list. The indexer also leaves out MD5, SHA-1 and SHA-256 digests,
+  words longer than 64 characters, and numbers of fewer than three
+  significant digits.
 - `tools/search_harness.mjs --old-index` and `--old-body` give the `--compare`
   script its own index, for a change to the index format.
 
@@ -101,7 +115,13 @@ here.
   resolve against the host rather than the `baseURL`.
 - `build_search_index.py --base-url` did not prefix a page whose front matter
   sets `url`, so under a subpath its search result linked outside the site.
-
+- A reader in dark mode saw a white flash on every navigation: the page was
+  painted light and turned dark once `main.js` ran. The mode is now set in
+  `<head>`, before the first paint.
+- The X logo in an embed was inline SVG, which reached the feeds with the
+  post: most readers dropped it, and one that kept it drew it at the full
+  column width. It is drawn in CSS now, so a feed carries no logo and the site
+  looks as before.
 - A search for a word with a hyphen, an underscore or a full stop in it found
   nothing: `utf-8`, `x86_64`, `node.js`. The index holds the words between
   them, and the query was looked up whole.
@@ -216,6 +236,7 @@ First stable release. Requires Hugo 0.158.0 or later, standard edition.
 - `tools/check.py` no longer reports the feeds' own indentation as leaked
   template whitespace when the site is built without `--minify`.
 
-[Unreleased]: https://github.com/delphij/chaos-theme/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/delphij/chaos-theme/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/delphij/chaos-theme/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/delphij/chaos-theme/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/delphij/chaos-theme/releases/tag/v1.0.0
