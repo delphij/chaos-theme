@@ -52,6 +52,18 @@
   {{- end -}}
 {{- end -}}
 {{ partialCached "head/css.html" . }}
+{{- /* Stamps `dark` on the root element, when that is the theme, before first paint. main.js
+       is deferred, so leaving this to it paints one light frame first, which
+       a dark reader sees as a white flash on every navigation. The same
+       script the XSLT-rendered pages use (see xml-xsl-theme.html).
+
+       After the stylesheet on purpose. A classic script waits for the sheets
+       before it, so the parser cannot move past <head> until main.css, and
+       the @view-transition rule in it, has loaded. With nothing holding the
+       parser there (no script, or this one ahead of the sheet), Chrome can
+       evaluate the opt-in while the sheet is still in flight, find none, and
+       abort the transition ("ViewTransition opt-in disabled"). */ -}}
+<script>{{ (resources.Get "js/theme-init.js" | resources.Minify).Content | safeJS }}</script>
 {{ range slice "rss" "atom" -}}
   {{ with or ($.OutputFormats.Get .) (site.Home.OutputFormats.Get .) -}}
     {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
