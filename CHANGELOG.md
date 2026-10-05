@@ -38,6 +38,12 @@ here.
   title is printed with it, as print hides the header and footer that name
   the site. The screen is unchanged.
 
+### Fixed
+
+- The X logo of an embedded post is printed. It is painted as a masked
+  background, which browsers leave out of print unless the reader turns on
+  background graphics.
+
 ## [1.2.0] - 2026-10-03
 
 A search that reads both Chinese scripts, forgives a misspelt word and loads
