@@ -39,6 +39,11 @@ readingStats = 'この記事は約 {{ .WordCount }} 文字で、読むのに約 
 # Print references
 printReferences = '注'
 
+# Print permalink: the caption of the QR code; the second form is used when
+# comments are enabled
+printPermalink = 'この記事をオンラインで読む'
+printPermalinkDiscuss = 'この記事をオンラインで読み、コメントする'
+
 # Footer
 poweredBy = 'このサイトは <a href="https://gohugo.io">Hugo</a> で構築され、テーマは <a href="https://github.com/delphij/chaos-theme">Chaos</a> を使用しています。'
 remarkAttribution = 'コメントシステムには <a href="https://remark42.com/">Remark42</a> を使用しています。'

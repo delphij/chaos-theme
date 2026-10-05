@@ -15,6 +15,22 @@
          of notes, ahead of the post footer (print-footnotes.js). */}}
   <div id="print-references" class="print-only" data-heading="{{ T "printReferences" }}"></div>
   {{- partial "post-footer.html" . -}}
+  {{- /* Paper has no address bar: the permalink, as a QR code and in full,
+         captioned with what scanning it is for, and the site's name, which
+         print shows nowhere else. The code is a CSS image of the print rules
+         rather than an <img>, which browsers fetch on screen as well, even
+         hidden and lazy. Scale 2 comes out near 0.5mm a module unscaled. */}}
+  {{- with images.QR .Permalink (dict "scale" 2 "targetDir" "qr") }}
+  <div class="print-only print-permalink" style="--qr: url('{{ .RelPermalink }}')">
+    <p>
+      <span>{{ T (cond (not site.Params.remarkURL) "printPermalink" "printPermalinkDiscuss") }}</span>
+      {{- with site.Title }}
+      <span>{{ . }}</span>
+      {{- end }}
+      <span>{{ $.Permalink }}</span>
+    </p>
+  </div>
+  {{- end }}
   {{- partial "remark.html" . -}}
   {{- partial "pager.html" . -}}
 {{ end }}

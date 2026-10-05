@@ -28,6 +28,16 @@ here.
 
 ## [Unreleased]
 
+### Added
+
+- A printed article ends with its permalink, as a QR code and in full. The
+  codes are generated at build time into `qr/`, one small PNG per page, and
+  are fetched only when a page is printed. A caption says what scanning is
+  for: reading online, and joining the discussion where comments are enabled
+  (new i18n keys `printPermalink` and `printPermalinkDiscuss`). The site's
+  title is printed with it, as print hides the header and footer that name
+  the site. The screen is unchanged.
+
 ## [1.2.0] - 2026-10-03
 
 A search that reads both Chinese scripts, forgives a misspelt word and loads

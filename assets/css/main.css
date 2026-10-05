@@ -1733,12 +1733,13 @@
 
     .print-only {
       display: block;
-      margin-top: 3em;
-      padding-top: 1em;
-      border-top: 2px solid var(--border-color);
     }
 
     #print-references {
+      margin-top: 3em;
+      padding-top: 1em;
+      border-top: 2px solid var(--border-color);
+
       h2 {
         font-size: var(--h2-size);
         font-weight: 700;
@@ -1769,6 +1770,40 @@
       margin-top: 2.5em;
       page-break-inside: avoid;
       break-inside: avoid;
+    }
+
+    /* Permalink for print - the QR code with the address beside it */
+    .print-permalink {
+      display: flex;
+      align-items: center;
+      gap: 4mm;
+      font-size: var(--small-size);
+      color: var(--muted);
+      margin-top: 1.5em;               /* Collapses into the post footer's */
+      break-inside: avoid;
+
+      /* The code, fetched only once these rules apply */
+      &::before {
+        content: var(--qr);
+        flex: none;
+        line-height: 0;
+        image-rendering: pixelated;    /* Modules stay square at printer resolution */
+      }
+
+      p {
+        margin: 0;
+      }
+
+      span {
+        display: block;
+        overflow-wrap: anywhere;
+      }
+
+      /* The caption; a span, as strong carries emphasis marks in CJK */
+      span:first-child {
+        color: var(--text);
+        font-weight: 600;
+      }
     }
 
     /* Disable CSS containment for proper print layout */

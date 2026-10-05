@@ -39,6 +39,11 @@ readingStats = '이 글은 약 {{ .WordCount }} 자이며, 읽는 데 약 {{ .Re
 # Print references
 printReferences = '주석'
 
+# Print permalink: the caption of the QR code; the second form is used when
+# comments are enabled
+printPermalink = '이 글을 온라인으로 읽기'
+printPermalinkDiscuss = '이 글을 온라인으로 읽고 토론에 참여하기'
+
 # Footer
 poweredBy = '이 사이트는 <a href="https://gohugo.io">Hugo</a>로 구축되었으며, 테마는 <a href="https://github.com/delphij/chaos-theme">Chaos</a>를 사용합니다.'
 remarkAttribution = '댓글 시스템은 <a href="https://remark42.com/">Remark42</a>를 사용합니다.'

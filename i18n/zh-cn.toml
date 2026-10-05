@@ -39,6 +39,11 @@ readingStats = '本文约 {{ .WordCount }} 字，阅读大致需要 {{ .ReadingT
 # Print references
 printReferences = '注释'
 
+# Print permalink: the caption of the QR code; the second form is used when
+# comments are enabled
+printPermalink = '在线阅读本文'
+printPermalinkDiscuss = '在线阅读本文并参与讨论'
+
 # Footer
 poweredBy = '本站使用 <a href="https://gohugo.io">Hugo</a> 构建，主题为 <a href="https://github.com/delphij/chaos-theme">Chaos</a>。'
 remarkAttribution = '评论系统采用 <a href="https://remark42.com/">Remark42</a>。'
