@@ -8,7 +8,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="{{ site.Language.Locale }}">
   {{- /* polyxslt renders the feed in a browser without XSLT; see README.md,
          "Readable XML in a Post-XSLT Browser". */}}
-  <script xmlns="http://www.w3.org/1999/xhtml" src="{{ "_3p/polyxslt/1.0.2/xslt-polyfill.min.js" | relURL }}"></script>
+  <script xmlns="http://www.w3.org/1999/xhtml" src="{{ "_3p/polyxslt/1.1.0/xslt-polyfill.min.js" | relURL }}"></script>
   <title>{{ site.Title }}</title>
   {{- with site.Params.subtitle }}
   <subtitle>{{ . }}</subtitle>

@@ -75,7 +75,7 @@ index it writes, with a credit beside them.
 polyxslt
 Copyright (c) 2026 Xin LI
 Licensed under the MIT License
-Location: static/_3p/polyxslt/1.0.2/
-See static/_3p/polyxslt/1.0.2/LICENSE for full license text
+Location: static/_3p/polyxslt/1.1.0/
+See static/_3p/polyxslt/1.1.0/LICENSE for full license text
 Website: https://github.com/delphij/polyxslt
 XSLT 1.0 in the browser for the feeds, once browsers no longer run XSLT.

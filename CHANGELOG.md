@@ -43,8 +43,10 @@ here.
 - KaTeX 0.19.0 replaces 0.18.9. Its stylesheet falls back to the browser's
   math font before Times New Roman for a character the KaTeX fonts lack. The
   fonts are unchanged.
-- polyxslt 1.0.2 replaces 1.0.0. The code is the same; the build differs in
-  its version alone.
+- polyxslt 1.1.0 replaces 1.0.0. A transformation takes less time, by 35 to
+  55 % in polyxslt's own benchmark of a feed and a sitemap stylesheet. The
+  html output method no longer adds `<meta charset>` to a `<head>` that
+  lacks one; `feed.xsl` writes its own, so the rendered feed is the same.
 
 ### Fixed
 

@@ -18,7 +18,7 @@
   <channel>
     {{- /* polyxslt renders the feed in a browser without XSLT; see README.md,
            "Readable XML in a Post-XSLT Browser". */}}
-    <script xmlns="http://www.w3.org/1999/xhtml" src="{{ "_3p/polyxslt/1.0.2/xslt-polyfill.min.js" | relURL }}"></script>
+    <script xmlns="http://www.w3.org/1999/xhtml" src="{{ "_3p/polyxslt/1.1.0/xslt-polyfill.min.js" | relURL }}"></script>
     <title>{{ if eq .Title site.Title }}{{ site.Title }}{{ else }}{{ with .Title }}{{.}} on {{ end }}{{ site.Title }}{{ end }}</title>
     <link>{{ .Permalink }}</link>
     <description>{{ if ne .Title site.Title }}{{ with .Title }}Recent content in {{ . }} on {{ site.Title }}{{ end }}{{ else }}{{ or site.Params.description site.Params.subtitle (printf "Recent content on %s" site.Title) }}{{ end }}</description>

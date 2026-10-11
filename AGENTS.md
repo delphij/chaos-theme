@@ -205,7 +205,7 @@ Only for:
 - **instant.page 5.2.0**: Tiny (1KB), dramatic perceived performance improvement
 - **Mermaid 11.17.2**: Generation of diagram and flowchart from text, loaded conditionally
 - **Noto Sans Mono 2.014**: Clean Latin monospace subset with consistent character metrics
-- **polyxslt 1.0.2**: Keeps the styled feeds working after browsers drop XSLT; never requested by a browser that still has it
+- **polyxslt 1.1.0**: Keeps the styled feeds working after browsers drop XSLT; never requested by a browser that still has it
 - **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
 - **OpenCC 1.4.2** (character table only): lets a search in Simplified or Traditional Chinese find posts in either, at about 5 KB of index (in `tools/vendor/opencc/`)
 - **Remark42**: Optional, user's choice, not vendored (embedded script)
