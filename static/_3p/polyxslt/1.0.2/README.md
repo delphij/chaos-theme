@@ -1,7 +1,7 @@
 # polyxslt
 
 - **Project**: [polyxslt](https://github.com/delphij/polyxslt)
-- **Version**: 1.0.0 (release tag `v1.0.0`)
+- **Version**: 1.0.2 (release tag `v1.0.2`)
 - **License**: MIT (see `LICENSE`)
 - **Purpose**: renders the Atom and RSS feeds through `feed.xsl` in a browser
   that no longer runs XSLT itself. Loaded by `layouts/index.atom.xml` and
@@ -10,13 +10,13 @@
 `xslt-polyfill.min.js` is the release asset of the same name, unmodified:
 
 ```
-a0003273f787c459466bcaec0e1910c0acbefdd397e4b9c8e227831225a103be  xslt-polyfill.min.js
+089af477409a79f8ee04fe6e61ccf132711bf1fd8dca94f64fdabb324040dce7  xslt-polyfill.min.js
 ```
 
 ## How to Update
 
 ```bash
-VERSION=1.0.0
+VERSION=1.0.2
 DEST="themes/chaos/static/_3p/polyxslt/${VERSION}"
 
 mkdir -p "${DEST}"

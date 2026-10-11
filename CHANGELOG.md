@@ -38,6 +38,14 @@ here.
   title is printed with it, as print hides the header and footer that name
   the site. The screen is unchanged.
 
+### Changed
+
+- KaTeX 0.19.0 replaces 0.18.9. Its stylesheet falls back to the browser's
+  math font before Times New Roman for a character the KaTeX fonts lack. The
+  fonts are unchanged.
+- polyxslt 1.0.2 replaces 1.0.0. The code is the same; the build differs in
+  its version alone.
+
 ### Fixed
 
 - The X logo of an embedded post is printed. It is painted as a masked

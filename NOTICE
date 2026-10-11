@@ -13,8 +13,8 @@ This theme includes the following third-party software:
 KaTeX
 Copyright (c) 2013-2020 Khan Academy and other contributors
 Licensed under the MIT License
-Location: static/_3p/katex/0.18.9/
-See static/_3p/katex/0.18.9/LICENSE for full license text
+Location: static/_3p/katex/0.19.0/
+See static/_3p/katex/0.19.0/LICENSE for full license text
 Website: https://katex.org/
 
 Remark42 embed script
@@ -75,7 +75,7 @@ index it writes, with a credit beside them.
 polyxslt
 Copyright (c) 2026 Xin LI
 Licensed under the MIT License
-Location: static/_3p/polyxslt/1.0.0/
-See static/_3p/polyxslt/1.0.0/LICENSE for full license text
+Location: static/_3p/polyxslt/1.0.2/
+See static/_3p/polyxslt/1.0.2/LICENSE for full license text
 Website: https://github.com/delphij/polyxslt
 XSLT 1.0 in the browser for the feeds, once browsers no longer run XSLT.

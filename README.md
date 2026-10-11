@@ -1004,11 +1004,11 @@ This is the one thing in the theme that needs Node, and the one script in
 
 All dependencies are vendored in `static/_3p/` and `tools/vendor/` to ensure reliability and privacy:
 
-- **KaTeX 0.18.9**: Mathematical typesetting for scientific content
+- **KaTeX 0.19.0**: Mathematical typesetting for scientific content
 - **instant.page 5.2.0**: Link prefetching for near-instant page transitions
 - **Mermaid 11.17.2**: Diagram and flowchart generation from text
 - **Noto Sans Mono 2.014**: Monospace font subset for code blocks and dates
-- **polyxslt 1.0.0**: XSLT 1.0 in the browser, so the feeds stay readable once browsers drop native XSLT
+- **polyxslt 1.0.2**: XSLT 1.0 in the browser, so the feeds stay readable once browsers drop native XSLT
 - **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
 - **OpenCC 1.4.2** (character table only): Traditional to Simplified Chinese characters for the offline search index generator (in `tools/vendor/opencc/`)
 
