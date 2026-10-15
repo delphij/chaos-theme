@@ -53,6 +53,18 @@ here.
 - The X logo of an embedded post is printed. It is painted as a masked
   background, which browsers leave out of print unless the reader turns on
   background graphics.
+- `build_search_index.py` linked a post at its file name as written, where
+  Hugo lowercases it: `CVE-2024-4317.md` is published as `cve-2024-4317/`, and
+  its search result was a 404 on a server with a case-sensitive file system.
+  The tool no longer works URLs out itself: it indexes the pages `hugo list
+  published` reports, with the URL, title and date Hugo gives each, so `slug`,
+  `url`, `[permalinks]` and the site's configuration apply as in the build,
+  and a title with escaped quotes in it is no longer cut short at them. It
+  needs `hugo` on the `PATH`, or `--hugo`. `--base-url` defaults to the site's
+  `baseURL` rather than `/`, and a post Hugo does not publish -- a draft, or
+  one dated in the future or past its expiry -- is no longer indexed. The
+  search index must be rebuilt.
+- `check.py --public` checks that every search result links a published page.
 
 ## [1.2.0] - 2026-10-03
 

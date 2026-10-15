@@ -399,8 +399,11 @@ python3 themes/chaos/tools/build_search_index.py --content content --output asse
 | `--output-body` | `<stem>-body.json` | Path to Tier 2 body search index (defaults to `assets/search-index-body.json`) |
 | `--single-file` | `false` | Generate a legacy single monolithic index file instead of two-tier |
 | `--max-body-chars` | `0` | Maximum body characters to index per post; `0` indexes the whole body. A limit makes the index smaller, and words past it unfindable |
-| `--base-url` | `/` | Path prefix for post links. A site under a subpath (`baseURL = "https://example.org/blog/"`) passes that path, `/blog/`, or search results link outside the site |
+| `--base-url` | the site's `baseURL` | `baseURL` to link posts under, for a build that overrides the site's own (`hugo -b`). A path such as `/blog/` is enough |
+| `--hugo` | `hugo` | Hugo executable to ask for each post's URL |
 | `--keep-traditional` | `false` | Index Traditional Chinese characters as written, not as their Simplified forms. A search then finds only posts in the script of the query |
+
+The tool indexes the Markdown pages that `hugo list published`, run on the directory above `--content`, reports, and takes each one's URL, title and date from it. So `slug`, `url`, `[permalinks]` and the site's other settings apply as they do in the build, and a post Hugo does not publish (a draft, or one dated in the future or past its expiry) is left out of the index. Hugo reads its `HUGO_*` environment variables there as in the build, so a build for another environment (`hugo -e staging`) runs the tool with `HUGO_ENVIRONMENT=staging`.
 
 #### 3. Technical Code & Keyword Preservation
 
@@ -948,6 +951,10 @@ python3 themes/chaos/tools/check.py --public public
   — a header rendered once and reused marks the wrong entry everywhere, and
   menu entries configured with `url` instead of `pageRef` mark none at all
   (needs `--public`)
+- every search result links a page the build published, by the directory
+  name as written, so a miscased link fails even on a case-insensitive file
+  system, and an index built for another `baseURL` fails too (needs
+  `--public`)
 
 Exit status is 1 on failure, so a build script can stop on it.
 

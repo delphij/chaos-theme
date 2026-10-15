@@ -15,13 +15,15 @@ index for search.js to fold the query with.
 """
 
 import argparse
-import glob
+import csv
 import json
 import os
 import re
+import subprocess
 import sys
 import warnings
 from collections import defaultdict
+from urllib.parse import urlsplit
 
 # Suppress invalid escape sequence warnings from vendored jieba on Python 3.12+
 warnings.filterwarnings("ignore", category=SyntaxWarning, module=".*jieba.*")
@@ -166,13 +168,9 @@ def parse_frontmatter(content: str):
         return [unquote(v) for v in values if unquote(v)]
 
     meta = {
-        "title": scalar("title"),
-        "date": scalar("date").split("T")[0],
         "description": scalar("description"),
-        "slug": scalar("url|slug"),
         "tags": items("tags"),
         "categories": items("categories"),
-        "draft": flag("draft"),
         # Three ways to keep a post out, or down. noindex / private / robots:
         # out of search engines and of this index alike.
         "noindex": flag("noindex") or flag("private") or "noindex" in scalar("robots").lower(),
@@ -184,29 +182,28 @@ def parse_frontmatter(content: str):
     return meta, body
 
 
-def compute_post_url(filepath: str, base_content_dir: str, meta: dict, base_url: str) -> str:
-    """Computes clean URL matching Hugo's default output path."""
-    if meta.get("slug", "").startswith("/"):
-        # A front matter url: Hugo publishes it under the baseURL's path too.
-        url = meta["slug"]
-    else:
-        rel = os.path.relpath(filepath, base_content_dir)
-        # Strip posts/ prefix if present
-        if rel.startswith("posts/"):
-            rel = rel[6:]
+def published_pages(site_dir: str, hugo: str, base_url: str) -> list:
+    """The pages Hugo publishes, from `hugo list published`.
 
-        if rel.endswith("/index.md"):
-            slug_path = rel[:-9]
-        elif rel.endswith(".md"):
-            slug_path = rel[:-3]
-        else:
-            slug_path = rel
-
-        # Hugo defaults to /posts/<slug>/
-        url = f"/posts/{slug_path}/"
-    if base_url and base_url != "/":
-        url = base_url.rstrip("/") + url
-    return url
+    Asked of Hugo rather than worked out here: Hugo alone knows the site's
+    final configuration -- baseURL, [permalinks], disablePathToLower -- and
+    how it turns a file name, a slug or a url into a path. A page it does not
+    list is one it does not publish: a draft, or one dated in the future or
+    past its expiry date. Each row carries the page's file, relative to the
+    site, its title, its date and its permalink.
+    """
+    env = {**os.environ, "HUGO_BASEURL": base_url} if base_url else None
+    try:
+        result = subprocess.run([hugo, "list", "published", "--source", site_dir],
+                                env=env, capture_output=True, text=True, encoding="utf-8")
+    except OSError as e:
+        sys.exit(f"Error: cannot run {hugo}: {e}")
+    if result.returncode != 0:
+        sys.exit(f"Error: `{hugo} list published` failed:\n{result.stderr.strip()}")
+    # Regular pages only, not sections or the home page; and Markdown, which
+    # is what this script knows how to read.
+    return [row for row in csv.DictReader(result.stdout.splitlines())
+            if row["kind"] == "page" and row["path"].endswith(".md")]
 
 
 # Common technical terms with symbols that should be preserved intact
@@ -334,7 +331,8 @@ def main():
     parser.add_argument("--output", default="assets/search-index.json", help="Path to output Tier 1 / core search-index.json (default: assets/search-index.json)")
     parser.add_argument("--output-body", default="", help="Path to output Tier 2 / body search-index.json (default: auto derived as <stem>-body.json)")
     parser.add_argument("--single-file", action="store_true", help="Generate legacy monolithic single-file index instead of two-tier")
-    parser.add_argument("--base-url", default="/", help="Base URL for site links (default: /)")
+    parser.add_argument("--base-url", default="", help="baseURL to publish under, overriding the site's (default: the site's)")
+    parser.add_argument("--hugo", default="hugo", help="Hugo executable, asked for each page's URL (default: hugo)")
     parser.add_argument("--max-body-chars", type=int, default=0, help="Max body characters to index per post; 0 indexes the whole body (default: 0)")
     parser.add_argument("--stopwords", default="", help="Path to custom stopwords file (overrides default)")
     parser.add_argument("--extra-stopwords", default="", help="Path to extra stopwords file (augments default)")
@@ -380,15 +378,15 @@ def main():
         stop_words = {"".join(fold.get(ch, ch) for ch in word) for word in stop_words}
     fold_ords = str.maketrans(fold)
 
+    site_dir = os.path.dirname(content_dir)
+    pages = published_pages(site_dir, args.hugo, args.base_url)
+
     print(f"Active stop words: {len(stop_words)} terms")
-    print(f"Scanning markdown files in {content_dir}...")
-    files = glob.glob(os.path.join(content_dir, "**", "*.md"), recursive=True)
+    print(f"Reading the {len(pages)} pages Hugo publishes from {site_dir}...")
 
     parsed_posts = []
-    for filepath in files:
-        # A section's or the home page's own content, not a post
-        if os.path.basename(filepath) == "_index.md":
-            continue
+    for page in pages:
+        filepath = os.path.join(site_dir, page["path"])
         try:
             with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read()
@@ -397,16 +395,12 @@ def main():
             continue
 
         meta, body = parse_frontmatter(content)
-        if meta.get("draft", False):
-            continue
         if meta.get("noindex", False) or meta.get("search_hidden", False):
             continue
 
-        title = meta.get("title", "")
-        if not title:
-            title = os.path.splitext(os.path.basename(filepath))[0]
-
-        date = meta.get("date", "")
+        title = page["title"].strip() or os.path.splitext(os.path.basename(filepath))[0]
+        # Hugo's zero date is a page without one.
+        date = "" if page["date"].startswith("0001-") else page["date"][:10]
         tags = meta.get("tags", [])
         # A tag with a symbol in it (C++, C#) is taught to jieba as one word.
         # Every post is read before any is tokenized below, so the word holds
@@ -415,7 +409,6 @@ def main():
             if any(ch in tag for ch in "+#"):
                 jieba.add_word(tag.strip().lower())
         categories = meta.get("categories", [])
-        url = compute_post_url(filepath, content_dir, meta, args.base_url)
 
         clean_body = clean_markdown(body)
         # Only retain summary if explicitly set in front matter to keep docs payload compact
@@ -423,7 +416,8 @@ def main():
 
         parsed_posts.append({
             "title": title,
-            "url": url,
+            # A path, not the absolute permalink, so the index works on any host.
+            "url": urlsplit(page["permalink"]).path,
             "date": date,
             "summary": summary,
             "tags": tags,

@@ -19,8 +19,10 @@ Hugo has no opinion about.
 """
 
 import argparse
+import json
 import re
 import sys
+import urllib.parse
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -287,6 +289,52 @@ def check_xsl_wellformed(public):
             notes.append(f'xsl-wellformed: {f.name}')
 
 
+def check_search_links(public):
+    """Every search result links a page the build published.
+
+    build_search_index.py asks Hugo for the URLs before the build, so a build
+    run with another baseURL or environment can publish elsewhere. It once
+    worked the URLs out itself, and kept the case of CVE-2024-4317.md where
+    Hugo publishes cve-2024-4317/, a 404 for that result. A case-insensitive
+    file system -- macOS by default -- serves the wrong spelling anyway, so
+    the comparison is against the directory names as written, not against
+    what opens.
+    """
+    # search-index.json, or search-index.<hash>.json when fingerprinted
+    indexes = sorted(public.glob('search-index.json')) + sorted(public.glob('search-index.*.json'))
+    if not indexes:
+        notes.append('search-links: no search index')
+        return
+    published = {'/' + f.parent.relative_to(public).as_posix() + '/' if f.parent != public else '/'
+                 for f in public.rglob('index.html')}
+    # The index links under the baseURL's path, which the output does not
+    # contain: the home page's canonical link says what that path is.
+    base = '/'
+    home = public / 'index.html'
+    if home.exists():
+        for tag in re.findall(r'<link\s[^>]*>', home.read_text(encoding='utf-8', errors='replace'), re.I):
+            if re.search(r'\brel=["\']?canonical\b', tag, re.I):
+                m = re.search(r'\bhref=["\']?([^"\'\s>]+)', tag, re.I)
+                if m:
+                    base = urllib.parse.urlsplit(m.group(1)).path or '/'
+                break
+    for f in indexes:
+        docs = json.loads(f.read_text(encoding='utf-8')).get('docs', [])
+        missing = []
+        for doc in docs:
+            path = urllib.parse.unquote(urllib.parse.urlsplit(doc.get('url', '')).path)
+            # Outside the baseURL's path is outside the site, wherever the
+            # rest of it would lead.
+            if not path.startswith(base) or '/' + path[len(base):] not in published:
+                missing.append(doc.get('url', ''))
+        if missing:
+            fail('search-links', f'{f.name}: {len(missing)} search result(s) link a page that was not '
+                                 f'published -- was the index built for the same baseURL as the site? '
+                                 f'{"; ".join(missing[:3])}')
+        else:
+            notes.append(f'search-links: {f.name}, {len(docs)} result(s)')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -306,10 +354,12 @@ def main():
         check_feed_whitespace(public)
         check_xsl_wellformed(public)
         check_nav_active(public)
+        check_search_links(public)
     else:
         notes.append('feed-whitespace: skipped (no --public)')
         notes.append('xsl-wellformed: skipped (no --public)')
         notes.append('nav-active: skipped (no --public)')
+        notes.append('search-links: skipped (no --public)')
 
     for n in notes:
         print(f'  ok    {n}')
