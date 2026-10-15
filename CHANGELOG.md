@@ -28,6 +28,14 @@ here.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-14
+
+A printed article that ends with its permalink as a QR code; search
+results that link each page where Hugo publishes it; and Chinese and
+Japanese UI strings that leave the gap between CJK and Latin text to CSS.
+Requires Hugo 0.158.0 or later, as before. The search index must be
+rebuilt with this version's `build_search_index.py`, which now runs `hugo`.
+
 ### Added
 
 - A printed article ends with its permalink, as a QR code and in full. The
@@ -37,6 +45,7 @@ here.
   (new i18n keys `printPermalink` and `printPermalinkDiscuss`). The site's
   title is printed with it, as print hides the header and footer that name
   the site. The screen is unchanged.
+- `check.py --public` checks that every search result links a published page.
 
 ### Changed
 
@@ -69,7 +78,6 @@ here.
   `baseURL` rather than `/`, and a post Hugo does not publish -- a draft, or
   one dated in the future or past its expiry -- is no longer indexed. The
   search index must be rebuilt.
-- `check.py --public` checks that every search result links a published page.
 
 ## [1.2.0] - 2026-10-03
 
@@ -279,7 +287,8 @@ First stable release. Requires Hugo 0.158.0 or later, standard edition.
 - `tools/check.py` no longer reports the feeds' own indentation as leaked
   template whitespace when the site is built without `--minify`.
 
-[Unreleased]: https://github.com/delphij/chaos-theme/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/delphij/chaos-theme/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/delphij/chaos-theme/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/delphij/chaos-theme/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/delphij/chaos-theme/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/delphij/chaos-theme/releases/tag/v1.0.0
