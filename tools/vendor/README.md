@@ -89,4 +89,4 @@ print('Updated the OpenCC character table to version', VERSION)
 "
 ```
 
-Then update the version and commit above, in `NOTICE`, and in the dependency lists of `README.md`, `AGENTS.md` and `CLAUDE.md`, and check upstream for a `NOTICE` file, which would have to be vendored too. Rebuild the search index: a site's index holds pairs from the table it was built with.
+Then update the version and commit above, in `NOTICE`, and in the dependency lists of `README.md` and `AGENTS.md`, and check upstream for a `NOTICE` file, which would have to be vendored too. Rebuild the search index: a site's index holds pairs from the table it was built with.

@@ -33,7 +33,7 @@ Hugo compiles Markdown → static HTML at build time. No client-side frameworks,
 **Key architectural decisions:**
 - **Template hierarchy**: `baseof.html` provides base structure, specific templates extend it
 - **Partial components**: Reusable, cacheable components for performance
-- **Custom renderers**: Override markdown rendering for images, code, math
+- **Custom renderers**: Override markdown rendering for images, code, math (`layouts/_markup/`)
 - **Asset pipeline**: Hugo Pipes handles bundling, minification, fingerprinting, SRI
 
 ### Why Vendored Dependencies?
@@ -45,7 +45,7 @@ Hugo compiles Markdown → static HTML at build time. No client-side frameworks,
 ### Client-Side Search Engine Architecture
 Chaos implements a zero-dependency, privacy-preserving client-side full-text search engine powered by an offline pre-computed inverted index:
 - **Offline Indexing (`tools/build_search_index.py`)**:
-  - Scans Hugo markdown, preserves technical identifiers inside code blocks and inline backticks, tokenizes with vendored `jieba`.
+  - Reads the Markdown pages `hugo list published` reports, with Hugo's URL, title and date for each; preserves technical identifiers inside code blocks and inline backticks, tokenizes with vendored `jieba`.
   - Splits output into two mathematically disjoint tiers: Tier 1 (Core metadata + Title/Tags) and Tier 2 (Body only, strictly `P_T1(w) ∩ P_T2(w) = ∅`).
   - Writes each inverted index as two space-joined strings, `terms` and `postings` (gap-encoded doc ids, base-32 digits). `encode_postings` there and `decodePostings` in `search.js` must change together, and `tools/search_harness.mjs --compare … --old-index …` checks such a change.
 - **Progressive Delivery**:
@@ -55,10 +55,168 @@ Chaos implements a zero-dependency, privacy-preserving client-side full-text sea
   - BM25-IDF + multi-field boosting (Title exact +120, Title phrase +60, Tag phrase +45, Token in Title +18, Token in Tag +12).
   - The in-memory index is a `Map` from term to its still-encoded posting list, decoded per query, so a term such as `constructor` or `toString` cannot collide with an Object prototype property.
 
-## 3. Code Quality Standards
+## 3. Working Conventions
+
+The concrete rules for changing the theme; the sections around this one give
+the reasons.
+
+### Overview
+
+Minimalist Hugo theme for personal blogs with excellent Chinese typography support. Design philosophy: fast-loading, accessible (WCAG 2.1 AA), mobile-first, minimal dependencies (brotli: ~2KB main.js, ~3KB search.js when search is enabled).
+
+**Key Features**: Dark/light mode, responsive mobile menu with glass effects, automatic table of contents, instant page navigation, full i18n (5 languages).
+
+### Commands
+
+```bash
+hugo server -D              # Dev server with drafts
+hugo server                 # Production preview
+hugo --gc --minify          # Production build
+```
+
+### Technology Stack
+- **Hugo** 0.158.0+ (standard edition)
+- **Languages**: Go Templates, HTML5, CSS3, vanilla JavaScript
+- **Asset Processing**: Hugo Pipes (bundling, minification, SRI)
+- **Dependencies**: vendored, the browser's in `static/_3p/` and the build tools' in `tools/vendor/`; versions and reasons under [Dependency Management](#9-dependency-management)
+
+### Directory Structure
+```
+/layouts/          Templates (baseof, _default, _markup, _partials, shortcodes)
+/assets/           Source CSS/JS (processed by Hugo Pipes)
+/static/_3p/       Vendored dependencies (versioned)
+/i18n/             Translation files (en-us, zh-cn, zh-tw, ja-jp, ko-kr)
+/config/           Configuration overrides
+```
+
+### Formatting (Strictly Enforced)
+- **Indentation**: 2 spaces in templates, CSS and JS; 4 in Python; the shell
+  scripts in `tools/` are tab-indented. `.editorconfig` states all of this.
+- **Line endings**: LF
+- **EOF**: Single newline
+- **Naming**: kebab-case files, BEM-style CSS classes
+
+### Templates
+1. **i18n**: ALL user-facing text must use `{{ T "key" }}` (including ARIA labels)
+2. **Escaping**: Use `safeHTML`, `safeHTMLAttr`, `safeURL` appropriately
+3. **Performance**: Use `partialCached` for static content
+4. **Comments**: Document complex logic with `{{- /* comment */ }}`
+
+### CSS
+**Organization**: cascade layers, declared once at the top of `tokens.css`:
+`chaos.reset` (normalize.css) → `chaos.tokens` → `chaos.base` (element
+defaults in prose.css) → `chaos.syntax` (Chroma classes onto the `--syntax-*`
+roles) → `chaos.components` (everything with a class or id, then print). A
+later layer wins regardless of specificity, and unlayered CSS beats them all.
+
+**Nesting**: nest a component's states, children and breakpoints inside it.
+Only nest under a single selector or a list of equal specificity -- `&` takes
+the list's highest specificity, like `:is()` -- and put declarations before
+nested rules. Element defaults go in `chaos.base` -- element selectors and
+their states (`a:hover`, `:focus-visible`), the focus ring, the `[id]` anchor
+offset -- and anything naming a class or id in `chaos.components`, so a
+component never has to restate a default's `:hover` to override it.
+Before adding a rule, look for the concept it belongs to: shared shapes
+(side panels, panel labels, navigation items, term chips, result pills) are
+one grouped rule, with only the differences left per component.
+Breakpoints are listed at the top of main.css.
+
+**Performance Rules**:
+- Specific transitions (NOT `transition: all`)
+- CSS containment on isolated components (`.toc`, `.alert`) - disable in print
+- Modern viewport units (`dvh` for mobile)
+- CSS variables for all repeated values
+- No hardcoded colors
+
+### JavaScript
+- ES modules: each feature is one file under `assets/js/modules/` exporting a
+  single `init*()`, and `main.js` is only the wiring. No IIFE wrapper -- a
+  module is already its own scope
+- `search.js` and `mermaid.js` are separate entry points, not modules of
+  `main.js`: each is loaded only where it is wanted (a search-enabled site, a
+  page with a diagram), so bundling them into `main.js` would put them on
+  every page
+- Bundled by `js.Build` (esbuild, built into Hugo), so no Node toolchain is
+  involved: `hugo` alone builds the theme
+- Syntax floor is declared as `es2024` in `_partials/foot/script.html`; write
+  newer syntax freely and esbuild lowers it. Runtime APIs and CSS are held to
+  Baseline Widely Available (see Browser Support in README.md)
+- Apache 2.0 copyright header required
+- Cache DOM references at initialization
+- Modern DOM methods (`replaceChildren`, `append`)
+- Helper functions for DRY patterns
+- Intersection Observer for scroll tracking
+
+### Internationalization
+All text must be externalized to i18n files:
+```toml
+# i18n/en-us.toml
+readMore = 'Read more…'
+
+# i18n/zh-cn.toml
+readMore = '阅读全文…'
+```
+
+**NEVER hardcode** UI labels, button text, ARIA labels, navigation items, or error messages.
+
+### Dependencies
+Third-party libraries:
+1. Place in `static/_3p/<libname>/<version>/`
+2. Include LICENSE file
+3. Document in NOTICE file
+4. Prefer vendoring over CDNs
+
+### Commit Messages
+Conventional Commits format:
+```
+feat: add feature
+fix: resolve bug
+docs: update documentation
+style: formatting
+refactor: restructure code
+perf: performance improvement
+chore: maintenance
+```
+
+### `tools/`
+
+Not all one kind, and the difference decides whether a build calls it. See
+README.md for the full list.
+
+- **Build steps**, run by a site's build script: `build_search_index.py`,
+  `post_build.sh` (which runs `strip_xsl_space.sh` and
+  `render_xsl_companions.sh`), and `check.py`
+- **Content tooling**, run by hand while writing: `fetch_x_embed.py`,
+  `auxmark.py`, `generate_default_card.py`
+- **Diagnostics**, never in a build: `search_harness.mjs`, and
+  `check_chroma.py` after a Hugo upgrade (see `assets/css/syntax-upgrade.md`)
+
+`hugo` alone still builds the theme; none of these is a dependency of the
+templates.
+
+The two added for this theme's own correctness:
+
+- `tools/check.py --public public` -- i18n key parity, unread translations,
+  version parity (theme.toml vs hugo.toml), CJK literals, authored script left
+  inline in a template, template indentation leaking into the feeds, an XSL
+  stylesheet that no longer parses as XML, a menu whose active entry is not
+  the page's own, a search result linking a page that was not published.
+  Python 3 only, exit 1 on failure, and it belongs in the build right after
+  `hugo`
+- `tools/search_harness.mjs` -- runs `assets/js/search.js` against a real
+  index in a stubbed DOM; `--compare <file>` checks a change against the
+  version it replaces. Derives its queries from the index, so it carries no
+  site's content. Pass `--body`, or most queries return a single result and
+  a ranking change cannot show. The only thing here that needs Node
+
+Add a check to `check.py` when a mistake gets through that a build would not
+have caught -- that is what it is for, and every check in it was put there by
+one.
+
+## 4. Code Quality Standards
 
 ### Formatting Rationale
-**2-space indentation** (not tabs):
+**2-space indentation** (4 in Python, tabs only in the shell scripts in `tools/`, as `.editorconfig` states):
 - Consistent across editors
 - Balances readability with horizontal space
 - Standard for HTML/CSS/JS ecosystems
@@ -94,7 +252,7 @@ Hardcoded text creates:
 - Color contrast ≥4.5:1
 - Alt text on images
 
-## 4. Performance Philosophy
+## 5. Performance Philosophy
 
 ### CSS Performance
 **Problem**: Poor CSS practices cause layout thrashing and repaints.
@@ -137,10 +295,12 @@ Hardcoded text creates:
 - **Lazy loading**: Images load on-demand
 - **WebP conversion**: Modern format with fallbacks
 - **Responsive srcsets**: Multiple resolutions for different viewports
-- **Partial caching**: Static components cached per language
+- **Partial caching**: for what does not vary per page (the header is not in it:
+  its menu marks the current entry)
+- **Conditional loading**: KaTeX and Mermaid only on pages that use them
 - **instant.page**: Prefetches links on hover for near-instant navigation
 
-## 5. Internationalization Strategy
+## 6. Internationalization Strategy
 
 ### Why Five Languages?
 - **English**: International standard
@@ -155,7 +315,7 @@ Hardcoded text creates:
 - Spacing: Add space around untranslatable English terms
 - **Why**: Proper CJK typography is essential for readability
 
-## 6. Security Principles
+## 7. Security Principles
 
 ### Defense in Depth
 1. **Escape by default**: All template variables
@@ -171,7 +331,7 @@ Only for:
 
 **Never** for user input or external content.
 
-## 7. Development Workflow Philosophy
+## 8. Development Workflow Philosophy
 
 ### Incremental Changes
 - Small, focused commits over large rewrites
@@ -187,11 +347,12 @@ Only for:
 
 ### Documentation Discipline
 - Update README.md for user-facing changes
-- Update CLAUDE.md for coding conventions
-- Update AGENTS.md for design philosophy
+- Update AGENTS.md: [Working Conventions](#3-working-conventions) for coding
+  conventions, the other sections for design philosophy. CLAUDE.md and
+  GEMINI.md only import it
 - Document all i18n keys with comments
 
-## 8. Dependency Management
+## 9. Dependency Management
 
 ### Adding Dependencies - Decision Tree
 1. **Can we avoid it?** (Most important question)
@@ -248,7 +409,7 @@ Only for:
    - Provide clear, actionable error messages
    - Use subprocess error handling for git operations
 
-## 9. AI Collaboration Philosophy
+## 10. AI Collaboration Philosophy
 
 ### Contribution Guidelines
 **Priorities:**
@@ -261,7 +422,7 @@ Only for:
 ### Code Review Focus
 When reviewing changes, prioritize:
 1. **i18n compliance**: No hardcoded text?
-2. **Formatting**: 2-space, no tabs, EOF newline?
+2. **Formatting**: as `.editorconfig` states (2 spaces; 4 in Python; tabs in `tools/*.sh`), EOF newline?
 3. **ARIA localization**: All labels internationalized?
 4. **Performance impact**: Adds bloat? Layout thrashing?
 5. **Accessibility**: Keyboard navigation? Focus management?
@@ -273,10 +434,10 @@ Reject changes that:
 - Add unnecessary dependencies
 - Harm performance without justification
 - Break accessibility
-- Use tabs or inconsistent formatting
+- Break the formatting `.editorconfig` states
 - Lack documentation
 
-## 10. Common Pitfalls & Solutions
+## 11. Common Pitfalls & Solutions
 
 ### Anti-Patterns to Avoid
 ❌ **Hardcoded text**: Use `{{ T "key" }}` instead
@@ -284,7 +445,7 @@ Reject changes that:
 ❌ **Repeated DOM queries**: Cache references
 ❌ **Magic numbers**: Use CSS variables
 ❌ **External CDNs**: Vendor dependencies
-❌ **Tabs for indentation**: Use 2 spaces
+❌ **Formatting against `.editorconfig`**: 2 spaces, 4 in Python, tabs only in `tools/*.sh`
 ❌ **Inline styles/scripts**: Use external files
 ❌ **CSS containment on tables**: Only simple components
 
@@ -294,12 +455,12 @@ Reject changes that:
 ✅ **Cache DOM references** at initialization
 ✅ **CSS variables** for repeated values
 ✅ **Vendor dependencies** with versions
-✅ **2-space indentation** consistently
+✅ **Formatting** as `.editorconfig` states
 ✅ **Hugo asset pipeline** for processing
 ✅ **Semantic HTML5** elements
 ✅ **Git mv for file operations** (Python tools: prefer `git mv` over `shutil.move()` for better history tracking)
 
-## 11. Browser Support Philosophy
+## 12. Browser Support Philosophy
 
 ### Baseline Widely Available
 Target: [Baseline Widely Available](https://web.dev/baseline), a rolling floor.
@@ -331,12 +492,12 @@ As of 2026: Chrome/Edge 122+, Firefox 124+, Safari/iOS 17.4+.
   expands ruby annotations, and is shared by the HTML and feed pipelines.
 - JS: ES2024 syntax floor, ES modules, `<dialog>`, modern array/DOM methods, Intersection Observer
 
-## 12. Quality Assurance Checklist
+## 13. Quality Assurance Checklist
 
 Before committing:
 - [ ] No hardcoded text (all i18n)
 - [ ] ARIA labels localized
-- [ ] 2-space indentation, no tabs
+- [ ] Indentation as `.editorconfig` states
 - [ ] Files end with single newline
 - [ ] No trailing whitespace
 - [ ] Conventional commit message
@@ -360,7 +521,7 @@ This theme prioritizes **performance**, **accessibility**, and **internationaliz
 
 **When in doubt:**
 1. Check existing patterns in codebase
-2. Consult CLAUDE.md for specific conventions
+2. Consult [Working Conventions](#3-working-conventions) for specific conventions
 3. Prioritize user experience over developer convenience
 4. Ask before adding complexity
 
