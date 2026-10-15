@@ -40,6 +40,11 @@ here.
 
 ### Changed
 
+- The Chinese and Japanese UI strings no longer type a space between CJK and
+  Latin text or numbers: `text-autospace` adds a narrower gap where CSS
+  renders them, as it does in posts. Their parentheticals take full-width
+  parentheses, `全部标签（A-Z）`. Where CSS does not reach -- a page title, a
+  tooltip, the search box placeholder -- the two now meet without a gap.
 - KaTeX 0.19.0 replaces 0.18.9. Its stylesheet falls back to the browser's
   math font before Times New Roman for a character the KaTeX fonts lack. The
   fonts are unchanged.

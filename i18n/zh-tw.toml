@@ -15,7 +15,7 @@ archives = '存檔'
 # Navigation
 skipToContent = '跳轉到主要內容'
 mainNavigation = '主導航'
-atomFeed = 'Atom 訂閱'
+atomFeed = 'Atom訂閱'
 themeToggle = '切換淺/深色模式'
 themeLightMode = '已啟用淺色模式'
 themeDarkMode = '已啟用深色模式'
@@ -34,7 +34,7 @@ readMore = '閱讀全文…'
 joinDiscussion = '參與評論'
 
 # Reading stats
-readingStats = '本文約 {{ .WordCount }} 字，閱讀大致需要 {{ .ReadingTime }} 分鐘'
+readingStats = '本文約{{ .WordCount }}字，閱讀大致需要{{ .ReadingTime }}分鐘'
 
 # Print references
 printReferences = '註釋'
@@ -45,8 +45,8 @@ printPermalink = '線上閱讀本文'
 printPermalinkDiscuss = '線上閱讀本文並參與討論'
 
 # Footer
-poweredBy = '本站使用 <a href="https://gohugo.io">Hugo</a> 構建，主題為 <a href="https://github.com/delphij/chaos-theme">Chaos</a>。'
-remarkAttribution = '評論系統採用 <a href="https://remark42.com/">Remark42</a>。'
+poweredBy = '本站使用<a href="https://gohugo.io">Hugo</a>構建，主題為<a href="https://github.com/delphij/chaos-theme">Chaos</a>。'
+remarkAttribution = '評論系統採用<a href="https://remark42.com/">Remark42</a>。'
 
 # Theme toggle, feeds and post navigation
 feedLabel = 'RSS'
@@ -67,24 +67,24 @@ popularTags = '熱門標籤'
 tagsOverview = '標籤速覽'
 tagsAlphabetNav = '標籤字母導覽'
 alphabetIndex = '字母快速索引'
-allTagsAZ = '全部標籤 (A-Z)'
-allCategoriesLink = '全部分類 ({{ .Count }}) →'
-allTagsLink = '全部標籤 ({{ .Count }}) →'
+allTagsAZ = '全部標籤（A-Z）'
+allCategoriesLink = '全部分類（{{ .Count }}）→'
+allTagsLink = '全部標籤（{{ .Count }}）→'
 categoryTitle = '分類：{{ .Name }}'
 tagTitle = '標籤：{{ .Name }}'
 
 # Archives
 archivesYearNav = '歸檔年份導覽'
 yearQuickJump = '年份快速直達'
-yearLabel = '{{ .Year }} 年'
+yearLabel = '{{ .Year }}年'
 
 # Atom feed stylesheet
 visitBlogHome = '← 造訪部落格首頁'
-feedPageTitle = 'Web Feed (Atom 訂閱源)'
-feedIntro = '這是一個 <strong>Atom</strong> 格式的網站訂閱源。如果您使用的是支援 RSS/Atom 的瀏覽器或擴充功能，可以直接在此檢視文章預覽。'
-rssFeedPageTitle = 'Web Feed (RSS 訂閱源)'
-rssFeedIntro = '這是一個 <strong>RSS 2.0</strong> 格式的網站訂閱源。如果您使用的是支援 RSS/Atom 的瀏覽器或擴充功能，可以直接在此檢視文章預覽。'
-feedSubscribeHelp = '要訂閱 <strong>{{ .Title }}</strong> 的最新內容，請將下方位址複製並加入您的 RSS 閱讀器（{{ .Readers }}）中：'
+feedPageTitle = 'Web Feed（Atom訂閱源）'
+feedIntro = '這是一個<strong>Atom</strong>格式的網站訂閱源。如果您使用的是支援RSS/Atom的瀏覽器或擴充功能，可以直接在此檢視文章預覽。'
+rssFeedPageTitle = 'Web Feed（RSS訂閱源）'
+rssFeedIntro = '這是一個<strong>RSS 2.0</strong>格式的網站訂閱源。如果您使用的是支援RSS/Atom的瀏覽器或擴充功能，可以直接在此檢視文章預覽。'
+feedSubscribeHelp = '要訂閱<strong>{{ .Title }}</strong>的最新內容，請將下方位址複製並加入您的RSS閱讀器（{{ .Readers }}）中：'
 feedLatestPosts = '最新文章列表'
 feedReadMore = '在網站閱讀全文並參與討論 →'
 feedDiagramSource = '圖表原始碼（Mermaid）。請至原文檢視算繪後的圖形。'
@@ -94,16 +94,16 @@ feedUrlCopyFailed = '無法自動複製，請手動選取上方的位址並複�
 listSeparator = '、'
 
 # Sitemap stylesheet
-sitemapPageTitle = 'XML Sitemap (網站地圖)'
-sitemapIntro = '這是為搜尋引擎與索引爬蟲產生的標準 XML 網站地圖。目前共收錄 <strong>{{ .Count }}</strong> 個公開頁面。'
+sitemapPageTitle = 'XML Sitemap（網站地圖）'
+sitemapIntro = '這是為搜尋引擎與索引爬蟲產生的標準XML網站地圖。目前共收錄<strong>{{ .Count }}</strong>個公開頁面。'
 sitemapFilterToolbar = '分類開關工具列'
 sitemapFilterLabel = '分類開關：'
 sitemapToggleType = '點擊顯示/隱藏{{ .Type }}'
 sitemapOnlyType = '點擊僅檢視{{ .Type }}（再次點擊恢復全部）'
-sitemapVisibleCount = '目前顯示：{{ .Visible }} / {{ .Total }} 個頁面'
+sitemapVisibleCount = '目前顯示：{{ .Visible }} / {{ .Total }}個頁面'
 sitemapHint = '提示：點擊上方分類按鈕可開啟/關閉，點擊表格內徽章可僅檢視該類，點擊表頭可切換排序'
-sitemapColumnPath = '頁面路徑 (Path)'
-sitemapColumnLastModified = '最後更新時間 (Last Modified)'
+sitemapColumnPath = '頁面路徑（Path）'
+sitemapColumnLastModified = '最後更新時間（Last Modified）'
 sitemapAllHidden = '已隱藏所有分類的內容，請點擊上方分類按鈕開啟顯示。'
 sortByPath = '按路徑排序'
 sortByPathAscending = '按路徑排序（目前升冪）'
@@ -116,7 +116,7 @@ contentTypePage = '頁面'
 
 # SEO, pagination and 404
 lastModified = '最後修改'
-pageNumber = '第 {{ .Number }} 頁'
+pageNumber = '第{{ .Number }}頁'
 pageNotFound = '找不到頁面'
 pageNotFoundDesc = '抱歉，您訪問的頁面不存在或已被移除。'
 backToHome = '返回首頁'
@@ -126,7 +126,7 @@ copyFailed = '複製失敗'
 
 # Search
 search = '搜尋'
-searchPlaceholder = '搜尋文章… (按 ESC 退出)'
+searchPlaceholder = '搜尋文章…（按ESC退出）'
 searchNoResults = '未找到相關文章'
 searchClose = '關閉'
 searchLoading = '正在載入索引…'
@@ -136,17 +136,17 @@ searchOpen = '開啟'
 searchDeprecated = '已過時'
 
 # X (Twitter) embeds
-xPostFrom = '來自 X (Twitter)'
+xPostFrom = '來自X（Twitter）'
 
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
-  other = '{{ .Name }}（{{ .Count }} 篇文章）'
+  other = '{{ .Name }}（{{ .Count }}篇文章）'
 
 [yearPostCount]
-  other = '{{ .Year }} 年（{{ .Count }} 篇文章）'
+  other = '{{ .Year }}年（{{ .Count }}篇文章）'
 
 [archivesSummary]
-  other = '依時間軸收錄全站共 {{ .Count }} 篇技術文章與日誌。'
+  other = '依時間軸收錄全站共{{ .Count }}篇技術文章與日誌。'
 
 [listPostCount]
-  other = '共 {{ .Count }} 篇文章。'
+  other = '共{{ .Count }}篇文章。'

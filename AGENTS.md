@@ -312,7 +312,11 @@ Hardcoded text creates:
 ### Chinese Typography Conventions
 - Full-width punctuation: `，。！？` (not `,. !?`)
 - Chinese quotes: `「」『』` (not `""''`)
-- Spacing: Add space around untranslatable English terms
+- Spacing: no typed space between CJK and Latin text, numbers, tags or
+  `{{ }}` placeholders (`Atom订阅`, `共{{ .Count }}篇文章`); CSS
+  `text-autospace` supplies a narrower, proportional gap. A parenthetical
+  takes full-width parentheses: `全部标签（A-Z）`. Korean, which separates
+  words with spaces, is not affected
 - **Why**: Proper CJK typography is essential for readability
 
 ## 7. Security Principles
