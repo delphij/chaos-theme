@@ -78,17 +78,28 @@ function announceTheme(mode) {
   if (themeAnnouncement) themeAnnouncement.textContent = ANNOUNCEMENT[mode];
 }
 
-// Sync theme with Remark42 comment system
-function syncRemark42Theme(withRetries = false) {
+// Pass a theme change on to Remark42. Its first theme comes from remark_config
+// (_partials/remark.html), which is kept current too: until the embed script
+// has run there is no changeTheme, and the frame is built from the config.
+function syncRemark42Theme() {
   const theme = getEffectiveTheme(getCurrentMode());
-  window.REMARK42?.changeTheme(theme);
+  if (window.remark_config) window.remark_config.theme = theme;
+  window.REMARK42?.changeTheme?.(theme);
+}
 
-  if (withRetries) {
-    // Retry with exponential backoff for race conditions
-    [100, 400, 800, 1600, 3200].forEach(delay => {
-      setTimeout(() => window.REMARK42?.changeTheme(getEffectiveTheme(getCurrentMode())), delay);
-    });
+// A theme posted while the frame is still loading is not heard, so send it
+// again when the frame reports `inited`, the message the embed script itself
+// waits for before it shows the frame.
+function watchRemark42Inited() {
+  let origin;
+  try {
+    origin = new URL(window.remark_config?.host).origin;
+  } catch {
+    return; // No comments on this page
   }
+  window.addEventListener('message', event => {
+    if (event.origin === origin && event.data?.inited === true) syncRemark42Theme();
+  });
 }
 
 // LocalStorage helpers with error handling
@@ -125,12 +136,13 @@ export function initTheme() {
   // Initialize theme on page load
   const initialMode = getCurrentMode();
   applyTheme(initialMode);
+  watchRemark42Inited();
 
   // Real-time listener for OS/browser color scheme changes
   systemDark.addEventListener('change', () => {
     if (getCurrentMode() === THEME_AUTO) {
       applyTheme(THEME_AUTO);
-      syncRemark42Theme(false);
+      syncRemark42Theme();
     }
   });
 
@@ -140,9 +152,6 @@ export function initTheme() {
     applyTheme(nextMode);
     setStoredTheme(nextMode);
     announceTheme(nextMode);
-    syncRemark42Theme(false);
+    syncRemark42Theme();
   });
-
-  // Sync with Remark42 when it becomes ready
-  window.addEventListener('REMARK42::ready', () => syncRemark42Theme(true), { once: true });
 }

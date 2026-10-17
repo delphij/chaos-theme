@@ -17,7 +17,10 @@ Requires site.Params.remarkURL to be set. Optional parameters:
        from the site language rather than hardcoding any one of them. */ -}}
 {{- $locale := site.Params.remarkLocale | default (index (split site.Language.Lang "-") 0) | default "en" }}
 {{- $noFooter := site.Params.remarkNoFooter | default "true" }}
-<script>var remark_config = { host: '{{ . }}', site_id: '{{ $siteId }}', locale: '{{ $locale }}', no_footer: '{{ $noFooter }}' };</script>
+{{- /* The widget takes its first theme from this config, and theme-init.js has
+       already put `dark` on the root element by now. theme.js passes on later
+       changes, and sends the theme again once the frame reports `inited`. */ -}}
+<script>var remark_config = { host: '{{ . }}', site_id: '{{ $siteId }}', locale: '{{ $locale }}', no_footer: '{{ $noFooter }}', theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light' };</script>
 <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)}}(remark_config.components||["embed"],document);</script>
 <div id="remark42"></div>
 {{- end }}

@@ -28,6 +28,16 @@ here.
 
 ## [Unreleased]
 
+### Fixed
+
+- Remark42 comments open in the page's theme. The widget used to load
+  light and switch to dark only after it reported ready, so on a dark page the
+  comments came up light first, or stayed light if the switch was lost.
+  `theme.js` no longer resends the theme on a timer after the widget loads:
+  a change made before the widget script runs goes into `remark_config`, and
+  one made while the comments are loading is sent again once they report
+  `inited`.
+
 ## [1.3.0] - 2026-10-14
 
 A printed article that ends with its permalink as a QR code; search
