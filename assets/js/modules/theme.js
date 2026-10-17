@@ -88,18 +88,23 @@ function syncRemark42Theme() {
 }
 
 // A theme posted while the frame is still loading is not heard, so send it
-// again when the frame reports `inited`, the message the embed script itself
-// waits for before it shows the frame.
-function watchRemark42Inited() {
+// again once the widget can hear it. Its first `height` report comes from the
+// mounted widget, which is listening for the theme by then; `inited` is no
+// use here, as the frame posts it before the widget's script has even loaded.
+function watchRemark42Ready() {
   let origin;
   try {
     origin = new URL(window.remark_config?.host).origin;
   } catch {
     return; // No comments on this page
   }
+  // `height` comes again on every resize: one resend is enough
+  const controller = new AbortController();
   window.addEventListener('message', event => {
-    if (event.origin === origin && event.data?.inited === true) syncRemark42Theme();
-  });
+    if (event.origin !== origin || typeof event.data?.height !== 'number') return;
+    controller.abort();
+    syncRemark42Theme();
+  }, { signal: controller.signal });
 }
 
 // LocalStorage helpers with error handling
@@ -136,7 +141,7 @@ export function initTheme() {
   // Initialize theme on page load
   const initialMode = getCurrentMode();
   applyTheme(initialMode);
-  watchRemark42Inited();
+  watchRemark42Ready();
 
   // Real-time listener for OS/browser color scheme changes
   systemDark.addEventListener('change', () => {

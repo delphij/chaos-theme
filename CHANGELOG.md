@@ -35,8 +35,8 @@ here.
   comments came up light first, or stayed light if the switch was lost.
   `theme.js` no longer resends the theme on a timer after the widget loads:
   a change made before the widget script runs goes into `remark_config`, and
-  one made while the comments are loading is sent again once they report
-  `inited`.
+  one made while the comments are loading is sent again once they first
+  report their height.
 
 ## [1.3.0] - 2026-10-14
 
