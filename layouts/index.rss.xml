@@ -39,15 +39,15 @@
     {{- end }}
     {{- with index $pages 0 }}
       {{- if not .Date.IsZero }}
-    <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
+    <pubDate>{{ .Date.UTC.Format "Mon, 02 Jan 2006 15:04:05 +0000" | safeHTML }}</pubDate>
       {{- end }}
     {{- end }}
     {{- if not .Date.IsZero }}
-    <lastBuildDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>
+    <lastBuildDate>{{ .Date.UTC.Format "Mon, 02 Jan 2006 15:04:05 +0000" | safeHTML }}</lastBuildDate>
     {{- else }}
       {{- with index $pages 0 }}
         {{- if not .Date.IsZero }}
-    <lastBuildDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>
+    <lastBuildDate>{{ .Date.UTC.Format "Mon, 02 Jan 2006 15:04:05 +0000" | safeHTML }}</lastBuildDate>
         {{- end }}
       {{- end }}
     {{- end }}
@@ -68,7 +68,7 @@
     <item>
       <title>{{ .Title }}</title>
       <link>{{ .Permalink }}</link>
-      <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
+      <pubDate>{{ .Date.UTC.Format "Mon, 02 Jan 2006 15:04:05 +0000" | safeHTML }}</pubDate>
       {{- with site.Params.author.email }}
       <author>{{ . }}{{ with site.Params.author.name }} ({{ . }}){{ end }}</author>
       {{- end }}

@@ -132,7 +132,7 @@
         </main>
 
         {{- /* Minified, and wrapped in CDATA because the stylesheet is XML. */ -}}
-        <script><![CDATA[{{ (resources.Get "js/xml-xsl-feed.js" | resources.ExecuteAsTemplate "js/xml-xsl-feed.js" . | resources.Minify).Content }}]]></script>
+        <script><![CDATA[{{ (slice (resources.Get "js/xml-xsl-time.js") (resources.Get "js/xml-xsl-feed.js") | resources.Concat "js/xml-xsl-feed.bundle.js" | resources.ExecuteAsTemplate "js/xml-xsl-feed.js" . | resources.Minify).Content }}]]></script>
       </body>
     </html>
   </xsl:template>
@@ -149,34 +149,37 @@
       </h3>
 
       <div class="feed-entry-meta">
-        <time>
+        {{- /* The feed's time is UTC, and printed as such; the script
+               rewrites it in the reader's time zone. */}}
+        <xsl:variable name="entry-time">
           <xsl:choose>
-            <xsl:when test="atom:published">
-              <xsl:value-of select="substring(atom:published, 1, 10)" />
-              <xsl:if test="string-length(atom:published) &gt;= 16">
-                <xsl:text> </xsl:text>
-                <xsl:value-of select="substring(atom:published, 12, 5)" />
-              </xsl:if>
-            </xsl:when>
-            <xsl:when test="atom:updated">
-              <xsl:value-of select="substring(atom:updated, 1, 10)" />
-              <xsl:if test="string-length(atom:updated) &gt;= 16">
-                <xsl:text> </xsl:text>
-                <xsl:value-of select="substring(atom:updated, 12, 5)" />
-              </xsl:if>
-            </xsl:when>
-            <xsl:when test="pubDate">
-              <xsl:choose>
-                <xsl:when test="string-length(pubDate) &gt;= 16">
-                  <xsl:value-of select="substring(pubDate, 1, 16)" />
-                </xsl:when>
-                <xsl:otherwise>
-                  <xsl:value-of select="pubDate" />
-                </xsl:otherwise>
-              </xsl:choose>
-            </xsl:when>
+            <xsl:when test="atom:published"><xsl:value-of select="atom:published" /></xsl:when>
+            <xsl:when test="atom:updated"><xsl:value-of select="atom:updated" /></xsl:when>
+            <xsl:otherwise><xsl:value-of select="pubDate" /></xsl:otherwise>
           </xsl:choose>
-        </time>
+        </xsl:variable>
+        <xsl:if test="string($entry-time) != ''">
+          <time data-utc="{$entry-time}">
+            <xsl:if test="not(pubDate)">
+              <xsl:attribute name="datetime"><xsl:value-of select="$entry-time" /></xsl:attribute>
+            </xsl:if>
+            <xsl:choose>
+              <xsl:when test="pubDate">
+                <xsl:value-of select="substring($entry-time, 1, 22)" />
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="substring($entry-time, 1, 10)" />
+                <xsl:if test="string-length($entry-time) &gt;= 16">
+                  <xsl:text> </xsl:text>
+                  <xsl:value-of select="substring($entry-time, 12, 5)" />
+                </xsl:if>
+              </xsl:otherwise>
+            </xsl:choose>
+            <xsl:if test="substring($entry-time, string-length($entry-time)) = 'Z' or contains($entry-time, '+0000') or contains($entry-time, 'GMT')">
+              <xsl:text> UTC</xsl:text>
+            </xsl:if>
+          </time>
+        </xsl:if>
 
         <xsl:variable name="author-name">
           <xsl:choose>

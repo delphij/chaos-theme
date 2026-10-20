@@ -127,9 +127,21 @@
     currentSort = { col: col, dir: newDir };
 
     rows.sort(function(a, b) {
+      var res;
+      if (col === 'time') {
+        // UTC timestamps, so string order is time order. Ties keep the
+        // order the stylesheet gave them in both directions: posts first.
+        var timeA = a.getAttribute('data-time') || '';
+        var timeB = b.getAttribute('data-time') || '';
+        res = timeA < timeB ? -1 : (timeA > timeB ? 1 : 0);
+        if (res !== 0) {
+          return newDir === 'asc' ? res : -res;
+        }
+        return a.getAttribute('data-order') - b.getAttribute('data-order');
+      }
       var valA = a.getAttribute('data-' + col) || '';
       var valB = b.getAttribute('data-' + col) || '';
-      var res = valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
+      res = valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
       return newDir === 'asc' ? res : -res;
     });
 

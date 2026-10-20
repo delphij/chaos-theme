@@ -96,8 +96,18 @@
                 </tr>
               </thead>
               <tbody id="sitemapTbody">
+                {{- /* Newest first. A list page takes its lastmod from its newest
+                       page, so one new post brings the home page and every
+                       one of its terms to the same time: ties go posts,
+                       pages, categories, tags, then newest post (by path)
+                       or alphabetical. The order a row arrives in becomes
+                       its data-order, which the script falls back on for
+                       ties, so these keys are written here only. */}}
                 <xsl:for-each select="sitemap:urlset/sitemap:url">
                   <xsl:sort select="sitemap:lastmod" order="descending" />
+                  <xsl:sort select="number(not(contains(sitemap:loc, '/posts/'))) * (1 + number(contains(sitemap:loc, '/categories/')) + 2 * number(not(contains(sitemap:loc, '/categories/')) and contains(sitemap:loc, '/tags/')))" data-type="number" />
+                  <xsl:sort select="substring(sitemap:loc, 1, contains(sitemap:loc, '/posts/') * string-length(sitemap:loc))" order="descending" />
+                  <xsl:sort select="sitemap:loc" />
                   <xsl:variable name="itemType">
                     <xsl:choose>
                       <xsl:when test="contains(sitemap:loc, '/posts/')">post</xsl:when>
@@ -110,13 +120,14 @@
                   <xsl:variable name="itemPath">
                     <xsl:choose>
                       <xsl:when test="contains(substring-after(sitemap:loc, '://'), '/')">
-                        /<xsl:value-of select="substring-after(substring-after(sitemap:loc, '://'), '/')" />
+                        <xsl:text>/</xsl:text>
+                        <xsl:value-of select="substring-after(substring-after(sitemap:loc, '://'), '/')" />
                       </xsl:when>
                       <xsl:otherwise>/</xsl:otherwise>
                     </xsl:choose>
                   </xsl:variable>
 
-                  <tr data-type="{$itemType}" data-path="{$itemPath}" data-time="{sitemap:lastmod}">
+                  <tr data-type="{$itemType}" data-path="{$itemPath}" data-time="{sitemap:lastmod}" data-order="{position()}">
                     <td>
                       <xsl:choose>
                         <xsl:when test="$itemType = 'post'">
@@ -143,11 +154,16 @@
                       </a>
                     </td>
                     <td class="time-col">
-                      <xsl:value-of select="substring(sitemap:lastmod, 1, 10)" />
-                      <xsl:if test="string-length(sitemap:lastmod) &gt;= 16">
-                        <xsl:text> </xsl:text>
-                        <xsl:value-of select="substring(sitemap:lastmod, 12, 5)" />
-                      </xsl:if>
+                      <time datetime="{sitemap:lastmod}" data-utc="{sitemap:lastmod}">
+                        <xsl:value-of select="substring(sitemap:lastmod, 1, 10)" />
+                        <xsl:if test="string-length(sitemap:lastmod) &gt;= 16">
+                          <xsl:text> </xsl:text>
+                          <xsl:value-of select="substring(sitemap:lastmod, 12, 5)" />
+                        </xsl:if>
+                        <xsl:if test="substring(sitemap:lastmod, string-length(sitemap:lastmod)) = 'Z'">
+                          <xsl:text> UTC</xsl:text>
+                        </xsl:if>
+                      </time>
                     </td>
                   </tr>
                 </xsl:for-each>
@@ -166,7 +182,7 @@
         </main>
 
         {{- /* Minified, and wrapped in CDATA because the stylesheet is XML. */ -}}
-        <script><![CDATA[{{ (resources.Get "js/xml-xsl-sitemap.js" | resources.ExecuteAsTemplate "js/xml-xsl-sitemap.js" . | resources.Minify).Content }}]]></script>
+        <script><![CDATA[{{ (slice (resources.Get "js/xml-xsl-time.js") (resources.Get "js/xml-xsl-sitemap.js") | resources.Concat "js/xml-xsl-sitemap.bundle.js" | resources.ExecuteAsTemplate "js/xml-xsl-sitemap.js" . | resources.Minify).Content }}]]></script>
       </body>
     </html>
   </xsl:template>
