@@ -891,15 +891,20 @@
   article.post {
     /* Chinese typography enhancements for professional text layout
        (text-autospace is inherited from body)
-       - text-align: start - Eliminates artificial space stretching in mixed CJK/Latin text
-       - text-wrap: pretty - Avoids orphan characters and balances line breaks
+       - text-align: justify - Keeps the right edge on the character grid; CJK lines
+         justify between ideographs, so a full line needs at most a sliver of slack.
+         With start alignment, every line that ends on trimmed punctuation or a
+         Latin run left a visibly ragged edge.
+       - text-wrap is left at its default. WebKit applies pretty to the whole
+         paragraph and ends lines early to even out the rag even where the next
+         character would fit and no kinsoku rule applies; Blink only adjusts the
+         last few lines. Under justify those early breaks would also loosen spacing.
        - text-spacing-trim: Optimizes CJK punctuation spacing (Chrome 133+, Safari 18.2+)
        - text-spacing: Standard shorthand for CJK spacing and trimming
        - font-feature-settings: "chws" 1 - Enables OpenType Contextual Half-width Spacing for adjacent CJK punctuation
        - line-break: strict - Enforces strict CJK line-breaking rules
        - hyphens: auto - Hyphenate long English words at line ends to avoid large voids */
-    text-align: start;
-    text-wrap: pretty;
+    text-align: justify;
     text-spacing-trim: normal;
     text-spacing: auto-spaces normal;
     font-feature-settings: "chws" 1;
