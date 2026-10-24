@@ -24,7 +24,6 @@
 
      1359px  max   the article layout loses room for the side TOC, which
                    becomes the floating toggle and drawer
-      960px  max   the brand subtitle stops fitting beside the title
       769px  min   the one min-width query: the code block line-number
                    column (prose.css). Complementary with 768px max, which hides that
                    column outright -- which is why it is 769 and not 768,
@@ -309,12 +308,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 440px;
-
-      /* Intermediate tablet - Constrain subtitle */
-      @media (max-width: 960px) {
-        max-width: 220px;
-      }
+      max-width: 35em;
 
       /* Hide subtitle on mobile / small tablets */
       @media (max-width: 768px) {
