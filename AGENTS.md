@@ -64,7 +64,7 @@ the reasons.
 
 Minimalist Hugo theme for personal blogs with excellent Chinese typography support. Design philosophy: fast-loading, accessible (WCAG 2.1 AA), mobile-first, minimal dependencies (brotli: ~2KB main.js, ~3KB search.js when search is enabled).
 
-**Key Features**: Dark/light mode, responsive mobile menu with glass effects, automatic table of contents, instant page navigation, full i18n (5 languages).
+**Key Features**: Dark/light mode, responsive mobile menu with glass effects, automatic table of contents, interactive code parameters (`code_vars` via `layouts/_partials/code-vars.html` and `assets/js/code-vars.js`), instant page navigation, full i18n (5 languages).
 
 ### Commands
 
@@ -197,12 +197,12 @@ templates.
 The two added for this theme's own correctness:
 
 - `tools/check.py --public public` -- i18n key parity, unread translations,
-  version parity (theme.toml vs hugo.toml), CJK literals, authored script left
-  inline in a template, template indentation leaking into the feeds, an XSL
-  stylesheet that no longer parses as XML, a menu whose active entry is not
-  the page's own, a search result linking a page that was not published.
-  Python 3 only, exit 1 on failure, and it belongs in the build right after
-  `hugo`
+  version parity (theme.toml vs hugo.toml), CJK literals, translated UI strings
+  inside URL-typed attributes (`data-*-url-*`), authored script left inline in
+  a template, template indentation leaking into the feeds, an XSL stylesheet
+  that no longer parses as XML, a menu whose active entry is not the page's
+  own, a search result linking a page that was not published. Python 3 only,
+  exit 1 on failure, and it belongs in the build right after `hugo`
 - `tools/search_harness.mjs` -- runs `assets/js/search.js` against a real
   index in a stubbed DOM; `--compare <file>` checks a change against the
   version it replaces. Derives its queries from the index, so it carries no
@@ -297,7 +297,7 @@ Hardcoded text creates:
 - **Responsive srcsets**: Multiple resolutions for different viewports
 - **Partial caching**: for what does not vary per page (the header is not in it:
   its menu marks the current entry)
-- **Conditional loading**: KaTeX and Mermaid only on pages that use them
+- **Conditional loading**: KaTeX, Mermaid and `code-vars.js` only on pages that use them
 - **instant.page**: Prefetches links on hover for near-instant navigation
 
 ## 6. Internationalization Strategy

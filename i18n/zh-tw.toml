@@ -123,6 +123,13 @@ backToHome = '返回首頁'
 copyCode = '複製'
 copiedCode = '已複製'
 copyFailed = '複製失敗'
+codeVarsTitle = '範例參數'
+codeVarsHint = '修改後僅同步更新程式碼區塊，不影響內文'
+codeVarsUrlNotice = '以下參數來自連結，非作者原文。'
+codeVarsModifiedBadge = '參數已修改'
+codeVarsUrlBadge = '參數來自連結'
+codeVarsReset = '重設'
+codeVarModified = '{{ .Desc }}（預設值：{{ .Default }}）'
 
 # Search
 search = '搜尋'

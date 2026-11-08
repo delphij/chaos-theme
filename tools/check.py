@@ -134,6 +134,30 @@ def check_no_cjk_literals(theme):
         fail('cjk-literal', f'{len(offenders)}: {", ".join(offenders[:6])}')
 
 
+def check_no_url_attr_i18n(theme):
+    """No translated UI string inside a URL-typed attribute.
+
+    Go's html/template classifies any attribute whose name contains a
+    hyphen- or underscore-delimited token from {url, uri, src, href} (such as
+    data-url-badge) as contentTypeURL, and percent-encodes non-ASCII characters
+    into %e5%8f... without a warning.
+    """
+    pattern = re.compile(
+        r'\b([\w:-]*(?:^|[-_:])(?:url|uri|src|href)(?:$|[-_:])[\w:-]*)\s*=\s*"[^"]*\{\{-?\s*T\s+',
+        re.I,
+    )
+    offenders = []
+    for p in sorted((theme / 'layouts').rglob('*.html')):
+        body = strip_comments(p.read_text(encoding='utf-8', errors='replace'), '.html')
+        for m in pattern.finditer(body):
+            n = body[:m.start()].count('\n') + 1
+            offenders.append(f'{p.relative_to(theme)}:{n} ({m.group(1)})')
+    if offenders:
+        fail('url-attr-i18n',
+             f'{len(offenders)} translated string(s) in URL-typed attribute(s) '
+             f'(html/template percent-encodes non-ASCII there): {", ".join(offenders)}')
+
+
 def check_no_authored_inline_js(theme):
     """Scripts the theme writes live in assets/, not inside a template.
 
@@ -348,6 +372,7 @@ def main():
     check_i18n_unused(theme)
     check_version_parity(theme)
     check_no_cjk_literals(theme)
+    check_no_url_attr_i18n(theme)
     check_no_authored_inline_js(theme)
     if args.public:
         public = args.public.resolve()

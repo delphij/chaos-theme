@@ -1179,6 +1179,249 @@
   }
 
   /* ==========================================================================
+     COMPONENTS - INTERACTIVE CODE VARIABLES
+     Parameter panel (code-vars.html) and synchronized <var class="code-var">
+     placeholders inside code blocks (code-vars.js).
+     ========================================================================== */
+
+  .code-vars-panel {
+    position: relative;
+    margin: 1.25em 0;
+    background: var(--ground);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+
+    &:has(> .code-vars-reset:not([hidden])) .code-vars-header {
+      padding-right: 76px;
+    }
+
+    @media (forced-colors: active) {
+      border: 1px solid CanvasText;
+    }
+  }
+
+  .code-vars-header {
+    display: flex;
+    align-items: center;
+    gap: 6px 10px;
+    flex-wrap: wrap;
+    padding: 8px 16px;
+    background: var(--ground-head);
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  .code-vars-chevron {
+    flex-shrink: 0;
+    color: var(--muted);
+    transition: transform var(--transition-fast);
+  }
+
+  .code-vars-details[open] > .code-vars-header .code-vars-chevron {
+    transform: rotate(90deg);
+  }
+
+  .code-vars-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--heading);
+  }
+
+  .code-vars-hint {
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  .code-vars-url-notice {
+    margin: 12px 16px 0;
+    padding: 8px 12px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--alert-warning-border);
+    background: var(--alert-warning-bg);
+    border-radius: var(--radius-sm);
+  }
+
+  .code-vars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 10px 16px;
+    padding: 12px 16px;
+  }
+
+  .code-vars-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .code-vars-label {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    line-height: 1.35;
+  }
+
+  .code-vars-input {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--heading);
+    background: var(--surface);
+    border: var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    min-width: 0;
+    caret-color: var(--primary);
+    transition: border-color var(--transition-fast);
+
+    &.is-from-url {
+      border-color: var(--alert-warning-border);
+    }
+
+    @media (forced-colors: active) {
+      border: 1px solid ButtonBorder;
+    }
+  }
+
+  .code-vars-reset {
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    z-index: 1;
+    padding: 2px 8px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--link);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+
+    &:hover {
+      color: var(--link-hover);
+      background: var(--paper);
+    }
+  }
+
+  /* Per-code-block status pill when any variable inside that block differs
+     from the article's default, so readers jumping straight to an anchor still
+     see that the commands were modified or pre-filled from a link. */
+  .code-vars-badge {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    transform: translateY(-50%);
+    z-index: 6;
+    padding: 1px 8px;
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--muted);
+    background: var(--surface);
+    border: var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+
+    &:hover {
+      color: var(--heading);
+      background: var(--paper);
+    }
+
+    &.is-from-url {
+      color: var(--alert-warning-border);
+      background: var(--alert-warning-bg);
+      border-color: var(--alert-warning-border);
+    }
+  }
+
+  /* Text keeps its inherited syntax or prose ink so variables never collide
+     with --syntax-* roles or read as links; zero horizontal padding keeps
+     monospace character columns aligned. */
+  .code-var {
+    font-style: normal;
+    font-family: inherit;
+    color: inherit;
+    background: var(--code-var-bg);
+    padding: 0;
+    border-radius: 2px 2px 0 0;
+    border-bottom: 1px dashed var(--code-var-border);
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+
+    &[contenteditable] {
+      cursor: text;
+    }
+
+    &.is-hovered,
+    &:hover {
+      background: var(--code-var-hover-bg);
+      border-bottom-color: var(--code-var-hover-border);
+    }
+
+    &.is-modified {
+      border-bottom-style: solid;
+    }
+
+    &.is-from-url {
+      border-bottom-color: var(--alert-warning-border);
+    }
+
+    &:focus,
+    &:focus-visible {
+      background: var(--surface);
+      color: var(--heading);
+      border-bottom-color: transparent;
+      outline: var(--focus-outline);
+      outline-offset: 1px;
+    }
+
+    @media (forced-colors: active) {
+      border-bottom: 1px dashed LinkText;
+    }
+  }
+
+  .code-var-tooltip {
+    position: fixed;
+    z-index: var(--z-top);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    font-size: var(--text-xs);
+    line-height: 1.4;
+    color: var(--heading);
+    background: var(--surface);
+    border: var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-dialog);
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: min(360px, 90vw);
+
+    &[hidden] {
+      display: none;
+    }
+
+    .code-var-icon {
+      flex-shrink: 0;
+      color: var(--muted);
+    }
+
+    .code-var-tooltip-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  /* ==========================================================================
      COMPONENTS - MERMAID DIAGRAMS
      Clean container layout for Mermaid SVG flowcharts.
      Theme rendering (light/dark) is managed dynamically by Mermaid JS.
@@ -1628,6 +1871,8 @@
     .pager,
     #remark42,
     .reading-stats,
+    .code-vars-panel,
+    .code-var-tooltip,
     button {
       display: none !important;
     }
@@ -1907,5 +2152,10 @@
 
     /* Syntax highlighting needs nothing here: the dark --syntax-* roles are
        scoped to @media screen, so every reader prints the light colours. */
+    .code-var {
+      background: transparent;
+      color: inherit;
+      border-bottom: none;
+    }
   }
 }

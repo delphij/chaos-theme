@@ -1,0 +1,50 @@
+{{- /*
+Renders the interactive code parameters panel when a page declares `code_vars`
+in front matter:
+
+  code_vars:
+    - name: zone
+      default: "sjc.example.net"
+      desc: "Target parent zone"
+
+Hidden by default (`hidden`) so readers without JavaScript—or on pages where no
+code block matches—never see an inert form. `assets/js/code-vars.js` (loaded
+below via `foot/script.html` only on pages with `code_vars`) moves the panel
+above the first matching code block, un-hides it once at least one occurrence
+is decorated, and synchronizes edits across the page and URL query string.
+
+Note: `data-link-badge` avoids the token `url` in its attribute name because
+Go's `html/template` classifies any `*-url-*` attribute as `contentTypeURL` and
+percent-encodes non-ASCII characters.
+
+@context {page} The current page.
+*/ -}}
+{{- with .Params.code_vars }}
+<aside class="code-vars-panel" aria-labelledby="code-vars-title" data-modified-badge="{{ T "codeVarsModifiedBadge" }}" data-link-badge="{{ T "codeVarsUrlBadge" }}" hidden>
+  <details class="code-vars-details">
+    <summary class="code-vars-header">
+      <svg class="code-vars-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      <span id="code-vars-title" class="code-vars-title">{{ T "codeVarsTitle" }}</span>
+      <span class="code-vars-hint">{{ T "codeVarsHint" }}</span>
+    </summary>
+    <p class="code-vars-url-notice" role="status" hidden>{{ T "codeVarsUrlNotice" }}</p>
+    <div class="code-vars-grid">
+      {{- range . }}
+      {{- $def := .default }}
+      {{- if $def }}
+      {{- $name := or .name $def }}
+      {{- $desc := or .desc $name }}
+      <label class="code-vars-field">
+        <span class="code-vars-label">{{ $desc }}</span>
+        <input type="text" class="code-vars-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+          name="{{ $name }}" value="{{ $def }}" placeholder="{{ $def }}"
+          data-modified-tip="{{ T "codeVarModified" (dict "Desc" $desc "Default" $def) }}">
+      </label>
+      {{- end }}
+      {{- end }}
+    </div>
+  </details>
+  <button type="button" class="code-vars-reset" hidden>{{ T "codeVarsReset" }}</button>
+</aside>
+{{ partial "foot/script.html" "js/code-vars.js" }}
+{{- end }}

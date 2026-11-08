@@ -28,6 +28,21 @@ here.
 
 ## [Unreleased]
 
+### Added
+
+- Interactive code parameters (`code_vars` in front matter). A post can list
+  named parameters with their default values and descriptions; a collapsible
+  parameter panel is placed above the first matching code block, and matching
+  literals inside highlighted code blocks (except blocks with
+  `{code_vars="false"}`) are wrapped in `<var class="code-var">` (including
+  regex-escaped `\.` and pipe-separated `a|b|c` variants) and kept in sync
+  across the page, the copy button and the URL query string, with a warning
+  banner and per-block status badges when values are modified or pre-filled from
+  a link (new i18n keys `codeVarsTitle`, `codeVarsHint`, `codeVarsUrlNotice`,
+  `codeVarsReset`, `codeVarModified`, `codeVarsModifiedBadge` and
+  `codeVarsUrlBadge`; new properties `--code-var-bg`, `--code-var-hover-bg`,
+  `--code-var-border` and `--code-var-hover-border`).
+
 ### Fixed
 
 - Remark42 comments open in the page's theme. The widget used to load

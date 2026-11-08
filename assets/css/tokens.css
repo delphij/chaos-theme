@@ -133,6 +133,14 @@
     --syntax-inserted-bg: var(--alert-tip-bg);
     --syntax-deleted-bg: var(--alert-warning-bg);
 
+    /* Interactive code variables (<var class="code-var">). Text keeps its own
+       ink so variables never collide with --syntax-* roles or read as links;
+       neutral grounds and a quiet dashed underline mark the slot on --code-bg. */
+    --code-var-bg: #E6E6E6;            /* Neutral step below --code-bg (1.09:1 against --code-bg) */
+    --code-var-hover-bg: #DEDEDE;      /* Neutral deeper step on hover (1.17:1 against --code-bg; syntax inks >= 4.79:1) */
+    --code-var-border: color-mix(in srgb, var(--muted) 45%, transparent); /* Quiet ruled guide on --code-var-bg */
+    --code-var-hover-border: var(--muted); /* 墨 Sumi on hover (5.6:1 on --code-var-bg) */
+
     /* Layout dimensions - Spacing and container widths */
     --max-width: 1280px;               /* Maximum container width for header/footer/nav */
     --content-width: 780px;            /* ~48 full-width CJK characters per line at 16px.
@@ -241,6 +249,9 @@
       --syntax-variable: #DEB068;        /* 飴色 Ame-iro */
       --syntax-tag: #A8C97F;             /* 柳色 Yanagi-iro */
       --syntax-line-hl: rgba(248, 181, 0, 0.12); /* Weaker than light: comments on it keep AA */
+
+      --code-var-bg: #262626;            /* Neutral step above --code-bg (1.13:1 against --code-bg) */
+      --code-var-hover-bg: #2E2E2E;      /* Neutral deeper step on hover (1.26:1 against --code-bg; syntax inks >= 4.70:1) */
     }
   }
 

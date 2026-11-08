@@ -149,6 +149,8 @@ def check_contrast(tokens_css):
     for mode, props in (('light', light), ('dark', dark)):
         ground = rgba(resolve('--code-bg', props))
         grounds = {'code': ground,
+                   'code-var': rgba(resolve('--code-var-bg', props)),
+                   'code-var hover': rgba(resolve('--code-var-hover-bg', props)),
                    'highlighted line': over(rgba(resolve('--syntax-line-hl', props)), ground)}
         for ink in inks:
             colour = rgba(resolve(ink, props))

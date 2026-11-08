@@ -30,6 +30,11 @@ series: "Chaos 主题指南"
 deprecated: false
 searchHidden: false
 noindex: false
+# 可交互代码参数（可选）：
+code_vars:
+  - name: host
+    default: "router.example.net"
+    desc: "网关主机名"
 ---
 ```
 
@@ -82,6 +87,29 @@ series: "Chaos 主题指南"
 
 Chaos会自动关联同系列文章，并在[Open Graph](https://ogp.me/)元数据中注入系列信息。
 配合站点的taxonomy配置，读者可通过`/series/chaos-主题指南/`查阅完整篇目列表。
+
+## 可交互代码参数（`code_vars`）
+
+对于包含具体网络配置、系统管理命令或安装部署脚本的文章，可在 Front Matter 中通过 `code_vars` 声明允许读者动态调整的参数：
+
+```yaml
+code_vars:
+  - name: host
+    default: "router.example.net"
+    desc: "网关主机名"
+  - name: ip
+    default: "192.0.2.1"
+    desc: "网关管理IP"
+```
+
+### 实际效果
+
+- **参数联动面板**：主题自动在首个匹配代码块上方挂载可折叠的参数面板，并将代码块内对应的默认值标记为可交互的 `<var class="code-var">`。
+- **全局同步与复制**：读者在面板或代码块中修改参数后，全文代码块即时同步，右上角复制按钮自动复制替换后的真实内容。
+- **URL参数共享**：非默认修改自动同步至 URL 查询字符串（如 `?host=node1.example.org`），便于分享与预设填入。
+- **局部代码块免替换**：通过 ```` ```text {code_vars="false"} ```` 可保留固定的输出或真实日志。
+
+详细交互机制与配置规范参见[代码语法高亮、交互参数与 Mermaid 图表](../code-and-diagrams/#code-vars)。
 
 ## 扩展Markdown语法
 

@@ -123,6 +123,13 @@ backToHome = 'Back to Home'
 copyCode = 'Copy'
 copiedCode = 'Copied!'
 copyFailed = 'Copy failed'
+codeVarsTitle = 'Code parameters'
+codeVarsHint = 'Edits update code blocks only, not article prose'
+codeVarsUrlNotice = 'Parameters below were loaded from the link, not the original article.'
+codeVarsModifiedBadge = 'Parameters modified'
+codeVarsUrlBadge = 'Parameters from link'
+codeVarsReset = 'Reset'
+codeVarModified = '{{ .Desc }} (default: {{ .Default }})'
 
 # Search
 search = 'Search'

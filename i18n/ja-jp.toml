@@ -123,6 +123,13 @@ backToHome = 'トップページに戻る'
 copyCode = 'コピー'
 copiedCode = 'コピーしました'
 copyFailed = 'コピーできませんでした'
+codeVarsTitle = 'コードのパラメータ'
+codeVarsHint = '変更はコードブロックにのみ反映され、本文は変わりません'
+codeVarsUrlNotice = '以下のパラメータはリンクから読み込まれたもので、記事の元の値ではありません。'
+codeVarsModifiedBadge = 'パラメータ変更済'
+codeVarsUrlBadge = 'リンクからのパラメータ'
+codeVarsReset = 'リセット'
+codeVarModified = '{{ .Desc }}（既定値：{{ .Default }}）'
 
 # Search
 search = '検索'

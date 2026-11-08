@@ -271,6 +271,27 @@ Create styled alert boxes:
 > Proceed with caution
 ```
 
+### Interactive Code Parameters
+
+Articles containing shell scripts or configuration snippets can declare editable parameters in front matter under `code_vars`:
+
+```yaml
+code_vars:
+  - name: zone
+    default: "sjc.example.net"
+    desc: "Target parent zone"
+  - name: subs
+    default: "guest iot tiot t ut"
+    desc: "Subdomains to merge (space-separated)"
+  - name: primary
+    default: "192.0.2.1"
+    desc: "Primary DNS server IP"
+```
+
+- **Clean source & feeds**: Code blocks in Markdown keep the literal default values (`sjc.example.net`, `192.0.2.1`), so RSS/Atom feeds and no-JS readers see runnable default examples with no template markers.
+- **Parameter panel & synchronized code blocks**: When `code_vars` is present, `assets/js/code-vars.js` (loaded only on pages with `code_vars`) places a collapsible parameter panel above the first matching code block and wraps matching literals inside `.highlight` code blocks into `<var class="code-var">` (including regex-escaped `\.` and pipe-delimited `a|b|c` variants). Editing a parameter in the panel—or directly in a code block on desktop—updates every occurrence across the page and the copy-button output, and persists committed non-default values in the URL query string (`?zone=...`), marking modified code blocks with a status badge.
+- **Excluding output blocks**: Add `{code_vars="false"}` to a code fence (e.g. ```` ```text {code_vars="false"} ````) to keep historical command output or log excerpts from being treated as editable parameters.
+
 ### Responsive Images
 
 All markdown images are handled automatically by the custom render hook:
@@ -477,6 +498,7 @@ by what they derive from.
 | Table header | 黒 bar, 生成り色 text | `#2D2C28` bar, 白鼠 text |
 | Callout inks | 藍色, 千歳緑, 柿茶, 蘇芳, 菖蒲色 | 浅縹, 薄青, 伽羅色, 退紅, 藤紫 |
 | Callout grounds | 月白, tint, tint, 薄桜, tint | tints |
+| Code variable slot / modified underline | `#E6E6E6` with 墨 / 蘇芳 | `#262626` with `#989896` / 退紅 |
 | Highlight | 山吹色 at 25% | 山吹色 at 16% |
 
 Dark mode keeps the roles rather than inverting the values: a deep,
