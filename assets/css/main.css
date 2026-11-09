@@ -1911,8 +1911,8 @@
       break-after: avoid-page;
     }
 
-    /* Images and blockquotes should not break */
-    img, blockquote {
+    /* Images, diagrams and blockquotes should not break */
+    img, blockquote, .mermaid {
       page-break-inside: avoid;
       break-inside: avoid;
     }
@@ -2085,7 +2085,7 @@
 
     /* Code block containers - Shared margin and padding */
     .highlight,
-    pre:not(.highlight pre),
+    pre:not(.highlight pre, .mermaid),
     blockquote .highlight {
       margin: 0.5em 0;
       padding: 8px;
