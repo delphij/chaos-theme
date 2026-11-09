@@ -165,7 +165,7 @@ print(Colour("蘇芳", "#9E3D3F").rgb())
 HTML代码检查标签与属性的配色：
 
 ```html
-<figure class="x-card" id="x-404015814665195520">
+<figure class="x-card" id="x-204125811366830080">
   <img src="wairo.png" alt="和色色票" width="1600" height="640">
   <figcaption>色票</figcaption>
 </figure>
@@ -219,7 +219,7 @@ flowchart LR
 
 X（Twitter）的帖子从构建时缓存的数据渲染成静态卡片，不加载第三方脚本：
 
-{{< x user="delphij" id="404015814665195520" >}}
+{{< x user="delphij" id="204125811366830080" >}}
 
 ## 分隔线 {#rule}
 
