@@ -28,6 +28,13 @@ here.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-08
+
+Code blocks whose hostnames, paths and versions a reader can change in
+place; feeds and a sitemap that write every time in UTC and show it in the
+reader's own time zone; and comments that open in the page's theme.
+Requires Hugo 0.158.0 or later, as before.
+
 ### Added
 
 - Interactive code parameters (`code_vars` in front matter). A post can list
@@ -43,8 +50,32 @@ here.
   `codeVarsUrlBadge`; new properties `--code-var-bg`, `--code-var-hover-bg`,
   `--code-var-border` and `--code-var-hover-border`).
 
+### Changed
+
+- The RSS feed and the sitemap write their times in UTC, as the Atom feed
+  already did. They used the build machine's offset, so the same instant was
+  spelled differently depending on where and when the site was built, and
+  string order was not time order across a DST change. The instants are
+  unchanged. The styled feed and sitemap pages show these times in the
+  reader's time zone, with the UTC time as the tooltip.
+- The sitemap page breaks ties in time in a fixed order: posts, pages,
+  categories, then tags; posts newest path first, the others alphabetically.
+  Sorting by time in either direction keeps that order for ties.
+- Article text is justified again, and no longer sets `text-wrap: pretty`.
+  Start alignment left a ragged right edge wherever a line ended on trimmed
+  punctuation or a Latin run, and WebKit's `pretty` broke lines early across
+  the whole paragraph, which made it worse.
+
 ### Fixed
 
+- A diagram printed from a dark page is in Mermaid's light palette. Mermaid
+  writes its node and edge-label fills into the SVG, which is printed even
+  with background graphics off, so a dark diagram printed as dark blocks.
+  Diagrams are no longer split across pages, and do not take the print
+  background of code blocks.
+- The site subtitle in the header no longer collapses to 220px between 768px
+  and 960px. Its width is now `35em`, and it shrinks with the viewport down
+  to the mobile layout.
 - Remark42 comments open in the page's theme. The widget used to load
   light and switch to dark only after it reported ready, so on a dark page the
   comments came up light first, or stayed light if the switch was lost.
@@ -312,7 +343,8 @@ First stable release. Requires Hugo 0.158.0 or later, standard edition.
 - `tools/check.py` no longer reports the feeds' own indentation as leaked
   template whitespace when the site is built without `--minify`.
 
-[Unreleased]: https://github.com/delphij/chaos-theme/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/delphij/chaos-theme/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/delphij/chaos-theme/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/delphij/chaos-theme/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/delphij/chaos-theme/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/delphij/chaos-theme/compare/v1.0.0...v1.1.0
