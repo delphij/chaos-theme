@@ -89,7 +89,9 @@
   .archive-cat-label,
   .search-item-link,
   .series-nav-title a,
-  .series-nav-link {
+  .series-nav-link,
+  .archive-year-title a,
+  .archive-section-title a {
     border-bottom: none;
   }
 
@@ -736,7 +738,8 @@
      the navigation, where their headings read as a fresh start. */
   .tags-section,
   .tag-letter-group,
-  .archive-year-section {
+  .archive-year-section,
+  .archive-section {
     scroll-margin-top: calc(var(--nav-height) + 16px);
   }
 
@@ -792,9 +795,27 @@
     gap: 32px;
   }
 
-  .archive-year-title {
+  .archive-year-title,
+  .archive-section-title {
     font-size: var(--h3-size);
     margin: 0 0 12px 0;
+
+    a {
+      color: inherit;
+      transition: color var(--transition-fast);
+
+      &:hover {
+        color: var(--primary);
+      }
+    }
+  }
+
+  .archive-year-count,
+  .archive-section-count {
+    font-size: var(--text-sm);
+    font-weight: normal;
+    color: var(--muted);
+    margin-left: 6px;
   }
 
   .archive-post-list {

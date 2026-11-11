@@ -28,6 +28,13 @@ here.
 
 ## [Unreleased]
 
+### Added
+
+- A dedicated timeline view for the `/series/` taxonomy index, grouping articles
+  by series, sorting series by their latest update date, and displaying chapters
+  in chronological reading order with `series_title` preferred.
+- An end-of-article series navigation directory card (`series-nav`).
+
 ## [1.4.0] - 2026-11-08
 
 Code blocks whose hostnames, paths and versions a reader can change in

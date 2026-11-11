@@ -30,6 +30,44 @@
       </div>
     </div>
 
+  {{- else if eq .Data.Plural "series" -}}
+    {{- $seriesList := slice -}}
+    {{- range .Data.Terms.Alphabetical -}}
+      {{- $posts := .Pages.ByDate -}}
+      {{- if gt (len $posts) 0 -}}
+        {{- $latest := index ($posts.Reverse) 0 -}}
+        {{- $seriesList = $seriesList | append (dict
+          "id" (printf "series-%s" (.Page.LinkTitle | urlize))
+          "title" .Page.LinkTitle
+          "url" .Page.RelPermalink
+          "count" (len $posts)
+          "latestDate" $latest.Date.Unix
+          "posts" $posts
+        ) -}}
+      {{- end -}}
+    {{- end -}}
+    <div class="archive-timeline">
+      {{ range sort $seriesList "latestDate" "desc" }}
+        <div class="archive-section" id="{{ .id }}">
+          <h2 class="archive-section-title">
+            <a href="{{ .url }}">{{ .title }}</a>
+            <span class="archive-section-count">({{ .count }})</span>
+          </h2>
+          <div class="archive-post-list">
+            {{ range .posts }}
+              <div class="archive-post-row">
+                <time class="archive-date" datetime="{{ .Date.Format "2006-01-02" }}">
+                  <span class="archive-date-full">{{ .Date.Format "2006-01-02" }}</span>
+                  <span class="archive-date-short">{{ .Date.Format "01-02" }}</span>
+                </time>
+                <a class="archive-post-title" href="{{ .RelPermalink }}"{{ if and .Params.series_title (ne .Params.series_title .Title) }} title="{{ .Title }}"{{ end }}>{{ or .Params.series_title .Title }}</a>
+              </div>
+            {{ end }}
+          </div>
+        </div>
+      {{ end }}
+    </div>
+
   {{- else -}}
     <div class="tags-flat-wrap">
       {{ range .Data.Terms.ByCount }}
