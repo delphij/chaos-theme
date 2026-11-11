@@ -46,5 +46,7 @@ the match can then run to the next "]...{...}" anywhere in the feed.
 {{- $content = $content | replaceRE (printf `(%s)\s+(%s)` $cjk $cjk) "$1$2" -}}
 {{- $content = $content | replaceRE (printf `(%s)\s+([a-zA-Z0-9])` $cjk) "$1$2" -}}
 {{- $content = $content | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" -}}
+{{- $content = $content | replaceRE (printf `(%s)[ \t]+(<(?:strong|em|del|mark|a)\b)` $cjk) "$1$2" -}}
+{{- $content = $content | replaceRE (printf `(</(?:strong|em|del|mark|a)>)[ \t]+(%s)` $cjk) "$1$2" -}}
 
 {{- return $content -}}
