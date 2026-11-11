@@ -72,6 +72,7 @@ allCategoriesLink = '全部分类（{{ .Count }}）→'
 allTagsLink = '全部标签（{{ .Count }}）→'
 categoryTitle = '分类：{{ .Name }}'
 tagTitle = '标签：{{ .Name }}'
+seriesTitle = '系列：{{ .Name }}'
 
 # Archives
 archivesYearNav = '归档年份导航'

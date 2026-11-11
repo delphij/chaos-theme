@@ -72,6 +72,7 @@ allCategoriesLink = '전체 분류 ({{ .Count }}) →'
 allTagsLink = '전체 태그 ({{ .Count }}) →'
 categoryTitle = '분류: {{ .Name }}'
 tagTitle = '태그: {{ .Name }}'
+seriesTitle = '시리즈: {{ .Name }}'
 
 # Archives
 archivesYearNav = '아카이브 연도 탐색'

@@ -72,6 +72,7 @@ allCategoriesLink = 'All categories ({{ .Count }}) →'
 allTagsLink = 'All tags ({{ .Count }}) →'
 categoryTitle = 'Category: {{ .Name }}'
 tagTitle = 'Tag: {{ .Name }}'
+seriesTitle = 'Series: {{ .Name }}'
 
 # Archives
 archivesYearNav = 'Archive year navigation'

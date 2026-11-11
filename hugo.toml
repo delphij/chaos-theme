@@ -4,6 +4,11 @@
 # locale, hasCJKLanguage, outputs). Those belong in the site's own config;
 # exampleSite/hugo.toml is a complete one to start from.
 
+[taxonomies]
+  category = 'categories'
+  tag = 'tags'
+  series = 'series'
+
 # The default main menu, used when a site defines none of its own.
 [menus]
   [[menus.main]]

@@ -1,0 +1,27 @@
+{{- /*
+Renders a series navigation panel for each series the article belongs to
+that has more than one listed page.
+
+@context {page} The current page.
+*/ -}}
+{{- range .GetTerms "series" -}}
+  {{- $pages := (partial "_funcs/filter-listed-pages.html" .Pages).ByDate -}}
+  {{- if gt (len $pages) 1 -}}
+    {{- $title := T "seriesTitle" (dict "Name" .LinkTitle) -}}
+    <nav class="series-nav" aria-label="{{ $title }}">
+      <h2 class="series-nav-title"><a href="{{ .RelPermalink }}">{{ $title }}</a></h2>
+      <ol>
+        {{- range $pages -}}
+          {{- $label := or .Params.series_title .Title -}}
+          <li>
+            {{- if eq . $ -}}
+              <span class="series-nav-link active" aria-current="page">{{ $label }}</span>
+            {{- else -}}
+              <a class="series-nav-link" href="{{ .RelPermalink }}">{{ $label }}</a>
+            {{- end -}}
+          </li>
+        {{- end -}}
+      </ol>
+    </nav>
+  {{- end -}}
+{{- end -}}

@@ -12,6 +12,7 @@
   {{- $content := partial "_funcs/typeset-content.html" .Content -}}
   {{- $content = replaceRE `loading="lazy" decoding="async"` `fetchpriority="high"` $content 1 -}}
   {{- $content | safeHTML -}}
+  {{- partial "series.html" . -}}
   {{- /* Filled while printing: the footnotes and external links as one list
          of notes, ahead of the post footer (print-footnotes.js). */}}
   <div id="print-references" class="print-only" data-heading="{{ T "printReferences" }}"></div>

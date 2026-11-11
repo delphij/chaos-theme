@@ -87,7 +87,9 @@
   .taxo-link,
   .archive-post-title,
   .archive-cat-label,
-  .search-item-link {
+  .search-item-link,
+  .series-nav-title a,
+  .series-nav-link {
     border-bottom: none;
   }
 
@@ -99,7 +101,8 @@
   .sidebar-az-item,
   .sidebar-year-item,
   .tag-flat-item,
-  .toc-content a {
+  .toc-content a,
+  .series-nav-link {
     border-radius: var(--radius-sm);
     transition: color var(--transition-fast), background-color var(--transition-fast);
   }
@@ -112,6 +115,7 @@
   .sidebar-year-item:hover,
   .tag-flat-item:hover,
   .toc-content a:hover,
+  .series-nav-link:hover,
   nav.main-links a:hover,
   .btn-icon:hover {
     color: var(--primary);
@@ -121,7 +125,8 @@
   .sidebar-nav-jump.active,
   .sidebar-az-item.active,
   .sidebar-year-item.active,
-  .toc-content a.active {
+  .toc-content a.active,
+  .series-nav-link.active {
     color: var(--primary);
     font-weight: 600;
     background: var(--paper);
@@ -961,6 +966,78 @@
   }
 
   /* ==========================================================================
+     COMPONENTS - SERIES NAVIGATION PANEL
+     End-of-article series directory card matching the TOC and code-vars
+     panel aesthetic (--ground body capped by a --ground-head header slip).
+     ========================================================================== */
+
+  /* Article cards - in-column panels on the quiet ground, each capped by a
+     --ground-head header band. */
+  .series-nav,
+  .x-card,
+  .code-vars-panel {
+    background: var(--ground);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+
+    /* System colours drop the tinted ground that is the only edge. */
+    @media (forced-colors: active) {
+      border: 1px solid CanvasText;
+    }
+  }
+
+  .series-nav {
+    margin: 2.5em 0 0;
+    contain: layout style;
+
+    ~ .post-footer {
+      margin-top: 2em;
+    }
+
+    ol {
+      margin: 0;
+      padding: 8px 12px 8px 2.25em;
+    }
+
+    li {
+      margin: 2px 0;
+
+      &::marker {
+        font-size: var(--text-sm);
+      }
+
+      &:has(> .active)::marker {
+        color: var(--primary);
+        font-weight: 600;
+      }
+    }
+  }
+
+  .series-nav-title {
+    margin: 0;
+    padding: 8px 16px;
+    font-size: var(--text-sm);
+    background: var(--ground-head);
+
+    a {
+      color: inherit;
+
+      &:hover {
+        color: var(--primary);
+      }
+    }
+  }
+
+  .series-nav-link {
+    display: block;
+    padding: 4px 8px;
+    font-size: var(--text-md);
+    line-height: 1.5;
+    color: var(--text);
+    text-align: left;
+  }
+
+  /* ==========================================================================
      COMPONENTS - X (TWITTER) EMBED CARDS
      Refined static embed cards for X/Twitter posts with theme-consistent styling.
      Supports light/dark mode, responsive mobile layout, and WCAG accessibility.
@@ -971,15 +1048,7 @@
     margin: 1.5em auto;
     max-width: 550px;
     width: 100%;
-    background: var(--ground);
-    border-radius: var(--radius-card);
-    overflow: hidden;
     contain: layout style;
-
-    /* System colours drop the tinted ground that is the only edge. */
-    @media (forced-colors: active) {
-      border: 1px solid CanvasText;
-    }
 
     @media (max-width: 768px) {
       margin: 1.5em 0;
@@ -1187,16 +1256,9 @@
   .code-vars-panel {
     position: relative;
     margin: 1.25em 0;
-    background: var(--ground);
-    border-radius: var(--radius-card);
-    overflow: hidden;
 
     &:has(> .code-vars-reset:not([hidden])) .code-vars-header {
       padding-right: 76px;
-    }
-
-    @media (forced-colors: active) {
-      border: 1px solid CanvasText;
     }
   }
 
@@ -1873,6 +1935,7 @@
     .reading-stats,
     .code-vars-panel,
     .code-var-tooltip,
+    .series-nav,
     button {
       display: none !important;
     }

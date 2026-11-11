@@ -184,7 +184,8 @@ title = 'Article Title'
 description = 'SEO meta description'
 categories = ['Category1']
 tags = ['tag1', 'tag2']
-series = 'Series Name'                 # For grouping related posts
+series = ['Series Name']               # Group related posts; renders a series nav card
+series_title = 'Part Subtitle'         # Optional cleaner title shown in the series nav card
 
 # Indexing & Deprecation controls (optional)
 deprecated = false                     # Set true to demote in on-site search and display [Deprecated] badge
