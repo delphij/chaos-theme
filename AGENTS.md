@@ -6,7 +6,7 @@ This document provides essential context for AI models and human contributors co
 
 ### Design Principles
 * **Minimalism**: Add features only when necessary; prefer simplicity over complexity
-* **Performance First**: Every byte counts - target <10KB total JavaScript, efficient CSS
+* **Performance First**: Every byte counts - target <20KB total JavaScript (uncompressed, before any on-demand Mermaid or KaTeX), efficient CSS
 * **Visual language**: Use `--radius-card` for content cards and panels, small
   radii for controls, and square neutral backgrounds for code blocks. Keep
   prose lists open and unboxed. Use the shared light/dark palette in
