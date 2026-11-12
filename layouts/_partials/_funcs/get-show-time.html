@@ -13,24 +13,27 @@ Site-wide but language-specific: cache it per language.
 
 @example: {{ partialCached "_funcs/get-show-time.html" . site.Language.Lang }}
 @return {bool}
+
+Hugo before 0.166.0 honours only one return per partial, and only at the end:
+any other return is left in place and fails with "wrong number of args for
+return". Keep the single return at the bottom while min_version is below that.
 */ -}}
 {{- $override := site.Params.showTime -}}
+{{- $show := false -}}
 {{- if eq $override true -}}
-  {{- return true -}}
-{{- else if eq $override false -}}
-  {{- return false -}}
-{{- end -}}
-{{- $first := "" -}}
-{{- $differ := false -}}
-{{- range site.RegularPages -}}
-  {{- if not .Date.IsZero -}}
-    {{- $t := .Date.Format "15:04" -}}
-    {{- if not $first -}}
-      {{- $first = $t -}}
-    {{- else if ne $t $first -}}
-      {{- $differ = true -}}
-      {{- break -}}
+  {{- $show = true -}}
+{{- else if ne $override false -}}
+  {{- $first := "" -}}
+  {{- range site.RegularPages -}}
+    {{- if not .Date.IsZero -}}
+      {{- $t := .Date.Format "15:04" -}}
+      {{- if not $first -}}
+        {{- $first = $t -}}
+      {{- else if ne $t $first -}}
+        {{- $show = true -}}
+        {{- break -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- return $differ -}}
+{{- return $show -}}
