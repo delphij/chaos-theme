@@ -818,6 +818,29 @@
     margin-left: 6px;
   }
 
+  .series-year-label {
+    display: none;
+
+    @media (max-width: 600px) {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--muted);
+      padding: 6px 8px 2px;
+    }
+  }
+
+  .series-year-group {
+    @media (max-width: 600px) {
+      margin-top: 6px;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+
   .archive-post-list {
     display: flex;
     flex-direction: column;

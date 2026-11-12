@@ -30,10 +30,13 @@ here.
 
 ### Added
 
-- A dedicated timeline view for the `/series/` taxonomy index, grouping articles
-  by series, sorting series by their latest update date, and displaying chapters
-  in chronological reading order with `series_title` preferred.
-- An end-of-article series navigation directory card (`series-nav`).
+- A dedicated timeline view for the `/series/` taxonomy index: one section per
+  series, the series ordered by their latest post, and each series' posts
+  newest first like every other list, labelled with `series_title` where set.
+  On narrow screens the posts are grouped under year headings and show `MM-DD`,
+  as on the archives page.
+- An end-of-article series navigation card (`series-nav`), oldest first, read
+  as a table of contents.
 
 ## [1.4.0] - 2026-11-08
 

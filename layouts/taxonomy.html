@@ -33,9 +33,9 @@
   {{- else if eq .Data.Plural "series" -}}
     {{- $seriesList := slice -}}
     {{- range .Data.Terms.Alphabetical -}}
-      {{- $posts := .Pages.ByDate -}}
+      {{- $posts := .Pages.ByDate.Reverse -}}
       {{- if gt (len $posts) 0 -}}
-        {{- $latest := index ($posts.Reverse) 0 -}}
+        {{- $latest := index $posts 0 -}}
         {{- $seriesList = $seriesList | append (dict
           "id" (printf "series-%s" (.Page.LinkTitle | urlize))
           "title" .Page.LinkTitle
@@ -53,11 +53,16 @@
             <a href="{{ .url }}">{{ .title }}</a>
             <span class="archive-section-count">({{ .count }})</span>
           </h2>
-          <div class="archive-post-list">
-            {{ range .posts }}
-              {{ partial "archive-row.html" (dict "page" . "seriesTitle" true) }}
-            {{ end }}
-          </div>
+          {{ range .posts.GroupByDate "2006" }}
+            <div class="series-year-group">
+              <div class="series-year-label">{{ T "yearLabel" (dict "Year" .Key) }}</div>
+              <div class="archive-post-list">
+                {{ range .Pages }}
+                  {{ partial "archive-row.html" (dict "page" . "seriesTitle" true) }}
+                {{ end }}
+              </div>
+            </div>
+          {{ end }}
         </div>
       {{ end }}
     </div>
