@@ -1,4 +1,4 @@
-{{- $images := partial "_funcs/get-page-images.html" . }}
+{{- $images := partialCached "_funcs/get-page-images.html" . .RelPermalink }}
 {{- $metaTitle := partial "_funcs/get-meta-title.html" . }}
 {{- with index $images 0 }}
   <meta name="twitter:card" content="summary_large_image">
@@ -10,11 +10,11 @@
   <meta name="twitter:card" content="summary">
 {{- end }}
 
-{{- with partial "_funcs/get-meta-title.html" . }}
+{{- with $metaTitle }}
   <meta name="twitter:title" content="{{ . }}">
 {{- end }}
 
-{{- with partial "_funcs/get-meta-description.html" . }}
+{{- with partialCached "_funcs/get-meta-description.html" . .RelPermalink }}
   <meta name="twitter:description" content="{{ . }}">
 {{- end }}
 

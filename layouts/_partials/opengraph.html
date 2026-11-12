@@ -8,7 +8,7 @@
   <meta property="og:title" content="{{ . }}">
 {{- end }}
 
-{{- with partial "_funcs/get-meta-description.html" . }}
+{{- with partialCached "_funcs/get-meta-description.html" . .RelPermalink }}
   <meta property="og:description" content="{{ . }}">
 {{- end }}
 
@@ -42,7 +42,7 @@
   <meta property="og:type" content="website">
 {{- end }}
 
-{{- $images := partial "_funcs/get-page-images.html" . | first 6 -}}
+{{- $images := partialCached "_funcs/get-page-images.html" . .RelPermalink | first 6 -}}
 {{- $pageTitle := partial "_funcs/get-meta-title.html" . -}}
 {{- range $idx, $img := $images }}
   <meta property="og:image" content="{{ $img }}">

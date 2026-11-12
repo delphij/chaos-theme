@@ -16,7 +16,7 @@
   {{- $pageTitle = printf "%s | %s" (partial "_funcs/get-page-title.html" .) site.Title -}}
 {{- end -}}
 <title>{{ printf "%s%s" $pageTitle $pageSuffix }}</title>
-<meta name="description" content="{{ printf "%s%s" (partial "_funcs/get-meta-description.html" .) $pageSuffix }}">
+<meta name="description" content="{{ printf "%s%s" (partialCached "_funcs/get-meta-description.html" . .RelPermalink) $pageSuffix }}">
 {{- $robots := "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" -}}
 {{- if or .Params.noindex .Params.private (eq .Kind "404") -}}
   {{- $robots = "noindex, nofollow" -}}

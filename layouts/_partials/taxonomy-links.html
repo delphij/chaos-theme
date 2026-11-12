@@ -12,16 +12,26 @@ categories is left out.
 {{- $taxonomy := .taxonomy -}}
 {{- $isTags := eq $taxonomy "tags" -}}
 {{- if ne $page.Type "page" -}}
-  {{- $terms := index $page.Params $taxonomy | default slice -}}
+  {{- /* GetTerms keeps front matter order and gives each term's own page, so
+         its URL and canonical title come without a site.GetPage per name. */ -}}
+  {{- $terms := $page.GetTerms $taxonomy -}}
+  {{- $cats := slice -}}
   {{- if $isTags -}}
-    {{- $terms = complement ($page.Params.categories | default slice) $terms -}}
-  {{- end -}}
-  {{- range $i, $name := $terms -}}
-    {{- if $isTags -}}
-      <a class="taxo-link tag-link" href="{{ partial "_funcs/get-term-url.html" (dict "taxonomy" $taxonomy "name" $name) }}" title="{{ T `tagTitle` (dict `Name` $name) }}">#{{ $name }}</a>
-    {{- else -}}
-      {{- if gt $i 0 -}}<span class="cat-sep">, </span>{{- end -}}
-      <a class="taxo-link cat-link" href="{{ partial "_funcs/get-term-url.html" (dict "taxonomy" $taxonomy "name" $name) }}" title="{{ T `categoryTitle` (dict `Name` $name) }}">{{ $name }}</a>
+    {{- range $page.GetTerms "categories" -}}
+      {{- $cats = $cats | append .LinkTitle -}}
     {{- end -}}
+  {{- end -}}
+  {{- $i := 0 -}}
+  {{- range $terms -}}
+    {{- $name := .LinkTitle -}}
+    {{- if $isTags -}}
+      {{- if not (in $cats $name) -}}
+      <a class="taxo-link tag-link" href="{{ .RelPermalink }}" title="{{ T `tagTitle` (dict `Name` $name) }}">#{{ $name }}</a>
+      {{- end -}}
+    {{- else -}}
+      {{- if $i -}}<span class="cat-sep">, </span>{{- end -}}
+      <a class="taxo-link cat-link" href="{{ .RelPermalink }}" title="{{ T `categoryTitle` (dict `Name` $name) }}">{{ $name }}</a>
+    {{- end -}}
+    {{- $i = add $i 1 -}}
   {{- end -}}
 {{- end -}}

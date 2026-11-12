@@ -26,10 +26,8 @@ column drops the year and shows MM-DD.
   </time>
   <a class="archive-post-title" href="{{ $p.RelPermalink }}"{{ with $tooltip }} title="{{ . }}"{{ end }}>{{ $label }}</a>
   {{- if .category -}}
-    {{- with $p.Params.categories -}}
-      {{- range first 1 . }}
-  <a class="archive-cat-label" href="{{ partial "_funcs/get-term-url.html" (dict "taxonomy" "categories" "name" .) }}" title="{{ T `categoryTitle` (dict `Name` .) }}">{{ . }}</a>
-      {{- end -}}
+    {{- range first 1 ($p.GetTerms "categories") }}
+  <a class="archive-cat-label" href="{{ .RelPermalink }}" title="{{ T `categoryTitle` (dict `Name` .LinkTitle) }}">{{ .LinkTitle }}</a>
     {{- end -}}
   {{- end }}
 </div>
