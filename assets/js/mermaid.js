@@ -15,15 +15,14 @@ import { THEME_CHANGE_EVENT } from './modules/events.js';
 
 const diagrams = [...document.querySelectorAll('pre.mermaid')].map((el, i) => ({
   el,
-  code: (el.dataset.originalCode || el.textContent).trim(),
+  code: el.textContent.trim(),
   id: `mermaid-diagram-${i}`
 }));
 const rendered = {};
 
-function isDarkTheme(event) {
-  // The event carries the theme that was just applied; without one (the
-  // first render) read what is on the element.
-  if (event?.detail?.theme) return event.detail.theme === 'dark';
+// theme.js sets the class before it announces a change, so the element is
+// right both on the first render and on THEME_CHANGE_EVENT.
+function isDarkTheme() {
   return document.documentElement.classList.contains('dark');
 }
 
@@ -60,9 +59,9 @@ function render(isDark) {
   })());
 }
 
-async function renderMermaid(event) {
+async function renderMermaid() {
   if (typeof mermaid === 'undefined' || diagrams.length === 0) return;
-  const isDark = isDarkTheme(event);
+  const isDark = isDarkTheme();
   await render(isDark);
   show(isDark);
   // Pre-render the light SVG in dark mode so beforeprint can swap it in

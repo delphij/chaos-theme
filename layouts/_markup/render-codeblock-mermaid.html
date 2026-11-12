@@ -1,1 +1,3 @@
-<pre class="mermaid" data-original-code="{{ .Inner }}">{{ .Inner | safeHTML }}</pre>
+{{- /* The source once, escaped: mermaid.js reads it back as textContent, and a
+       reader without JavaScript sees the diagram's source as written. */ -}}
+<pre class="mermaid">{{ .Inner }}</pre>

@@ -223,8 +223,7 @@ function initCodeVars() {
   const detailsEl = panel.querySelector('.code-vars-details');
   const urlNoticeEl = panel.querySelector('.code-vars-url-notice');
   const resetBtn = panel.querySelector('.code-vars-reset');
-  const modifiedBadgeText = panel.dataset.modifiedBadge || '';
-  const linkBadgeText = panel.dataset.linkBadge || modifiedBadgeText;
+  const { modifiedBadge: modifiedBadgeText, linkBadge: linkBadgeText } = panel.dataset;
 
   const defs = [];
   const defsByName = new Map();
@@ -232,13 +231,12 @@ function initCodeVars() {
   for (const input of inputEls) {
     const name = input.name;
     const defaultValue = input.defaultValue;
-    if (!name || !defaultValue) continue;
-    const desc = input.closest('.code-vars-field')?.querySelector('.code-vars-label')?.textContent || name;
+    const desc = input.closest('.code-vars-field').querySelector('.code-vars-label').textContent;
     const def = {
       name,
       defaultValue,
       desc,
-      modifiedTip: input.dataset.modifiedTip || desc,
+      modifiedTip: input.dataset.modifiedTip,
       currentValue: defaultValue,
       fromUrl: false,
       inputEl: input
@@ -268,7 +266,7 @@ function initCodeVars() {
       badge.className = 'code-vars-badge';
       badge.hidden = true;
       badge.addEventListener('click', () => {
-        if (detailsEl) detailsEl.open = true;
+        detailsEl.open = true;
         panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       });
       block.appendChild(badge);
@@ -365,8 +363,8 @@ function initCodeVars() {
       }
     }
 
-    if (resetBtn) resetBtn.hidden = !anyModified;
-    if (urlNoticeEl) urlNoticeEl.hidden = !anyFromUrl;
+    resetBtn.hidden = !anyModified;
+    urlNoticeEl.hidden = !anyFromUrl;
 
     for (const item of decoratedBlocks) {
       let blockModified = false;
@@ -455,17 +453,12 @@ function initCodeVars() {
       applyValue(def.name, trimmed, null);
     }
   }
-  if (loadedFromUrl && detailsEl) {
+  if (loadedFromUrl) {
     detailsEl.open = true;
   }
 
-  function closestEl(target, selector) {
-    const base = target instanceof Element ? target : target?.parentElement;
-    return base ? base.closest(selector) : null;
-  }
-
   function getEditable(node) {
-    const el = closestEl(node, '.code-vars-input, var.code-var');
+    const el = node.closest('.code-vars-input, var.code-var');
     if (!el) return null;
     const isInput = el.tagName === 'INPUT';
     const def = defsByName.get(isInput ? el.name : el.dataset.var);
@@ -484,27 +477,25 @@ function initCodeVars() {
     }
   }
 
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      for (const def of defs) {
-        def.fromUrl = false;
-        def.inputEl.value = def.defaultValue;
-        applyValue(def.name, def.defaultValue, null);
-      }
-      commitUrlState();
-    });
-  }
+  resetBtn.addEventListener('click', () => {
+    for (const def of defs) {
+      def.fromUrl = false;
+      def.inputEl.value = def.defaultValue;
+      applyValue(def.name, def.defaultValue, null);
+    }
+    commitUrlState();
+  });
 
   // Hover tooltips on in-place <var class="code-var"> elements
   article.addEventListener('mouseover', (e) => {
-    const target = closestEl(e.target, 'var.code-var');
+    const target = e.target.closest('var.code-var');
     if (!target) return;
     setHoverGroup(target.dataset.var, true);
     showTooltip(target);
   });
 
   article.addEventListener('mouseout', (e) => {
-    const target = closestEl(e.target, 'var.code-var');
+    const target = e.target.closest('var.code-var');
     if (!target) return;
     setHoverGroup(target.dataset.var, false);
     if (document.activeElement !== target) {
@@ -537,7 +528,7 @@ function initCodeVars() {
   });
 
   article.addEventListener('beforeinput', (e) => {
-    const target = closestEl(e.target, 'var.code-var');
+    const target = e.target.closest('var.code-var');
     if (target && (e.inputType === 'insertParagraph' || e.inputType === 'insertLineBreak')) {
       e.preventDefault();
       target.blur();
@@ -570,7 +561,7 @@ function initCodeVars() {
   });
 
   article.addEventListener('paste', (e) => {
-    const target = closestEl(e.target, 'var.code-var');
+    const target = e.target.closest('var.code-var');
     if (target && PLAINTEXT_EDITABLE !== 'plaintext-only') {
       e.preventDefault();
       const text = (e.clipboardData?.getData('text/plain') || '').replace(/[\r\n]+/g, ' ');

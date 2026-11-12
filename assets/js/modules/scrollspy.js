@@ -20,7 +20,6 @@ function setupScrollSpy(navContainer, targetSelector) {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       const id = entry.target.id;
-      if (!id) return;
       const navLink = navContainer.querySelector(`a[href="#${CSS.escape(id)}"]`);
 
       if (navLink && entry.isIntersecting) {

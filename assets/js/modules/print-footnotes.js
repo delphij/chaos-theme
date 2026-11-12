@@ -111,7 +111,7 @@ export function initPrintFootnotes() {
     if (notes.length === 0) return;
 
     const heading = document.createElement('h2');
-    heading.textContent = printNotes.dataset.heading || 'Notes';
+    heading.textContent = printNotes.dataset.heading;
 
     const list = document.createElement('ol');
     list.append(...notes.map(({ backId, body }, index) => {

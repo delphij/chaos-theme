@@ -41,24 +41,13 @@
     var visible = 0;
 
     rows.forEach(function(row) {
-      var rowType = row.getAttribute('data-type');
-      if (activeTypes[rowType]) {
-        row.classList.remove('is-hidden');
-        visible++;
-      } else {
-        row.classList.add('is-hidden');
-      }
+      var shown = !!activeTypes[row.getAttribute('data-type')];
+      row.classList.toggle('is-hidden', !shown);
+      if (shown) visible++;
     });
 
     pills.forEach(function(pill) {
-      var filter = pill.getAttribute('data-filter');
-      if (activeTypes[filter]) {
-        pill.classList.add('active');
-        pill.classList.remove('inactive');
-      } else {
-        pill.classList.remove('active');
-        pill.classList.add('inactive');
-      }
+      pill.classList.toggle('active', !!activeTypes[pill.getAttribute('data-filter')]);
     });
 
     if (emptyRow) {
@@ -154,21 +143,15 @@
     }
 
     // Update Header indicators
-    if (col === 'path') {
-      thPath.className = 'sortable sorted-' + newDir;
-      thTime.className = 'sortable';
-      iconPath.textContent = newDir === 'asc' ? '↑' : '↓';
-      iconTime.textContent = '↕';
-      thPath.setAttribute('aria-label', newDir === 'asc' ? I18N.sortByPathAsc : I18N.sortByPathDesc);
-      thTime.setAttribute('aria-label', I18N.sortByTime);
-    } else {
-      thTime.className = 'sortable sorted-' + newDir;
-      thPath.className = 'sortable';
-      iconTime.textContent = newDir === 'asc' ? '↑' : '↓';
-      iconPath.textContent = '↕';
-      thTime.setAttribute('aria-label', newDir === 'asc' ? I18N.sortByTimeAsc : I18N.sortByTimeDesc);
-      thPath.setAttribute('aria-label', I18N.sortByPath);
-    }
+    [
+      { col: 'path', th: thPath, icon: iconPath, label: I18N.sortByPath, asc: I18N.sortByPathAsc, desc: I18N.sortByPathDesc },
+      { col: 'time', th: thTime, icon: iconTime, label: I18N.sortByTime, asc: I18N.sortByTimeAsc, desc: I18N.sortByTimeDesc }
+    ].forEach(function(h) {
+      var on = h.col === col;
+      h.th.className = on ? 'sortable sorted-' + newDir : 'sortable';
+      h.icon.textContent = on ? (newDir === 'asc' ? '↑' : '↓') : '↕';
+      h.th.setAttribute('aria-label', on ? (newDir === 'asc' ? h.asc : h.desc) : h.label);
+    });
   }
 
   // Bind table headers click & keyboard (Enter/Space)

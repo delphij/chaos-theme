@@ -76,7 +76,7 @@
   background: var(--paper);
 }
 
-.stat-pill.inactive {
+.stat-pill:not(.active) {
   text-decoration: line-through;
 }
 

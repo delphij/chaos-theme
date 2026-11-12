@@ -11,7 +11,7 @@ const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"'
 
 function escapeHTML(str) {
   if (!str) return '';
-  return String(str).replace(/[&<>'"]/g, ch => HTML_ESCAPES[ch] || ch);
+  return String(str).replace(/[&<>'"]/g, ch => HTML_ESCAPES[ch]);
 }
 
 function escapeRegExp(str) {
@@ -138,12 +138,7 @@ function initSearch() {
   const initialHTML = resultsContainer.innerHTML;
 
   // Localised strings, from the dialog's data-* attributes (see search.html).
-  const {
-    msgLoading = 'Loading...',
-    msgEmpty = 'No matching posts found',
-    msgError = 'Failed to load search index',
-    msgDeprecated = 'Deprecated'
-  } = dialog.dataset;
+  const { msgLoading, msgEmpty, msgError, msgDeprecated } = dialog.dataset;
 
   async function fetchJSON(url) {
     const res = await fetch(url);
@@ -158,7 +153,7 @@ function initSearch() {
     coreLoad ??= (async () => {
       resultsContainer.innerHTML = `<div class="search-loading">${escapeHTML(msgLoading)}</div>`;
       try {
-        const raw = await fetchJSON(dialog.dataset.indexUrl || '/search-index.json');
+        const raw = await fetchJSON(dialog.dataset.indexUrl);
         if (!Array.isArray(raw.docs)) throw new Error('unsupported index format');
         indexData = { docs: raw.docs, index: new Map(), vocab: [], fold: new Map() };
         docText = [];
@@ -220,10 +215,7 @@ function initSearch() {
     currentResults = [];
   });
 
-  toggleBtn?.addEventListener('click', e => {
-    e.preventDefault();
-    openSearch();
-  });
+  toggleBtn?.addEventListener('click', openSearch);
 
   closeBtn?.addEventListener('click', () => dialog.close());
 
@@ -489,7 +481,6 @@ function initSearch() {
     for (const idStr of Object.keys(scores)) {
       const id = Number(idStr);
       const doc = docs[id];
-      if (!doc) continue;
 
       const { title: titleLower, summary: summaryLower, tags: tagsLower } = matchText(id);
 

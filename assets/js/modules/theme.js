@@ -15,7 +15,6 @@ const THEME_LIGHT = 'light';
 const root = document.documentElement;
 const btn = document.getElementById('themeToggle');
 const storageKey = 'theme-mode';
-const legacyStorageKey = 'scheme';
 const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 // Cached DOM references for performance
@@ -25,7 +24,7 @@ const themeAnnouncement = document.getElementById('theme-announcement');
 // _partials/header.html). Read once: the button does not change.
 const labels = btn?.dataset ?? {};
 const NEXT_LABEL = { [THEME_DARK]: labels.labelToDark, [THEME_LIGHT]: labels.labelToLight, [THEME_AUTO]: labels.labelToAuto };
-const ANNOUNCEMENT = { [THEME_DARK]: labels.announceDark, [THEME_LIGHT]: labels.announceLight, [THEME_AUTO]: labels.announceAuto || 'Auto' };
+const ANNOUNCEMENT = { [THEME_DARK]: labels.announceDark, [THEME_LIGHT]: labels.announceLight, [THEME_AUTO]: labels.announceAuto };
 
 function systemTheme() {
   return systemDark.matches ? THEME_DARK : THEME_LIGHT;
@@ -129,15 +128,6 @@ function setStoredTheme(mode) {
 }
 
 export function initTheme() {
-  // Migrate existing users to Auto mode by clearing legacy two-state preference
-  try {
-    if (localStorage.getItem(legacyStorageKey)) {
-      localStorage.removeItem(legacyStorageKey);
-    }
-  } catch {
-    // Ignore localStorage access errors (e.g. cookies/storage disabled)
-  }
-
   // Initialize theme on page load
   const initialMode = getCurrentMode();
   applyTheme(initialMode);
