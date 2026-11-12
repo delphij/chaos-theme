@@ -188,8 +188,10 @@ README.md for the full list.
   `render_xsl_companions.sh`), and `check.py`
 - **Content tooling**, run by hand while writing: `fetch_x_embed.py`,
   `auxmark.py`, `generate_default_card.py`
-- **Diagnostics**, never in a build: `search_harness.mjs`, and
-  `check_chroma.py` after a Hugo upgrade (see `assets/css/syntax-upgrade.md`)
+- **Diagnostics and maintenance**, never in a build: `search_harness.mjs`,
+  `check_chroma.py` after a Hugo upgrade (see `assets/css/syntax-upgrade.md`),
+  and `take_screenshots.mjs`, which retakes `images/*.png` from `exampleSite`
+  after a visible change
 
 `hugo` alone still builds the theme; none of these is a dependency of the
 templates.
@@ -207,7 +209,8 @@ The two added for this theme's own correctness:
   index in a stubbed DOM; `--compare <file>` checks a change against the
   version it replaces. Derives its queries from the index, so it carries no
   site's content. Pass `--body`, or most queries return a single result and
-  a ranking change cannot show. The only thing here that needs Node
+  a ranking change cannot show. With `take_screenshots.mjs`, the only things
+  here that need Node
 
 Add a check to `check.py` when a mistake gets through that a build would not
 have caught -- that is what it is for, and every check in it was put there by

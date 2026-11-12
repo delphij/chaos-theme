@@ -952,8 +952,8 @@ not work without them:
 preprocesses and expands Markdown under git control, and
 `generate_default_card.py` renders the default social sharing card.
 
-**Diagnostics**, never part of a build: `search_harness.mjs` and
-`check_chroma.py`, below.
+**Diagnostics and maintenance**, never part of a build: `search_harness.mjs`,
+`check_chroma.py` and `take_screenshots.mjs`, below.
 
 `hugo` alone still builds the theme. None of this is a dependency of the
 theme's templates — the build steps produce content and post-process output,
@@ -1035,8 +1035,24 @@ most queries return a single result, and a single result cannot show a change
 in ranking. The tool says so when that happens rather than reporting a
 reassuring "identical".
 
-This is the one thing in the theme that needs Node, and the one script in
-`tools/` that no build should run.
+#### `take_screenshots.mjs`
+
+Retakes the specimen images from `exampleSite`: `images/screenshot.png` (the
+home page, light), `images/tn.png` (the same view at 900×600) and
+`images/screenshot-dark.png` (the KaTeX post, dark). Run it after a visible
+change, so the screenshots on themes.gohugo.io show the theme as it is:
+
+```bash
+node themes/chaos/tools/take_screenshots.mjs [--chrome /path/to/chrome]
+```
+
+It builds the example site with `hugo` into a temporary directory, serves it
+on a loopback port, and drives headless Chrome over the DevTools Protocol with
+Node's built-in WebSocket -- no npm packages. Chrome is found from `--chrome`,
+then `$CHROME_BIN`, then the usual macOS locations and names on `$PATH`.
+
+`search_harness.mjs` and this script are the two tools here that need Node,
+and no site build should run either.
 
 ## Dependencies
 

@@ -45,6 +45,9 @@ here.
   front matter keeps an article's prose as written.
 - An end-of-article series navigation card (`series-nav`), oldest first, read
   as a table of contents.
+- `tools/take_screenshots.mjs` retakes `images/screenshot.png`,
+  `images/screenshot-dark.png` and `images/tn.png` from `exampleSite` with
+  headless Chrome; it needs Node, but no npm packages.
 
 ### Changed
 
