@@ -1,0 +1,36 @@
+{{- /*
+Decides whether datetime.html shows the hour and minute (15:04), for the whole
+site at once: a site shows times on every page or on none, never on some, so
+a post that happens to be dated at midnight still shows its 00:00.
+
+  showTime = true            always show the time
+  showTime = false           never show it
+  showTime = "auto" or unset show it only when the dated pages do not all share
+                             one time of day, which is what a site whose
+                             front matter gives dates alone looks like
+
+Site-wide but language-specific: cache it per language.
+
+@example: {{ partialCached "_funcs/get-show-time.html" . site.Language.Lang }}
+@return {bool}
+*/ -}}
+{{- $override := site.Params.showTime -}}
+{{- if eq $override true -}}
+  {{- return true -}}
+{{- else if eq $override false -}}
+  {{- return false -}}
+{{- end -}}
+{{- $first := "" -}}
+{{- $differ := false -}}
+{{- range site.RegularPages -}}
+  {{- if not .Date.IsZero -}}
+    {{- $t := .Date.Format "15:04" -}}
+    {{- if not $first -}}
+      {{- $first = $t -}}
+    {{- else if ne $t $first -}}
+      {{- $differ = true -}}
+      {{- break -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $differ -}}

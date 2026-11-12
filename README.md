@@ -161,6 +161,14 @@ hasCJKLanguage = true
   # featuredCategories = ["Category1", "Category2"] # Optional pinned list for "Core Categories" (sorted dynamically by recent activity)
   # featuredCategoriesRecentYears = 5    # Time window in years to prioritize active categories (default: 5, set 0 for all-time count)
 
+  # Timestamp display control (optional)
+  # Controls whether post timestamps display hours and minutes (HH:MM).
+  # Site-wide: either every date shows HH:MM or none does. By default
+  # (omitted or "auto"), times are shown only if the dated pages do not all
+  # share one time of day (a site whose front matter gives dates alone).
+  # Set true to always show HH:MM, or false to show only YYYY-MM-DD.
+  # showTime = true
+
   # Client-side full-text search (optional, disabled by default)
   [params.search]
     enable = true                      # Enable search button and '/' hotkey

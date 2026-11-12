@@ -38,6 +38,13 @@
   # remarkLocale = "zh"
   # remarkNoFooter = "true"
 
+  # Timestamp display control (optional)
+  # Controls whether post timestamps display hours and minutes (HH:MM).
+  # Site-wide. By default (omitted or "auto"), shows HH:MM only if the dated
+  # pages do not all share one time of day.
+  # Set true to always display HH:MM, or false to show only YYYY-MM-DD.
+  # showTime = true
+
   # Client-side full-text search (optional, disabled by default)
   # When enabled, adds a search button to the header and hotkey '/' modal.
   # Generate search index with: python3 themes/chaos/tools/build_search_index.py --output assets/search-index.json

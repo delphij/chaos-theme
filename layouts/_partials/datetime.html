@@ -1,9 +1,11 @@
 {{- /*
-Renders a <time> element: machine-readable in the attribute, minutes in the
-text.
+Renders a <time> element: machine-readable in the attribute, the date in the
+text, and the minutes too when the site shows times (_funcs/get-show-time.html).
 
 @context {time} time The time to render, e.g. a page's .Date or .Lastmod.
 
 @example: {{ partial "datetime.html" .Date }}
 */ -}}
-<time datetime="{{ time.Format "2006-01-02T15:04:05-07:00" . }}">{{ time.Format "2006-01-02 15:04" . }}</time>
+{{- $showTime := partialCached "_funcs/get-show-time.html" . site.Language.Lang -}}
+{{- $format := cond $showTime "2006-01-02 15:04" "2006-01-02" -}}
+<time datetime="{{ time.Format "2006-01-02T15:04:05-07:00" . }}">{{ time.Format $format . }}</time>

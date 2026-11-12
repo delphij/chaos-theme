@@ -35,6 +35,10 @@ here.
   newest first like every other list, labelled with `series_title` where set.
   On narrow screens the posts are grouped under year headings and show `MM-DD`,
   as on the archives page.
+- `showTime`: whether dates show the time of day (`HH:MM`), for the whole site
+  at once. The default, `"auto"`, shows it unless every dated page has the same
+  time of day, as on a site whose front matter gives dates alone; `true` and
+  `false` force it.
 - An end-of-article series navigation card (`series-nav`), oldest first, read
   as a table of contents.
 
