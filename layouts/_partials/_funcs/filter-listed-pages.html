@@ -1,16 +1,19 @@
 {{- /*
-Returns the pages that may be listed: the two listing filters the theme
-honours everywhere, applied in the one place they are written down.
+Returns the pages that may be listed: those whose type is not in
+site.Params.excludedTypes (default: "page").
 
-  - types in site.Params.excludedTypes (default: "page")
-  - pages marked `hidden` in front matter
+Deprecated, with excludedTypes: both go in the next major version, when the
+homepage, archives and feeds list mainSections alone. A page that should be
+published but not listed says so with Hugo's own `build: { list: never }`,
+which keeps it out of every collection without a template filtering for it.
 
 @context {page.Pages} pages The pages to filter.
 @returns {page.Pages} The pages that may be listed.
 
 @example: {{ partial "_funcs/filter-listed-pages.html" .Pages }}
 */ -}}
+{{- with site.Params.excludedTypes -}}
+  {{- warnf "chaos: params.excludedTypes is deprecated and will be removed in the next major version; use build: { list: never } in the front matter of pages to keep out of lists" -}}
+{{- end -}}
 {{- $excludedTypes := site.Params.excludedTypes | default (slice "page") -}}
-{{- $pages := where . "Type" "not in" $excludedTypes -}}
-{{- $pages = where $pages "Params.hidden" "ne" true -}}
-{{- return $pages -}}
+{{- return where . "Type" "not in" $excludedTypes -}}

@@ -80,7 +80,6 @@ enableGitInfo = false
   subtitle = '一个 *Chaos* 主题的示例站点'
   description = 'Chaos 主题的示例站点：中文排版、数学公式、提示框、代码高亮与深浅色模式。'
   mainSections = ['posts']
-  excludedTypes = ['page']
 
   [params.author]
     name = 'Chaos'

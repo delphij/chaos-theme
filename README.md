@@ -141,7 +141,7 @@ hasCJKLanguage = true
 
   # Content filtering
   mainSections = ["posts"]             # Sections to display on homepage
-  excludedTypes = ["page"]             # Content types to hide from listings
+  # excludedTypes = ["page"]           # Deprecated: use build.list in front matter
   # unpaginatedSections = ["archives"] # Sections whose layout renders its own
                                        # complete listing, so the theme must not
                                        # paginate them (default: ["archives"])
@@ -191,6 +191,7 @@ series_title = 'Part Subtitle'         # Optional cleaner title shown in the ser
 deprecated = false                     # Set true to demote in on-site search and display [Deprecated] badge
 searchHidden = false                   # Set true to exclude from on-site search (search engines unaffected)
 noindex = false                        # Set true to exclude from search engines, on-site search, and sitemap
+build = { list = 'never' }             # Hugo built-in: publish the page but keep it out of every list
 +++
 ```
 

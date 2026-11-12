@@ -38,6 +38,18 @@ here.
 - An end-of-article series navigation card (`series-nav`), oldest first, read
   as a table of contents.
 
+### Deprecated
+
+- The `excludedTypes` parameter, which now logs a warning when set. It still
+  works, and its default still keeps root-level pages (type `page`) out of
+  section and term lists; both go in the next major version. To publish a
+  page but keep it out of every list, use Hugo's own `build: { list: never }`.
+
+### Removed
+
+- The undocumented `hidden` front matter variable, which only some lists
+  honoured; use `build: { list: never }`.
+
 ## [1.4.0] - 2026-11-08
 
 Code blocks whose hostnames, paths and versions a reader can change in

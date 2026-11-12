@@ -46,7 +46,6 @@ hasCJKLanguage = true
 [params]
   subtitle = '一个 *Chaos* 主题的示例站点'
   mainSections = ['posts']
-  excludedTypes = ['page']
 
   [params.search]
     enable = true
