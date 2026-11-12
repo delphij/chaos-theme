@@ -13,15 +13,13 @@
    written as ordinary CSS.
    ========================================================================== */
 
-/* Chrome and row links stay plain and turn primary on hover, matching the
-   .link-plain family in main.css. */
+/* Chrome and row links stay plain and turn primary on hover */
 .link-plain {
   border-bottom: none;
   color: inherit;
 }
 
 .link-plain:hover {
-  border-bottom: none;
   color: var(--primary);
 }
 
@@ -32,7 +30,6 @@
 /* Sticky header with frosted-glass effect, matching .site-nav on the main site. */
 .site-header {
   width: 100%;
-  background: var(--bg);
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
   backdrop-filter: blur(16px) saturate(160%);

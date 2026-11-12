@@ -90,7 +90,6 @@
   .search-item-link,
   .series-nav-title a,
   .series-nav-link,
-  .archive-year-title a,
   .archive-section-title a {
     border-bottom: none;
   }
@@ -188,7 +187,6 @@
 
   .post-entry .post-title a {
     color: var(--heading);
-    transition: color var(--transition-fast);
 
     &:hover {
       color: var(--primary);
@@ -212,27 +210,20 @@
   .taxo-link {
     display: inline-block;
     font-size: var(--small-size);
-    transition: color var(--transition-fast);
+
+    &:hover,
+    &:focus-visible {
+      color: var(--primary);
+    }
   }
 
   .cat-link {
     font-weight: 600;
     color: var(--accent);
-
-    &:hover,
-    &:focus-visible {
-      color: var(--primary);
-    }
   }
 
   .tag-link {
-    font-weight: 400;
     color: var(--muted);
-
-    &:hover,
-    &:focus-visible {
-      color: var(--primary);
-    }
   }
 
   /* Separators inherit the muted colour of the metadata they sit in */
@@ -250,11 +241,9 @@
      Sticky header with flexbox-based navigation menu.
      ========================================================================== */
 
-  /* Frosted-glass sticky header: the page shows through an 82% --bg, blurred.
-     The opaque declaration is the fallback where color-mix() is unsupported. */
+  /* Frosted-glass sticky header: the page shows through an 82% --bg, blurred */
   .site-nav {
     width: 100%;
-    background: var(--bg);
     background: color-mix(in srgb, var(--bg) 82%, transparent);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
     backdrop-filter: blur(16px) saturate(160%);
@@ -305,7 +294,6 @@
     @media (max-width: 768px) {
       font-size: var(--font-size-base);
       flex: 1;
-      min-width: 0;
     }
 
     .subtitle {
@@ -366,7 +354,6 @@
       white-space: nowrap;
       padding: 8px 12px;
       border-radius: var(--radius-md);
-      transition: color var(--transition-fast), background var(--transition-fast);
 
       /* Stack navigation links vertically on mobile */
       @media (max-width: 768px) {
@@ -378,9 +365,8 @@
   }
 
   /* Base icon button styles - Minimum 44x44px touch target (WCAG 2.5.5) */
+  /* Buttons start from normalize.css: no border or background, a pointer */
   .btn-icon {
-    border: 0;
-    cursor: pointer;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -391,7 +377,6 @@
     border-radius: var(--radius-md);
     font-size: 18px;
     color: var(--heading);
-    background: transparent;
     transition: background var(--transition-fast), color var(--transition-fast);
   }
 
@@ -429,7 +414,6 @@
       display: block;
       max-width: var(--content-width);
       margin: 0 auto;
-      padding: 0 var(--gutter);
     }
   }
 
@@ -494,7 +478,6 @@
       bottom: 0;
       max-height: calc(100dvh - var(--nav-height));
       z-index: var(--z-overlay);
-      overflow-y: auto;
       --panel-pad: 24px;
       border-radius: 0;
 
@@ -578,8 +561,6 @@
       border-radius: 50%;
       background: var(--primary);
       color: var(--primary-fg);
-      border: none;
-      cursor: pointer;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       z-index: var(--z-modal);
       transition: box-shadow var(--transition-normal);
@@ -656,7 +637,6 @@
     font-size: var(--text-xs);
     color: var(--link);
     font-weight: 500;
-    transition: color var(--transition-fast);
 
     &:hover {
       color: var(--link-hover);
@@ -803,7 +783,6 @@
 
     a {
       color: inherit;
-      transition: color var(--transition-fast);
 
       &:hover {
         color: var(--primary);
@@ -811,7 +790,6 @@
     }
   }
 
-  .archive-year-count,
   .archive-section-count {
     font-size: var(--text-sm);
     font-weight: normal;
@@ -896,14 +874,12 @@
     color: var(--text);
     flex: 1;
     line-height: 1.45;
-    transition: color var(--transition-fast);
   }
 
   .archive-cat-label {
     font-size: var(--text-xs);
     color: var(--muted);
     flex-shrink: 0;
-    transition: color var(--transition-fast);
 
     &:hover {
       color: var(--primary);
@@ -951,7 +927,6 @@
     text-spacing: auto-spaces normal;
     font-feature-settings: "chws" 1;
     line-break: strict;
-    -webkit-hyphens: auto;
     hyphens: auto;
   }
 
@@ -1127,9 +1102,7 @@
       gap: 6px;
     }
 
-    /* A mask rather than background-image, so the logo follows currentColor.
-       Guarded by @supports: without mask support the span would otherwise
-       paint as a solid square, and showing nothing is the better fallback. */
+    /* A mask rather than background-image, so the logo follows currentColor */
     .x-logo {
       display: inline-block;
       flex-shrink: 0;
@@ -1141,16 +1114,14 @@
         height: 14px;
       }
 
-      @supports (mask: url("x.svg") center / contain no-repeat) {
-        background-color: currentColor;
-        /* The logo is a background: print drops those unless told to keep it */
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E") center / contain no-repeat;
+      background-color: currentColor;
+      /* The logo is a background: print drops those unless told to keep it */
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E") center / contain no-repeat;
 
-        @media (forced-colors: active) {
-          background-color: CanvasText;
-        }
+      @media (forced-colors: active) {
+        background-color: CanvasText;
       }
     }
   }
@@ -1207,9 +1178,7 @@
       /* Links inside tweet body */
       a {
         color: var(--link);
-        text-decoration: none;
         word-break: break-all;
-        transition: color var(--transition-fast);
 
         &:hover,
         &:focus-visible {
@@ -1222,9 +1191,7 @@
     /* Citation and metadata links in footer */
     > a {
       color: var(--muted);
-      text-decoration: none;
       margin-left: 6px;
-      transition: color var(--transition-fast);
 
       &:hover,
       &:focus-visible {
@@ -1240,21 +1207,24 @@
      ========================================================================== */
 
   /* Code copy button - Floating subtle button in top right */
-  .code-copy-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
+  /* The copy button and the variable tooltip: one small pill */
+  .code-copy-btn,
+  .code-var-tooltip {
     display: inline-flex;
     align-items: center;
     gap: 5px;
     padding: 3px 8px;
     font-size: var(--text-xs);
     line-height: 1.4;
+    border-radius: var(--radius-sm);
+  }
+
+  .code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
     color: var(--muted);
     background: var(--bg);             /* The page ground, a step off --code-bg in both modes */
-    border: none;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
     opacity: 0;
     transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
     z-index: 5;
@@ -1405,10 +1375,7 @@
     font-size: var(--text-xs);
     font-weight: 600;
     color: var(--link);
-    background: transparent;
-    border: none;
     border-radius: var(--radius-sm);
-    cursor: pointer;
     transition: color var(--transition-fast), background-color var(--transition-fast);
 
     &:hover {
@@ -1482,8 +1449,7 @@
       border-bottom-color: var(--alert-warning-border);
     }
 
-    &:focus,
-    &:focus-visible {
+    &:focus {
       background: var(--surface);
       color: var(--heading);
       border-bottom-color: transparent;
@@ -1499,16 +1465,9 @@
   .code-var-tooltip {
     position: fixed;
     z-index: var(--z-top);
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 8px;
-    font-size: var(--text-xs);
-    line-height: 1.4;
     color: var(--heading);
     background: var(--surface);
     border: var(--border);
-    border-radius: var(--radius-sm);
     box-shadow: var(--shadow-dialog);
     pointer-events: none;
     white-space: nowrap;
@@ -1539,11 +1498,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: transparent;           /* Not a code slab: no ground, no frame */
-    border: none;
+    background: transparent;           /* Not a code slab: no ground */
     padding: 1.5rem 0;
     margin: 1.5rem 0;
-    overflow-x: auto;
 
     /* Diagram labels are figure text, not code, so opt out of the monospace
        stack every other <pre> gets. This is also load-bearing: Mermaid measures
@@ -1584,9 +1541,6 @@
     /* Pagination items - Remove list styling */
     li {
       list-style: none;
-      display: inline-block;
-      margin: 0;
-      padding: 0;
     }
 
     /* Pagination links - Button-style with minimum 44px touch target (WCAG 2.5.5) */
@@ -1714,10 +1668,8 @@
     padding: 0;
     box-shadow: var(--shadow-dialog);
     overflow: hidden;
-    position: fixed;
-    top: 10vh;
+    top: 10vh;                         /* A modal dialog is fixed in the top layer */
     margin: 0 auto;
-    z-index: var(--z-modal);
 
     &::backdrop {
       background: rgba(0, 0, 0, 0.35);
@@ -1946,8 +1898,7 @@
        white paper, with black ink for text; only what differs from the
        light values is restated. No !important needed: chaos.components
        outranks the chaos.tokens layer. */
-    :root,
-    html.dark {
+    :root {
       color-scheme: light;
       --bg: #FFFFFF;
       --surface: #FFFFFF;
@@ -2022,29 +1973,13 @@
 
     /* Images, diagrams and blockquotes should not break */
     img, blockquote, .mermaid {
-      page-break-inside: avoid;
       break-inside: avoid;
     }
 
-    /* Tables - Prevent row split across pages and repeat header on each printed page */
-    table {
-      page-break-inside: auto;
-      break-inside: auto;
-    }
-
+    /* A table may break between rows, never inside one; the browser repeats
+       its <thead> on each page by default */
     tr {
-      page-break-inside: avoid;
       break-inside: avoid;
-    }
-
-    thead {
-      display: table-header-group;
-    }
-
-    /* Code blocks - allow breaking for large blocks, but prefer keeping together */
-    pre, .highlight {
-      page-break-inside: auto;
-      break-inside: auto;
     }
 
     /* Smart breaking for code blocks using orphan/widow control
@@ -2098,7 +2033,6 @@
 
       h2 {
         font-size: var(--h2-size);
-        font-weight: 700;
         margin-bottom: 1em;
       }
 
@@ -2112,7 +2046,7 @@
       li {
         margin-bottom: 0.5em;
         overflow-wrap: anywhere;       /* A URL breaks where it must; prose as usual */
-        page-break-inside: avoid;
+        break-inside: avoid;
       }
 
       /* A footnote's paragraphs, set as tightly as the list around them */
@@ -2124,7 +2058,6 @@
     /* Post footer for print - separated by whitespace, same as on screen */
     .post-footer {
       margin-top: 2.5em;
-      page-break-inside: avoid;
       break-inside: avoid;
     }
 
@@ -2187,23 +2120,20 @@
     }
 
     /* Remove background from code inside code blocks */
-    .highlight code,
     pre code {
       background: transparent;
     }
 
     /* Code block containers - Shared margin and padding */
     .highlight,
-    pre:not(.highlight pre, .mermaid),
-    blockquote .highlight {
+    pre:not(.highlight pre, .mermaid) {
       margin: 0.5em 0;
       padding: 8px;
       background: var(--code-bg);
     }
 
     /* Pre elements - Reset styles (container provides styling) */
-    .highlight pre,
-    blockquote pre {
+    .highlight pre {
       margin: 0;
       padding: 0;
       background: transparent;
@@ -2214,49 +2144,12 @@
       padding: 8px;
     }
 
-    /* Chroma table structures - Remove all borders and spacing */
+    /* The line-number table, a block on screen, is a full-width table again */
     .chroma .lntable {
       display: table;
-      border: none;
-      border-spacing: 0;
-      border-collapse: collapse;
       margin: 0;                       /* A page is under 769px, so the line-number
                                           column is hidden: nothing to hang */
-      padding: 0;
       width: 100%;
-    }
-
-    .chroma .lntable tbody,
-    .chroma .lntable tr,
-    .chroma .lntd {
-      border: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .chroma .lntable tbody {
-      display: table-row-group;
-    }
-
-    .chroma .lntable tr {
-      display: table-row;
-    }
-
-    .chroma .lntd {
-      display: table-cell;
-      vertical-align: top;
-    }
-
-    /* Line number column padding already set in main styles */
-
-    /* Remove borders and spacing from code column elements only */
-    .chroma .lntd:not(:first-child) pre,
-    .chroma .lntd:not(:first-child) code,
-    .chroma code {
-      background: transparent;
-      border: none;
-      margin: 0;
-      padding: 0;
     }
 
     /* Syntax highlighting needs nothing here: the dark --syntax-* roles are
