@@ -66,6 +66,7 @@
   background: transparent;
   color: var(--muted);
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
   transition: color var(--transition-fast), background-color var(--transition-fast);
 }
@@ -115,6 +116,7 @@ table {
 
 th.sortable {
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
@@ -164,6 +166,7 @@ tr.is-hidden {
   color: var(--type-color);
   margin-right: 8px;
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
 }
 

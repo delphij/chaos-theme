@@ -1,8 +1,4 @@
-{{- $pages := partial "_funcs/get-main-pages.html" . -}}
-{{- $limit := site.Config.Services.RSS.Limit -}}
-{{- if ge $limit 1 -}}
-{{- $pages = $pages | first $limit -}}
-{{- end -}}
+{{- $pages := partialCached "_funcs/get-feed-pages.html" . site.Language.Lang -}}
 {{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
 {{ "<?" | safeHTML }}xml-stylesheet type="text/xsl" href="{{ "feed.xsl" | relURL }}"{{ "?>" | safeHTML }}
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="{{ site.Language.Locale }}">
@@ -35,12 +31,12 @@
   {{- range .AlternativeOutputFormats }}
   {{ printf `<link rel="alternate" type="%s" href="%s" hreflang="%s"/>` .MediaType.Type .Permalink site.Language.Locale | safeHTML }}
   {{- end }}
-  {{- range first 25 $pages }}
+  {{- range $pages }}
   <entry>
     <title>{{ .Title }}</title>
     <author>
       <name>{{ or site.Params.author.name site.Title }}</name>
-      <uri>{{ or site.Params.author.uri site.Home.Permalink }}</uri>
+      <uri>{{ or site.Params.author.url site.Home.Permalink }}</uri>
     </author>
     <id>{{ .Permalink }}</id>
     <link rel="alternate" type="text/html" href="{{ .Permalink }}"/>

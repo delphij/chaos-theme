@@ -28,8 +28,8 @@
     {{- else -}}
       {{- $lines = $lines | append (printf "Preferred-Languages: %s" $sec.languages) -}}
     {{- end -}}
-  {{- else if site.LanguageCode -}}
-    {{- $lines = $lines | append (printf "Preferred-Languages: %s" site.LanguageCode) -}}
+  {{- else -}}
+    {{- $lines = $lines | append (printf "Preferred-Languages: %s" site.Language.Locale) -}}
   {{- end -}}
 
   {{- /* Canonical (RFC 9116 Section 2.5.2) */ -}}

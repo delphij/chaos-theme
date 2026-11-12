@@ -16,7 +16,7 @@ Generates Schema.org structured data in JSON-LD format.
   {{- end -}}
 {{- end -}}
 {{- $licenseURL := site.Params.licenseURL | default "https://creativecommons.org/licenses/by-nc/4.0/" -}}
-{{- $inLanguage := or site.Language.Locale site.Language.Lang site.LanguageCode "zh-CN" -}}
+{{- $inLanguage := site.Language.Locale -}}
 
 {{- if .IsHome -}}
   {{- $website := dict

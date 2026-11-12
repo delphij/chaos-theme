@@ -1,0 +1,15 @@
+{{- /*
+Returns the pages the RSS and Atom feeds carry: the main-section pages, newest
+first, capped at the site's services.rss.limit, or at 25 when the site sets no
+limit (Hugo's own default, -1, would put every post in every feed fetch).
+
+The same for every page: cache it per language.
+
+@example: {{ partialCached "_funcs/get-feed-pages.html" . site.Language.Lang }}
+@returns {page.Pages}
+*/ -}}
+{{- $limit := site.Config.Services.RSS.Limit -}}
+{{- if lt $limit 1 -}}
+  {{- $limit = 25 -}}
+{{- end -}}
+{{- return first $limit (partialCached "_funcs/get-main-pages.html" . site.Language.Lang) -}}

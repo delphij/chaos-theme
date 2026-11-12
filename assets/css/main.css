@@ -237,6 +237,7 @@
 
   /* Separators inherit the muted colour of the metadata they sit in */
   .meta-sep {
+    -webkit-user-select: none;
     user-select: none;
   }
 
@@ -1257,6 +1258,7 @@
     opacity: 0;
     transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
     z-index: 5;
+    -webkit-user-select: none;
     user-select: none;
 
     /* Touch users need the same readable label as mouse and keyboard users. */
@@ -1312,6 +1314,7 @@
     padding: 8px 16px;
     background: var(--ground-head);
     cursor: pointer;
+    -webkit-user-select: none;
     user-select: none;
     list-style: none;
 
@@ -1432,6 +1435,7 @@
     border: var(--border);
     border-radius: var(--radius-sm);
     cursor: pointer;
+    -webkit-user-select: none;
     user-select: none;
     transition: color var(--transition-fast), background-color var(--transition-fast);
 

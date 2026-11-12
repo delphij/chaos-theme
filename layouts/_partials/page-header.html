@@ -13,7 +13,9 @@ so that a term page and its index page share one header treatment.
 
 {{- $count := 0 -}}
 {{- if or (eq .Kind "term") (eq .Kind "section") -}}
-  {{- $count = len .Pages -}}
+  {{- /* The pages the list shows, not .Pages: a section's .Pages holds its
+         subsections and none of their posts. */ -}}
+  {{- $count = len (partial "_funcs/get-list-pages.html" .) -}}
 {{- end -}}
 <div class="page-title-group">
   <h1 class="page-title">{{- partial "_funcs/get-page-title.html" . -}}</h1>

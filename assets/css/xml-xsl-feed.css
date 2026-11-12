@@ -63,6 +63,7 @@
   flex: 1 1 auto;
   min-width: 0;
   word-break: break-all;
+  -webkit-user-select: text;
   user-select: text;
 }
 
@@ -75,6 +76,7 @@
   color: var(--muted);
   background: var(--ground);
   border-radius: var(--radius-sm);
+  -webkit-user-select: none;
   user-select: none;
   transition: color var(--transition-fast), background var(--transition-fast);
 }

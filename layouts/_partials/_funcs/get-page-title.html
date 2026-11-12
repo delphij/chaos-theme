@@ -6,7 +6,10 @@ Hugo derives a list page's title from the section or taxonomy name ("tags",
 i18n table -- lowercased, so the lookup does not depend on
 capitalizeListTitles. Term and regular pages are never translated.
 
-A title the author wrote in front matter is returned untouched. Probing the
+A title is translated only while it is still the derived name (the section's
+or taxonomy's own name, case aside), which is how a title the author wrote in
+front matter is told apart without reading .Params.title (deprecated since
+Hugo 0.169.0); the author's title is returned untouched. Probing the
 i18n table with it was wrong twice over: a translation could override what the
 author asked for, and any list page whose title is not an i18n key logged
 
@@ -29,9 +32,12 @@ probing it logged the same warning; its derived title is kept as Hugo made it.
 
 {{- $title := .Title -}}
 {{- $translated := slice "posts" "archives" "categories" "tags" "series" -}}
-{{- if and (in (slice "section" "taxonomy") .Kind) (not .Params.title) (in $translated (lower $title)) -}}
-  {{- with T (lower $title) -}}
-    {{- $title = . -}}
+{{- if in (slice "section" "taxonomy") .Kind -}}
+  {{- $name := cond (eq .Kind "taxonomy") .Data.Plural .Section -}}
+  {{- if and (eq (lower $title) $name) (in $translated $name) -}}
+    {{- with T $name -}}
+      {{- $title = . -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 {{- return $title -}}

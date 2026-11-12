@@ -1,14 +1,6 @@
-{{- $pages := "" -}}
-{{- if .IsHome -}}
-  {{- $pages = partial "_funcs/get-main-pages.html" . -}}
-{{- else -}}
-  {{- $pages = .RegularPages -}}
-{{- end -}}
-{{- $limit := site.Config.Services.RSS.Limit -}}
-{{- if le $limit 0 -}}
-  {{- $limit = 25 -}}
-{{- end -}}
-{{- $pages = $pages | first $limit -}}
+{{- /* The home feed only: section and term feeds, where a site enables them,
+       come from Hugo's embedded rss.xml. */ -}}
+{{- $pages := partialCached "_funcs/get-feed-pages.html" . site.Language.Lang -}}
 {{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
 {{ "<?" | safeHTML }}xml-stylesheet type="text/xsl" href="{{ "feed.xsl" | relURL }}"{{ "?>" | safeHTML }}
 <rss version="2.0"
@@ -23,13 +15,7 @@
     <link>{{ .Permalink }}</link>
     <description>{{ if ne .Title site.Title }}{{ with .Title }}Recent content in {{ . }} on {{ site.Title }}{{ end }}{{ else }}{{ or site.Params.description site.Params.subtitle (printf "Recent content on %s" site.Title) }}{{ end }}</description>
     <generator>Hugo -- gohugo.io</generator>
-    {{- with site.Language.Locale }}
-    <language>{{ . }}</language>
-    {{- else }}
-    {{- with site.LanguageCode }}
-    <language>{{ . }}</language>
-    {{- end }}
-    {{- end }}
+    <language>{{ site.Language.Locale }}</language>
     {{- with site.Copyright }}
     <copyright>{{ . | markdownify | plainify }}</copyright>
     {{- end }}
@@ -64,7 +50,7 @@
     {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType.Type | safeHTML }}
     {{- end }}
     {{- range $pages }}
-      {{- if and (.IsPage) (.Params.date) }}
+      {{- if not .Date.IsZero }}
     <item>
       <title>{{ .Title }}</title>
       <link>{{ .Permalink }}</link>

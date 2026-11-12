@@ -48,6 +48,22 @@ here.
   Noto Sans Mono subset (about 16 KB) is now loaded, and preloaded, on every
   page instead of only on pages with code.
 
+### Fixed
+
+- Atom entries link their author to `params.author.url`, the key the README
+  and the JSON-LD use; they read `author.uri`, which no site sets, and fell
+  back to the home page.
+- The RSS and Atom feeds carry the same pages: `services.rss.limit` when the
+  site sets one, otherwise 25. Atom was capped at 25 whatever the limit.
+- The sitemap honours Hugo's `sitemap: { disable: true }` front matter.
+- A section page's post count is the number of posts it lists, not of its
+  direct children.
+- `user-select` carries its `-webkit-` prefix, which Safari at the supported
+  floor still needs.
+- No more deprecation notices from Hugo 0.169: the feeds and the page title no
+  longer read `.Params.date` or `.Params.title`, and the language falls back
+  through `Language.Locale` instead of the deprecated `LanguageCode`.
+
 ### Deprecated
 
 - The `excludedTypes` parameter, which now logs a warning when set. It still

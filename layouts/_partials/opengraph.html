@@ -12,11 +12,11 @@
   <meta property="og:description" content="{{ . }}">
 {{- end }}
 
-{{- $rawLocale := or .Params.locale site.Language.Locale site.Language.Lang site.LanguageCode "zh-CN" -}}
+{{- $rawLocale := or .Params.locale site.Language.Locale -}}
 <meta property="og:locale" content="{{ partial "_funcs/get-og-locale.html" $rawLocale }}">
 {{- if .IsTranslated -}}
   {{- range .Translations -}}
-    {{- $tLocale := or .Params.locale .Language.Locale .Language.Lang .Language.LanguageCode -}}
+    {{- $tLocale := or .Params.locale .Language.Locale -}}
     {{- with $tLocale -}}
 <meta property="og:locale:alternate" content="{{ partial "_funcs/get-og-locale.html" . }}">
     {{- end -}}
