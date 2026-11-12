@@ -866,9 +866,7 @@
 
   /* On narrow screens the date column narrows and shows the short date */
   .archive-date {
-    font-family: var(--font-mono);
     font-size: var(--text-sm);
-    font-variant-numeric: tabular-nums;
     color: var(--muted);
     flex-shrink: 0;
     width: 82px;

@@ -307,6 +307,18 @@
   }
 
   /* ==========================================================================
+     TIMESTAMPS
+     Dates and times share the monospace stack, so the digits line up from
+     one row to the next. Every page shows a date, so this makes Noto Sans
+     Mono a base resource rather than an on-demand one (head/css.html
+     preloads it).
+     ========================================================================== */
+
+  time {
+    font-family: var(--font-mono);
+  }
+
+  /* ==========================================================================
      CHINESE TYPOGRAPHY
      Ruby annotations (phonetic guides) and highlighted text.
      ========================================================================== */

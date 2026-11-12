@@ -42,6 +42,12 @@ here.
 - An end-of-article series navigation card (`series-nav`), oldest first, read
   as a table of contents.
 
+### Changed
+
+- Every `<time>` is set in the monospace stack (`--font-mono`), so the
+  Noto Sans Mono subset (about 16 KB) is now loaded, and preloaded, on every
+  page instead of only on pages with code.
+
 ### Deprecated
 
 - The `excludedTypes` parameter, which now logs a warning when set. It still

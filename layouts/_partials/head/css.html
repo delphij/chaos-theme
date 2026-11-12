@@ -2,6 +2,12 @@
        out absolute; see the file) and so cannot just be listed alongside the
        plain sheets. It goes first: everything after it resolves var()s it
        defines. */ -}}
+{{- /* The monospace subset is needed on every page (dates are set in it; see
+       prose.css), but is discovered only once the stylesheet has been parsed
+       and a <time> laid out. Preloaded so it downloads alongside the
+       stylesheet, and font-display: swap has little or nothing to swap. The
+       URL must be the one tokens.css gives @font-face, or it downloads twice. */ -}}
+<link rel="preload" href="{{ "_3p/noto-sans-mono/2.014/noto-sans-mono-latin.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
 {{- $tokens := resources.Get "css/tokens.css" | resources.ExecuteAsTemplate "css/tokens.css" . -}}
 {{- $cssFiles := slice "css/normalize.css" "css/prose.css" "css/main.css" "css/syntax.css" -}}
 

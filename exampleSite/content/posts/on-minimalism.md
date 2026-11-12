@@ -33,7 +33,7 @@ series: "Chaos 主题指南"
 | 资源与特性 | 加载形式 | 原始尺寸 | Gzip压缩 | Brotli压缩 | 说明 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | 主题核心样式(CSS) | 基础资源 | 约35 KB | 约9 KB | 约8 KB | 基础配色、排版、深浅色、响应式网格 |
-| 等宽字体子集(WOFF2) | 按需加载 | 约16 KB | - | - | [Noto Sans Mono](https://fonts.google.com/noto/specimen/Noto+Sans+Mono)拉丁子集，用于代码与数字（本身已压缩） |
+| 等宽字体子集(WOFF2) | 基础资源 | 约16 KB | - | - | [Noto Sans Mono](https://fonts.google.com/noto/specimen/Noto+Sans+Mono)拉丁子集，用于代码与日期（本身已压缩，随样式表预加载） |
 | 核心脚本(main.js) | 基础资源 | 约7 KB | 约3 KB | 约3 KB | 深浅色切换、移动端菜单、代码复制、目录高亮、打印排版优化 |
 | 交互代码参数(code-vars.js) | 按需加载 | 约8 KB | 约3 KB | 约3 KB | 仅在声明code_vars时单页载入，提供交互参数面板与变量联动 |
 | 全文检索模块(search.js) | 可选加载 | 约7 KB | 约3 KB | 约3 KB | 离线索引检索驱动，不含按需获取的索引数据文件 |
@@ -43,5 +43,5 @@ series: "Chaos 主题指南"
 > [!NOTE]
 > 关于字体的说明：
 > - **正文与标题**：优先使用用户操作系统的默认无衬线字体，不依赖外部网络字体。
-> - **等宽字体**：内置精简后的[Noto Sans Mono](https://fonts.google.com/noto/specimen/Noto+Sans+Mono)拉丁字母与数字子集（约16 KB），确保代码与数字排版等宽，中文注释则回退至系统内置字体。[WOFF2](https://en.wikipedia.org/wiki/Web_Open_Font_Format)格式内部已采用Brotli压缩，网络传输大小即为文件本身大小。
+> - **等宽字体**：内置精简后的[Noto Sans Mono](https://fonts.google.com/noto/specimen/Noto+Sans+Mono)拉丁字母与数字子集（约16 KB），确保代码与日期排版等宽；因每页都有日期，它随样式表一同预加载，中文注释则回退至系统内置字体。[WOFF2](https://en.wikipedia.org/wiki/Web_Open_Font_Format)格式内部已采用Brotli压缩，网络传输大小即为文件本身大小。
 > - **数学公式**：KaTeX样式表约25 KB；公式中的特殊符号（如积分号、希腊字母）由浏览器按需下载对应的WOFF2字体文件，单个切片约4 KB至27 KB不等，常规公式页面通常只需获取两至三个切片。
