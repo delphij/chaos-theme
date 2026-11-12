@@ -300,6 +300,7 @@ code_vars:
 
 - **Clean source & feeds**: Code blocks in Markdown keep the literal default values (`sjc.example.net`, `192.0.2.1`), so RSS/Atom feeds and no-JS readers see runnable default examples with no template markers.
 - **Parameter panel & synchronized code blocks**: When `code_vars` is present, `assets/js/code-vars.js` (loaded only on pages with `code_vars`) places a collapsible parameter panel above the first matching code block and wraps matching literals inside `.highlight` code blocks into `<var class="code-var">` (including regex-escaped `\.` and pipe-delimited `a|b|c` variants). Editing a parameter in the panel—or directly in a code block on desktop—updates every occurrence across the page and the copy-button output, and persists committed non-default values in the URL query string (`?zone=...`), marking modified code blocks with a status badge.
+- **Inline code follows**: Matching literals in the prose's inline code (outside headings, which the table of contents repeats) follow the values too, and can be edited in place like the code blocks. An article whose prose discusses the literal values themselves sets `code_vars_inline: false` in front matter to leave its prose as written.
 - **Excluding output blocks**: Add `{code_vars="false"}` to a code fence (e.g. ```` ```text {code_vars="false"} ````) to keep historical command output or log excerpts from being treated as editable parameters.
 
 ### Responsive Images

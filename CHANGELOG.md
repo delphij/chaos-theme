@@ -39,6 +39,10 @@ here.
   at once. The default, `"auto"`, shows it unless every dated page has the same
   time of day, as on a site whose front matter gives dates alone; `true` and
   `false` force it.
+- Code parameters (`code_vars`) also update inline code in the prose,
+  outside headings, so a command quoted in a sentence follows the reader's
+  values and can be edited in place like the code blocks. `code_vars_inline: false` in
+  front matter keeps an article's prose as written.
 - An end-of-article series navigation card (`series-nav`), oldest first, read
   as a table of contents.
 

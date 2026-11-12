@@ -292,6 +292,16 @@ function initCodeVars() {
   }
   panel.hidden = false;
 
+  // Inline code in the prose follows the values too, and is edited in place
+  // like the code blocks (the handlers below are delegated on the article).
+  // Headings keep their text, as the table of contents repeats it. An
+  // article that discusses the literal values sets code_vars_inline: false.
+  if (panel.dataset.inline !== 'false') {
+    for (const code of article.querySelectorAll(':not(pre) > code')) {
+      if (!code.closest('h1, h2, h3, h4, h5, h6')) decorateContainer(code, patterns, editableInPlace);
+    }
+  }
+
   const varElements = Array.from(article.querySelectorAll('var.code-var'));
 
   const tooltip = document.createElement('div');

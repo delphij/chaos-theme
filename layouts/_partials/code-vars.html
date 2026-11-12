@@ -20,7 +20,7 @@ percent-encodes non-ASCII characters.
 @context {page} The current page.
 */ -}}
 {{- with .Params.code_vars }}
-<aside class="code-vars-panel" aria-labelledby="code-vars-title" data-modified-badge="{{ T "codeVarsModifiedBadge" }}" data-link-badge="{{ T "codeVarsUrlBadge" }}" hidden>
+<aside class="code-vars-panel" aria-labelledby="code-vars-title" data-modified-badge="{{ T "codeVarsModifiedBadge" }}" data-link-badge="{{ T "codeVarsUrlBadge" }}"{{ if eq $.Params.code_vars_inline false }} data-inline="false"{{ end }} hidden>
   <details class="code-vars-details">
     <summary class="code-vars-header">
       <svg class="code-vars-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
