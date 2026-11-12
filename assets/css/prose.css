@@ -71,6 +71,7 @@
     font-weight: 700;
     line-height: 1.35;
     text-wrap: balance;
+    text-align: start;
   }
 
   /* Heading spacing is set in em so it tracks the responsive size steps, and the

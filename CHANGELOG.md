@@ -65,6 +65,9 @@ here.
 
 ### Fixed
 
+- Headings, post titles, metadata and series navigation keep start alignment on
+  article pages, rather than inheriting `text-align: justify` and stretching
+  the lines of multi-line titles across the full width.
 - Atom entries link their author to `params.author.url`, the key the README
   and the JSON-LD use; they read `author.uri`, which no site sets, and fell
   back to the home page.
