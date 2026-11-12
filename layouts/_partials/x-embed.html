@@ -1,0 +1,46 @@
+{{- /*
+Renders an X post for the x and x_simple shortcodes: from the cached oEmbed
+markup in data/x_embeds/<id>.html when there is one (no script, no tracking),
+otherwise from a live oEmbed fetch, inside the theme's x-card.
+
+simple asks oEmbed to omit its script, as Hugo's own x_simple does. Hugo's
+x_simple also inlines a <style> block with fixed colours; the theme styles
+the card itself (main.css), so that block, and services.x.disableInlineCSS
+with it, has no counterpart here.
+
+@param {shortcode} ctx    The shortcode context.
+@param {bool}      simple Omit the oEmbed script.
+
+@example: {{ partial "x-embed.html" (dict "ctx" . "simple" true) }}
+*/ -}}
+{{- $ctx := .ctx -}}
+{{- $pc := site.Config.Privacy.X -}}
+{{- if not $pc.Disable -}}
+  {{- $id := or ($ctx.Get "id") "" -}}
+  {{- $user := or ($ctx.Get "user") "" -}}
+  {{- if not (and $id $user) -}}
+    {{- errorf "The %q shortcode requires two named parameters: user and id. See %s" $ctx.Name $ctx.Position -}}
+  {{- end -}}
+  {{- $content := "" -}}
+  {{- $cachedFile := printf "data/x_embeds/%s.html" $id -}}
+  {{- if fileExists $cachedFile -}}
+    {{- $content = readFile $cachedFile -}}
+  {{- else -}}
+    {{- $query := dict "url" (printf "https://x.com/%v/status/%v" $user $id) "dnt" $pc.EnableDNT -}}
+    {{- if .simple -}}
+      {{- $query = merge $query (dict "omit_script" true) -}}
+    {{- end -}}
+    {{- with try (resources.GetRemote (printf "https://publish.x.com/oembed?%s" (querify $query))) -}}
+      {{- with .Err -}}
+        {{- warnidf "shortcode-x-getremote" "The %q shortcode was unable to retrieve the remote data: %s. See %s" $ctx.Name . $ctx.Position -}}
+      {{- else with .Value -}}
+        {{- $content = (. | transform.Unmarshal).html -}}
+      {{- else -}}
+        {{- warnidf "shortcode-x-getremote" "The %q shortcode was unable to retrieve the remote data. See %s" $ctx.Name $ctx.Position -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- with $content -}}
+    {{- partial "x-card.html" (dict "id" $id "user" $user "content" (. | safeHTML)) -}}
+  {{- end -}}
+{{- end -}}

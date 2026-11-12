@@ -1,0 +1,20 @@
+{{- /*
+Returns a translated page's language alternates for hreflang: one per
+translation, then x-default for the default language's. Empty for a page with
+no translations. Shared by head.html and sitemap.xml, which must agree.
+
+@context {page} page The page.
+@returns {slice} dicts of "lang" and "href".
+
+@example: {{ range partial "_funcs/get-alternates.html" . }}{{ .lang }}{{ end }}
+*/ -}}
+{{- $alternates := slice -}}
+{{- if .IsTranslated -}}
+  {{- range .AllTranslations -}}
+    {{- $alternates = $alternates | append (dict "lang" .Language.Lang "href" .Permalink) -}}
+  {{- end -}}
+  {{- with index (where .AllTranslations "Language.Lang" site.Sites.Default.Language.Lang) 0 -}}
+    {{- $alternates = $alternates | append (dict "lang" "x-default" "href" .Permalink) -}}
+  {{- end -}}
+{{- end -}}
+{{- return $alternates -}}

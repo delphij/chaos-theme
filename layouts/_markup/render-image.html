@@ -1,0 +1,60 @@
+{{- /*
+Renders a Markdown image.
+
+A page resource becomes a responsive WebP <img> (GIF stays GIF, as resizing
+would flatten its animation): 1x and 2x derivatives of each breakpoint the
+source is wide enough for, plus a full-width one when the source is wider
+still. The widest derivative is both the link target and the src, so the
+untouched source file is never referenced and a page can set
+build.publishResources = false. Every browser at the theme's floor reads
+WebP, so there is no <picture> with a same-format fallback.
+
+Breakpoints follow the article column (max 1280px, ~1232px of it content):
+360 small phones, 640 large phones, 960 tablets, 1232 the full column.
+
+A remote URL, data URI or static file is rendered as given.
+*/ -}}
+{{- $dest := .Destination -}}
+{{- $alt := .PlainText -}}
+{{- $src := .Page.Resources.GetMatch $dest -}}
+{{- if findRE `^([A-Za-z][A-Za-z0-9+.-]*:|//)` $dest -}}
+  {{- if hasPrefix $dest "data:" -}}
+<img src="{{ $dest | safeURL }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
+  {{- else -}}
+<a href="{{ $dest }}"><img src="{{ $dest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+  {{- end -}}
+{{- else if $src -}}
+  {{- $format := cond (eq $src.MediaType.SubType "gif") "" "webp" -}}
+  {{- $srcset := slice -}}
+  {{- $largest := $src -}}
+  {{- $largestWidth := 0 -}}
+  {{- range $base := slice 360 640 960 1232 -}}
+    {{- range $w := slice $base (mul $base 2) -}}
+      {{- if ge $src.Width $w -}}
+        {{- $img := $src.Resize (printf "%dx %s" $w $format) -}}
+        {{- $srcset = $srcset | append (printf "%s %dw" $img.RelPermalink $w) -}}
+        {{- if gt $w $largestWidth -}}
+          {{- $largest = $img -}}
+          {{- $largestWidth = $w -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if gt $src.Width $largestWidth -}}
+    {{- $largest = $src -}}
+    {{- if $format -}}
+      {{- $largest = $src.Resize (printf "%dx %s" $src.Width $format) -}}
+    {{- end -}}
+    {{- $srcset = $srcset | append (printf "%s %dw" $largest.RelPermalink $src.Width) -}}
+  {{- end -}}
+  {{- /* sizes: each viewport's column width, capped at the source's own. */ -}}
+  {{- $sizes := slice -}}
+  {{- range slice (slice 640 360) (slice 960 640) (slice 1280 960) -}}
+    {{- $sizes = $sizes | append (printf "(max-width: %dpx) %dpx" (index . 0) (cond (lt $src.Width (index . 1)) $src.Width (index . 1))) -}}
+  {{- end -}}
+  {{- $sizes = $sizes | append (printf "%dpx" (cond (lt $src.Width 1232) $src.Width 1232)) -}}
+<a href="{{ $largest.RelPermalink }}"><img src="{{ $largest.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="{{ delimit $sizes ", " }}" width="{{ $src.Width }}" height="{{ $src.Height }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+{{- else if $dest -}}
+  {{- $linkDest := strings.TrimPrefix "/" $dest | relURL -}}
+<a href="{{ $linkDest }}"><img src="{{ $linkDest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+{{- end -}}

@@ -44,6 +44,14 @@ here.
 
 ### Changed
 
+- A Markdown image renders as a plain `<img>` with a WebP srcset, without the
+  `<picture>`, the WebP `<source>` and the full-size copy in the source's own
+  format that only browsers without WebP read. Every browser at the theme's
+  floor reads WebP; one fewer derivative is generated and published per JPEG
+  or PNG.
+- The `x_simple` shortcode no longer inlines Hugo's `<style>` block with fixed
+  colours (and `services.x.disableInlineCSS` no longer matters): the theme
+  styles the card itself, as it already did for `x`.
 - Every `<time>` is set in the monospace stack (`--font-mono`), so the
   Noto Sans Mono subset (about 16 KB) is now loaded, and preloaded, on every
   page instead of only on pages with code.

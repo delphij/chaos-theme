@@ -1,10 +1,9 @@
 {{- /*
 Renders an image for the feed output formats.
 
-The HTML hook builds a <picture> with a WebP <source>, a width-descriptor
-srcset and a sizes attribute - roughly 1.2 KB of markup per image, and the
-whole apparatus is wasted on a feed reader, which has no layout to be
-responsive to. Some sanitisers drop <picture> and <source> outright.
+The HTML hook builds a width-descriptor srcset and a sizes attribute - most
+of a kilobyte of markup per image, and wasted on a feed reader, which has no
+layout to be responsive to.
 
 So the feed gets one plain absolute <img>, capped at the article measure. The
 width asked for is one the HTML hook already generates, so this reuses an

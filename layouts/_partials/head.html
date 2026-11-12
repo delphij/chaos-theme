@@ -31,13 +31,8 @@
 {{- end -}}
 <link rel="canonical" href="{{ $canonicalURL }}">
 {{- end -}}
-{{- if .IsTranslated -}}
-  {{- range .AllTranslations -}}
-<link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}">
-  {{- end -}}
-  {{- with index (where .AllTranslations "Language.Lang" site.Sites.Default.Language.Lang) 0 -}}
-<link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
-  {{- end -}}
+{{- range partial "_funcs/get-alternates.html" . -}}
+<link rel="alternate" hreflang="{{ .lang }}" href="{{ .href }}">
 {{- end -}}
 {{- $licenseURL := site.Params.licenseURL | default "https://creativecommons.org/licenses/by-nc/4.0/" -}}
 {{- with $licenseURL -}}
