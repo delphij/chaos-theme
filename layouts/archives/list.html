@@ -11,18 +11,7 @@
         <h2 class="archive-year-title">{{ T "yearLabel" (dict "Year" .Key) }}</h2>
         <div class="archive-post-list">
           {{ range .Pages }}
-            <div class="archive-post-row">
-              <time class="archive-date" datetime="{{ .Date.Format "2006-01-02" }}">
-                <span class="archive-date-full">{{ .Date.Format "2006-01-02" }}</span>
-                <span class="archive-date-short">{{ .Date.Format "01-02" }}</span>
-              </time>
-              <a class="archive-post-title" href="{{ .RelPermalink }}">{{ .Title }}</a>
-              {{ with .Params.categories }}
-                {{ range first 1 . }}
-                  <a class="archive-cat-label" href="{{ partial "_funcs/get-term-url.html" (dict "taxonomy" "categories" "name" .) }}" title="{{ T `categoryTitle` (dict `Name` .) }}">{{ . }}</a>
-                {{ end }}
-              {{ end }}
-            </div>
+            {{ partial "archive-row.html" (dict "page" . "category" true) }}
           {{ end }}
         </div>
       </div>

@@ -1,0 +1,35 @@
+{{- /*
+Renders one row of a dated timeline list: the archives page and the /series/
+index. The list is grouped under year headings, so on narrow screens the date
+column drops the year and shows MM-DD.
+
+@context {page} page          The page to list.
+@context {bool} seriesTitle   Label the row with `series_title` when set, the
+                              full title kept as the tooltip (default: false).
+@context {bool} category      Show the page's first category (default: false).
+
+@example: {{ partial "archive-row.html" (dict "page" . "category" true) }}
+*/ -}}
+{{- $p := .page -}}
+{{- $label := $p.Title -}}
+{{- $tooltip := "" -}}
+{{- if .seriesTitle -}}
+  {{- with $p.Params.series_title -}}
+    {{- $label = . -}}
+    {{- if ne . $p.Title -}}{{- $tooltip = $p.Title -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+<div class="archive-post-row">
+  <time class="archive-date" datetime="{{ $p.Date.Format "2006-01-02" }}">
+    <span class="archive-date-full">{{ $p.Date.Format "2006-01-02" }}</span>
+    <span class="archive-date-short">{{ $p.Date.Format "01-02" }}</span>
+  </time>
+  <a class="archive-post-title" href="{{ $p.RelPermalink }}"{{ with $tooltip }} title="{{ . }}"{{ end }}>{{ $label }}</a>
+  {{- if .category -}}
+    {{- with $p.Params.categories -}}
+      {{- range first 1 . }}
+  <a class="archive-cat-label" href="{{ partial "_funcs/get-term-url.html" (dict "taxonomy" "categories" "name" .) }}" title="{{ T `categoryTitle` (dict `Name` .) }}">{{ . }}</a>
+      {{- end -}}
+    {{- end -}}
+  {{- end }}
+</div>

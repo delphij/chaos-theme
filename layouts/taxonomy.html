@@ -55,13 +55,7 @@
           </h2>
           <div class="archive-post-list">
             {{ range .posts }}
-              <div class="archive-post-row">
-                <time class="archive-date" datetime="{{ .Date.Format "2006-01-02" }}">
-                  <span class="archive-date-full">{{ .Date.Format "2006-01-02" }}</span>
-                  <span class="archive-date-short">{{ .Date.Format "01-02" }}</span>
-                </time>
-                <a class="archive-post-title" href="{{ .RelPermalink }}"{{ if and .Params.series_title (ne .Params.series_title .Title) }} title="{{ .Title }}"{{ end }}>{{ or .Params.series_title .Title }}</a>
-              </div>
+              {{ partial "archive-row.html" (dict "page" . "seriesTitle" true) }}
             {{ end }}
           </div>
         </div>
