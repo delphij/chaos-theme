@@ -66,6 +66,9 @@ here.
 - The sitemap honours Hugo's `sitemap: { disable: true }` front matter.
 - A section page's post count is the number of posts it lists, not of its
   direct children.
+- Links in an X post no longer draw two lines on hover, an underline over
+  the base link's bottom border: links in the post's text are prose links,
+  and the byline link is a plain link, grey until hovered.
 - `user-select` carries its `-webkit-` prefix, which Safari at the supported
   floor still needs.
 - No more deprecation notices from Hugo 0.169: the feeds and the page title no

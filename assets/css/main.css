@@ -90,7 +90,8 @@
   .search-item-link,
   .series-nav-title a,
   .series-nav-link,
-  .archive-section-title a {
+  .archive-section-title a,
+  blockquote.twitter-tweet > a {
     border-bottom: none;
   }
 
@@ -1175,20 +1176,14 @@
         margin-bottom: 10px;
       }
 
-      /* Links inside tweet body */
+      /* Links in the tweet's text are prose links, like any in a quote;
+         only long short-links need to break anywhere */
       a {
-        color: var(--link);
         word-break: break-all;
-
-        &:hover,
-        &:focus-visible {
-          color: var(--link-hover);
-          text-decoration: underline;
-        }
       }
     }
 
-    /* Citation and metadata links in footer */
+    /* The byline and date link: metadata, so a plain link (see LINKS) */
     > a {
       color: var(--muted);
       margin-left: 6px;
@@ -1196,7 +1191,6 @@
       &:hover,
       &:focus-visible {
         color: var(--link);
-        text-decoration: underline;
       }
     }
   }
