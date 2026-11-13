@@ -181,6 +181,7 @@
     border-radius: var(--radius-card);
     color: var(--blockquote-fg);
     font-size: 0.95em;
+    text-align: start;                 /* Narrower measure than body; avoid justify rivers */
 
     > :first-child {
       margin-top: 0;
@@ -203,6 +204,9 @@
     margin: 1em 0;                      /* Consistent spacing before and after lists */
     font-variant-numeric: tabular-nums; /* Consistent number width */
     padding-left: 0;
+    /* Lists often have narrower measures and long inline code/URLs;
+       ragged-right prevents justification rivers before unbreakable tokens */
+    text-align: start;
 
     /* Lists on mobile - Indent safely to prevent markers from clipping at the screen edge */
     @media (max-width: 768px) {
@@ -295,14 +299,18 @@
      The block-level background on .highlight stays, since a block is its own
      unit. Size is an optical adjustment (mono x-height runs large next to CJK),
      set in em so it tracks its context: body, heading or list item. */
-  code {
+  code,
+  kbd,
+  samp {
     font-size: 0.9em;
     overflow-wrap: break-word;
+    hyphens: none;                      /* Never insert hyphens into code identifiers */
   }
 
   /* Code inside a block inherits the block's size, not the inline adjustment */
   pre code {
     font-size: inherit;
+    overflow-wrap: normal;
   }
 
   /* ==========================================================================
@@ -430,17 +438,26 @@
       border: 0;
     }
 
-    /* Line number table - Horizontal scroll container with hanging indent on desktop only */
+    /* Line number table - Keep line numbers fixed while only the code column scrolls */
     .lntable {
       margin: 0;
-      overflow-x: auto;
       display: block;
-      max-width: 100%;                   /* Keep code column at original width */
+      width: 100%;
+      max-width: none;
 
       /* Hanging indent for line numbers on screens > 768px where there's space
          Synchronized with list hanging indent breakpoint (769px) */
       @media (min-width: 769px) {
         margin: 0 0 0 -3em;              /* Shift left so line numbers hang in margin */
+        width: calc(100% + 3em);         /* Keep code column right edge flush with prose */
+      }
+
+      tbody {
+        display: block;
+      }
+
+      tr {
+        display: flex;
       }
     }
 
@@ -457,6 +474,8 @@
        page ground so the indent leaves no code-coloured strip; hidden on
        narrow ones to keep the reading width. */
     .lntd:first-child {
+      flex: 0 0 auto;
+
       @media (min-width: 769px) {
         pre {
           background: var(--bg);
@@ -466,6 +485,12 @@
       @media (max-width: 768px) {
         display: none;
       }
+    }
+
+    /* Code column: takes remaining width and lets its <pre> scroll horizontally */
+    .lntd:last-child {
+      flex: 1 1 0%;
+      min-width: 0;
     }
 
     /* Code lines - Flex layout for alignment */

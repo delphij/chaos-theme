@@ -17,6 +17,12 @@ Shared by the HTML and feed pipelines so the two cannot drift.
     is the CSS Text 4 initial value, so this is the right thing to emit for any
     conforming renderer, feed readers included.
 
+ 3. Long inline <code> spans and bare URL <a> links (>= 24 chars, outside <pre>)
+    receive <wbr> after safe delimiter characters (., /, ?, =, _, ::, ->) when
+    followed by an alphanumeric character. This prevents unbreakable tokens from
+    dropping whole to the next line and tearing open justification rivers, while
+    keeping short identifiers intact and copy-paste clean.
+
 Both stay string rewrites over rendered HTML because neither is a Markdown
 construct: Goldmark has no hook for them, and Hugo cannot load a custom
 Goldmark extension. (Everything that IS a Markdown construct - math, images,
@@ -48,5 +54,30 @@ the match can then run to the next "]...{...}" anywhere in the feed.
 {{- $content = $content | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" -}}
 {{- $content = $content | replaceRE (printf `(%s)[ \t]+(<(?:strong|em|del|mark|a)\b)` $cjk) "$1$2" -}}
 {{- $content = $content | replaceRE (printf `(</(?:strong|em|del|mark|a)>)[ \t]+(%s)` $cjk) "$1$2" -}}
+
+{{- $out := slice -}}
+{{- range $i, $chunk := split $content "<pre" -}}
+  {{- $pre := "" -}}
+  {{- $seg := $chunk -}}
+  {{- if gt $i 0 -}}
+    {{- $pair := split $chunk "</pre>" -}}
+    {{- if ge (len $pair) 2 -}}
+      {{- $pre = printf "<pre%s</pre>" (index $pair 0) -}}
+      {{- $seg = delimit (after 1 $pair) "</pre>" -}}
+    {{- else -}}
+      {{- $pre = printf "<pre%s" $chunk -}}
+      {{- $seg = "" -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range (findRE `(?:<code>[^<\n]{24,}</code>|<a\b[^>]*>https?://[^<\n]{24,}</a>)` $seg | uniq) -}}
+    {{- $inner := replaceRE `^<[^>]+>|</[^>]+>$` "" . -}}
+    {{- $wrapped := $inner | replaceRE `([./?=_]|::|->)([A-Za-z0-9])` "$1<wbr>$2" -}}
+    {{- if ne $wrapped $inner -}}
+      {{- $seg = replace $seg . (replace . (printf ">%s<" $inner) (printf ">%s<" $wrapped)) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $out = $out | append $pre $seg -}}
+{{- end -}}
+{{- $content = delimit $out "" -}}
 
 {{- return $content -}}
