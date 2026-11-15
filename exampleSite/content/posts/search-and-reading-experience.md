@@ -68,7 +68,7 @@ python3 themes/chaos/tools/build_search_index.py --single-file
 ```
 
 > [!NOTE]
-> 主题核心脚本经压缩后仅约2 KB。启用搜索后，会额外引入约2 KB的`search.js`（未压缩约6 KB），并在开启搜索界面时按需载入索引数据。
+> 启用搜索后，页面会按需引入独立的`search.js`，并在首次打开搜索面板时才请求索引数据（各项脚本与资源的具体体积对照见[少即是多：静态博客的依赖取舍](../on-minimalism/)）。
 
 ## 打印与导出PDF
 
