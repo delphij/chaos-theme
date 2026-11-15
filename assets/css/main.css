@@ -1606,29 +1606,16 @@
   }
 
   /* ==========================================================================
-     SPECIALIZED - CHINESE TYPOGRAPHY
-     Emphasis dots and inline math line-breaking. Ruby is in chaos.base.
+     SPECIALIZED - INLINE MATH
+     Inline math line-breaking. CJK typography (emphasis, ruby) is in prose.css.
      ========================================================================== */
-
-  /* Chinese emphasis dots - traditional emphasis marks.
-     Scoped to article prose: applied globally it also put dots under Latin words
-     and digits inside interface strings (the <strong> in feedIntro, sitemapIntro
-     and friends), where 着重号 has no business being. */
-  article.post strong {
-    text-emphasis: filled dot;         /* Adds dots below characters */
-    text-emphasis-position: under;     /* Position below for horizontal text */
-  }
-
-  /* TODO: Improve CJK emphasis (em) styling.
-     In Chinese typography, browser default faux-italic causes stroke distortion.
-     Consider proper font fallback (e.g. KaiTi for CJK while preserving italic for Latin)
-     or alternative emphasis styles. */
 
   /* Inline math wrapper - Prevent line breaks before following punctuation
      Works in Safari with CJK line-breaking rules; known limitation in Chrome
      The wrapper treats the formula as an atomic inline unit for line-breaking */
   .math-inline {
     display: inline-block;             /* Atomic inline unit - works with Safari's CJK line-break rules */
+    text-emphasis: none;               /* Never draw emphasis marks over inline formulas */
 
     /* Insert word joiner after inline math to prevent line break before punctuation
        Provides additional protection in Safari; Chrome doesn't respect this for CJK */
@@ -2115,7 +2102,7 @@
         overflow-wrap: anywhere;
       }
 
-      /* The caption; a span, as strong carries emphasis marks in CJK */
+      /* The caption */
       span:first-child {
         color: var(--text);
         font-weight: 600;

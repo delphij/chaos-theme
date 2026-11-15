@@ -45,6 +45,252 @@
                  U+2032-2033, U+20AC, U+2190-2193, U+2212, U+2260, U+2264-2265;
 }
 
+/* Optical weight and glyph-face compensation for CJK emphasis (--font-em).
+   Traditional KaiTi and SongTi faces (~54-75 px^2 ink at 16px, ~82-84% glyph
+   face) look thin or shrunken inside modern sans-serif prose (~87 px^2 ink,
+   ~92% glyph face):
+   - Multi-weight KaiTi steps normal emphasis (100-500) up to Medium / macOS
+     Kaiti Bold (OS/2 weight 400) and bold emphasis (600-900) to Bold / Black.
+   - CJK serif fallback steps multi-weight Noto/Source Han Serif up to Medium,
+     while two-weight Songti SC uses Regular (400) for 100-500 and Bold (700)
+     for 600-900 so normal emphasis never jumps to a 700 bold face.
+   - Single-weight faces (WenKai Screen, Windows KaiTi, SimSun, Linux UKai /
+     Fandol) sit in 400-only fallback families so browsers synthesize bold on
+     top of the 106% face at 600-900 instead of switching families.
+   - unicode-range covers Han ideographs only (radicals, 々/〇/〻, Unified and
+     Compatibility Ideographs), deliberately excluding full-width CJK
+     punctuation (U+3000-3004, U+3008-3020, U+FF00-FFEF): KaiTi and legacy
+     SongTi lack OpenType halt/chws tables, so letting punctuation fall through
+     to the body CJK sans-serif keeps it at 1em with working punctuation trim.
+   - Simplified and Traditional Chinese families stay strictly separated via
+     :lang() so Big5-only KaiTi (BiauKai, DFKai-SB) cannot create ransom-note
+     glyph mixing on Simplified pages.
+   - CSS local() matches OpenType Full Name (ID 4) and PostScript Name (ID 6),
+     never a bare Family Name (ID 1); pairing ASCII PostScript names alongside
+     English Full Names also covers CJK-locale Windows where ID 4 is localized.
+     Some entries below look like family names but are Full Names, so keep
+     them: Adobe-style CJK fonts drop "Regular" from the Regular face's Full
+     Name ("Noto Serif CJK SC", "Source Han Serif" name that one face). Where
+     a vendor's choice is not certain, both forms are listed ("LXGW WenKai" and
+     "LXGW WenKai Regular"); an unmatched name costs nothing. */
+@font-face {
+  font-family: "Chaos Kai";
+  src: local("LXGWWenKai-Medium"), local("LXGW WenKai Medium"),
+       local("STKaitiSC-Bold"), local("Kaiti SC Bold");
+  font-weight: 100 500;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Kai";
+  src: local("LXGWWenKai-Bold"), local("LXGW WenKai Bold"),
+       local("STKaitiSC-Black"), local("Kaiti SC Black");
+  font-weight: 600 900;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Kai Fallback";
+  src: local("LXGWWenKaiScreen"), local("LXGW WenKai Screen"),
+       local("LXGWWenKai-Regular"), local("LXGW WenKai"), local("LXGW WenKai Regular"),
+       local("KaiTi"), local("SimKai"), local("STKaiti"),
+       local("AR PL UKai CN"), local("FandolKai-Regular");
+  font-weight: 400;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Serif";
+  src: local("Noto Serif CJK SC Medium"), local("NotoSerifCJKsc-Medium"),
+       local("Source Han Serif SC Medium"), local("SourceHanSerifSC-Medium"),
+       local("Noto Serif SC Medium"), local("NotoSerifSC-Medium"),
+       local("Noto Serif CJK SC"), local("NotoSerifCJKsc-Regular"),
+       local("Source Han Serif SC"), local("SourceHanSerifSC-Regular"),
+       local("Noto Serif SC"), local("NotoSerifSC-Regular"),
+       local("STSongti-SC-Regular"), local("Songti SC Regular");
+  font-weight: 100 500;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Serif";
+  src: local("Noto Serif CJK SC Bold"), local("NotoSerifCJKsc-Bold"),
+       local("Source Han Serif SC Bold"), local("SourceHanSerifSC-Bold"),
+       local("Noto Serif SC Bold"), local("NotoSerifSC-Bold"),
+       local("STSongti-SC-Bold"), local("Songti SC Bold");
+  font-weight: 600 900;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Serif Fallback";
+  src: local("SimSun"), local("NSimSun"),
+       local("AR PL UMing CN"), local("FandolSong-Regular");
+  font-weight: 400;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Kai TC";
+  src: local("LXGWWenKaiTC-Medium"), local("LXGW WenKai TC Medium"),
+       local("LXGWWenKaiMonoTC-Medium"), local("LXGW WenKai Mono TC Medium"),
+       local("STKaitiTC-Bold"), local("Kaiti TC Bold");
+  font-weight: 100 500;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Kai TC";
+  src: local("LXGWWenKaiTC-Bold"), local("LXGW WenKai TC Bold"),
+       local("LXGWWenKaiMonoTC-Bold"), local("LXGW WenKai Mono TC Bold"),
+       local("STKaitiTC-Black"), local("Kaiti TC Black");
+  font-weight: 600 900;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Kai TC Fallback";
+  src: local("LXGWWenKaiTC-Regular"), local("LXGW WenKai TC"), local("LXGW WenKai TC Regular"),
+       local("BiauKaiTC-Regular"), local("BiauKaiTC Regular"),
+       local("BiauKaiHK-Regular"), local("BiauKaiHK Regular"), local("BiauKai"),
+       local("DFKai-SB"), local("TW-Kai"),
+       local("AR PL UKai TW"), local("AR PL UKai HK");
+  font-weight: 400;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Serif TC";
+  src: local("Noto Serif CJK TC Medium"), local("NotoSerifCJKtc-Medium"),
+       local("Source Han Serif TC Medium"), local("SourceHanSerifTC-Medium"),
+       local("Noto Serif TC Medium"), local("NotoSerifTC-Medium"),
+       local("Noto Serif CJK TC"), local("NotoSerifCJKtc-Regular"),
+       local("Source Han Serif TC"), local("SourceHanSerifTC-Regular"),
+       local("Noto Serif TC"), local("NotoSerifTC-Regular"),
+       local("STSongti-TC-Regular"), local("Songti TC Regular");
+  font-weight: 100 500;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Serif TC";
+  src: local("Noto Serif CJK TC Bold"), local("NotoSerifCJKtc-Bold"),
+       local("Source Han Serif TC Bold"), local("SourceHanSerifTC-Bold"),
+       local("Noto Serif TC Bold"), local("NotoSerifTC-Bold"),
+       local("STSongti-TC-Bold"), local("Songti TC Bold");
+  font-weight: 600 900;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Serif TC Fallback";
+  src: local("PMingLiU"), local("MingLiU"),
+       local("LiSungLight"), local("Apple LiSung Light"),
+       local("AR PL UMing TW"), local("AR PL UMing HK");
+  font-weight: 400;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+/* Japanese emphasis (--font-em under :lang(ja)) shifts Kana and Kanji from
+   body Gothic to paired upright Mincho at native 100% metrics (Hiragino, Yu and
+   Noto Mincho/Gothic share a ~92% glyph face, unlike Chinese KaiTi/SongTi),
+   again excluding full-width punctuation (U+3000-303F, U+30FB, U+FF00-FFEF).
+   An alternative convention on Japanese developer platforms (Zenn, Qiita) is
+   synthesized oblique (font-synthesis-style: auto, matching Korean); upright
+   Mincho is chosen here to avoid shearing dense Kanji strokes per JLREQ while
+   keeping the same architecture as Chinese (*...* = typeface voice shift,
+   [...]{.} = explicit emphasis marks). */
+@font-face {
+  font-family: "Chaos Mincho";
+  /* Yu Mincho ships in two cuts with different names: macOS's (Medium/Demibold,
+     "YuMin-Medium" / "YuMin-Demibold") and Windows' (Light/Regular/Demibold,
+     "YuMincho-Regular" / "YuMincho-Demibold", with localized Full Name ID 4 on
+     Japanese Windows). Pairing Full and PostScript names covers both. */
+  src: local("YuMin-Medium"), local("YuMincho Medium"),
+       local("Yu Mincho Medium"),
+       local("Yu Mincho Regular"), local("YuMincho-Regular"),
+       local("BIZUDPMincho-Medium"), local("BIZ UDPMincho Medium"),
+       local("BIZUDMincho-Medium"), local("BIZ UDMincho Medium"),
+       local("Noto Serif CJK JP Medium"), local("NotoSerifCJKjp-Medium"),
+       local("Source Han Serif Medium"), local("SourceHanSerif-Medium"),
+       local("Noto Serif JP Medium"), local("NotoSerifJP-Medium"),
+       local("Noto Serif CJK JP"), local("NotoSerifCJKjp-Regular"),
+       local("Source Han Serif"), local("SourceHanSerif-Regular"),
+       local("Noto Serif JP"), local("NotoSerifJP-Regular"),
+       local("HiraMinProN-W3"), local("Hiragino Mincho ProN W3");
+  font-weight: 100 500;
+  font-style: italic;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3040-30FA, U+30FC-30FF, U+31F0-31FF,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Mincho";
+  src: local("YuMin-Demibold"), local("YuMincho-Demibold"),
+       local("YuMincho Demibold"), local("Yu Mincho Demibold"),
+       local("YuMincho-Bold"), local("Yu Mincho Bold"),
+       local("BIZUDPMincho-Bold"), local("BIZ UDPMincho Bold"),
+       local("BIZUDMincho-Bold"), local("BIZ UDMincho Bold"),
+       local("Noto Serif CJK JP Bold"), local("NotoSerifCJKjp-Bold"),
+       local("Source Han Serif Bold"), local("SourceHanSerif-Bold"),
+       local("Noto Serif JP Bold"), local("NotoSerifJP-Bold"),
+       local("HiraMinProN-W6"), local("Hiragino Mincho ProN W6");
+  font-weight: 600 900;
+  font-style: italic;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3040-30FA, U+30FC-30FF, U+31F0-31FF,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Mincho Fallback";
+  src: local("BIZUDMincho-Regular"), local("BIZ UDMincho"),
+       local("MS PMincho"), local("MS Mincho"),
+       local("IPAexMincho"), local("IPAMincho");
+  font-weight: 400;
+  font-style: italic;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3040-30FA, U+30FC-30FF, U+31F0-31FF,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
 @layer chaos.tokens {
   /* ==========================================================================
      CSS VARIABLES
@@ -176,6 +422,20 @@
     --font-mono: "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
                  "Liberation Mono", monospace;
 
+    /* Emphasis stack - Han-scoped KaiTi and CJK serif @font-face families come
+       first so -apple-system / BlinkMacSystemFont cannot intercept ideographs
+       with PingFang on WebKit/Firefox; Latin/digits skip those unicode-ranges
+       and hit true italic system sans (before upright-only Noto Sans CJK),
+       while full-width CJK punctuation skips both and lands on body CJK
+       sans-serif with working halt/chws trimming. Sites that self-host a CJK
+       webfont can prepend it or override --font-em without restyling em. */
+    --font-em: "Chaos Kai", "Chaos Kai Fallback",
+               "Chaos Serif", "Chaos Serif Fallback",
+               -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Noto Sans", "Liberation Sans", "DejaVu Sans",
+               "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+
     /* Animation timing - Consistent transitions */
     --transition-fast: 0.2s ease;      /* Quick transitions for hover/focus */
     --transition-normal: 0.3s ease;    /* Standard transitions for UI elements */
@@ -192,6 +452,32 @@
 
     /* Elevation and shadows */
     --shadow-dialog: 0 16px 36px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Locale-specific emphasis stacks so Traditional Chinese, Japanese and Korean
+     pages (or lang-tagged passages) never mix regional glyph forms. */
+  :is(:lang(zh-TW), :lang(zh-HK), :lang(zh-MO), :lang(zh-Hant)) {
+    --font-em: "Chaos Kai TC", "Chaos Kai TC Fallback",
+               "Chaos Serif TC", "Chaos Serif TC Fallback",
+               -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Noto Sans", "Liberation Sans", "DejaVu Sans",
+               "Noto Sans TC", "PingFang TC", "PingFang HK",
+               "Microsoft JhengHei", sans-serif;
+  }
+
+  :lang(ja) {
+    --font-em: "Chaos Mincho", "Chaos Mincho Fallback",
+               -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Noto Sans", "Liberation Sans", "DejaVu Sans",
+               "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+               "Yu Gothic", "Meiryo", sans-serif;
+  }
+
+  :lang(ko) {
+    --font-em: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Noto Sans", "Liberation Sans", "DejaVu Sans",
+               "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic",
+               sans-serif;
   }
 
   /* Dark mode variables

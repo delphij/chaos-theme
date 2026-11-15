@@ -2,11 +2,12 @@
 Applies the theme's post-rendering text conventions to a block of rendered HTML.
 Shared by the HTML and feed pipelines so the two cannot drift.
 
- 1. Ruby (義訓) annotations, outside <pre> and <code>: [base]{annotation},
-    [base]^{annotation} or [base]^(annotation). Output follows the current HTML
-    standard: <rb> is obsolete, so the base text is a bare child of <ruby>, and
-    <rp> supplies the parenthetical fallback a renderer without ruby support
-    shows instead - "民国十八（一九二九）" rather than the two runs colliding.
+ 1. Emphasis marks (着重号) and ruby (義訓) annotations, outside <pre> and
+    <code>: [text]{.} becomes <em class="em-dot">text</em> (degrading to plain
+    <em> in feed readers without the theme's stylesheet); [base]{annotation},
+    [base]^{annotation} or [base]^(annotation) becomes standard HTML <ruby>
+    (<rb> is obsolete, so the base text is a bare child, and <rp> supplies the
+    parenthetical fallback "民国十八（一九二九）" when ruby is unsupported).
 
  2. Spaces an author types between CJK and Latin runs (outside <pre> and
     <code>) are removed, so that CSS text-autospace can insert the proportional
@@ -96,6 +97,8 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- end -}}
   {{- end -}}
   {{- if $seg -}}
+    {{- $hasEmDot := in $seg "]{.}" -}}
+    {{- $codes := slice -}}
     {{- $codeOut := slice -}}
     {{- range $j, $cchunk := split $seg "<code" -}}
       {{- $code := "" -}}
@@ -114,7 +117,7 @@ the match can then run to the next "]...{...}" anywhere in the feed.
         {{- /* The bracketed text excludes "[" as well as "]", so a stray "["
              earlier on the line ("[注：[经]{工}") cannot become part of the
              base. tools/build_search_index.py mirrors these patterns. */ -}}
-        {{- $prose = $prose | replaceRE `\[([^\[\]\n]{1,32})\]\^?\{([^}\n]{1,32})\}` $ruby -}}
+        {{- $prose = $prose | replaceRE `\[([^\[\]\n]{1,32})\]\^?\{([^.}\n]|[^}\n]{2,32})\}` $ruby -}}
         {{- $prose = $prose | replaceRE `\[([^\[\]\n]{1,32})\]\^\(([^)\n]{1,32})\)` $ruby -}}
         {{- range seq 2 -}}
           {{- $prose = $prose | replaceRE (printf `(%s)\s+(%s)` $cjk $cjk) "$1$2" -}}
@@ -122,9 +125,25 @@ the match can then run to the next "]...{...}" anywhere in the feed.
         {{- $prose = $prose | replaceRE (printf `(%s)\s+([a-zA-Z0-9])` $cjk) "$1$2" -}}
         {{- $prose = $prose | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" -}}
       {{- end -}}
-      {{- $codeOut = $codeOut | append $code $prose -}}
+      {{- if and $hasEmDot $code -}}
+        {{- $codeOut = $codeOut | append (printf "\x00\x01%d\x00" (len $codes)) $prose -}}
+        {{- $codes = $codes | append $code -}}
+      {{- else -}}
+        {{- $codeOut = $codeOut | append $code $prose -}}
+      {{- end -}}
     {{- end -}}
     {{- $seg = delimit $codeOut "" -}}
+    {{- if $hasEmDot -}}
+      {{- /* Expand [text]{.} with <code> held in placeholders (counted as 1
+           unit) so code inside emphasis dots works without matching literal
+           [x]{.} inside <code>, and allow balanced inline tags and <ruby>
+           without counting tag attributes against the 32-unit cap. */ -}}
+      {{- $emUnit := `(?:[^\[\]<\x00\n]|\x00\x01[0-9]+\x00|<(?:a|strong|em|del|mark)\b[^>]*>[^\[\]<\n]*</(?:a|strong|em|del|mark)>|<ruby>[^\[\]<\n]*<rp>[^<\n]*</rp><rt>[^<\n]*</rt><rp>[^<\n]*</rp></ruby>)` -}}
+      {{- $seg = $seg | replaceRE (printf `\[(%s{1,32})\]\{\.\}` $emUnit) `<em class="em-dot">$1</em>` -}}
+      {{- range $k, $c := $codes -}}
+        {{- $seg = replace $seg (printf "\x00\x01%d\x00" $k) $c -}}
+      {{- end -}}
+    {{- end -}}
     {{- /* Spaces and line-wrap newlines at an inline tag boundary. The rules
          above match a CJK character and a letter separated only by whitespace;
          a tag between them ("见 <em>", "</a>\n的") hides the pair, and

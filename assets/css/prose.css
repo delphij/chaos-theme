@@ -315,6 +315,7 @@
     font-size: 0.9em;
     overflow-wrap: break-word;
     hyphens: none;                      /* Never insert hyphens into code identifiers */
+    text-emphasis: none;                /* Never inherit emphasis dots/sesame into code */
   }
 
   /* Code inside a block inherits the block's size, not the inline adjustment */
@@ -337,8 +338,42 @@
 
   /* ==========================================================================
      CHINESE TYPOGRAPHY
-     Ruby annotations (phonetic guides) and highlighted text.
+     Inline emphasis, ruby annotations (phonetic guides) and highlighted text.
      ========================================================================== */
+
+  /* Emphasis and alternate voice - True italic for Latin (UA default
+     font-style: italic), upright KaiTi/serif for Chinese and upright Mincho
+     for Japanese without mechanical faux-italic shear. line-height: 1 keeps
+     size-adjusted CJK glyphs from nudging the parent paragraph's line box.
+
+     Locale trade-offs when KaiTi is absent (Japanese and Korean):
+     - Japanese uses upright Mincho ("Chaos Mincho" in tokens.css) for Kana +
+       Kanji inside em/i, and reserves 傍点 (sesame over right) for explicit
+       [text]{.} (.em-dot:lang(ja) below). Two alternatives were rejected or
+       left opt-in:
+         1. Blanket text-emphasis: sesame on em:lang(ja) marks every English
+            letter inside Markdown *italic* (Goldmark emits em for all *...*
+            and CSS text-emphasis has no unicode-range) and collides in tight
+            1.35 line-height headings.
+         2. Synthesized oblique (font-synthesis-style: auto, common on Japanese
+            developer sites such as Zenn/Qiita where *...* is read as oblique)
+            avoids English sesame pollution, and sites preferring that web
+            convention can opt in via `:is(em, i):lang(ja) { font-synthesis-style: auto; }`,
+            but upright Mincho is the default here because it preserves stroke
+            integrity on dense Kanji per JLREQ and matches the Chinese design.
+     - Korean uses synthesized oblique (font-synthesis-style: auto): Korean
+       typesetting (KLREQ) accepts slanted Hangul for emphasis, and Hangul's
+       geometric strokes shear cleanly without the distortion seen in Kanji. */
+  em,
+  i {
+    font-family: var(--font-em);
+    font-synthesis-style: none;
+    line-height: 1;
+  }
+
+  :is(em, i):lang(ko) {
+    font-synthesis-style: auto;
+  }
 
   /* Ruby annotations - Phonetic notation marks
      Used for showing pronunciation above Chinese characters */
@@ -355,6 +390,7 @@
     font-weight: normal;
     letter-spacing: 0.05em;
     padding: 0 0.1em;
+    text-emphasis: none;               /* Never draw emphasis marks on ruby glosses */
   }
 
   /* Highlighted text - search matches and marked text in content */
@@ -367,6 +403,58 @@
 }
 
 @layer chaos.components {
+  /* Emphasis marks ([text]{.} in typeset-content.html) - Upright body type at
+     normal weight, decoupled from bold and italic. Each language puts the
+     marks where its own convention does, which is also the preferred
+     position CSS Text Decoration 3 lists for text-emphasis-position:
+     - Chinese 着重号: filled dots under the text (GB/T 15834; Taiwan's
+       標點符號手冊 likewise puts them under horizontal text).
+     - Japanese 傍点: sesame marks over the text (JLREQ).
+     - Korean 드러냄표: dots over the text; the Korean punctuation rules
+       (문장 부호 규정) place them above horizontal text. Filled dot is
+       kept as the shape, matching the ˙ of those rules.
+     "over right" also gives the right side in vertical text for ja and ko. */
+  .em-dot {
+    font-family: inherit;
+    font-style: normal;
+    line-height: inherit;
+    text-emphasis: filled dot;
+    text-emphasis-position: under;
+
+    &:is(:lang(ja), :lang(ko)) {
+      text-emphasis-position: over right;
+    }
+
+    &:lang(ja) {
+      text-emphasis-style: sesame;
+    }
+  }
+
+  /* Links draw their underline as a border-bottom at the bottom of the
+     inline box, and under-dots (Chinese only; Japanese and Korean marks sit
+     over the text) land on it. Padding moves the border below the dots,
+     whether the link sits inside .em-dot or wraps it.
+
+     Why 0.4em (and not larger):
+     - Without Noto Sans SC installed on Apple platforms, -apple-system (SFNS,
+       hhea descent -0.211em / -3.38px at 16px) sizes the inline box while
+       PingFang SC (hhea descent -0.340em / -5.44px, the deepest among common
+       CJK sans faces) places the under-dots (~9px below baseline). That pair
+       is already the worst-case gap: 0.25em (4px) overlapped in Chrome, while
+       0.4em (6.4px -> 9.78px below baseline) clears the dots cleanly.
+     - Inline vertical padding does not grow the 1.7 line box (27.2px at 16px).
+       When Noto Sans SC (first in body's font stack, hhea descent -0.288em /
+       -4.61px) IS installed, the inline box itself starts 1.23px deeper while
+       its dots sit higher than PingFang's: 0.5em (8px) + 1px border reaches
+       13.61px below Line 1's baseline (13.59px above Line 2's), grazing or
+       overlapping Line 2's CJK glyph tops (~13.8px regular, ~14.6px 106%
+       KaiTi). Keeping 0.4em preserves ~2px of inter-line clearance across
+       both stacks. */
+  .em-dot:not(:lang(ja), :lang(ko)) a,
+  a:has(.em-dot:not(:lang(ja), :lang(ko))) {
+    padding-bottom: 0.4em;
+  }
+
   /* ==========================================================================
      CALLOUTS
      GitHub-style alerts, rendered as blockquote.alert by render-blockquote.html,

@@ -45,6 +45,15 @@ here.
   front matter keeps an article's prose as written.
 - An end-of-article series navigation card (`series-nav`), oldest first, read
   as a table of contents.
+- Emphasis marks (`[text]{.}` in prose, rendered as `<em class="em-dot">`):
+  upright body type with filled dots under the text in Chinese, sesame marks
+  over right in Japanese, and filled dots over right in Korean, degrading to
+  plain `<em>` in feed readers without the stylesheet.
+- Locale-aware CJK emphasis (`--font-em`) on `em` and `i`: Latin text keeps
+  true italic while Chinese switches to optical-weight KaiTi with a serif
+  fallback (`size-adjust: 106%`), Japanese to upright Mincho, and Korean to
+  synthesized oblique, leaving full-width CJK punctuation on the body sans-serif
+  so OpenType punctuation kerning continues to apply.
 - `tools/take_screenshots.mjs` retakes `images/screenshot.png`,
   `images/screenshot-dark.png` and `images/tn.png` from `exampleSite` with
   headless Chrome; it needs Node, but no npm packages.
@@ -62,6 +71,9 @@ here.
 - Every `<time>` is set in the monospace stack (`--font-mono`), so the
   Noto Sans Mono subset (about 16 KB) is now loaded, and preloaded, on every
   page instead of only on pages with code.
+- `**bold**` (`strong`) in articles now changes font weight alone, without
+  drawing emphasis dots under every character; use `[text]{.}` for emphasis
+  marks.
 - Inline `<code>` receives `<wbr>` break opportunities from 16 characters up
   (down from 24; bare URL links stay at 24), and delimiters (`.`, `/`, `\`,
   `?`, `#`, `_`, `::`, `->`) now open the continued line by URL convention
