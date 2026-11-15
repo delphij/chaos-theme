@@ -239,9 +239,11 @@ The theme supports the following taxonomies:
 
 ## Special Features
 
+All Markdown extensions and typography rules described below are demonstrated side-by-side in `exampleSite/content/posts/specimen/` (component overview) and `exampleSite/content/posts/typography-specimen/` (mixed CJK/Latin prose).
+
 ### Mathematics
 
-The theme includes KaTeX support for rendering mathematical expressions. Enable the passthrough extension in your configuration:
+The theme includes KaTeX support for rendering mathematical expressions (loaded only on pages that use math). Enable the passthrough extension in your configuration:
 
 ```toml
 [markup.goldmark.extensions.passthrough]
@@ -262,38 +264,85 @@ $$
 $$
 ```
 
+Inline formulas are wrapped in `.math-inline` with a trailing word joiner (`U+2060`) so trailing CJK punctuation (`，`, `。`, `、`, `）`) stays attached to the formula instead of wrapping alone to the next line. Display formulas are centered and horizontally scrollable on narrow viewports.
+
 ### Ruby Annotations & CJK Emphasis Marks
 
-For Chinese/Japanese ruby annotations and traditional Chinese emphasis dots (着重号):
+For Chinese/Japanese ruby annotations, semantic glosses (*gikun* / 义训), and CJK emphasis dots (着重号):
 
 ```markdown
 [漢字]{かんじ}
+[汉字]^{hàn zì}
 [汉字]^(hàn zì)
+[临时方案]{永久线上架构}
 [着重]{.}
 ```
 
-Standard `**bold**` increases font weight without adding emphasis dots, while `*italic*` keeps true italic for Latin text and switches Chinese characters to upright KaiTi/serif, Japanese Kana/Kanji to upright Mincho, and Korean Hangul to synthesized oblique (`--font-em`). `[着重]{.}` renders filled dots under the text in Chinese, filled dots over it in Korean (드러냄표), and sesame marks (`傍点`) over it in Japanese.
+- **Ruby (`<ruby>` + `<rt>` + `<rp>`)**: `[base]{annotation}`, `[base]^{annotation}`, and `[base]^(annotation)` render `<rt>` above the base text at `0.65em` without inflating paragraph line spacing, and emit `<rp>（</rp>...<rp>）</rp>` as a parenthetical fallback in RSS/Atom feeds or browsers without ruby support. The base text accepts up to 32 characters (without `[`, `]`, or newlines).
+- **Emphasis dots (`.em-dot`)**: `[text]{.}` renders upright body type at normal weight with filled dots under the text in Chinese, filled dots over it in Korean (`드러냄표`), and sesame marks (`傍点`) over it in Japanese; it degrades to plain `<em>` in feed readers. Up to 32 inline units (including inline `<code>`, links, and `<ruby>`) are supported inside `[...]{.}`, and link underlines automatically pad downward (`0.4em`) so they do not collide with under-dots.
+- **Bold vs. italic (`**bold**` / `*italic*` / `***bold italic***`)**: `**bold**` increases font weight without adding emphasis dots; `*italic*` keeps true italic for Latin text and switches Chinese characters to upright KaiTi/serif (with optical weight and `106%` scale compensation so paragraph gray level stays uniform), Japanese Kana/Kanji to upright Mincho, and Korean Hangul to synthesized oblique (`--font-em`).
+
+### CJK Typography & Soft Line Breaks
+
+When `markup.goldmark.extensions.cjk` is enabled with `eastAsianLineBreaksStyle = "css3draft"`, source line breaks between East Asian characters and after full-width punctuation are collapsed at parse time without introducing stray spaces. Post-rendering typesetting (`layouts/_partials/_funcs/typeset-content.html`, shared with HTML and Atom/RSS feeds) additionally:
+
+- Removes author-typed spaces between CJK and Latin/alphanumeric runs or prose tags (`strong`, `em`, `del`, `mark`, `a`, `ruby`), letting CSS `text-autospace: normal` supply a narrower proportional gap (~`2px` at `16px`).
+- Preserves an author-typed space next to inline `<code>`, `<kbd>`, or `<samp>` when the adjacent character inside the code span is a symbol (such as `` `--bare` ``, `` `/usr/local` ``, or `` `sh(1)` ``), because `text-autospace` does not insert a gap between an ideograph and a symbol; adjacent full-width CJK punctuation still drops extra spaces.
+- Inserts zero-width `<wbr>` break opportunities inside inline `<code>` of 16+ characters and bare URL links of 24+ characters (placing delimiters such as `.`, `/`, `\`, `?`, `#`, `_`, `::`, `->` at the start of the next line while keeping `./`, `../`, `~/`, `/.`, `://`, `..`, and IPv6 `::` intact), and bounds Blink's cross-tag `text-autospace` overflow fallback before inline elements opening with ASCII letters or digits.
 
 ### Alerts/Callouts
 
-Create styled alert boxes:
+Create styled alert boxes using GitHub-style blockquote markers (`render-blockquote.html`):
 
 ```markdown
 > [!NOTE]
-> This is a note callout
+> Background information and supplementary notes.
 
 > [!TIP]
-> Helpful tip here
-
-> [!WARNING]
-> Important warning
+> Helpful tips and practical recommendations.
 
 > [!IMPORTANT]
-> Critical information
+> Key prerequisites readers should know.
+
+> [!WARNING]
+> Warnings requiring extra attention.
 
 > [!CAUTION]
-> Proceed with caution
+> Operations with serious consequences.
+
+> [!HISTORICAL]
+> Archived or superseded content kept for reference.
+
+> [!DISCLAIMER]
+> Disclaimer notice.
+
+> [!NOTE] Custom Alert Title
+> Optional custom title on the marker line, with body paragraphs below.
 ```
+
+Each alert renders as a tinted Wairo card (`blockquote.alert`) at full body font size (unlike regular blockquotes, which are `0.95em`) with a localized heading and emoji (`NOTE` / `HISTORICAL` in indigo, `TIP` in forest green, `IMPORTANT` in persimmon amber, `WARNING` / `DISCLAIMER` in crimson rose, `CAUTION` in iris violet). When `eastAsianLineBreaks` is enabled, keep `[!TYPE]` (and any optional custom title) on its own line and start body paragraphs on subsequent `>` lines.
+
+### Code Blocks & Mermaid Diagrams
+
+Fenced code blocks are rendered via Chroma (`render-codeblock.html`) with role-based traditional colors and a copy button:
+
+````markdown
+```c {hl_lines=[8,9], linenostart=10}
+/* 5 or more lines show line numbers automatically */
+```
+
+```sh {linenos=false}
+# Force line numbers off
+```
+
+```mermaid
+flowchart LR
+    A[Markdown] --> B[Hugo]
+```
+````
+
+- **Automatic line numbers**: Line numbers are enabled automatically when a fenced block has 5 or more lines, and omitted for shorter snippets unless `linenos` is set explicitly. Code blocks disable `text-autospace`, `text-spacing-trim`, and OpenType `chws` so box-drawing characters and full-width columns stay aligned.
+- **Mermaid diagrams**: Fences with language `mermaid` emit `<pre class="mermaid">` and load `mermaid.js` on demand in matching light/dark theme colors; Atom/RSS feeds render the diagram source with a notice linking back to the article.
 
 ### Interactive Code Parameters
 
@@ -365,6 +414,13 @@ Benefits:
 - **Performance**: Faster page loads, works offline
 - **Reliability**: Content survives if tweets are deleted
 - **Version control**: Cached content can be committed to git
+
+### Tables, Lists, Footnotes & Headings
+
+- **Tables (`render-table.html`)**: Rendered cleanly across HTML and Atom/RSS feeds without extra indentation whitespace (keeping Hugo's `.WordCount` accurate for CJK cells), styled with `tabular-nums`, striped rows, an inverted/raised header row, and horizontal scrolling on narrow screens. Table attribute lists placed immediately after a table (`{.class #id}`) are forwarded onto `<table>`.
+- **Lists & blockquotes**: Unlike prose paragraphs (which are justified on desktop), lists, definition lists (`Term\n: Description`), task lists (`- [x]`), and blockquotes stay left-aligned (`text-align: start`) with `tabular-nums` hanging markers so numbers and technical identifiers align cleanly.
+- **Footnotes & summary divider**: Standard Markdown footnotes (`[^id]`) appear at the bottom of the article with back-links; when printing, footnotes and cross-page links are unified into one numbered "Notes" list. Place `<!--more-->` on its own line to control where post list summaries truncate.
+- **Custom heading IDs**: Append `{#custom-id}` to a heading (e.g. `## My Section {#my-section}`) for stable anchor links and TOC targets.
 
 ### Client-Side Full-Text Search
 
