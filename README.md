@@ -18,7 +18,7 @@ Screenshots are taken from the bundled [example site](#example-site).
 - **Instant Page Transitions & Prerendering**: Native 0ms navigation via W3C Speculation Rules API with fallback to [instant.page](https://instant.page/)
 - **View Transitions**: Native cross-document transitions between pages via CSS `@view-transition`
 - **Print-Ready Articles**: Footnotes and external links printed as one numbered list of notes, for clean, readable printouts
-- **Chinese Typography**: Modern CSS features for CJK text (text-autospace, hanging-punctuation, auto-phrase)
+- **Chinese Typography**: Modern CSS features for CJK text (`text-autospace`, `text-spacing-trim`, `hanging-punctuation`, locale-aware `--font-em` emphasis, and `text-emphasis` marks)
 - **Mathematics Support**: Built-in KaTeX integration for scientific content
 - **SEO & Licensing**: Comprehensive OpenGraph (with territory-cased locale, primary image alt, and alternates), Twitter Cards, Schema.org (JSON-LD BlogPosting/WebSite/BreadcrumbList with complete publisher metadata), multilingual hreflang and default-language x-default clusters, W3C-compliant XML sitemap, and machine-readable CC licensing support
 - **Accessible**: WCAG 2.1 AA compliant with skip-to-content links, ARIA labels, screen reader announcements, and reduced-motion support
@@ -78,10 +78,12 @@ The `exampleSite/` directory holds a small demo blog that exercises the theme's 
 hugo server --source exampleSite
 ```
 
-`posts/specimen/` is a specimen page rather than a guide: every component the
-theme renders, in a fixed order on one page, to look through in both colour
-modes after a change to the palette or the typography. Every push to `main`
-publishes the example site to GitHub Pages, where the specimen as last pushed
+`posts/specimen/` and `posts/typography-specimen/` are specimen pages rather
+than guides: the first sets every component the theme renders in a fixed order
+on one page, and the second sets full-length mixed CJK/Latin technical prose to
+check justification, punctuation trimming, optical KaiTi weight, `<wbr>` break
+points and list alignment in both colour modes. Every push to `main`
+publishes the example site to GitHub Pages, where the specimens as last pushed
 can be compared with a local build.
 
 ## Quick Start
@@ -251,14 +253,17 @@ $$
 $$
 ```
 
-### Ruby Annotations (CJK Phonetic Guides)
+### Ruby Annotations & CJK Emphasis Marks
 
-For Chinese/Japanese ruby annotations:
+For Chinese/Japanese ruby annotations and traditional Chinese emphasis dots (着重号):
 
 ```markdown
 [漢字]{かんじ}
 [汉字]^(hàn zì)
+[着重]{.}
 ```
+
+Standard `**bold**` increases font weight without adding emphasis dots, while `*italic*` keeps true italic for Latin text and switches Chinese characters to upright KaiTi/serif, Japanese Kana/Kanji to upright Mincho, and Korean Hangul to synthesized oblique (`--font-em`). `[着重]{.}` renders filled dots under the text in Chinese, filled dots over it in Korean (드러냄표), and sesame marks (`傍点`) over it in Japanese.
 
 ### Alerts/Callouts
 

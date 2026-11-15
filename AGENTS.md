@@ -491,12 +491,16 @@ As of 2026: Chrome/Edge 122+, Firefox 124+, Safari/iOS 17.4+.
 
 ### Modern Features Used
 - CSS: Variables, Grid, Flexbox, `dvh`, containment, `color-scheme`, backdrop-filter
-- CJK Typography: `text-autospace: normal`, `text-spacing-trim: normal`, `font-feature-settings: "chws" 1` for OpenType CJK punctuation kerning
+- CJK Typography: `text-autospace: normal`, `text-spacing-trim: normal`, `font-feature-settings: "chws" 1` for OpenType CJK punctuation kerning, `font-synthesis-style: none` with `--font-em` (Latin italic + upright Chinese KaiTi/serif and Japanese Mincho; Korean `em`/`i` synthesized oblique) on `em`/`i`, and `.em-dot` (`text-emphasis: filled dot` under in Chinese, over in Korean; `sesame` over right in Japanese) decoupled from `strong`
 - Build-time CJK Filtering: line-wrap newlines are collapsed at parse time by
   `markup.goldmark.extensions.cjk` (site config); spaces typed between CJK and
   Latin runs are stripped in `layouts/_partials/_funcs/typeset-content.html` so
   `text-autospace` can insert the proportional space instead. That partial also
-  expands ruby annotations, and is shared by the HTML and feed pipelines.
+  expands `[text]{.}` emphasis marks and ruby annotations (outside `<pre>` and
+  `<code>`), adds `<wbr>` break opportunities inside inline `<code>` (>= 16
+  chars), bare URL `<a>` links (>= 24 chars), and ahead of the final CJK break
+  unit before ASCII-leading inline tags, and is shared by the HTML and feed
+  pipelines.
 - JS: ES2024 syntax floor, ES modules, `<dialog>`, modern array/DOM methods, Intersection Observer
 
 ## 13. Quality Assurance Checklist
