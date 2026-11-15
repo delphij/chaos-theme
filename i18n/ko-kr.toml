@@ -35,6 +35,7 @@ joinDiscussion = '댓글 참여'
 
 # Reading stats
 readingStats = '이 글은 약 {{ .WordCount }} 자이며, 읽는 데 약 {{ .ReadingTime }} 분 소요됩니다'
+readingStatsParen = ' ({{ .Stats }})'
 
 # Print references
 printReferences = '주석'

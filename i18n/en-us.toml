@@ -35,6 +35,10 @@ joinDiscussion = 'Join discussion'
 
 # Reading stats
 readingStats = 'Approximately {{ .WordCount }} words, {{ .ReadingTime }} min read'
+# The stats as a parenthetical after the summary's read-more link; the
+# opening space, if any, belongs here: Chinese and Japanese take full-width
+# parentheses with none
+readingStatsParen = ' ({{ .Stats }})'
 
 # Print references
 printReferences = 'Notes'

@@ -35,6 +35,7 @@ joinDiscussion = '参与评论'
 
 # Reading stats
 readingStats = '本文约{{ .WordCount }}字，阅读大致需要{{ .ReadingTime }}分钟'
+readingStatsParen = '（{{ .Stats }}）'
 
 # Print references
 printReferences = '注释'

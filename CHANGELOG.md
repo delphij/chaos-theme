@@ -68,9 +68,11 @@ here.
 - The `x_simple` shortcode no longer inlines Hugo's `<style>` block with fixed
   colours (and `services.x.disableInlineCSS` no longer matters): the theme
   styles the card itself, as it already did for `x`.
-- Every `<time>` is set in the monospace stack (`--font-mono`), so the
-  Noto Sans Mono subset (about 16 KB) is now loaded, and preloaded, on every
-  page instead of only on pages with code.
+- Every `<time>` is set in the monospace stack (`--font-mono`), and digits in
+  `.reading-stats` use the same bundled Noto Sans Mono face (`U+0030-0039`,
+  with surrounding prose kept on `--font-sans`), so the Noto Sans Mono subset
+  (about 16 KB) is now loaded, and preloaded, on every page instead of only on
+  pages with code.
 - `**bold**` (`strong`) in articles now changes font weight alone, without
   drawing emphasis dots under every character; use `[text]{.}` for emphasis
   marks.
@@ -79,6 +81,10 @@ here.
   `?`, `#`, `_`, `::`, `->`) now open the continued line by URL convention
   rather than trailing the broken line, while keeping decimals, version ranges,
   CLI `--flag=value` switches and IPv6 `::` addresses intact.
+- The reading stats after a summary's read-more link take their parentheses
+  from the new i18n key `readingStatsParen`: full-width `（…）` with no
+  leading space in Chinese and Japanese, ` (…)` in English and Korean.
+  `readingStats` itself is unchanged, so a site overriding it keeps working.
 
 ### Fixed
 

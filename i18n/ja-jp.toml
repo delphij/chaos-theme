@@ -35,6 +35,7 @@ joinDiscussion = 'コメントに参加'
 
 # Reading stats
 readingStats = 'この記事は約{{ .WordCount }}文字で、読むのに約{{ .ReadingTime }}分かかります'
+readingStatsParen = '（{{ .Stats }}）'
 
 # Print references
 printReferences = '注'

@@ -952,6 +952,10 @@
     text-align: start;
   }
 
+  .reading-stats {
+    font-family: "Chaos Mono Digits", var(--font-sans);
+  }
+
   /* Post footer metadata at the end of article (tags & last modified date).
      Separated from the body by whitespace alone - the muted colour and smaller
      size already mark it as metadata, so a rule would only add furniture. */
