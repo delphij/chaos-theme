@@ -15,9 +15,11 @@ import { initOverlays } from './modules/overlay.js';
 import { initScrollSpy } from './modules/scrollspy.js';
 import { initPrintFootnotes } from './modules/print-footnotes.js';
 import { initCodeCopy } from './modules/code-copy.js';
+import { initHeadingCopy } from './modules/heading-copy.js';
 
 initTheme();
 initOverlays();
 initScrollSpy();
 initPrintFootnotes();
 initCodeCopy();
+initHeadingCopy();

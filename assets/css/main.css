@@ -78,6 +78,7 @@
   .toc-content a,
   nav.main-links a,
   .skip-link,
+  .heading-anchor,
   .sidebar-tag-item,
   .sidebar-more-link,
   .sidebar-nav-jump,
@@ -1229,43 +1230,20 @@
     border-radius: var(--radius-sm);
   }
 
-  .code-copy-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
+  /* Quiet copy controls (modules/code-copy.js and modules/heading-copy.js):
+     hidden until their parent is hovered or focused, with a masked icon that
+     swaps to a tick or cross on .copied / .failed. */
+  .code-copy-btn,
+  .heading-anchor {
     color: var(--muted);
-    background: var(--bg);             /* The page ground, a step off --code-bg in both modes */
     opacity: 0;
-    transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
-    z-index: 5;
-    -webkit-user-select: none;
-    user-select: none;
-
-    /* The icon: a mask, so it takes the state's colour; the state classes
-       swap the shape */
-    --copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");
+    transition: opacity var(--transition-fast), color var(--transition-fast), background-color var(--transition-fast);
 
     &::before {
       content: "";
       flex: none;
-      width: 14px;
-      height: 14px;
       background-color: currentColor;
       mask: var(--copy-icon) center / contain no-repeat;
-
-      @media (forced-colors: active) {
-        background-color: ButtonText;
-      }
-    }
-
-    /* Touch users need the same readable label as mouse and keyboard users. */
-    @media (hover: none) {
-      opacity: 1;
-    }
-
-    &:hover {
-      color: var(--heading);
-      background: var(--paper);
     }
 
     &.copied {
@@ -1279,15 +1257,75 @@
       color: var(--alert-warning-border);
       --copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E");
     }
+  }
+
+  .code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: var(--bg);       /* The page ground, a step off --code-bg in both modes */
+    z-index: 5;
+    -webkit-user-select: none;
+    user-select: none;
+
+    --copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");
+
+    &::before {
+      width: 14px;
+      height: 14px;
+
+      @media (forced-colors: active) {
+        background-color: ButtonText;
+      }
+    }
+
+    /* Touch users need the same readable label as mouse and keyboard users. */
+    @media (hover: none) {
+      opacity: 1;
+    }
+
+    &:hover {
+      color: var(--heading);
+      background-color: var(--paper);
+    }
 
     @media (forced-colors: active) {
       border: 1px solid ButtonBorder;
     }
   }
 
+  .heading-anchor {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    width: 1.35em;
+    height: 1.35em;
+    margin-left: 0.3em;
+    border-radius: var(--radius-sm);
+
+    --copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/%3E%3C/svg%3E");
+
+    &::before {
+      width: 0.85em;
+      height: 0.85em;
+
+      @media (forced-colors: active) {
+        background-color: LinkText;
+      }
+    }
+
+    &:hover {
+      color: var(--primary);
+      background-color: var(--paper);
+    }
+  }
+
   .highlight:hover .code-copy-btn,
   .highlight:focus-within .code-copy-btn,
-  .code-copy-btn:focus-visible {
+  .code-copy-btn:focus-visible,
+  article.post :is(h2, h3, h4, h5, h6):hover .heading-anchor,
+  .heading-anchor:focus-visible {
     opacity: 1;
   }
 
@@ -1939,6 +1977,7 @@
     .skip-link,
     .toc-wrapper,
     .pager,
+    .heading-anchor,
     #remark42,
     .reading-stats,
     .code-vars-panel,

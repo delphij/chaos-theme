@@ -45,6 +45,9 @@ here.
   front matter keeps an article's prose as written.
 - An end-of-article series navigation card (`series-nav`), oldest first, read
   as a table of contents.
+- Section-link copy anchors on article headings (`h2`–`h6`), revealed on hover
+  or keyboard focus: clicking copies the section URL (preserving any active
+  `code_vars` query parameters) and updates the location hash in place.
 - Emphasis marks (`[text]{.}` in prose, rendered as `<em class="em-dot">`):
   upright body type with filled dots under the text in Chinese, sesame marks
   over right in Japanese, and filled dots over right in Korean, degrading to
