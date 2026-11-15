@@ -1723,12 +1723,27 @@
     overflow: hidden;
     top: 10vh;                         /* A modal dialog is fixed in the top layer */
     margin: 0 auto;
+    overscroll-behavior: contain;
 
+    /* A wheel over the backdrop starts its scroll chain at the backdrop, not
+       in the dialog, so the page underneath would scroll. Making the backdrop
+       a contained scroll container stops it where overscroll-behavior applies
+       to non-scrollable scroll containers (current Chrome); the :modal lock
+       below covers the other engines. */
     &::backdrop {
+      overflow: hidden;
+      overscroll-behavior: contain;
       background: rgba(0, 0, 0, 0.35);
       -webkit-backdrop-filter: blur(12px);
       backdrop-filter: blur(12px);
     }
+  }
+
+  /* Lock the page while the search dialog is modal; :modal stops matching on
+     close, so no script has to undo it. html already has scrollbar-gutter:
+     stable (prose.css), so hiding the scrollbar shifts nothing. */
+  html:has(dialog.search-dialog:modal) {
+    overflow: hidden;
   }
 
   .search-box {
@@ -1791,6 +1806,7 @@
   .search-results {
     max-height: min(480px, 55vh);
     overflow-y: auto;
+    overscroll-behavior: contain;      /* Don't chain to the page under the modal */
     padding: 8px 12px;
     background: var(--surface);
 

@@ -311,7 +311,10 @@
      ========================================================================== */
 
   :root {
-    /* Color scheme - Tells browser to use native light UI for controls */
+    /* Color scheme - Tells browser to use native light UI for controls.
+       html.dark switches it to dark; the <meta name="color-scheme"> in
+       head.html only matters before this sheet applies, so a dark system
+       gets a dark canvas on first paint. */
     color-scheme: light;
 
     /* Color palette - Light mode

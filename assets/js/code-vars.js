@@ -561,6 +561,9 @@ function initCodeVars() {
   article.addEventListener('keydown', (e) => {
     const target = getEditable(e.target);
     if (!target) return;
+    // Keys pressed while an IME is composing (Esc to cancel, Enter to
+    // confirm a candidate) belong to the IME, not to this field.
+    if (e.isComposing || e.keyCode === 229) return;
     const { el, isInput, def } = target;
     if (e.key === 'Escape') {
       e.preventDefault();

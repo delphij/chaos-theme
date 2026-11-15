@@ -277,16 +277,26 @@ function initSearch() {
 
   toggleBtn?.addEventListener('click', openSearch);
 
-  closeBtn?.addEventListener('click', () => dialog.close());
+  // Fallback for browsers without Invoker Commands (commandfor/command)
+  if (!('commandForElement' in HTMLButtonElement.prototype)) {
+    closeBtn?.addEventListener('click', () => dialog.close());
+  }
 
-  // Close on a click on the backdrop. The dialog has no padding and clips its
-  // content, so a click whose target is the dialog itself landed outside it.
-  dialog.addEventListener('click', e => {
-    if (e.target === dialog) dialog.close();
-  });
+  // Fallback for browsers without <dialog closedby="any"> light dismiss
+  if (!('closedBy' in HTMLDialogElement.prototype)) {
+    const outside = e => {
+      const r = dialog.getBoundingClientRect();
+      return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+    };
+    let pressedOutside = false;
+    dialog.addEventListener('pointerdown', e => { pressedOutside = outside(e); });
+    dialog.addEventListener('pointerup', e => { if (pressedOutside && outside(e)) dialog.close(); });
+  }
 
   // Global hotkey '/' to open search (unless typing in input/textarea)
   document.addEventListener('keydown', e => {
+    // An Escape that cancels an IME composition must not close the dialog.
+    if (e.isComposing || e.keyCode === 229) return;
     if (e.key === '/' && !dialog.open) {
       const tag = e.target?.tagName || '';
       if (tag !== 'INPUT' && tag !== 'TEXTAREA' && !e.target.isContentEditable) {
@@ -664,6 +674,8 @@ function initSearch() {
 
   // Keyboard navigation inside search input
   input.addEventListener('keydown', e => {
+    // Arrows and Enter pick IME candidates while composing: leave them be.
+    if (e.isComposing || e.keyCode === 229) return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       updateSelection(selectedIndex + 1);

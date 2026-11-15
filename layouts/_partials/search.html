@@ -23,14 +23,14 @@ Only rendered when site.Params.search.enable is true.
     {{- $bodyIndexURL = . | relURL -}}
   {{- end -}}
 {{- end -}}
-<dialog id="searchDialog" class="search-dialog" aria-modal="true" aria-label="{{ T "search" }}" data-index-url="{{ $indexURL }}"{{ with $bodyIndexURL }} data-body-index-url="{{ . }}"{{ end }} data-msg-loading="{{ T "searchLoading" }}" data-msg-empty="{{ T "searchNoResults" }}" data-msg-count="{{ T "searchResultCount" (dict "Count" "{count}") }}" data-msg-error="{{ T "searchError" }}" data-msg-deprecated="{{ T "searchDeprecated" }}">
+<dialog id="searchDialog" class="search-dialog" closedby="any" aria-label="{{ T "search" }}" data-index-url="{{ $indexURL }}"{{ with $bodyIndexURL }} data-body-index-url="{{ . }}"{{ end }} data-msg-loading="{{ T "searchLoading" }}" data-msg-empty="{{ T "searchNoResults" }}" data-msg-count="{{ T "searchResultCount" (dict "Count" "{count}") }}" data-msg-error="{{ T "searchError" }}" data-msg-deprecated="{{ T "searchDeprecated" }}">
   <div class="search-box">
     <div class="search-header">
       <span class="search-icon" aria-hidden="true">
         {{- partial "icon-search.html" . -}}
       </span>
       <input type="search" id="searchInput" class="search-input" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="searchListbox" placeholder="{{ T "searchPlaceholder" }}" autocomplete="off" spellcheck="false" aria-label="{{ T "search" }}">
-      <button type="button" class="btn-icon search-close" id="searchClose" aria-label="{{ T "searchClose" }}" title="{{ T "searchClose" }}">✕</button>
+      <button type="button" class="btn-icon search-close" id="searchClose" commandfor="searchDialog" command="close" aria-label="{{ T "searchClose" }}" title="{{ T "searchClose" }}">✕</button>
     </div>
     {{- /* The dialog's own live region: what search.js announces (loading,
            a failure, the number of results) is written here, not into the

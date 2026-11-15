@@ -21,6 +21,7 @@
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light dark" />
         {{- /* This page is a rendering of the sitemap, not a page of the site:
                keep it, and the static companion the build renders from this
                same stylesheet, out of the index. */}}

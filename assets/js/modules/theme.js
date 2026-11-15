@@ -139,6 +139,15 @@ export function initTheme() {
     }
   });
 
+  // Sync theme override if changed in another tab (a null key means the
+  // other tab cleared storage, which drops the override too)
+  window.addEventListener('storage', e => {
+    if (e.key === storageKey || e.key === null) {
+      applyTheme(getCurrentMode());
+      syncRemark42Theme();
+    }
+  });
+
   // Handle theme toggle clicks
   btn?.addEventListener('click', () => {
     const nextMode = getNextMode(getCurrentMode());
