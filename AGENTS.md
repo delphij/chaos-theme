@@ -358,6 +358,11 @@ Only for:
   conventions, the other sections for design philosophy. CLAUDE.md and
   GEMINI.md only import it
 - Document all i18n keys with comments
+- Do **NOT** automatically update the asset size figures in
+  `exampleSite/content/posts/on-minimalism.md` during ordinary feature, bug-fix,
+  or refactoring commits (sizes fluctuate while work is in progress and
+  premature edits cause noisy diffs and rebase conflicts); refresh those numbers
+  **only** when preparing a release
 
 ## 9. Dependency Management
 
@@ -519,6 +524,7 @@ Before committing:
 Before release:
 - [ ] All i18n files complete (5 languages)
 - [ ] README.md comprehensive
+- [ ] Asset size figures in `exampleSite/content/posts/on-minimalism.md` refreshed
 - [ ] LICENSE and NOTICE accurate
 - [ ] No console errors/warnings
 - [ ] Lighthouse score 95+
