@@ -73,6 +73,10 @@ here.
   the unparsed `text-spacing: auto-spaces normal` declaration, and turns off
   `text-autospace` and OpenType punctuation features inside `<pre>` blocks so
   full-width characters and ASCII tables keep monospace alignment.
+- `typeset-content.html` skips inline `<code>` during ruby and CJK whitespace
+  passes, preserves typed spaces next to symbol-edged `<code>`/`<kbd>`/`<samp>`
+  adjacent to ideographs, and collapses CJK-to-CJK spaces across
+  single-character runs.
 - Atom entries link their author to `params.author.url`, the key the README
   and the JSON-LD use; they read `author.uri`, which no site sets, and fell
   back to the home page.

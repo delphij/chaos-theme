@@ -13,7 +13,7 @@ Displays post title, date, taxonomy links, summary text, and optional
   <h2 class="post-title"><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
   {{ partial "post-meta.html" (dict "page" .) }}
   <div class="post-summary-content">
-    {{ .Summary }}
+    {{ partial "_funcs/typeset-content.html" .Summary | safeHTML }}
   </div>
   {{- /* A truncated summary leads on to the rest of the post; a complete one
          has nothing more to read, so it leads to the discussion instead. */}}

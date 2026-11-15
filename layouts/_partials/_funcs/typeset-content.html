@@ -2,20 +2,27 @@
 Applies the theme's post-rendering text conventions to a block of rendered HTML.
 Shared by the HTML and feed pipelines so the two cannot drift.
 
- 1. Ruby (義訓) annotations: [base]{annotation}, [base]^{annotation} or
-    [base]^(annotation). Output follows the current HTML standard: <rb> is
-    obsolete, so the base text is a bare child of <ruby>, and <rp> supplies the
-    parenthetical fallback a renderer without ruby support shows instead -
-    "民国十八（一九二九）" rather than the two runs colliding.
+ 1. Ruby (義訓) annotations, outside <pre> and <code>: [base]{annotation},
+    [base]^{annotation} or [base]^(annotation). Output follows the current HTML
+    standard: <rb> is obsolete, so the base text is a bare child of <ruby>, and
+    <rp> supplies the parenthetical fallback a renderer without ruby support
+    shows instead - "民国十八（一九二九）" rather than the two runs colliding.
 
- 2. Spaces an author types between CJK and Latin runs are removed, so that CSS
-    text-autospace can insert the proportional space instead: narrower and more
-    even than a typed word space (measured at 16px, 2px per boundary against
-    5.33px). The two never stack - once a real space is present the characters
-    are no longer adjacent and autospace inserts nothing - so leaving them in
-    would simply give the wider, less typographic gap. text-autospace: normal
-    is the CSS Text 4 initial value, so this is the right thing to emit for any
-    conforming renderer, feed readers included.
+ 2. Spaces an author types between CJK and Latin runs (outside <pre> and
+    <code>) are removed, so that CSS text-autospace can insert the proportional
+    space instead: narrower and more even than a typed word space (measured at
+    16px, 2px per boundary against 5.33px). The two never stack - once a real
+    space is present the characters are no longer adjacent and autospace inserts
+    nothing - so leaving them in would simply give the wider, less typographic
+    gap. text-autospace: normal is the CSS Text 4 initial value, so this is the
+    right thing to emit for any conforming renderer, feed readers included.
+
+    The space is removed only where autospace will put a gap back. It acts
+    between an ideograph and a letter or digit, never a symbol, so a space
+    before inline code that opens with - / . $ or ~ (--bare, /usr/local,
+    .txt) is the only gap that code gets: it has no background, and without
+    the space it reads as part of the word before it. See the boundary rules
+    below for where that is decided.
 
  3. Long inline <code> spans and bare URL <a> links (>= 24 chars, outside <pre>)
     receive <wbr> after safe delimiter characters (., /, ?, =, _, ::, ->) when
@@ -43,17 +50,9 @@ the match can then run to the next "]...{...}" anywhere in the feed.
 */ -}}
 
 {{- $content := . -}}
-
 {{- $ruby := `<ruby>$1<rp>（</rp><rt>$2</rt><rp>）</rp></ruby>` -}}
-{{- $content = $content | replaceRE `\[([^\]\n]{1,32})\]\^?\{([^}\n]{1,32})\}` $ruby -}}
-{{- $content = $content | replaceRE `\[([^\]\n]{1,32})\]\^\(([^)\n]{1,32})\)` $ruby -}}
-
 {{- $cjk := `[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{3000}-\x{303f}\x{ff00}-\x{ffef}]` -}}
-{{- $content = $content | replaceRE (printf `(%s)\s+(%s)` $cjk $cjk) "$1$2" -}}
-{{- $content = $content | replaceRE (printf `(%s)\s+([a-zA-Z0-9])` $cjk) "$1$2" -}}
-{{- $content = $content | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" -}}
-{{- $content = $content | replaceRE (printf `(%s)[ \t]+(<(?:strong|em|del|mark|a)\b)` $cjk) "$1$2" -}}
-{{- $content = $content | replaceRE (printf `(</(?:strong|em|del|mark|a)>)[ \t]+(%s)` $cjk) "$1$2" -}}
+{{- $cjkPunct := `[\x{3001}-\x{303f}\x{ff01}-\x{ff60}]` -}}
 
 {{- $out := slice -}}
 {{- range $i, $chunk := split $content "<pre" -}}
@@ -69,11 +68,71 @@ the match can then run to the next "]...{...}" anywhere in the feed.
       {{- $seg = "" -}}
     {{- end -}}
   {{- end -}}
-  {{- range (findRE `(?:<code>[^<\n]{24,}</code>|<a\b[^>]*>https?://[^<\n]{24,}</a>)` $seg | uniq) -}}
-    {{- $inner := replaceRE `^<[^>]+>|</[^>]+>$` "" . -}}
-    {{- $wrapped := $inner | replaceRE `([./?=_]|::|->)([A-Za-z0-9])` "$1<wbr>$2" -}}
-    {{- if ne $wrapped $inner -}}
-      {{- $seg = replace $seg . (replace . (printf ">%s<" $inner) (printf ">%s<" $wrapped)) -}}
+  {{- if $seg -}}
+    {{- $codeOut := slice -}}
+    {{- range $j, $cchunk := split $seg "<code" -}}
+      {{- $code := "" -}}
+      {{- $prose := $cchunk -}}
+      {{- if gt $j 0 -}}
+        {{- $cpair := split $cchunk "</code>" -}}
+        {{- if ge (len $cpair) 2 -}}
+          {{- $code = printf "<code%s</code>" (index $cpair 0) -}}
+          {{- $prose = delimit (after 1 $cpair) "</code>" -}}
+        {{- else -}}
+          {{- $code = printf "<code%s" $cchunk -}}
+          {{- $prose = "" -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if $prose -}}
+        {{- /* The bracketed text excludes "[" as well as "]", so a stray "["
+             earlier on the line ("[注：[经]{工}") cannot become part of the
+             base. tools/build_search_index.py mirrors these patterns. */ -}}
+        {{- $prose = $prose | replaceRE `\[([^\[\]\n]{1,32})\]\^?\{([^}\n]{1,32})\}` $ruby -}}
+        {{- $prose = $prose | replaceRE `\[([^\[\]\n]{1,32})\]\^\(([^)\n]{1,32})\)` $ruby -}}
+        {{- range seq 2 -}}
+          {{- $prose = $prose | replaceRE (printf `(%s)\s+(%s)` $cjk $cjk) "$1$2" -}}
+        {{- end -}}
+        {{- $prose = $prose | replaceRE (printf `(%s)\s+([a-zA-Z0-9])` $cjk) "$1$2" -}}
+        {{- $prose = $prose | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" -}}
+      {{- end -}}
+      {{- $codeOut = $codeOut | append $code $prose -}}
+    {{- end -}}
+    {{- $seg = delimit $codeOut "" -}}
+    {{- /* Spaces and line-wrap newlines at an inline tag boundary. The rules
+         above match a CJK character and a letter separated only by whitespace;
+         a tag between them ("见 <em>", "</a>\n的") hides the pair, and
+         Goldmark's eastAsianLineBreaks leaves newlines adjacent to ASCII
+         Markdown delimiters ("[", ")", "`"), which HTML would collapse to a
+         word space.
+
+         Prose-styled tags (strong, em, del, mark, a, ruby) hold ordinary
+         prose, which autospace treats like any other text: the space goes
+         whatever the tag holds.
+
+         Monospace tags (code, kbd, samp) lose the space next to an ideograph
+         only when the character just inside the tag is a letter or digit.
+         autospace puts no gap between an ideograph and a symbol, so for
+         "使用 <code>--bare</code>" or "编辑 <code>/usr/local</code>" the typed
+         space is the only separation, and inline code has no background to mark
+         its edge instead. An escaped entity (&lt;, &quot;) counts as a symbol:
+         its first character is "&". The closing side tests the last character
+         before </code>, so "<code>a.out</code> 的" loses its space and
+         "<code>~/</code> 下" keeps it. Next to full-width CJK punctuation
+         ("， <code>/404.html</code>", "<code>.</code> ，"), the glyph already
+         carries its own half-em blank space, so a typed space is always
+         dropped. */ -}}
+    {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:strong|em|del|mark|a|ruby)\b)` $cjk) "$1$2" -}}
+    {{- $seg = $seg | replaceRE (printf `(</(?:strong|em|del|mark|a|ruby)>)\s+(%s)` $cjk) "$1$2" -}}
+    {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b)` $cjkPunct) "$1$2" -}}
+    {{- $seg = $seg | replaceRE (printf `(</(?:code|kbd|samp)>)\s+(%s)` $cjkPunct) "$1$2" -}}
+    {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b[^>]*>[A-Za-z0-9])` $cjk) "$1$2" -}}
+    {{- $seg = $seg | replaceRE (printf `([A-Za-z0-9]</(?:code|kbd|samp)>)\s+(%s)` $cjk) "$1$2" -}}
+    {{- range (findRE `(?:<code>[^<\n]{24,}</code>|<a\b[^>]*>https?://[^<\n]{24,}</a>)` $seg | uniq) -}}
+      {{- $inner := replaceRE `^<[^>]+>|</[^>]+>$` "" . -}}
+      {{- $wrapped := $inner | replaceRE `([./?=_]|::|->)([A-Za-z0-9])` "$1<wbr>$2" -}}
+      {{- if ne $wrapped $inner -}}
+        {{- $seg = replace $seg . (replace . (printf ">%s<" $inner) (printf ">%s<" $wrapped)) -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
   {{- $out = $out | append $pre $seg -}}
