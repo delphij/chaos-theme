@@ -70,6 +70,15 @@ enableGitInfo = false
 [markup.highlight]
   noClasses = false
 
+# Collapse soft line breaks inside CJK paragraphs at parse time (including
+# after full-width punctuation via 'css3draft'), so wrapped source lines do not
+# turn into mid-sentence spaces in HTML or feeds.
+[markup.goldmark.extensions.cjk]
+  enable = true
+  eastAsianLineBreaks = true
+  eastAsianLineBreaksStyle = 'css3draft'
+  escapedSpace = true
+
 [markup.goldmark.extensions.passthrough]
   enable = true
   [markup.goldmark.extensions.passthrough.delimiters]

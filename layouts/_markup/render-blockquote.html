@@ -50,9 +50,12 @@ gave it.
       {{- if not $own -}}
         {{- $title = $default -}}
         {{- $lead = . -}}
-      {{- else if and (hasPrefix . $own) (ne . $own) -}}
-        {{- $title = $own -}}
-        {{- $lead = trim (strings.TrimPrefix $own .) " " -}}
+      {{- else if ne (string .) $own -}}
+        {{- $ownHTML := $.Page.RenderString $own -}}
+        {{- if and (hasPrefix . $ownHTML) (ne . $ownHTML) -}}
+          {{- $title = $ownHTML -}}
+          {{- $lead = trim (strings.TrimPrefix $ownHTML .) " " | safeHTML -}}
+        {{- end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}

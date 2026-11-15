@@ -470,12 +470,13 @@
     contain: layout style;             /* Optimize rendering performance */
 
     .alert-heading {
-      display: flex;
-      align-items: center;
-      gap: 0.35em;
       margin-bottom: 0.4em;
       font-weight: 600;
       color: var(--alert-accent, var(--heading));
+
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
