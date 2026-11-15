@@ -108,18 +108,91 @@ def load_stopwords_file(filepath: str) -> set:
     return words
 
 
+# Emphasis-dot [text]{.} and ruby [base]{rt} / [base]^{rt} / [base]^(rt), the
+# theme's own inline syntax (expanded for the page by typeset-content.html,
+# whose patterns these mirror).
+#
+# The bracketed text excludes "[" as well as "]". Without that, a ruby run
+# inside link text, "[[義]{ぎ}[訓]{くん}](url)", matched from the link's own
+# "[" and took "[義" as the first base. The link pass happened to repair it,
+# but any other stray "[" before a ruby on the line ("[注：[经]{工}…") would
+# leak into the indexed word.
+EM_DOT_RE = re.compile(r"\[((?:\x00\d+\x00|[^\[\]\x00\n]){1,32})\]\{\.\}")
+RUBY_UNIT_RE = re.compile(
+    r"\[([^\[\]\n]{1,32})\](?:\^?\{([^.}\n]|[^}\n]{2,32})\}|\^\(([^)\n]{1,32})\))"
+)
+RUBY_RUN_RE = re.compile(
+    r"(?:\[[^\[\]\n]{1,32}\](?:\^?\{(?:[^.}\n]|[^}\n]{2,32})\}|\^\([^)\n]{1,32}\)))+"
+)
+
+# Fenced blocks and inline code spans, which prose-only rewrites must not
+# touch. The page never expands [text]{.} or ruby there (typeset-content.html
+# skips <pre> and <code>), and code is full of the same shape: a regex such as
+# [0-9]{2} or a call such as handlers[cmd](ctx) would otherwise be rewritten as
+# ruby or a Markdown link, losing the literal the index keeps code for.
+#
+# Fences are anchored at line start with backreferenced length (\1 / \2, and no
+# backticks in a backtick fence's info string per CommonMark 4.5), so a 4-tick
+# fence wrapping ``` examples or a mid-line ```` ```text ```` inline code span
+# cannot close early or invert prose/code parity across the rest of the post.
+CODE_SPAN_RE = re.compile(
+    r"^[ \t>]*(`{3,})[^`\n]*\n[\s\S]*?(?:^[ \t>]*\1`*[ \t]*$|\Z)"
+    r"|^[ \t>]*(~{3,})[^\n]*\n[\s\S]*?(?:^[ \t>]*\2~*[ \t]*$|\Z)"
+    r"|(?<!`)(`+)(?!`)[^\n]+?(?<!`)\3(?!`)",
+    re.MULTILINE,
+)
+HTML_TAG_RE = re.compile(r"<!--[\s\S]*?-->|</?[A-Za-z][^>\n]*>")
+
+
+def outside_code(text: str, fn) -> str:
+    """Applies fn to prose while holding code fences and spans in placeholders."""
+    spans = []
+
+    def _stash(m: re.Match) -> str:
+        idx = len(spans)
+        spans.append(m.group(0))
+        return f"\n\x00{idx}\x00\n" if "\n" in m.group(0) else f"\x00{idx}\x00"
+
+    cleaned = fn(CODE_SPAN_RE.sub(_stash, text.replace("\x00", "")))
+    return re.sub(r"\x00(\d+)\x00", lambda m: spans[int(m.group(1))], cleaned)
+
+
 def clean_markdown(text: str) -> str:
     """Strips Markdown syntax, shortcodes, and HTML tags from text."""
-    # Remove Hugo shortcodes {{< ... >}} or {{% ... %}}
-    text = re.sub(r"\{\{[%<].*?[%>]\}\}", " ", text)
-    # Remove HTML tags
-    text = re.sub(r"<[^>]+>", " ", text)
-    # Remove images ![alt](url)
-    text = re.sub(r"!\[.*?\]\(.*?\)", " ", text)
-    # Convert links [text](url) -> text
-    text = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", text)
-    # Remove code fence markers (```lang ... ```) but preserve technical code content!
-    text = re.sub(r"```[a-zA-Z0-9_\-\.]*", " ", text)
+    # Unwrap ruby runs [经]{工}[验]{伤} -> keep base "经验" contiguous in place
+    # and append joined annotations ("工伤", "biàn tài") so both layers are indexed.
+    ruby_notes = []
+
+    def _unwrap_ruby(match: re.Match) -> str:
+        units = list(RUBY_UNIT_RE.finditer(match.group(0)))
+        bases = "".join(u.group(1) for u in units)
+        notes = [u.group(2) or u.group(3) for u in units]
+        sep = "" if all(not re.search(r"[A-Za-z0-9]", n) for n in notes) else " "
+        ruby_notes.append(sep.join(notes))
+        return bases
+
+    def _unwrap_links(s: str) -> str:
+        s = re.sub(r"!\[[^\[\]\n]*\]\([^)\n]*\)", " ", s)
+        return re.sub(r"\[([^\[\]\n]*)\]\([^)\n]*\)", r"\1", s)
+
+    def _clean_prose(prose: str) -> str:
+        # Remove Hugo shortcodes {{< ... >}} or {{% ... %}}
+        prose = re.sub(r"\{\{[%<].*?[%>]\}\}", " ", prose)
+        # Remove HTML comments and tags without eating "< 2" inequalities across lines
+        prose = HTML_TAG_RE.sub(" ", prose)
+        # Unwrap inner links/images, then ruby and [text]{.} (code is in \x00N\x00
+        # placeholders, so [`code`](url) and [text `code`]{.} unwrap cleanly while
+        # literal [x]{2} or arr[i](x) inside code stays untouched), then outer links.
+        prose = _unwrap_links(prose)
+        prose = RUBY_RUN_RE.sub(_unwrap_ruby, prose)
+        prose = EM_DOT_RE.sub(r"\1", prose)
+        return _unwrap_links(prose)
+
+    text = outside_code(text, _clean_prose)
+    if ruby_notes:
+        text = f"{text} {' '.join(ruby_notes)}"
+    # Remove code fence markers (```lang ... ```) while preserving technical code content
+    text = re.sub(r"(?:`{3,}|~{3,})[a-zA-Z0-9_\-\.]*", " ", text)
     # Remove inline code backticks while preserving code identifier text
     text = re.sub(r"`([^`]+)`", r" \1 ", text)
     text = re.sub(r"`", " ", text)

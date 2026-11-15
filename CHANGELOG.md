@@ -102,6 +102,10 @@ here.
   runs, and places a `<wbr>` ahead of the final CJK break unit before
   ASCII-leading inline tags so Blink's cross-element `text-autospace` overflow
   fallback cannot rewind an entire CJK run and open a justification river.
+- `tools/build_search_index.py` indexes both the base words and the annotations
+  of `<ruby>` runs and unwraps `[text]{.}` emphasis marks while holding fenced
+  and multi-backtick inline code spans in placeholders so code literals and `<`
+  inequalities across lines are never rewritten.
 - Atom entries link their author to `params.author.url`, the key the README
   and the JSON-LD use; they read `author.uri`, which no site sets, and fell
   back to the home page.
