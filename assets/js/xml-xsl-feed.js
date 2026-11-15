@@ -1,5 +1,6 @@
 // Script for the page feed.xsl renders: parses entry HTML that the XSLT
-// engine left as text, and copies the feed address to the clipboard.
+// engine left as text, trims dead Tab stops from code blocks that do not
+// scroll, and copies the feed address to the clipboard.
 //
 // Executed as a template (resources.ExecuteAsTemplate) for the localised
 // strings, then minified and inlined into an XML document inside a CDATA
@@ -18,6 +19,50 @@
     if (el.childElementCount === 0 && el.textContent.trim() !== '') {
       el.innerHTML = el.textContent;
     }
+  }
+})();
+
+// Same keyboard-scrollability rule as modules/code-copy.js, which explains
+// it: Chroma puts tabindex="0" on every code <pre> so Safari keyboard users
+// can scroll wide blocks, and here any block whose lines fit loses that dead
+// Tab stop; a focused <pre> keeps it until it is left. A copy rather than an
+// import, since this file is inlined as a template, not bundled. Runs after
+// the [data-feed-html] pass above so Firefox's parsed markup is in place.
+(function() {
+  var scrollers = [];
+  // One shared handler, so repeated calls while a <pre> is focused register
+  // it once.
+  function syncOnBlur(e) { syncTabStop(e.currentTarget); }
+  function syncTabStop(pre) {
+    if (pre.scrollWidth > pre.clientWidth) {
+      pre.tabIndex = 0;
+    } else if (document.activeElement === pre) {
+      pre.addEventListener('blur', syncOnBlur, { once: true });
+    } else {
+      pre.removeAttribute('tabindex');
+    }
+  }
+  var observer = new ResizeObserver(function(entries) {
+    for (var i = 0; i < entries.length; i++) syncTabStop(entries[i].target);
+  });
+
+  var blocks = document.querySelectorAll('.feed-entry-content .highlight');
+  for (var i = 0; i < blocks.length; i++) {
+    var block = blocks[i];
+    var scroller = block.querySelector('.lntable .lntd:last-child pre') || block.querySelector('pre');
+    var pres = block.querySelectorAll('pre[tabindex]');
+    for (var j = 0; j < pres.length; j++) {
+      if (pres[j] !== scroller) pres[j].removeAttribute('tabindex');
+    }
+    if (scroller) {
+      scrollers.push(scroller);
+      observer.observe(scroller);
+    }
+  }
+  if (scrollers.length > 0) {
+    document.fonts.ready.then(function() {
+      for (var i = 0; i < scrollers.length; i++) syncTabStop(scrollers[i]);
+    });
   }
 })();
 

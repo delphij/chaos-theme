@@ -13,4 +13,35 @@ hl_lines' line-number offset a second time, highlighting the line below.
 {{- if not (isset .Options "linenos") -}}
   {{- $opts = dict "linenos" (ge (len (split .Inner "\n")) 5) -}}
 {{- end -}}
-{{- (transform.HighlightCodeBlock . $opts).Wrapped -}}
+{{- /* Keyboard and screen-reader cleanup of Chroma's markup.
+
+       Chroma puts tabindex="0" on every <pre> it writes, the line-number
+       column's included, so a numbered block cost two Tab stops before its
+       copy button. The two <pre>s are not alike:
+
+       - The line-number <pre> never scrolls on its own (the code column
+         does), and its numbers are noise to a screen reader. Its tabindex is
+         dropped here, and unless the numbers are links (anchorlinenos) its
+         cell is aria-hidden.
+       - The code <pre> is a horizontal scroller (overflow-x: auto in
+         prose.css). WCAG 2.1.1 wants a scroller reachable from the keyboard,
+         and Safari, unlike Chrome 130+ and Firefox, does not make one
+         focusable by itself; that is why Chroma adds the tabindex. It stays
+         in the HTML, so a page without JavaScript (and every feed reader)
+         keeps it, and modules/code-copy.js (or xml-xsl-feed.js on the feed
+         preview) removes it from a block whose lines all fit, where it would
+         be a Tab stop that does nothing.
+
+       The table is only layout (prose.css turns it into a flex row), so it is
+       marked presentational instead of being read as a one-row table.
+
+       Chroma emits the line-number cell as <tr><td class="lntd"> followed by
+       a newline and its <pre>; the \s* allows for that whitespace changing in
+       a Chroma upgrade without the match silently failing. Fenced blocks
+       highlighted outside this hook ({{< highlight >}}) get the same tabindex
+       treatment from code-copy.js. */ -}}
+{{- $hl := string (transform.HighlightCodeBlock . $opts).Wrapped -}}
+{{- $hl = replace $hl `<table class="lntable">` `<table class="lntable" role="presentation">` -}}
+{{- $lnAttr := cond (not .Options.anchorlinenos) ` aria-hidden="true"` "" -}}
+{{- $hl = replaceRE `<tr><td class="lntd">(\s*)<pre tabindex="0"` (printf `<tr><td class="lntd"%s>$1<pre` $lnAttr) $hl -}}
+{{- $hl | safeHTML -}}

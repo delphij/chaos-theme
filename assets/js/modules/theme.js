@@ -6,6 +6,7 @@
 // Extracted from main.js.
 
 import { THEME_CHANGE_EVENT } from './events.js';
+import { announce } from './announce.js';
 
 // Constants
 const THEME_AUTO = 'auto';
@@ -16,9 +17,6 @@ const root = document.documentElement;
 const btn = document.getElementById('themeToggle');
 const storageKey = 'theme-mode';
 const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
-
-// Cached DOM references for performance
-const themeAnnouncement = document.getElementById('theme-announcement');
 
 // Localised strings, from the toggle button's data-* attributes (see
 // _partials/header.html). Read once: the button does not change.
@@ -74,7 +72,7 @@ function applyTheme(mode) {
 
 // Announce theme change to screen readers via aria-live region
 function announceTheme(mode) {
-  if (themeAnnouncement) themeAnnouncement.textContent = ANNOUNCEMENT[mode];
+  announce(ANNOUNCEMENT[mode]);
 }
 
 // Pass a theme change on to Remark42. Its first theme comes from remark_config

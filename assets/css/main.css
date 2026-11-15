@@ -1286,6 +1286,7 @@
   }
 
   .highlight:hover .code-copy-btn,
+  .highlight:focus-within .code-copy-btn,
   .code-copy-btn:focus-visible {
     opacity: 1;
   }

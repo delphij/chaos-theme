@@ -14,6 +14,8 @@
 // literals into `<var class="code-var">`, synchronizes edits across the page,
 // and persists committed changes to the URL query string.
 
+import { CODE_VARS_CHANGE_EVENT } from './modules/events.js';
+
 const IDENT_CHAR = /[A-Za-z0-9_]/;
 const BOUNDARY_CHAR = /[A-Za-z0-9_-]/;
 const DIGIT_CHAR = /[0-9]/;
@@ -450,6 +452,7 @@ function initCodeVars() {
     }
 
     updateChromeState();
+    document.dispatchEvent(new CustomEvent(CODE_VARS_CHANGE_EVENT));
   }
 
   // Hydrate initial values from the URL query string (?zone=...&primary=...).
