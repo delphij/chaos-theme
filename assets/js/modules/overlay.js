@@ -2,8 +2,8 @@
 // Use of this source code is governed by an Apache-2.0
 // license that can be found in the LICENSE file.
 //
-// The mobile menu and table-of-contents overlays: open/close, click-outside
-// and Escape. Extracted from main.js.
+// The mobile menu and table-of-contents overlays (open/close, click-outside,
+// focusout and Escape) plus the skip-link focus handoff to <main>.
 
 // Reusable overlay toggle handler
 function setupOverlayToggle(button, overlay, openClass) {
@@ -26,10 +26,35 @@ function setupOverlayToggle(button, overlay, openClass) {
     link.addEventListener('click', closeOverlay);
   });
 
+  // Close when keyboard focus tabs out of an open overlay and its toggle, so
+  // focus never lands underneath a full-screen mobile/tablet drawer.
+  const onFocusOut = (e) => {
+    if (!overlay.classList.contains(openClass)) return;
+    const next = e.relatedTarget;
+    if (next && !overlay.contains(next) && !button.contains(next)) {
+      closeOverlay();
+    }
+  };
+  overlay.addEventListener('focusout', onFocusOut);
+  button.addEventListener('focusout', onFocusOut);
+
   return { overlay, button, openClass, closeOverlay };
 }
 
 export function initOverlays() {
+  // Move focus to <main> when the skip link is activated without keeping a
+  // permanent tabindex="-1" on <main> (which otherwise makes clicking anywhere
+  // in the prose focus <main> and outline it when pressing Space to scroll).
+  const skipLink = document.querySelector('.skip-link');
+  const main = document.getElementById('main-content');
+  if (skipLink && main) {
+    skipLink.addEventListener('click', () => {
+      main.setAttribute('tabindex', '-1');
+      main.addEventListener('blur', () => main.removeAttribute('tabindex'), { once: true });
+      main.focus({ preventScroll: true });
+    });
+  }
+
   // Setup mobile menu toggle
   const menuOverlay = setupOverlayToggle(
     document.getElementById('menuToggle'),

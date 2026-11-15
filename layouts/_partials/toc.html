@@ -11,8 +11,11 @@ Provides sticky sidebar on desktop, collapsible on tablet, and overlay on mobile
 
 {{- $toc := .TableOfContents }}
 {{- if and $toc (findRE `(?s)<a\s+href=` $toc) }}
-<aside class="toc-wrapper" id="tocWrapper">
-  <button class="toc-toggle" id="tocToggle" aria-label="{{ T "tocToggle" }}" aria-expanded="false" title="{{ T "tableOfContents" }}">
+{{- /* Hugo wraps .TableOfContents in an unnamed <nav id="TableOfContents">;
+       strip that outer wrapper so #tableOfContents is the single landmark. */ -}}
+{{- $tocList := replaceRE `^(?s)\s*<nav[^>]*>(.*)</nav>\s*$` `$1` $toc -}}
+<div class="toc-wrapper" id="tocWrapper">
+  <button type="button" class="toc-toggle" id="tocToggle" aria-label="{{ T "tocToggle" }}" aria-expanded="false" aria-controls="tableOfContents" title="{{ T "tableOfContents" }}">
     <svg class="toc-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <line x1="8" y1="6" x2="21" y2="6"></line>
       <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -25,13 +28,12 @@ Provides sticky sidebar on desktop, collapsible on tablet, and overlay on mobile
       <line x1="18" y1="6" x2="6" y2="18"></line>
       <line x1="6" y1="6" x2="18" y2="18"></line>
     </svg>
-    <span class="sr-only">{{ T "tableOfContents" }}</span>
   </button>
-  <nav class="toc" id="tableOfContents" aria-label="{{ T "tableOfContents" }}">
-    <h2 class="toc-title">{{ T "tableOfContents" }}</h2>
+  <nav class="toc" id="tableOfContents" aria-labelledby="tocTitle">
+    <h2 class="toc-title" id="tocTitle">{{ T "tableOfContents" }}</h2>
     <div class="toc-content">
-      {{ $toc }}
+      {{ $tocList | safeHTML }}
     </div>
   </nav>
-</aside>
+</div>
 {{- end }}

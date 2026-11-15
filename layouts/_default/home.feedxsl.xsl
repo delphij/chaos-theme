@@ -88,7 +88,7 @@
                    "Title" `<xsl:value-of select="atom:feed/atom:title | rss/channel/title" />`
                    "Readers" (delimit $readers (T "listSeparator"))) }}
             </p>
-            <button type="button" class="feed-url-box" id="feedUrlCopy" title="{{ T `copyFeedUrl` }}" aria-label="{{ T `copyFeedUrl` }}">
+            <button type="button" class="feed-url-box" id="feedUrlCopy" title="{{ T `copyFeedUrl` }}">
               <span class="feed-url-label">{{ T "feedUrlLabel" }}</span>
               <span class="feed-url-value" id="feedUrlValue">
                 <xsl:choose>
@@ -106,7 +106,7 @@
                   </xsl:otherwise>
                 </xsl:choose>
               </span>
-              <span class="feed-url-hint" id="feedUrlHint">{{ T "copyFeedUrl" }}</span>
+              <span class="feed-url-hint" id="feedUrlHint" role="status" aria-live="polite">{{ T "copyFeedUrl" }}</span>
             </button>
           </section>
 

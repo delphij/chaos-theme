@@ -32,12 +32,12 @@ neighbour on either side.
 {{- end -}}
 
 {{- if or $prev $next }}
-<ul class="pager" aria-label="{{ T "paginationLabel" }}">
+<nav class="pager" aria-label="{{ T "paginationLabel" }}">
   {{- with $prev }}
-  <li class="page-prev"><a href="{{ .url }}"{{ with .label }} aria-label="{{ . }}"{{ end }}>{{ .text }}</a></li>
+  <a class="page-prev" href="{{ .url }}"{{ with .label }} aria-label="{{ . }}"{{ end }}>{{ .text }}</a>
   {{- end }}
   {{- with $next }}
-  <li class="page-next"><a href="{{ .url }}"{{ with .label }} aria-label="{{ . }}"{{ end }}>{{ .text }}</a></li>
+  <a class="page-next" href="{{ .url }}"{{ with .label }} aria-label="{{ . }}"{{ end }}>{{ .text }}</a>
   {{- end }}
-</ul>
+</nav>
 {{- end -}}

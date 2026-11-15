@@ -267,7 +267,9 @@ function initCodeVars() {
       badge.hidden = true;
       badge.addEventListener('click', () => {
         detailsEl.open = true;
-        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        panel.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+        detailsEl.querySelector('summary')?.focus({ preventScroll: true });
       });
       block.appendChild(badge);
 

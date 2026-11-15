@@ -12,7 +12,7 @@ Renders post footer metadata (tags and last modified date) at the end of an arti
 {{- if or $hasTags $hasMod -}}
 <footer class="post-footer">
   {{- if $hasTags -}}
-  <div class="post-tags" aria-label="{{ T "tags" }}">
+  <div class="post-tags" role="group" aria-label="{{ T "tags" }}">
     {{- partial "taxonomy-links.html" (dict "page" . "taxonomy" "tags") -}}
   </div>
   {{- end -}}

@@ -57,19 +57,19 @@
             </p>
             <div class="stats-bar" role="toolbar" aria-label="{{ T `sitemapFilterToolbar` }}">
               <span class="filter-label">{{ T "sitemapFilterLabel" }}</span>
-              <button type="button" class="stat-pill active" data-filter="post" title="{{ T `sitemapToggleType` (dict `Type` (T `contentTypePost`)) }}">
+              <button type="button" class="stat-pill" aria-pressed="true" data-filter="post" title="{{ T `sitemapToggleType` (dict `Type` (T `contentTypePost`)) }}">
                 <span>📝 {{ T "contentTypePost" }}</span>
                 <span class="stat-num"><xsl:value-of select="count(sitemap:urlset/sitemap:url[contains(sitemap:loc, '/posts/')])"/></span>
               </button>
-              <button type="button" class="stat-pill active" data-filter="category" title="{{ T `sitemapToggleType` (dict `Type` (T `categories`)) }}">
+              <button type="button" class="stat-pill" aria-pressed="true" data-filter="category" title="{{ T `sitemapToggleType` (dict `Type` (T `categories`)) }}">
                 <span>📁 {{ T "categories" }}</span>
                 <span class="stat-num"><xsl:value-of select="count(sitemap:urlset/sitemap:url[contains(sitemap:loc, '/categories/')])"/></span>
               </button>
-              <button type="button" class="stat-pill active" data-filter="tag" title="{{ T `sitemapToggleType` (dict `Type` (T `tags`)) }}">
+              <button type="button" class="stat-pill" aria-pressed="true" data-filter="tag" title="{{ T `sitemapToggleType` (dict `Type` (T `tags`)) }}">
                 <span>🏷️ {{ T "tags" }}</span>
                 <span class="stat-num"><xsl:value-of select="count(sitemap:urlset/sitemap:url[contains(sitemap:loc, '/tags/')])"/></span>
               </button>
-              <button type="button" class="stat-pill active" data-filter="page" title="{{ T `sitemapToggleType` (dict `Type` (T `contentTypePage`)) }}">
+              <button type="button" class="stat-pill" aria-pressed="true" data-filter="page" title="{{ T `sitemapToggleType` (dict `Type` (T `contentTypePage`)) }}">
                 <span>📄 {{ T "contentTypePage" }}</span>
                 <span class="stat-num"><xsl:value-of select="count(sitemap:urlset/sitemap:url[not(contains(sitemap:loc, '/posts/')) and not(contains(sitemap:loc, '/categories/')) and not(contains(sitemap:loc, '/tags/'))])"/></span>
               </button>
@@ -87,11 +87,15 @@
             <table id="sitemapTable">
               <thead>
                 <tr>
-                  <th class="sortable" id="thPath" data-col="path" tabindex="0" role="button" aria-label="{{ T `sortByPath` }}">
-                    {{ T "sitemapColumnPath" }} <span class="sort-icon" id="iconPath">↕</span>
+                  <th id="thPath" data-col="path" aria-sort="none">
+                    <button type="button" class="sort-btn" aria-label="{{ T `sortByPath` }}">
+                      {{ T "sitemapColumnPath" }} <span class="sort-icon" id="iconPath" aria-hidden="true">↕</span>
+                    </button>
                   </th>
-                  <th class="sortable sorted-desc" id="thTime" data-col="time" tabindex="0" role="button" aria-label="{{ T `sortByTimeDescending` }}">
-                    {{ T "sitemapColumnLastModified" }} <span class="sort-icon" id="iconTime">↓</span>
+                  <th id="thTime" data-col="time" aria-sort="descending">
+                    <button type="button" class="sort-btn" aria-label="{{ T `sortByTimeDescending` }}">
+                      {{ T "sitemapColumnLastModified" }} <span class="sort-icon" id="iconTime" aria-hidden="true">↓</span>
+                    </button>
                   </th>
                 </tr>
               </thead>

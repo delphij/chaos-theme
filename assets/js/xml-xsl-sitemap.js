@@ -33,8 +33,10 @@
   var pills = Array.from(document.querySelectorAll('.stat-pill'));
   var thPath = document.getElementById('thPath');
   var thTime = document.getElementById('thTime');
-  var iconPath = document.getElementById('iconPath');
-  var iconTime = document.getElementById('iconTime');
+  var headers = [
+    { col: 'path', th: thPath, btn: thPath && thPath.querySelector('.sort-btn'), icon: document.getElementById('iconPath'), label: I18N.sortByPath, asc: I18N.sortByPathAsc, desc: I18N.sortByPathDesc },
+    { col: 'time', th: thTime, btn: thTime && thTime.querySelector('.sort-btn'), icon: document.getElementById('iconTime'), label: I18N.sortByTime, asc: I18N.sortByTimeAsc, desc: I18N.sortByTimeDesc }
+  ];
 
   // 1. Toggle & filter logic
   function updateVisibility() {
@@ -47,7 +49,8 @@
     });
 
     pills.forEach(function(pill) {
-      pill.classList.toggle('active', !!activeTypes[pill.getAttribute('data-filter')]);
+      var active = !!activeTypes[pill.getAttribute('data-filter')];
+      pill.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
 
     if (emptyRow) {
@@ -143,27 +146,22 @@
     }
 
     // Update Header indicators
-    [
-      { col: 'path', th: thPath, icon: iconPath, label: I18N.sortByPath, asc: I18N.sortByPathAsc, desc: I18N.sortByPathDesc },
-      { col: 'time', th: thTime, icon: iconTime, label: I18N.sortByTime, asc: I18N.sortByTimeAsc, desc: I18N.sortByTimeDesc }
-    ].forEach(function(h) {
+    headers.forEach(function(h) {
       var on = h.col === col;
-      h.th.className = on ? 'sortable sorted-' + newDir : 'sortable';
+      h.th.setAttribute('aria-sort', on ? (newDir === 'asc' ? 'ascending' : 'descending') : 'none');
       h.icon.textContent = on ? (newDir === 'asc' ? '↑' : '↓') : '↕';
-      h.th.setAttribute('aria-label', on ? (newDir === 'asc' ? h.asc : h.desc) : h.label);
+      if (h.btn) {
+        h.btn.setAttribute('aria-label', on ? (newDir === 'asc' ? h.asc : h.desc) : h.label);
+      }
     });
   }
 
-  // Bind table headers click & keyboard (Enter/Space)
-  [thPath, thTime].forEach(function(th) {
-    th.addEventListener('click', function() {
-      sortTable(this.getAttribute('data-col'));
-    });
-    th.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        sortTable(this.getAttribute('data-col'));
-      }
-    });
+  // Bind table header buttons
+  headers.forEach(function(h) {
+    if (h.btn) {
+      h.btn.addEventListener('click', function() {
+        sortTable(h.col);
+      });
+    }
   });
 })();

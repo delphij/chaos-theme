@@ -520,10 +520,8 @@
 
   /* TOC content styling */
   .toc-content {
-    nav {
-      font-size: var(--text-md);
-      line-height: 1.6;
-    }
+    font-size: var(--text-md);
+    line-height: 1.6;
 
     ul {
       list-style: none;
@@ -1567,12 +1565,6 @@
     align-items: center;
     gap: 16px;
     margin: 36px 0;
-    padding: 0;
-
-    /* Pagination items - Remove list styling */
-    li {
-      list-style: none;
-    }
 
     /* Pagination links - Button-style with minimum 44px touch target (WCAG 2.5.5) */
     a {
@@ -1655,19 +1647,19 @@
   .skip-link {
     position: absolute;
     top: -100%;                        /* Completely off-screen */
-    left: 0;
+    left: 8px;
     padding: 10px 18px;                /* Maintained for smooth transition */
     z-index: var(--z-top);
     transition: top var(--transition-fast), opacity var(--transition-fast);
     opacity: 0;                        /* Invisible by default */
 
     &:focus {
-      top: 0;
+      top: 8px;
       opacity: 1;
       background: var(--primary);      /* Visual styles only when focused */
       color: var(--primary-fg);
       font-weight: 600;
-      border-radius: 0 0 var(--radius-sm) 0;
+      border-radius: var(--radius-sm);
     }
   }
 

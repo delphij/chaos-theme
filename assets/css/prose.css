@@ -134,7 +134,8 @@
   a:focus-visible,
   button:focus-visible,
   input:focus-visible,
-  [tabindex]:focus-visible {
+  summary:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
     outline: var(--focus-outline);
     outline-offset: var(--focus-offset);
   }
@@ -153,7 +154,8 @@
     a:focus-visible,
     button:focus-visible,
     input:focus-visible,
-    [tabindex]:focus-visible {
+    summary:focus-visible,
+    [tabindex]:not([tabindex="-1"]):focus-visible {
       outline: 2px solid Highlight;
     }
 

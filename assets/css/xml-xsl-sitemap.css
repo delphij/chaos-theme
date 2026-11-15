@@ -59,24 +59,20 @@
   align-items: center;
   gap: 6px;
   padding: 3px 8px;
-  font: inherit;
   font-size: var(--text-sm);
-  border: 0;
   border-radius: var(--radius-sm);
-  background: transparent;
   color: var(--muted);
-  cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
   transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
-.stat-pill.active {
+.stat-pill[aria-pressed="true"] {
   color: var(--type-color);
   background: var(--paper);
 }
 
-.stat-pill:not(.active) {
+.stat-pill[aria-pressed="false"] {
   text-decoration: line-through;
 }
 
@@ -114,16 +110,30 @@ table {
   font-size: var(--text-sm);
 }
 
-th.sortable {
-  cursor: pointer;
+th[aria-sort] {
+  padding: 0;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem;
+  color: inherit;
+  text-align: left;
+  white-space: nowrap;
   -webkit-user-select: none;
   user-select: none;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
-th.sortable:hover {
+.sort-btn:hover {
   background-color: var(--primary);
   color: var(--primary-fg);
+}
+
+.sort-btn:focus-visible {
+  outline-offset: -3px;
 }
 
 .sort-icon {
@@ -133,8 +143,7 @@ th.sortable:hover {
   opacity: 0.55;
 }
 
-th.sorted-asc .sort-icon,
-th.sorted-desc .sort-icon {
+th:not([aria-sort="none"]) .sort-icon {
   opacity: 1;
 }
 

@@ -5,13 +5,13 @@
     <span class="subtitle">{{ . | markdownify }}</span>
     {{- end -}}
   </a>
-  <button class="btn-icon menu-toggle" id="menuToggle" aria-label="{{ T "menuToggle" }}" aria-expanded="false">☰</button>
+  <button type="button" class="btn-icon menu-toggle" id="menuToggle" aria-label="{{ T "menuToggle" }}" aria-expanded="false" aria-controls="mainNav">☰</button>
   <nav class="main-links" id="mainNav" aria-label="{{ T "mainNavigation" }}">
     {{- partial "menu.html" (dict "menuID" "main" "page" .) }}
     <a href="{{ "atom.xml" | absURL }}" title="{{ T "atomFeed" }}" rel="alternate" type="application/atom+xml">{{ T "feedLabel" }}</a>
   </nav>
   {{- if site.Params.search.enable -}}
-  <button class="btn-icon search-toggle" id="searchToggle" aria-label="{{ T "search" }}" title="{{ T "search" }} (/)">
+  <button type="button" class="btn-icon search-toggle" id="searchToggle" aria-label="{{ T "search" }}" title="{{ T "search" }} (/)">
     {{- partial "icon-search.html" . -}}
   </button>
   {{- end -}}
@@ -19,7 +19,7 @@
          because it is what drives all six: the three aria-labels describe the
          state a click moves to, and the three announcements are only ever
          made from this button's click handler. */ -}}
-  <button class="btn-icon theme-toggle" id="themeToggle" aria-label="{{ T "themeToggle" }}"
+  <button type="button" class="btn-icon theme-toggle" id="themeToggle" aria-label="{{ T "themeToggle" }}"
     data-label-to-dark="{{ T "themeToggleToDark" }}"
     data-label-to-light="{{ T "themeToggleToLight" }}"
     data-label-to-auto="{{ T "themeToggleToAuto" }}"
