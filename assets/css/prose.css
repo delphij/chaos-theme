@@ -207,9 +207,10 @@
     /* Deliberately ragged-right even when article.post is justified on desktop:
        1. List items are mostly short (often <1 or 1-2 lines), so their right edge
           is naturally staggered and never forms a continuous block edge anyway.
-       2. Technical lists concentrate 12-23 char flags, camelCase names and code
-          tokens that cannot break or fall below the <wbr> threshold; justifying
-          line 1 stretches CJK character spacing right above a tight final line 2.
+       2. Technical lists concentrate medium-length flags, camelCase names and
+          code tokens without delimiter break points (or below the 16-char <wbr>
+          threshold); justifying line 1 stretches CJK character spacing right
+          above a tight final line 2.
        3. Nested lists indent inward and do not share the full body measure. */
     text-align: start;
 

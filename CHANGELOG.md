@@ -62,6 +62,11 @@ here.
 - Every `<time>` is set in the monospace stack (`--font-mono`), so the
   Noto Sans Mono subset (about 16 KB) is now loaded, and preloaded, on every
   page instead of only on pages with code.
+- Inline `<code>` receives `<wbr>` break opportunities from 16 characters up
+  (down from 24; bare URL links stay at 24), and delimiters (`.`, `/`, `\`,
+  `?`, `#`, `_`, `::`, `->`) now open the continued line by URL convention
+  rather than trailing the broken line, while keeping decimals, version ranges,
+  CLI `--flag=value` switches and IPv6 `::` addresses intact.
 
 ### Fixed
 
@@ -75,8 +80,10 @@ here.
   full-width characters and ASCII tables keep monospace alignment.
 - `typeset-content.html` skips inline `<code>` during ruby and CJK whitespace
   passes, preserves typed spaces next to symbol-edged `<code>`/`<kbd>`/`<samp>`
-  adjacent to ideographs, and collapses CJK-to-CJK spaces across
-  single-character runs.
+  adjacent to ideographs, collapses CJK-to-CJK spaces across single-character
+  runs, and places a `<wbr>` ahead of the final CJK break unit before
+  ASCII-leading inline tags so Blink's cross-element `text-autospace` overflow
+  fallback cannot rewind an entire CJK run and open a justification river.
 - Atom entries link their author to `params.author.url`, the key the README
   and the JSON-LD use; they read `author.uri`, which no site sets, and fell
   back to the home page.

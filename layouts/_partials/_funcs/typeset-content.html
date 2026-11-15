@@ -24,13 +24,40 @@ Shared by the HTML and feed pipelines so the two cannot drift.
     the space it reads as part of the word before it. See the boundary rules
     below for where that is decided.
 
- 3. Long inline <code> spans and bare URL <a> links (>= 24 chars, outside <pre>)
-    receive <wbr> after safe delimiter characters (., /, ?, =, _, ::, ->) when
-    followed by an alphanumeric character. This prevents unbreakable tokens from
-    dropping whole to the next line and tearing open justification rivers, while
-    keeping short identifiers intact and copy-paste clean.
+ 3. Inline <code> spans (>= 16 chars) and bare URL <a> links (>= 24 chars,
+    outside <pre>) receive <wbr> break opportunities, so an unbreakable token
+    no longer drops whole to the next line and tears open a justification
+    river. Short identifiers stay intact, and <wbr> adds nothing to copied
+    text. Placement follows the usual URL rule (Chicago Manual of Style 14.18):
+    the delimiter starts the next line, so the reader sees the token continue -
+      before  . / \ ? # _ :: ->  (. only after identifier/closing-punct/slash
+                                  and before [A-Za-z_], so 13.2, .., ... and
+                                  *.md never split while ._tcp does; ./, ../,
+                                  ~/, /. and \/ stay together; _ between alnums;
+                                  :: only between identifier scopes, never IPv6;
+                                  # for URL fragments)
+      after   :// = &            (= only in bare URL <a> links, so --flag=value
+                                  and KEY=yes stay intact; & only before query
+                                  key=, so C &var and escaped entities stay
+                                  intact)
+    The text is HTML-escaped by this point, so -> and & are matched as
+    -&gt; and &amp;.
 
-Both stay string rewrites over rendered HTML because neither is a Markdown
+ 4. Before an inline tag whose text opens with an ASCII letter or digit, a
+    <wbr> is placed ahead of the final CJK break unit (attaching trailing
+    small kana, prolonged sound marks, or iteration marks to that character
+    for strict kinsoku, and keeping adjacent closing+opening punctuation pairs
+    undivided so OpenType chws / text-spacing-trim is preserved). In Blink
+    (verified through Chrome 157; inline breaking and auto-spacing live in
+    third_party/blink/renderer/core/layout/inline/{line_breaker,text_auto_space}.cc),
+    when a CJK text node followed by <tag>[A-Za-z0-9] fits the remaining line
+    width on its own but overflows within the 1/8-ic cross-element
+    text-autospace gap, overflow handling drops the entire CJK text node back
+    to the previous inline tag boundary instead of breaking inside it;
+    splitting off the final break unit bounds that fallback without breaking
+    kinsoku or punctuation kerning.
+
+All of these stay string rewrites over rendered HTML because none is a Markdown
 construct: Goldmark has no hook for them, and Hugo cannot load a custom
 Goldmark extension. (Everything that IS a Markdown construct - math, images,
 links, diagrams - is handled structurally instead, by the per-output-format
@@ -127,13 +154,64 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- $seg = $seg | replaceRE (printf `(</(?:code|kbd|samp)>)\s+(%s)` $cjkPunct) "$1$2" -}}
     {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b[^>]*>[A-Za-z0-9])` $cjk) "$1$2" -}}
     {{- $seg = $seg | replaceRE (printf `([A-Za-z0-9]</(?:code|kbd|samp)>)\s+(%s)` $cjk) "$1$2" -}}
-    {{- range (findRE `(?:<code>[^<\n]{24,}</code>|<a\b[^>]*>https?://[^<\n]{24,}</a>)` $seg | uniq) -}}
+    {{- range (findRE `(?:<code>[^<\n]{16,}</code>|<a\b[^>]*>https?://[^<\n]{24,}</a>)` $seg | uniq) -}}
       {{- $inner := replaceRE `^<[^>]+>|</[^>]+>$` "" . -}}
-      {{- $wrapped := $inner | replaceRE `([./?=_]|::|->)([A-Za-z0-9])` "$1<wbr>$2" -}}
+      {{- /* Match query &key= before _ or . inserts <wbr> inside the key name;
+         skipping bare &ident preserves C &var and escaped &amp;quot; literals */ -}}
+      {{- $wrapped := $inner | replaceRE `&amp;([A-Za-z0-9_~%-]+)=` "&amp;<wbr>${1}=" -}}
+      {{- range seq 2 -}}
+        {{- $wrapped = $wrapped | replaceRE `([A-Za-z0-9_)\]/;}])\.([A-Za-z_])` "${1}<wbr>.${2}" -}}
+      {{- end -}}
+      {{- $wrapped = $wrapped | replaceRE `(/|\?|-&gt;)([A-Za-z0-9_~%])` "<wbr>${1}${2}" -}}
+      {{- /* Scope :: breaks only between non-colon-bounded identifiers, never
+         IPv6. Each match consumes both adjacent :: delimiters, so one pass
+         breaks every third scope; three passes complete a chain of any length */ -}}
+      {{- range seq 3 -}}
+        {{- $wrapped = $wrapped | replaceRE `(::|^|[^:A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)::([A-Za-z_~][A-Za-z0-9_]*)(::|[^:A-Za-z0-9_]|$)` "${1}${2}<wbr>::${3}${4}" -}}
+      {{- end -}}
+      {{- range seq 2 -}}
+        {{- $wrapped = $wrapped | replaceRE `([A-Za-z0-9_])\\([A-Za-z0-9_]{2,})` "${1}<wbr>\\${2}" -}}
+      {{- end -}}
+      {{- /* Keep \/, ./, ../, ~/ and /. intact rather than splitting at the slash */ -}}
+      {{- $wrapped = $wrapped | replaceRE `\\<wbr>/` `\/` -}}
+      {{- $wrapped = $wrapped | replaceRE `(^|[^/])/<wbr>\.` "${1}<wbr>/." -}}
+      {{- $wrapped = $wrapped | replaceRE `(^|[^A-Za-z0-9_.])(\.{1,2})<wbr>/` "${1}<wbr>${2}/" -}}
+      {{- $wrapped = $wrapped | replaceRE `(^|[^A-Za-z0-9_])~<wbr>/` "${1}<wbr>~/" -}}
+      {{- range seq 2 -}}
+        {{- $wrapped = $wrapped | replaceRE `\.\./\.\.` "../<wbr>.." -}}
+      {{- end -}}
+      {{- /* Needs the preceding character, so adjacent matches overlap: a second pass catches a_b_c */ -}}
+      {{- range seq 2 -}}
+        {{- $wrapped = $wrapped | replaceRE `([A-Za-z0-9])_([A-Za-z0-9])` "${1}<wbr>_${2}" -}}
+      {{- end -}}
+      {{- $wrapped = $wrapped | replaceRE `([A-Za-z0-9/+-])#([A-Za-z0-9_])` "${1}<wbr>#${2}" -}}
+      {{- if hasPrefix . "<a" -}}
+        {{- $wrapped = $wrapped | replaceRE `=([A-Za-z0-9_~%])` "=<wbr>${1}" -}}
+      {{- end -}}
+      {{- /* Scheme "://" breaks after, not between its slashes; non-scheme "//"
+         stays intact. No break where one already exists (token start, after a
+         space) or right after an escaped quote/angle */ -}}
+      {{- $wrapped = $wrapped | replaceRE `:/<wbr>/` "://<wbr>" -}}
+      {{- $wrapped = $wrapped | replaceRE `/<wbr>/` "//" -}}
+      {{- $wrapped = $wrapped | replaceRE `<wbr><wbr>` "<wbr>" -}}
+      {{- $wrapped = $wrapped | replaceRE `(^|\s|&(?:lt|gt|quot|apos|#(?:[0-9]+|[xX][0-9a-fA-F]+));)<wbr>` "${1}" -}}
       {{- if ne $wrapped $inner -}}
         {{- $seg = replace $seg . (replace . (printf ">%s<" $inner) (printf ">%s<" $wrapped)) -}}
       {{- end -}}
     {{- end -}}
+    {{- /* Bound Blink's cross-tag text-autospace overflow fallback to the final
+         CJK break unit while preserving strict kinsoku and adjacent full-width
+         punctuation kerning (chws / text-spacing-trim). */ -}}
+    {{- $cjkBreakable := `[\x{3042}\x{3044}\x{3046}\x{3048}\x{304a}-\x{3062}\x{3064}-\x{3082}\x{3084}\x{3086}\x{3088}-\x{308d}\x{308f}-\x{3094}\x{30a2}\x{30a4}\x{30a6}\x{30a8}\x{30aa}-\x{30c2}\x{30c4}-\x{30e2}\x{30e4}\x{30e6}\x{30e8}-\x{30ed}\x{30ef}-\x{30f4}\x{30f7}-\x{30fa}\x{3400}-\x{4dbf}\x{4e00}-\x{9fff}\x{f900}-\x{faff}\x{20000}-\x{323af}]` -}}
+    {{- $cjkNoStart := `[\x{3005}\x{3041}\x{3043}\x{3045}\x{3047}\x{3049}\x{3063}\x{3083}\x{3085}\x{3087}\x{308e}\x{3095}\x{3096}\x{309d}\x{309e}\x{30a1}\x{30a3}\x{30a5}\x{30a7}\x{30a9}\x{30c3}\x{30e3}\x{30e5}\x{30e7}\x{30ee}\x{30f5}\x{30f6}\x{30fc}-\x{30fe}]` -}}
+    {{- $cjkUnit := printf `%s%s*` $cjkBreakable $cjkNoStart -}}
+    {{- $cjkChar := `[\x{3005}\x{3041}-\x{3096}\x{309d}\x{309e}\x{30a1}-\x{30fe}\x{3400}-\x{4dbf}\x{4e00}-\x{9fff}\x{f900}-\x{faff}\x{20000}-\x{323af}]` -}}
+    {{- $cjkEndPunct := `[\x{3001}\x{3002}\x{ff0c}\x{ff0e}\x{ff1b}\x{ff1a}\x{ff01}\x{ff1f}\x{ff09}\x{3009}\x{300b}\x{300d}\x{300f}\x{3011}\x{3015}\x{3017}\x{3019}\x{301b}\x{301e}\x{301f}\x{ff3d}\x{ff5d}\x{2019}\x{201d}]` -}}
+    {{- $cjkInsep := `[\x{2014}\x{2026}]` -}}
+    {{- $openPunct := `[\x{3008}\x{300a}\x{300c}\x{300e}\x{3010}\x{3014}\x{3016}\x{3018}\x{301a}\x{301d}\x{ff08}\x{ff3b}\x{ff5b}\x{2018}\x{201c}]` -}}
+    {{- $inlineStart := `(?:<(?:a|code|kbd|samp|strong|em|del|mark|ruby)\b[^>\n]*>)+[A-Za-z0-9]` -}}
+    {{- $seg = $seg | replaceRE (printf `(%s|%s|%s)(%s(?:%s+%s+%s)?%s)` $cjkChar $cjkEndPunct $cjkInsep $cjkUnit $cjkEndPunct $openPunct $cjkUnit $inlineStart) "${1}<wbr>${2}" -}}
+    {{- $seg = $seg | replaceRE (printf `(%s|%s)(%s+%s%s)` $cjkChar $cjkInsep $openPunct $cjkUnit $inlineStart) "${1}<wbr>${2}" -}}
   {{- end -}}
   {{- $out = $out | append $pre $seg -}}
 {{- end -}}
