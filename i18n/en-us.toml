@@ -141,6 +141,10 @@ codeVarModified = '{{ .Desc }} (default: {{ .Default }})'
 search = 'Search'
 searchPlaceholder = 'Search posts… (ESC to close)'
 searchNoResults = 'No matching posts found'
+# Read out by the search dialog's live region after each search. search.js
+# fills in the count, so keep the {{ .Count }} placeholder; it is the number
+# of results listed (at most 25), and the wording avoids plural forms.
+searchResultCount = 'Results: {{ .Count }}'
 searchClose = 'Close'
 searchLoading = 'Loading search index…'
 searchError = 'Failed to load search index'

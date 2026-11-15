@@ -1805,20 +1805,17 @@
     font-size: var(--small-size);
   }
 
-  .search-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .search-item {
-    border-radius: var(--radius-md);
+  .search-item-link {
+    display: block;
+    padding: 10px 14px;
     margin-bottom: 4px;
-    transition: background var(--transition-fast);
+    border-radius: var(--radius-md);
+    color: inherit;
+    transition: background-color var(--transition-fast);
 
     &:hover,
-    &.is-selected {
-      background: var(--paper);
+    &[aria-selected="true"] {
+      background-color: var(--paper);
 
       .search-item-title {
         color: var(--primary);
@@ -1826,12 +1823,6 @@
         text-underline-offset: 0.2em;
       }
     }
-  }
-
-  .search-item-link {
-    display: block;
-    padding: 10px 14px;
-    color: inherit;
   }
 
   .search-item-header {
@@ -1927,7 +1918,7 @@
       border: 1px solid CanvasText;
     }
 
-    .search-item.is-selected {
+    .search-item-link[aria-selected="true"] {
       outline: 1px solid Highlight;
       outline-offset: -2px;
     }

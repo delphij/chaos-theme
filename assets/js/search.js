@@ -115,6 +115,9 @@ function initSearch() {
   const resultsContainer = document.getElementById('searchResults');
   const closeBtn = document.getElementById('searchClose');
   const toggleBtn = document.getElementById('searchToggle');
+  // The dialog's live region (see search.html); optional, so a template
+  // without it, or the stubbed DOM of tools/search_harness.mjs, still works.
+  const statusRegion = document.getElementById('searchStatus');
 
   if (!dialog || !input || !resultsContainer) {
     return;
@@ -138,7 +141,53 @@ function initSearch() {
   const initialHTML = resultsContainer.innerHTML;
 
   // Localised strings, from the dialog's data-* attributes (see search.html).
-  const { msgLoading, msgEmpty, msgError, msgDeprecated } = dialog.dataset;
+  const { msgLoading, msgEmpty, msgCount, msgError, msgDeprecated } = dialog.dataset;
+
+  // Screen-reader announcements for the dialog. The results list is not a
+  // live region: as one it read out every title and summary on each
+  // keystroke, and the role="status" its loading, empty and error messages
+  // once carried did nothing, since a live region inserted together with its
+  // text is often not read. Instead each outcome is written, as one short
+  // sentence, to #searchStatus, which is in the dialog from the start.
+  //
+  // The same sentence is not written twice in a row: when the body index
+  // arrives the current query is searched again, and announcing an unchanged
+  // count would only interrupt. The key is the query as well as the
+  // sentence, so a new query with the same number of results is still read.
+  // A cleared key (resetAnnouncement) lets the next one through.
+  //
+  // This is a copy of modules/announce.js, not an import of it: search.js is
+  // run as a classic script by tools/search_harness.mjs, where an import
+  // statement is a syntax error.
+  let lastAnnouncement = '';
+  let announceTimer = null;
+  function announceStatus(message, query = '') {
+    if (!statusRegion || !message) return;
+    const key = `${query}\n${message}`;
+    if (key === lastAnnouncement) return;
+    lastAnnouncement = key;
+    clearTimeout(announceTimer);
+    // Cleared first and written a moment later (the same 100 ms as
+    // ANNOUNCE_DELAY in announce.js, and a timer for the same reason), so
+    // that the region sees a change even when the text is the same as the
+    // one before the reset.
+    statusRegion.textContent = '';
+    announceTimer = setTimeout(() => {
+      statusRegion.textContent = message;
+    }, 100);
+  }
+  function resetAnnouncement() {
+    lastAnnouncement = '';
+    if (!statusRegion) return;
+    clearTimeout(announceTimer);
+    statusRegion.textContent = '';
+  }
+
+  function resetCombobox() {
+    selectedIndex = -1;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+  }
 
   async function fetchJSON(url) {
     const res = await fetch(url);
@@ -151,7 +200,13 @@ function initSearch() {
   // failure drops it, and the next opening tries again.
   function loadIndex() {
     coreLoad ??= (async () => {
+      resetCombobox();
       resultsContainer.innerHTML = `<div class="search-loading">${escapeHTML(msgLoading)}</div>`;
+      // Hold back the spoken notice so a cached or fast fetch finishes in
+      // silence while the screen reader is still introducing the input.
+      const loadingTimer = setTimeout(() => {
+        if (dialog.open) announceStatus(msgLoading);
+      }, 400);
       try {
         const raw = await fetchJSON(dialog.dataset.indexUrl);
         if (!Array.isArray(raw.docs)) throw new Error('unsupported index format');
@@ -162,8 +217,12 @@ function initSearch() {
         return true;
       } catch (err) {
         coreLoad = null;
+        resetCombobox();
         resultsContainer.innerHTML = `<div class="search-error">${escapeHTML(msgError)} (${escapeHTML(err.message)})</div>`;
+        if (dialog.open) announceStatus(msgError);
         return false;
+      } finally {
+        clearTimeout(loadingTimer);
       }
     })();
     return coreLoad;
@@ -183,7 +242,7 @@ function initSearch() {
         // Folded with the core index's pairs alone.
         docText = [];
         // What is on screen was ranked without the body index.
-        if (dialog.open) performSearch(input.value);
+        if (dialog.open && input.value.trim()) performSearch(input.value);
       } catch {
         // Search still works on the core index; the next opening tries again.
         bodyRequested = false;
@@ -200,9 +259,9 @@ function initSearch() {
   async function openSearch() {
     dialog.showModal();
     input.focus();
-    if (!await loadIndex()) return;
+    if (!await loadIndex() || !dialog.open) return;
     scheduleBodyLoad();
-    performSearch(input.value);
+    if (input.value.trim()) performSearch(input.value);
   }
 
   // Every way out -- the close button, a click on the backdrop, Escape --
@@ -211,8 +270,9 @@ function initSearch() {
   dialog.addEventListener('close', () => {
     input.value = '';
     resultsContainer.innerHTML = initialHTML;
-    selectedIndex = -1;
     currentResults = [];
+    resetCombobox();
+    resetAnnouncement();
   });
 
   toggleBtn?.addEventListener('click', openSearch);
@@ -410,10 +470,14 @@ function initSearch() {
   }
 
   function performSearch(query) {
-    if (!indexData || !query.trim()) {
+    if (!indexData) return;
+    if (!query.trim()) {
       resultsContainer.innerHTML = initialHTML;
       currentResults = [];
-      selectedIndex = -1;
+      resetCombobox();
+      // Nothing to report for an empty box; clearing the key means that
+      // typing the previous query again is announced again.
+      resetAnnouncement();
       return;
     }
 
@@ -540,12 +604,17 @@ function initSearch() {
     currentResults = rankedIds.slice(0, 25).map(id => docs[id]);
 
     renderResults(currentResults, fieldTokens);
+    // The count of results listed, which is at most 25 however many matched.
+    announceStatus(
+      currentResults.length ? msgCount?.replace('{count}', currentResults.length) : msgEmpty,
+      cleanQuery,
+    );
   }
 
   function renderResults(results, tokens) {
     if (results.length === 0) {
       resultsContainer.innerHTML = `<div class="search-empty">${escapeHTML(msgEmpty)}</div>`;
-      selectedIndex = -1;
+      resetCombobox();
       return;
     }
 
@@ -564,41 +633,33 @@ function initSearch() {
         ? ` <span class="search-badge-deprecated">${escapeHTML(msgDeprecated)}</span>`
         : '';
 
-      return `<li class="search-item" role="option" data-idx="${idx}" id="search-opt-${idx}">` +
-        `<a href="${escapeHTML(doc.url)}" class="search-item-link">` +
-          '<div class="search-item-header">' +
-            `<span class="search-item-title">${titleHighlighted}${deprecatedBadge}</span>` +
-            `<span class="search-item-date">${escapeHTML(doc.date)}</span>` +
-          '</div>' +
-          (summaryHighlighted ? `<div class="search-item-summary">${summaryHighlighted}</div>` : '') +
-          tagsHTML +
-        '</a>' +
-      '</li>';
+      return `<a href="${escapeHTML(doc.url)}" class="search-item-link" role="option" id="search-opt-${idx}" aria-selected="false">` +
+        '<div class="search-item-header">' +
+          `<span class="search-item-title">${titleHighlighted}${deprecatedBadge}</span>` +
+          `<span class="search-item-date">${escapeHTML(doc.date)}</span>` +
+        '</div>' +
+        (summaryHighlighted ? `<div class="search-item-summary">${summaryHighlighted}</div>` : '') +
+        tagsHTML +
+      '</a>';
     });
 
-    resultsContainer.innerHTML = `<ul class="search-list" role="listbox">${items.join('')}</ul>`;
+    resultsContainer.innerHTML = `<div id="searchListbox" role="listbox">${items.join('')}</div>`;
     selectedIndex = -1;
+    input.setAttribute('aria-expanded', 'true');
+    input.removeAttribute('aria-activedescendant');
   }
 
   function updateSelection(newIdx) {
-    const items = resultsContainer.querySelectorAll('.search-item');
-    if (items.length === 0) return;
+    const options = resultsContainer.querySelectorAll('[role="option"]');
+    if (options.length === 0) return;
 
-    if (selectedIndex >= 0 && items[selectedIndex]) {
-      items[selectedIndex].classList.remove('is-selected');
-      items[selectedIndex].removeAttribute('aria-selected');
-    }
+    options[selectedIndex]?.setAttribute('aria-selected', 'false');
+    selectedIndex = newIdx < 0 ? options.length - 1 : newIdx >= options.length ? 0 : newIdx;
 
-    selectedIndex = newIdx;
-    if (selectedIndex < 0) selectedIndex = items.length - 1;
-    if (selectedIndex >= items.length) selectedIndex = 0;
-
-    const currentItem = items[selectedIndex];
-    if (currentItem) {
-      currentItem.classList.add('is-selected');
-      currentItem.setAttribute('aria-selected', 'true');
-      currentItem.scrollIntoView({ block: 'nearest' });
-    }
+    const current = options[selectedIndex];
+    current.setAttribute('aria-selected', 'true');
+    input.setAttribute('aria-activedescendant', current.id);
+    current.scrollIntoView({ block: 'nearest' });
   }
 
   // Keyboard navigation inside search input

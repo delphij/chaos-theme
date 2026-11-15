@@ -138,6 +138,10 @@ codeVarModified = '{{ .Desc }} (기본값: {{ .Default }})'
 search = '검색'
 searchPlaceholder = '글 검색… (ESC로 닫기)'
 searchNoResults = '관련 글을 찾을 수 없습니다'
+# Read out by the search dialog's live region after each search. search.js
+# fills in the count, so keep the {{ .Count }} placeholder; it is the number
+# of results listed (at most 25), and the wording avoids plural forms.
+searchResultCount = '검색 결과 {{ .Count }}개'
 searchClose = '닫기'
 searchLoading = '인덱스 불러오는 중…'
 searchError = '인덱스 불러오기에 실패했습니다'

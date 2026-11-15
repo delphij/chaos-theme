@@ -138,6 +138,10 @@ codeVarModified = '{{ .Desc }}（既定値：{{ .Default }}）'
 search = '検索'
 searchPlaceholder = '記事を検索…（ESCで閉じる）'
 searchNoResults = '該当する記事が見つかりません'
+# Read out by the search dialog's live region after each search. search.js
+# fills in the count, so keep the {{ .Count }} placeholder; it is the number
+# of results listed (at most 25), and the wording avoids plural forms.
+searchResultCount = '{{ .Count }}件の結果'
 searchClose = '閉じる'
 searchLoading = 'インデックスを読み込み中…'
 searchError = 'インデックスの読み込みに失敗しました'

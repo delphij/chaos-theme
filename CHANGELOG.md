@@ -125,6 +125,15 @@ here.
 - No more deprecation notices from Hugo 0.169: the feeds and the page title no
   longer read `.Params.date` or `.Params.title`, and the language falls back
   through `Language.Locale` instead of the deprecated `LanguageCode`.
+- Keyboard navigation and WAI-ARIA compliance across interactive controls:
+  `Tab` skips Chroma's line-number `<pre>`, and a code `<pre>` is a Tab stop
+  only while its lines overflow and need scrolling (the line-number table is
+  presentational); clicking prose and pressing `Space` no longer outlines
+  `<main>`; the search modal uses a valid ARIA 1.2 combobox/listbox with
+  `aria-activedescendant` and reads out loading, failure and the result count
+  through a live region of its own; TOC, pager,
+  post-tag group, overlay focus-out, feed URL copy and sitemap filter/sort
+  controls expose standard landmark and state semantics.
 
 ### Deprecated
 

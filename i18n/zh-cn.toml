@@ -138,6 +138,10 @@ codeVarModified = '{{ .Desc }}（默认值：{{ .Default }}）'
 search = '搜索'
 searchPlaceholder = '搜索文章…（按ESC退出）'
 searchNoResults = '未找到相关文章'
+# Read out by the search dialog's live region after each search. search.js
+# fills in the count, so keep the {{ .Count }} placeholder; it is the number
+# of results listed (at most 25), and the wording avoids plural forms.
+searchResultCount = '{{ .Count }}条结果'
 searchClose = '关闭'
 searchLoading = '正在载入索引…'
 searchError = '索引加载失败'
