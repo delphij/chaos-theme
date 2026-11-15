@@ -28,6 +28,17 @@ here.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-14
+
+A timeline and chapter card for series; Chinese and Japanese emphasis in
+KaiTi and Mincho, with emphasis marks (`[text]{.}`) separate from bold;
+code parameters that follow into inline code, section-link anchors on
+headings and paired row hover on numbered code blocks; and printouts with
+hanging line and note numbers and clickable monospace URLs. Requires Hugo
+0.158.0 or later, as before. Sites that use ruby annotations or emphasis
+marks should rebuild their search index with this version's
+`build_search_index.py`.
+
 ### Added
 
 - A dedicated timeline view for the `/series/` taxonomy index: one section per
@@ -47,7 +58,12 @@ here.
   as a table of contents.
 - Section-link copy anchors on article headings (`h2`–`h6`), revealed on hover
   or keyboard focus: clicking copies the section URL (preserving any active
-  `code_vars` query parameters) and updates the location hash in place.
+  `code_vars` query parameters) and updates the location hash in place (new
+  i18n key `copyHeadingLink`).
+- Row hover highlight on numbered code blocks (new property
+  `--code-line-hover`), paired across the hanging line number and its code line
+  on mouse hover so tracking wide code horizontally keeps the line number lit
+  while still letting a highlighted (`hl`) or diff row show through.
 - Emphasis marks (`[text]{.}` in prose, rendered as `<em class="em-dot">`):
   upright body type with filled dots under the text in Chinese, sesame marks
   over right in Japanese, and filled dots over right in Korean, degrading to
@@ -88,12 +104,29 @@ here.
   from the new i18n key `readingStatsParen`: full-width `（…）` with no
   leading space in Chinese and Japanese, ` (…)` in English and Korean.
   `readingStats` itself is unchanged, so a site overriding it keeps working.
+- In print, cross-page internal links are numbered and listed under "Notes"
+  alongside external links, while same-page `#anchor` jumps stay unmarked. URLs
+  in the notes list, bare URL links in the body, and the end-of-article
+  permalink caption render as clickable monospace links (`--font-mono`) with
+  standard-port `https://` and bare-origin trailing `/` stripped from the
+  visible text, keeping the full `href` in exported PDFs.
 
 ### Fixed
 
 - Headings, post titles, metadata and series navigation keep start alignment on
   article pages, rather than inheriting `text-align: justify` and stretching
   the lines of multi-line titles across the full width.
+- Callout headings (`.alert-heading`) stay in inline flow instead of a flex
+  row, avoiding unwrapped flex columns and `0.35em` gaps around inline `<code>`,
+  `<em>`, `<a>`, `<ruby>` and `<wbr>`, drop their bottom margin when the heading
+  is the alert's only content, and preserve inline Markdown in custom titles
+  joined to CJK body text under `eastAsianLineBreaks`.
+- Mobile `768px` layout breakpoints are scoped to `@media screen`, so Blink's
+  A4/Letter printable viewport (~680–703px) keeps desktop prose justification,
+  spacing and hanging list markers instead of triggering mobile overrides.
+- Numbered code blocks wrap long lines in print and hang per-row CSS counters
+  (`--ln-start`) in the left margin across Blink and WebKit, matching the
+  hanging note numbers of `#print-references ol`.
 - CJK punctuation trimming (`text-spacing-trim: normal`, `"chws" 1`,
   `line-break: strict`) extends to post summaries and styled feed entries, drops
   the unparsed `text-spacing: auto-spaces normal` declaration, and turns off
@@ -131,7 +164,7 @@ here.
   presentational); clicking prose and pressing `Space` no longer outlines
   `<main>`; the search modal uses a valid ARIA 1.2 combobox/listbox with
   `aria-activedescendant` and reads out loading, failure and the result count
-  through a live region of its own; TOC, pager,
+  through a live region of its own (new i18n key `searchResultCount`); TOC, pager,
   post-tag group, overlay focus-out, feed URL copy and sitemap filter/sort
   controls expose standard landmark and state semantics.
 
@@ -462,7 +495,8 @@ First stable release. Requires Hugo 0.158.0 or later, standard edition.
 - `tools/check.py` no longer reports the feeds' own indentation as leaked
   template whitespace when the site is built without `--minify`.
 
-[Unreleased]: https://github.com/delphij/chaos-theme/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/delphij/chaos-theme/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/delphij/chaos-theme/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/delphij/chaos-theme/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/delphij/chaos-theme/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/delphij/chaos-theme/compare/v1.1.0...v1.2.0
