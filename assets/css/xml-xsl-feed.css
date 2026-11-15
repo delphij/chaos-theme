@@ -132,8 +132,15 @@
   gap: 6px 10px;
 }
 
+/* Entry bodies are article prose, so they take article.post's CJK
+   punctuation handling (text-autospace comes from prose.css on body). No
+   text-spacing shorthand (see article.post in main.css): the longhands do the
+   work. */
 .feed-entry-content {
   margin: 14px 0;
+  text-spacing-trim: normal;
+  font-feature-settings: "chws" 1;
+  line-break: strict;
 }
 
 .feed-entry-content img {

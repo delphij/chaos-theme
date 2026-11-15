@@ -908,26 +908,34 @@
      Includes justified text and CJK spacing optimizations.
      ========================================================================== */
 
+  /* Shared CJK prose punctuation and line-breaking rules for article bodies
+     and list-page summaries (text-autospace is inherited from body; feed
+     entries get the same rules in xml-xsl-feed.css):
+     - text-spacing-trim: Optimizes CJK punctuation spacing (Chrome 133+, Safari 18.2+)
+     - No text-spacing shorthand: CSS Text 4 defines it, but Chrome does not
+       parse it (CSS.supports() rejects even "normal"), and "auto-spaces" was
+       never a valid value, so the declaration was dropped wherever it was
+       read. The two longhands it would set are written out instead:
+       text-spacing-trim here, text-autospace inherited from body.
+     - font-feature-settings: "chws" 1 - Enables OpenType Contextual Half-width Spacing for adjacent CJK punctuation
+     - line-break: strict - Enforces strict CJK line-breaking rules */
+  article.post,
+  .post-summary-content {
+    text-spacing-trim: normal;
+    font-feature-settings: "chws" 1;
+    line-break: strict;
+  }
+
   article.post {
-    /* Chinese typography enhancements for professional text layout
-       (text-autospace is inherited from body)
-       - text-align: justify - Keeps the right edge on the character grid; CJK lines
+    /* - text-align: justify - Keeps the right edge on the character grid; CJK lines
          justify between ideographs, so a full line needs at most a sliver of slack.
          With start alignment, every line that ends on trimmed punctuation or a
          Latin run left a visibly ragged edge.
        - text-wrap is left at its default. WebKit applies pretty to the whole
          paragraph and ends lines early to even out the rag even where the next
          character would fit and no kinsoku rule applies; Blink only adjusts the
-         last few lines. Under justify those early breaks would also loosen spacing.
-       - text-spacing-trim: Optimizes CJK punctuation spacing (Chrome 133+, Safari 18.2+)
-       - text-spacing: Standard shorthand for CJK spacing and trimming
-       - font-feature-settings: "chws" 1 - Enables OpenType Contextual Half-width Spacing for adjacent CJK punctuation
-       - line-break: strict - Enforces strict CJK line-breaking rules */
+         last few lines. Under justify those early breaks would also loosen spacing. */
     text-align: justify;
-    text-spacing-trim: normal;
-    text-spacing: auto-spaces normal;
-    font-feature-settings: "chws" 1;
-    line-break: strict;
 
     /* Narrow viewports have too few CJK characters per line to absorb Latin/code tokens under justify */
     @media (max-width: 768px) {

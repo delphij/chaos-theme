@@ -204,8 +204,13 @@
     margin: 1em 0;                      /* Consistent spacing before and after lists */
     font-variant-numeric: tabular-nums; /* Consistent number width */
     padding-left: 0;
-    /* Lists often have narrower measures and long inline code/URLs;
-       ragged-right prevents justification rivers before unbreakable tokens */
+    /* Deliberately ragged-right even when article.post is justified on desktop:
+       1. List items are mostly short (often <1 or 1-2 lines), so their right edge
+          is naturally staggered and never forms a continuous block edge anyway.
+       2. Technical lists concentrate 12-23 char flags, camelCase names and code
+          tokens that cannot break or fall below the <wbr> threshold; justifying
+          line 1 stretches CJK character spacing right above a tight final line 2.
+       3. Nested lists indent inward and do not share the full body measure. */
     text-align: start;
 
     /* Lists on mobile - Indent safely to prevent markers from clipping at the screen edge */
@@ -291,7 +296,11 @@
     background: var(--code-bg);
     overflow-x: auto;
     font-size: var(--small-size);
-    hanging-punctuation: none;         /* Disable for monospace code blocks */
+    /* Disable prose CJK spacing/punctuation trimming inside monospace slabs */
+    hanging-punctuation: none;
+    text-autospace: no-autospace;
+    text-spacing-trim: space-all;
+    font-feature-settings: normal;
   }
 
   /* Inline code - no backdrop of its own: the monospace face already separates

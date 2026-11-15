@@ -68,6 +68,11 @@ here.
 - Headings, post titles, metadata and series navigation keep start alignment on
   article pages, rather than inheriting `text-align: justify` and stretching
   the lines of multi-line titles across the full width.
+- CJK punctuation trimming (`text-spacing-trim: normal`, `"chws" 1`,
+  `line-break: strict`) extends to post summaries and styled feed entries, drops
+  the unparsed `text-spacing: auto-spaces normal` declaration, and turns off
+  `text-autospace` and OpenType punctuation features inside `<pre>` blocks so
+  full-width characters and ASCII tables keep monospace alignment.
 - Atom entries link their author to `params.author.url`, the key the README
   and the JSON-LD use; they read `author.uri`, which no site sets, and fell
   back to the home page.
