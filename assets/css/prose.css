@@ -217,7 +217,7 @@
     text-align: start;
 
     /* Lists on mobile - Indent safely to prevent markers from clipping at the screen edge */
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       padding-left: 1.4em;
     }
 
@@ -234,7 +234,7 @@
     padding-left: 1.5em;
     margin: 0.3em 0;
 
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       padding-left: 1.2em;
     }
   }
@@ -548,7 +548,7 @@
 
       /* Hanging indent for line numbers on screens > 768px where there's space
          Synchronized with list hanging indent breakpoint (769px) */
-      @media (min-width: 769px) {
+      @media screen and (min-width: 769px) {
         margin: 0 0 0 -3em;              /* Shift left so line numbers hang in margin */
         width: calc(100% + 3em);         /* Keep code column right edge flush with prose */
       }
@@ -590,13 +590,13 @@
     .lntd:first-child {
       flex: 0 0 auto;
 
-      @media (min-width: 769px) {
+      @media screen and (min-width: 769px) {
         pre {
           background: var(--bg);
         }
       }
 
-      @media (max-width: 768px) {
+      @media screen and (max-width: 768px) {
         display: none;
       }
     }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by an Apache-2.0
 // license that can be found in the LICENSE file.
 //
-// While printing, turns an article's Markdown footnotes and external links
+// While printing, turns an article's Markdown footnotes and cross-page links
 // into one sequence of notes, numbered in the order they appear and listed
 // under one heading ahead of the post footer, and puts the page back
 // afterwards. The screen is never touched.
@@ -32,13 +32,36 @@ function footnoteSection() {
 }
 
 // Brackets for a URL set after its link text: full-width in CJK prose.
-const CJK_PAGE = /^(zh|ja|ko)\b/i.test(document.documentElement.lang);
-const bracketed = url => (CJK_PAGE ? `\uFF08${url}\uFF09` : ` (${url})`);
+// Standard-port https:// (and a bare origin's trailing slash) is stripped in
+// visible text while keeping the full href on <a class="print-url"> so saved
+// PDFs remain clickable and explicit http://, ftp:// or :port URLs stay intact.
+const [OPEN, CLOSE] = /^(zh|ja|ko)\b/i.test(document.documentElement.lang)
+  ? ['\uFF08', '\uFF09']
+  : [' (', ')'];
+const BARE_URL_RE = /^[a-z][a-z0-9+.-]*:\/\//i;
+const HTTPS_ORIGIN_RE = /^https:\/\/([^/@:?#]+)(?:\/?$|([/?#].*))/;
+const CHROME_SELECTOR = '.meta, .footnotes, .series-nav, .post-footer, .print-only, #remark42, .pager';
+
+const displayUrl = url => url.replace(HTTPS_ORIGIN_RE, '$1$2');
+
+function isNoteLink(link, pageUrl) {
+  return Boolean(link.textContent.trim()) &&
+         /^(https?:|ftp:|telnet:)/i.test(link.protocol) &&
+         link.href.split('#')[0] !== pageUrl;
+}
+
+function urlLink(link) {
+  const a = document.createElement('a');
+  a.className = 'print-url';
+  a.href = link.href;
+  a.textContent = displayUrl(link.href);
+  return a;
+}
 
 // A copy of a footnote's text for the notes list: its back-link dropped with
-// the no-break space Goldmark puts before it, and each external link inside it
-// followed by its URL in brackets.
-function footnoteBody(item) {
+// the no-break space Goldmark puts before it, and each cross-page link inside
+// it followed by its URL in brackets.
+function footnoteBody(item, pageUrl) {
   const copy = item.cloneNode(true);
   copy.querySelectorAll('.footnote-backref').forEach(back => {
     const before = back.previousSibling;
@@ -47,9 +70,12 @@ function footnoteBody(item) {
     }
     back.remove();
   });
-  copy.querySelectorAll('a[href*="://"]').forEach(link => {
-    if (link.textContent.trim() !== link.href) {
-      link.after(bracketed(link.href));
+  copy.querySelectorAll('a[href]').forEach(link => {
+    if (!isNoteLink(link, pageUrl)) return;
+    if (displayUrl(link.textContent.trim()) === displayUrl(link.href)) {
+      link.replaceWith(urlLink(link));
+    } else {
+      link.after(OPEN, urlLink(link), CLOSE);
     }
   });
   copy.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
@@ -59,10 +85,10 @@ function footnoteBody(item) {
 function numberNotes() {
   const notes = [];
   const footnoteNumbers = new Map();
+  const pageUrl = location.href.split('#')[0];
 
-  const marks = articlePost.querySelectorAll('a.footnote-ref, a[href*="://"]');
-  for (const mark of marks) {
-    if (mark.closest('.footnotes')) continue;
+  for (const mark of articlePost.querySelectorAll('a[href]')) {
+    if (mark.closest(CHROME_SELECTOR)) continue;
 
     if (mark.classList.contains('footnote-ref')) {
       const target = mark.getAttribute('href');
@@ -73,7 +99,7 @@ function numberNotes() {
         num = notes.length + 1;
         footnoteNumbers.set(target, num);
         // The sup Goldmark wraps the mark in carries the id to come back to.
-        notes.push({ backId: mark.parentElement.id, body: footnoteBody(item) });
+        notes.push({ backId: mark.parentElement.id, body: footnoteBody(item, pageUrl) });
       }
       const text = mark.textContent;
       mark.textContent = String(num);
@@ -85,6 +111,10 @@ function numberNotes() {
       continue;
     }
 
+    if (!isNoteLink(mark, pageUrl)) continue;
+
+    const isBareUrl = BARE_URL_RE.test(mark.textContent.trim());
+    if (isBareUrl) mark.classList.add('print-url');
     const num = notes.length + 1;
     const backId = `print-note-ref-${num}`;
     const sup = document.createElement('sup');
@@ -95,8 +125,11 @@ function numberNotes() {
     ref.textContent = String(num);
     sup.append(ref);
     mark.after(sup);
-    restore.push(() => sup.remove());
-    notes.push({ backId, body: [document.createTextNode(mark.href)] });
+    restore.push(() => {
+      sup.remove();
+      if (isBareUrl) mark.classList.remove('print-url');
+    });
+    notes.push({ backId, body: [urlLink(mark)] });
   }
   return notes;
 }

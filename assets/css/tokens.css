@@ -563,9 +563,9 @@
     }
   }
 
-  /* Mobile & Small Tablet breakpoint (<= 768px): the token half of it. The rest
-     of that breakpoint's rules stay with the components they restyle. */
-  @media (max-width: 768px) {
+  /* Mobile & Small Tablet breakpoint (<= 768px, screen only so A4/Letter
+     printable page widths ~680-703px in Blink do not inherit mobile tokens). */
+  @media screen and (max-width: 768px) {
     :root {
       --max-width: 100%;
       --gutter: 16px;

@@ -35,6 +35,10 @@
       600px  max   the archive timeline's date column only: narrowed, and
                    the full date swapped for the short one
 
+   769px and 768px are written as `screen and (...)`: a page in Blink is
+   about 680-703px wide on A4/Letter, which would otherwise pull the mobile
+   layout onto paper. Print sets its own rules at the end of this file.
+
    Also: (prefers-reduced-motion: reduce) with the view transition here and
    the rest in prose.css, (forced-colors: active) with the :focus-visible
    styles in prose.css and, here, each component whose tinted ground is its
@@ -183,7 +187,7 @@
     letter-spacing: -0.01em;
     text-align: start;
 
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       font-size: 22px;
     }
   }
@@ -271,7 +275,7 @@
       padding: 10px var(--gutter);
     }
 
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       padding: 8px var(--gutter);
       gap: 8px;
       position: relative;
@@ -294,7 +298,7 @@
     }
 
     /* Brand comes first, takes remaining space */
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       font-size: var(--font-size-base);
       flex: 1;
     }
@@ -310,7 +314,7 @@
       max-width: 35em;
 
       /* Hide subtitle on mobile / small tablets */
-      @media (max-width: 768px) {
+      @media screen and (max-width: 768px) {
         display: none;
       }
     }
@@ -330,7 +334,7 @@
     flex-shrink: 0;
 
     /* Hide main navigation by default on mobile */
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       display: none;
       flex-direction: column;
       position: absolute;
@@ -359,7 +363,7 @@
       border-radius: var(--radius-md);
 
       /* Stack navigation links vertically on mobile */
-      @media (max-width: 768px) {
+      @media screen and (max-width: 768px) {
         padding: 12px 16px;
         font-size: var(--font-size-base);
         width: 100%;
@@ -390,7 +394,7 @@
     line-height: 1;
 
     /* Show hamburger menu toggle on mobile */
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       display: inline-flex;
     }
   }
@@ -937,7 +941,7 @@
     text-align: justify;
 
     /* Narrow viewports have too few CJK characters per line to absorb Latin/code tokens under justify */
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       text-align: start;
     }
   }
@@ -969,7 +973,7 @@
     color: var(--muted);
 
     /* Post footer on mobile - Stack tags and modification date cleanly */
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       flex-direction: column;
       align-items: stretch;              /* baseline is meaningless once stacked */
       gap: 8px;
@@ -984,7 +988,7 @@
 
       /* flex-basis follows the main axis, so the 300px row-width hint would
          otherwise become a 300px block height once the footer stacks. */
-      @media (max-width: 768px) {
+      @media screen and (max-width: 768px) {
         flex: 0 1 auto;
       }
     }
@@ -994,7 +998,7 @@
       flex-shrink: 0;
       margin-left: auto;
 
-      @media (max-width: 768px) {
+      @media screen and (max-width: 768px) {
         margin-left: 0;
       }
     }
@@ -1086,7 +1090,7 @@
     width: 100%;
     contain: layout style;
 
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       margin: 1.5em 0;
       max-width: 100%;
     }
@@ -1101,7 +1105,7 @@
     background: var(--ground-head);
     font-size: var(--small-size);
 
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       padding: 8px 1em;
     }
   }
@@ -1115,7 +1119,7 @@
     font-size: var(--text-sm);
     letter-spacing: 0.2px;
 
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       font-size: var(--text-xs);
       gap: 6px;
     }
@@ -1127,7 +1131,7 @@
       width: 15px;
       height: 15px;
 
-      @media (max-width: 768px) {
+      @media screen and (max-width: 768px) {
         width: 14px;
         height: 14px;
       }
@@ -1148,7 +1152,7 @@
   .x-card-body {
     padding: 1em 1.25em;
 
-    @media (max-width: 768px) {
+    @media screen and (max-width: 768px) {
       padding: 0.9em 1em;
     }
   }
@@ -1187,7 +1191,7 @@
       overflow-wrap: break-word;
       text-align: left;
 
-      @media (max-width: 768px) {
+      @media screen and (max-width: 768px) {
         font-size: var(--text-md);
         line-height: 1.6;
         margin-bottom: 10px;
@@ -1984,9 +1988,10 @@
       margin: 0;
       padding: 0;
 
-      /* Article pages: minimal padding to prevent clipping hanging list markers */
+      /* Article pages: minimal padding to prevent clipping hanging list markers,
+         three-digit print note numbers, and hanging code line numbers */
       &:has(.content-layout) {
-        padding: 0 var(--gutter);      /* 24px - enough for hanging list numbers without excessive margins */
+        padding: 0 30px;
       }
     }
 
@@ -2032,6 +2037,12 @@
       widows: 7;
     }
 
+    pre:not(.mermaid) {
+      overflow: visible;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
     /* Avoid breaking a code block immediately after a heading */
     h1 + pre, h2 + pre, h3 + pre,
     h1 + .highlight, h2 + .highlight, h3 + .highlight {
@@ -2045,7 +2056,14 @@
       color: var(--text);
     }
 
-    /* Notes: footnotes and external links numbered as one sequence by
+    /* URLs in print notes, permalink, and bare body links use the monospace
+       face so 0/O and 1/l/I stay unambiguous on paper. */
+    .print-url {
+      font-family: var(--font-mono);
+      font-size: 0.92em;
+    }
+
+    /* Notes: footnotes and links numbered as one sequence by
        print-footnotes.js. A Markdown footnote's mark and a link's mark look
        alike, since they lead to the same list. */
     a.footnote-ref,
@@ -2080,7 +2098,6 @@
       ol {
         font-size: 0.85em;
         line-height: 1.6;
-        padding-left: 2em;
         margin: 0;
       }
 
@@ -2134,6 +2151,10 @@
         color: var(--text);
         font-weight: 600;
       }
+
+      a {
+        color: inherit;
+      }
     }
 
     /* Disable CSS containment for proper print layout */
@@ -2185,12 +2206,43 @@
       padding: 8px;
     }
 
-    /* The line-number table, a block on screen, is a full-width table again */
+    /* Keep hanging line numbers inside quote/callout cards */
+    blockquote .highlight:has(.lntable) {
+      margin-left: 1.5em;
+    }
+
+    /* Hanging line numbers on paper: hide the screen's separate scroll-pinned
+       <pre> column in both Blink and WebKit and hang a per-row counter outside
+       .highlight's 8px left padding, so wrapped lines and page breaks never
+       drift out of alignment. */
     .chroma .lntable {
-      display: table;
-      margin: 0;                       /* A page is under 769px, so the line-number
-                                          column is hidden: nothing to hang */
-      width: 100%;
+      counter-reset: code-line var(--ln-start, 0);
+
+      tr,
+      .lntd:last-child {
+        display: block;
+        break-inside: auto;
+      }
+
+      .lntd:first-child {
+        display: none;
+      }
+
+      .line {
+        position: relative;
+
+        &::before {
+          counter-increment: code-line;
+          content: counter(code-line);
+          position: absolute;
+          right: calc(100% + 8px + 0.5em);
+          color: var(--muted);
+        }
+      }
+
+      .cl {
+        min-width: 0;
+      }
     }
 
     /* Syntax highlighting needs nothing here: the dark --syntax-* roles are

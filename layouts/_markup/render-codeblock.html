@@ -41,7 +41,9 @@ hl_lines' line-number offset a second time, highlighting the line below.
        highlighted outside this hook ({{< highlight >}}) get the same tabindex
        treatment from code-copy.js. */ -}}
 {{- $hl := string (transform.HighlightCodeBlock . $opts).Wrapped -}}
-{{- $hl = replace $hl `<table class="lntable">` `<table class="lntable" role="presentation">` -}}
+{{- $lnStart := sub (int (or .Options.linenostart 1)) 1 -}}
+{{- $lnStyle := cond (ne $lnStart 0) (printf ` style="--ln-start: %d"` $lnStart) "" -}}
+{{- $hl = replace $hl `<table class="lntable">` (printf `<table class="lntable" role="presentation"%s>` $lnStyle) -}}
 {{- $lnAttr := cond (not .Options.anchorlinenos) ` aria-hidden="true"` "" -}}
 {{- $hl = replaceRE `<tr><td class="lntd">(\s*)<pre tabindex="0"` (printf `<tr><td class="lntd"%s>$1<pre` $lnAttr) $hl -}}
 {{- $hl | safeHTML -}}

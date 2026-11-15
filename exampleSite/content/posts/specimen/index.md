@@ -230,4 +230,4 @@ X（Twitter）的帖子从构建时缓存的数据渲染成静态卡片，不加
 分隔线下方的段落。
 
 [^note]: 脚注的内容出现在文章末尾，带有返回正文的链接。
-[^link]: 脚注语法见[CommonMark的扩展说明](https://github.github.com/gfm/)。打印时，脚注与正文中的外部链接合编为同一组「注释」。
+[^link]: 脚注语法见[CommonMark的扩展说明](https://github.github.com/gfm/)。打印时，脚注与正文中的链接合编为同一组「注释」。

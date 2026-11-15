@@ -29,7 +29,7 @@
       {{- with site.Title }}
       <span>{{ . }}</span>
       {{- end }}
-      <span>{{ $.Permalink }}</span>
+      <span><a class="print-url" href="{{ $.Permalink }}">{{ replaceRE `^https://([^/@:?#]+)(?:/?$|([/?#].*))` "$1$2" $.Permalink }}</a></span>
     </p>
   </div>
   {{- end }}
