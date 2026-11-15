@@ -2,7 +2,8 @@
 // Use of this source code is governed by an Apache-2.0
 // license that can be found in the LICENSE file.
 //
-// Keyboard scrollability and the copy button on highlighted code blocks.
+// Keyboard scrollability, row hover pairing, and the copy button on
+// highlighted code blocks.
 
 import { copyWithFeedback } from './clipboard.js';
 import { CODE_VARS_CHANGE_EVENT } from './events.js';
@@ -56,19 +57,57 @@ export function initCodeCopy() {
     entries.forEach(entry => syncTabStop(entry.target));
   });
 
+  // Pair each margin line number (.lnt) with its code row (.line) across the
+  // two <td class="lntd"> columns lazily on first mouse hover so hovering
+  // either highlights both; CSS :hover covers single-column fallback when
+  // JavaScript is off, and touch or non-hovered blocks pay zero setup cost.
+  const rows = new WeakMap();
+  let activePair = null;
+  const setPair = next => {
+    if (next === activePair) return;
+    activePair?.forEach(el => el.classList.remove('is-hovered'));
+    activePair = next;
+    activePair?.forEach(el => el.classList.add('is-hovered'));
+  };
+  const clearHover = () => setPair(null);
+  const onLineOver = e => {
+    if (e.pointerType !== 'mouse') return;
+    const el = e.target.closest('.line, .lnt');
+    if (el && !rows.has(el)) {
+      const nums = e.currentTarget.querySelectorAll('.lntd:first-child .lnt');
+      const lines = e.currentTarget.querySelectorAll('.lntd:last-child > pre > code > .line');
+      if (nums.length === lines.length) {
+        nums.forEach((num, i) => {
+          const pair = [num, lines[i]];
+          rows.set(num, pair);
+          rows.set(lines[i], pair);
+        });
+      } else {
+        rows.set(el, null);
+      }
+    }
+    setPair(el ? rows.get(el) : null);
+  };
+
   blocks.forEach(block => {
     // With line numbers, Chroma writes two <pre>s into a layout table and
     // only the code column's scrolls; the line-number <pre> beside it never
     // does. render-codeblock.html already took that one's tabindex away, but
     // a block highlighted outside the hook ({{< highlight >}}) still has it,
     // so every <pre> but the scroller loses it here.
-    const scroller = block.querySelector('.lntable .lntd:last-child pre') || block.querySelector('pre');
+    const lntable = block.querySelector('.lntable');
+    const scroller = lntable?.querySelector('.lntd:last-child pre') || block.querySelector('pre');
     block.querySelectorAll('pre[tabindex]').forEach(pre => {
       if (pre !== scroller) pre.removeAttribute('tabindex');
     });
     if (scroller) {
       scrollers.push(scroller);
       resizeObserver.observe(scroller);
+    }
+
+    if (lntable) {
+      lntable.addEventListener('pointerover', onLineOver);
+      lntable.addEventListener('pointerleave', clearHover);
     }
 
     const code = scroller || block.querySelector('code');

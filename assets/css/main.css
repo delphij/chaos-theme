@@ -38,8 +38,8 @@
    Also: (prefers-reduced-motion: reduce) with the view transition here and
    the rest in prose.css, (forced-colors: active) with the :focus-visible
    styles in prose.css and, here, each component whose tinted ground is its
-   only edge, (hover: none) with the
-   code copy button, and print at the end.
+   only edge, (hover: hover) on numbered code rows in prose.css, (hover: none)
+   with the code copy button, and print at the end.
    ========================================================================== */
 
 /* Document-level at-rules. They configure the document rather than style an

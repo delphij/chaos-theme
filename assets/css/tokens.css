@@ -391,9 +391,12 @@
     --syntax-inserted-bg: var(--alert-tip-bg);
     --syntax-deleted-bg: var(--alert-warning-bg);
 
-    /* Interactive code variables (<var class="code-var">). Text keeps its own
-       ink so variables never collide with --syntax-* roles or read as links;
-       neutral grounds and a quiet dashed underline mark the slot on --code-bg. */
+    /* Code line hover and interactive code variables (<var class="code-var">).
+       Text keeps its own ink so variables never collide with --syntax-* roles
+       or read as links; neutral grounds mark the hovered row and variable slot
+       on --code-bg, with --code-line-hover halfway to --code-var-bg so a
+       hovered row never swallows a variable inside it. */
+    --code-line-hover: #EAEAEA;        /* Neutral half-step below --code-bg (1.06:1 against --code-bg) */
     --code-var-bg: #E6E6E6;            /* Neutral step below --code-bg (1.09:1 against --code-bg) */
     --code-var-hover-bg: #DEDEDE;      /* Neutral deeper step on hover (1.17:1 against --code-bg; syntax inks >= 4.79:1) */
     --code-var-border: color-mix(in srgb, var(--muted) 45%, transparent); /* Quiet ruled guide on --code-var-bg */
@@ -554,6 +557,7 @@
       --syntax-tag: #A8C97F;             /* 柳色 Yanagi-iro */
       --syntax-line-hl: rgba(248, 181, 0, 0.12); /* Weaker than light: comments on it keep AA */
 
+      --code-line-hover: #222221;        /* Neutral half-step above --code-bg (1.06:1 against --code-bg) */
       --code-var-bg: #262626;            /* Neutral step above --code-bg (1.13:1 against --code-bg) */
       --code-var-hover-bg: #2E2E2E;      /* Neutral deeper step on hover (1.26:1 against --code-bg; syntax inks >= 4.70:1) */
     }

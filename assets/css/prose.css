@@ -560,6 +560,19 @@
       tr {
         display: flex;
       }
+
+      /* Eye-tracking ruler on multi-line blocks: subtle neutral band on the
+         code row (leaving .hl's Yamabuki ground intact) and brighter ink on
+         its margin line number, paired across columns by modules/code-copy.js. */
+      @media screen and (hover: hover) {
+        .line:not(.hl):is(:hover, .is-hovered) {
+          background-color: var(--code-line-hover);
+        }
+
+        .lnt:is(:hover, .is-hovered) {
+          color: var(--heading);
+        }
+      }
     }
 
     /* Line numbers - Unselectable with consistent spacing */
@@ -594,9 +607,32 @@
       min-width: 0;
     }
 
-    /* Code lines - Flex layout for alignment */
+    /* Code lines - Flex layout with horizontal slab padding on each row so
+       highlighted (.hl) and hovered rows span the full scrollable width edge
+       to edge rather than stopping at the initial viewport or 12px short.
+       Screen only: in print the .highlight container supplies the padding. */
     .line {
       display: flex;
+
+      @media screen {
+        padding-inline: 12px;
+      }
+    }
+  }
+
+  /* Code <pre>s whose rows carry their own horizontal padding above (leaving
+     the line-number column's <pre> and plain unhighlighted <pre>s untouched).
+     A browser without :has() (all below the Baseline floor) keeps the <pre>'s
+     12px as well, so code sits 24px in: wider, but still fully legible. */
+  @media screen {
+    pre.chroma:has(> code > .line) {
+      padding-inline: 0;
+
+      > code {
+        display: block;
+        width: max-content;
+        min-width: 100%;
+      }
     }
   }
 }
