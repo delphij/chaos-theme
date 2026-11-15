@@ -41,7 +41,8 @@ See static/_3p/noto-sans-mono/2.014/LICENSE for full license text
 Website: https://fonts.google.com/noto/specimen/Noto+Sans+Mono
 Shipped as a Latin/numeral subset (see the README in that directory for the
 exact subsetting command); the glyph outlines are upstream's, unmodified.
-Provides the monospace layer for code, taxonomy count pills and archive dates.
+Provides the monospace layer for code, taxonomy count pills, timestamps,
+reading-stats digits and print URLs.
 The upstream copyright line declares no Reserved Font Name, so the subset keeps
 the original family name.
 

@@ -132,10 +132,10 @@ Breakpoints are listed at the top of main.css.
 - ES modules: each feature is one file under `assets/js/modules/` exporting a
   single `init*()`, and `main.js` is only the wiring. No IIFE wrapper -- a
   module is already its own scope
-- `search.js` and `mermaid.js` are separate entry points, not modules of
-  `main.js`: each is loaded only where it is wanted (a search-enabled site, a
-  page with a diagram), so bundling them into `main.js` would put them on
-  every page
+- `search.js`, `code-vars.js` and `mermaid.js` are separate entry points, not
+  modules of `main.js`: each is loaded only where it is wanted (a search-enabled
+  site, a post declaring `code_vars`, a page with a diagram), so bundling them
+  into `main.js` would put them on every page
 - Bundled by `js.Build` (esbuild, built into Hugo), so no Node toolchain is
   involved: `hugo` alone builds the theme
 - Syntax floor is declared as `es2024` in `_partials/foot/script.html`; write

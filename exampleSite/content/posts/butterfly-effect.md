@@ -6,11 +6,11 @@ categories: ["随笔"]
 tags: ["混沌", "数学", "读书"]
 ---
 
-1961 年冬，气象学家[爱德华·洛伦兹](https://zh.wikipedia.org/wiki/%E6%84%9B%E5%BE%B7%E8%8F%AF%C2%B7%E8%AB%BE%E9%A0%93%C2%B7%E5%8B%9E%E4%BE%96%E6%AC%A1)为了节省时间，将一组中间运算结果舍入至小数点后三位后重新键入计算机。待他喝完咖啡回到办公室时，却发现模拟出的天气演化序列已与原先截然不同。
+1961年冬，气象学家[爱德华·洛伦兹](https://zh.wikipedia.org/wiki/%E6%84%9B%E5%BE%B7%E8%8F%AF%C2%B7%E8%AB%BE%E9%A0%93%C2%B7%E5%8B%9E%E4%BE%96%E6%AC%A1)为了节省时间，将一组中间运算结果舍入至小数点后三位后重新键入计算机。待他喝完咖啡回到办公室时，却发现模拟出的天气演化序列已与原先截然不同。
 
 <!--more-->
 
-那台[Royal McBee](https://en.wikipedia.org/wiki/Royal_McBee) [LGP-30](https://en.wikipedia.org/wiki/LGP-30)计算机内部保留六位小数，打印纸上呈现的却只有三位： \(0.506127\) 变成了 \(0.506\) 。
+那台[Royal McBee](https://en.wikipedia.org/wiki/Royal_McBee) [LGP-30](https://en.wikipedia.org/wiki/LGP-30)计算机内部保留六位小数，打印纸上呈现的却只有三位：\(0.506127\)变成了\(0.506\)。
 千分之一以下的微小差异，在经历数月尺度的数值演化后，被非线性机制放大成了完全不同的气象图景。
 
 洛伦兹后来把这一发现概括为那个著名的问题：

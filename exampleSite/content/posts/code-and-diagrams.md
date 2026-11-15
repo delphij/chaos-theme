@@ -1,7 +1,7 @@
 ---
-title: "代码语法高亮、交互参数与 Mermaid 图表"
+title: "代码语法高亮、交互参数与Mermaid图表"
 date: 2025-11-23
-description: "介绍 Chaos 主题的静态代码语法高亮、可交互代码参数（code_vars）、一键复制与 Mermaid 矢量图表支持。"
+description: "介绍Chaos主题的静态代码语法高亮、行号悬停联动、可交互代码参数（code_vars）、一键复制与Mermaid矢量图表支持。"
 categories: ["指南"]
 tags: ["Chaos", "Go", "Mermaid", "Python", "代码参数", "代码高亮"]
 series: "Chaos 主题指南"
@@ -27,12 +27,14 @@ code_vars_inline: false
 ## 代码语法高亮与剪贴板交互
 
 代码语法高亮直接在站点构建期由Chroma引擎预先生成静态HTML，
-客户端无需加载外部语法高亮脚本。代码块右上角提供复制按钮，
-通过原生[Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API)
+客户端无需加载外部语法高亮脚本。达到五行及以上的代码块在桌面端自动将行号悬挂于版心左侧栏外，
+鼠标移过代码行或行号时会同步高亮整行底色（`--code-line-hover`），方便横向对照宽幅代码；
+仅当代码行超出容器宽度需要横向滚动时，代码块才纳入键盘`Tab`焦点序列。
+代码块右上角提供复制按钮，通过原生[Clipboard API](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API)
 实现文本复制。
 
-以下为计算[逻辑斯谛映射](https://zh.wikipedia.org/wiki/%E9%80%BB%E8%BE%91%E6%96%AF%E8%B0%9B%E6%98%A0%E5%B0%84)(Logistic map)的示例代码。
-当控制参数 \(r = 3.9\) 时，该非线性迭代系统将进入混沌区间：
+以下为计算[逻辑斯谛映射](https://zh.wikipedia.org/wiki/%E9%80%BB%E8%BE%91%E6%96%AF%E8%B0%9B%E6%98%A0%E5%B0%84)（Logistic map）的示例代码。
+当控制参数\(r = 3.9\)时，该非线性迭代系统将进入混沌区间：
 
 ```go
 package main
@@ -74,7 +76,7 @@ Chaos采用了**渐进增强（Progressive Enhancement）与零运行时污染**
 - **源码与RSS零污染**：Markdown源码与代码块中直接书写**真实、合法且可直接运行的默认值**（如`router.example.net`或`192.0.2.1`）。在无JavaScript环境、命令行终端（如`w3m`/`curl`）或RSS阅读器中，读者看到的是毫无格式破损的标准示例代码。
 - **按需加载与自动装配**：当且仅当文章Front Matter中声明了`code_vars`时，主题才会按需加载独立的交互脚本（`code-vars.js`），自动在首个匹配代码块上方挂载可折叠的参数面板，并将代码块内对应的默认值升级为可联动的输入标记`<var class="code-var">`。
 
-### 1. Front Matter 配置写法
+### 1. Front Matter配置写法
 
 在文章头部的Front Matter中通过`code_vars`声明参数列表：
 
@@ -171,7 +173,7 @@ egrep "(guest|iot|tiot)" /var/log/dhcpd.log
 
 ## Mermaid图表
 
-在Markdown中使用 ```` ```mermaid ```` 代码块即可直接声明图表：
+在Markdown中使用```` ```mermaid ````代码块即可直接声明图表（深浅色切换或打印预览时均会自动匹配对应配色）：
 
 > [!NOTE]
 > 代码语法高亮在构建阶段完成，无客户端运行时开销；而Mermaid则需浏览器在前端动态解析并计算图形布局。

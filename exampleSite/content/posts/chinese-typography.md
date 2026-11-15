@@ -23,14 +23,20 @@ series: "Chaos 主题指南"
 
 ### 站点必须的配置
 
-使用中文写作时，必须在站点的`hugo.toml`中配置：
+使用中文写作时，必须在站点的`hugo.toml`中开启CJK字数统计与Goldmark的东亚断行折叠扩展：
 
 ```toml
 hasCJKLanguage = true
+
+[markup.goldmark.extensions.cjk]
+  enable = true
+  eastAsianLineBreaks = true
+  eastAsianLineBreaksStyle = 'css3draft'
+  escapedSpace = true
 ```
 
 > [!IMPORTANT]
-> 若未启用此项，Hugo的分词引擎会将连续的中文字句视作单个单词，导致字数统计与预计阅读时间严重失真，亦会影响列表页正文摘要的准确截断。
+> 若未启用`hasCJKLanguage`，Hugo的分词引擎会将连续的中文字句视作单个单词，导致字数统计与预计阅读时间严重失真，亦会影响列表页正文摘要的准确截断；而`[markup.goldmark.extensions.cjk]`则负责在解析期消除中文段落内手动折行产生的空格。
 
 ## 粗体、楷体变体与着重号
 
@@ -53,15 +59,15 @@ hasCJKLanguage = true
 
 ## 源码换行与空白处理
 
-撰写Markdown文本时，作者常习惯依句子结构或按行宽手动折行。
+撰写Markdown文本时，作者常习惯依句子结构或按行宽手动折行，历史稿件中也常遗留手敲的中西文空格。
 根据[CommonMark](https://commonmark.org/)规范，
-段落内的单个换行符在转换为HTML时通常会被视为空白字符，
-进而在相连的两个中文字符之间渲染出多余的ASCII空格。
+段落内的单个换行符在转换为HTML时默认会被视为空白字符，
+进而在相连的汉字或全角标点之间渲染出多余的ASCII空格。
 
-Chaos在模板中配置了正则处理规则，在生成HTML时，
-自动剔除CJK字符与标点之间的源码单行换行与空格，
-同时保留真实的段落分块（`</p><p>`）。
-如此，无论编辑源码时如何断行，最终呈现的文本均平顺连贯。
+Chaos分两层处理这些空白，并且完全避开`<pre>`与行内`<code>`代码块：
+
+1. **解析期软换行折叠**：依靠`hugo.toml`中的`[markup.goldmark.extensions.cjk]`（配合`eastAsianLineBreaksStyle = 'css3draft'`包含全角标点边界），在Markdown解析阶段直接折叠中日韩段落内的单行折行符。
+2. **渲染后边界净化与软断点注入**：构建期模板（网页与Atom/RSS订阅源共用）自动剔除汉字与西文、数字或内联标签（如`**粗体**`、`*楷体*`、链接）之间手敲的空格，统一交由CSS `text-autospace`控制间距；同时为16字符以上的行内代码与24字符以上的裸链接在`.`、`/`、`::`、`->`等分隔符前注入零宽软断点（`<wbr>`），避免两端对齐段落因长标识符整串换行而拉出空白「河流线」（详例见[混排样张](../typography-specimen/)）。
 
 ## 引文
 
@@ -83,6 +89,6 @@ Chaos在模板中配置了正则处理规则，在生成HTML时，
 | **斜体与变体** | CSS（`font-synthesis-style` + `--font-em`） | 西文真斜体，中日文禁用伪斜体并切换楷体/宋体/明朝体 |
 | **着重号** | 构建期重写 + CSS（`text-emphasis`） | `[文字]{.}`输出`<em class="em-dot">`，中文下加圆点，日韩上加傍点 |
 | **注音标注** | 构建期重写 | 输出标准HTML `<ruby>`（支持假名、拼音与注音符号） |
-| **长词软断行** | 构建期重写（`<wbr>`） | 为超长行内代码与裸链接在分隔符处注入零宽折行点 |
-| **空白净化** | 构建期重写 | 消除Markdown源码折行与手敲空格在CJK边界产生的多余空白 |
+| **长词软断行** | 构建期重写（`<wbr>`） | 为16字符以上行内代码与24字符以上裸链接在分隔符前注入零宽折行点 |
+| **空白净化** | Goldmark CJK扩展 + 构建期重写 | 消除Markdown源码折行与手敲空格在CJK边界产生的多余空白 |
 

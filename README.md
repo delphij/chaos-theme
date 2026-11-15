@@ -17,7 +17,7 @@ Screenshots are taken from the bundled [example site](#example-site).
 - **Table of Contents**: Automatic TOC for article pages with sticky sidebar and active section highlighting
 - **Instant Page Transitions & Prerendering**: Native 0ms navigation via W3C Speculation Rules API with fallback to [instant.page](https://instant.page/)
 - **View Transitions**: Native cross-document transitions between pages via CSS `@view-transition`
-- **Print-Ready Articles**: Footnotes and external links printed as one numbered list of notes, for clean, readable printouts
+- **Print-Ready Articles**: Footnotes and cross-page links printed as one numbered list of clickable notes, hanging code line numbers with wrapped lines, and a QR permalink at the end of the printout
 - **Chinese Typography**: Modern CSS features for CJK text (`text-autospace`, `text-spacing-trim`, `hanging-punctuation`, locale-aware `--font-em` emphasis, and `text-emphasis` marks)
 - **Mathematics Support**: Built-in KaTeX integration for scientific content
 - **SEO & Licensing**: Comprehensive OpenGraph (with territory-cased locale, primary image alt, and alternates), Twitter Cards, Schema.org (JSON-LD BlogPosting/WebSite/BreadcrumbList with complete publisher metadata), multilingual hreflang and default-language x-default clusters, W3C-compliant XML sitemap, and machine-readable CC licensing support
@@ -102,6 +102,15 @@ title = 'My Blog'
 # .Summary never truncates -- list pages print whole articles. The theme
 # cannot set this for you; Hugo does not inherit it from theme config.
 hasCJKLanguage = true
+
+# Collapse soft line breaks inside CJK paragraphs at parse time (including
+# after full-width punctuation via 'css3draft'), so wrapped source lines do not
+# turn into mid-sentence spaces in HTML or feeds.
+[markup.goldmark.extensions.cjk]
+  enable = true
+  eastAsianLineBreaks = true
+  eastAsianLineBreaksStyle = 'css3draft'
+  escapedSpace = true
 
 # Hugo does not inherit [outputs] from a theme, so name the formats here or
 # /feed.xsl, /sitemap.xsl and /atom.xml are never built.
@@ -316,9 +325,9 @@ All markdown images are handled automatically by the custom render hook:
 ![Alt text](image.jpg)
 ```
 
-- **Page bundle images**: Automatically processed into responsive `<picture>` elements with WebP conversion, multiple viewport resolutions (360px, 640px, 960px, 1232px), 1x/2x DPR variants, and explicit `width`/`height` to eliminate Cumulative Layout Shift (CLS).
-- **Static & relative paths**: Fall back to lazy-loaded `<picture><img>` elements with subpath-aware `relURL` resolution, preventing broken links and ignoring empty destinations.
-- **Remote images**: Rendered with native `loading="lazy"` and `decoding="async"`.
+- **Page bundle images**: Automatically processed into responsive `<img>` elements with WebP `srcset` conversion (animated GIFs stay GIFs), multiple viewport resolutions (360px, 640px, 960px, 1232px), 1x/2x DPR variants, and explicit `width`/`height` to eliminate Cumulative Layout Shift (CLS). Every browser at the theme's floor reads WebP, so no `<picture>` wrapper or duplicate fallback format is generated.
+- **Static & relative paths**: Fall back to lazy-loaded `<img>` elements with subpath-aware `relURL` resolution, ignoring empty destinations.
+- **Remote images & data URIs**: Rendered with native `loading="lazy"` and `decoding="async"`.
 
 ### Social Media Embeds
 
@@ -438,6 +447,8 @@ python3 themes/chaos/tools/build_search_index.py --content content --output asse
 | `--max-body-chars` | `0` | Maximum body characters to index per post; `0` indexes the whole body. A limit makes the index smaller, and words past it unfindable |
 | `--base-url` | the site's `baseURL` | `baseURL` to link posts under, for a build that overrides the site's own (`hugo -b`). A path such as `/blog/` is enough |
 | `--hugo` | `hugo` | Hugo executable to ask for each post's URL |
+| `--stopwords` | `tools/stopwords.txt` | Path to a custom stop-words file replacing the theme's default list (`data/stopwords.txt` in the site is still added) |
+| `--extra-stopwords` | none | Path to an extra stop-words file augmented onto the default list |
 | `--keep-traditional` | `false` | Index Traditional Chinese characters as written, not as their Simplified forms. A search then finds only posts in the script of the query |
 
 The tool indexes the Markdown pages that `hugo list published`, run on the directory above `--content`, reports, and takes each one's URL, title and date from it. So `slug`, `url`, `[permalinks]` and the site's other settings apply as they do in the build, and a post Hugo does not publish (a draft, or one dated in the future or past its expiry) is left out of the index. Hugo reads its `HUGO_*` environment variables there as in the build, so a build for another environment (`hugo -e staging`) runs the tool with `HUGO_ENVIRONMENT=staging`.
@@ -450,6 +461,7 @@ Unlike generic blog themes that strip code, Chaos **fully indexes technical code
 - **Simplified and Traditional Chinese**: A search in either script finds posts in either. The index holds Traditional characters as their Simplified forms, from the character table of the vendored [OpenCC](https://github.com/BYVoid/OpenCC) (Apache License 2.0), and carries the pairs a query can need, about 5 KB compressed on a blog of 1,950 posts, with a `foldCredit` string naming their source and license. Results show titles as they were written.
 - **Misspelt words**: A Latin word of four characters or more that is neither in the index nor the start of a word in it is matched to the words one edit away (a character missing, extra or wrong, or two swapped), at a lower weight: `freebds` finds FreeBSD.
 - **Part of a word**: A piece of a CJK word that the index holds whole, such as two characters of a three-character name, matches the words that contain it.
+- **Ruby & Emphasis Marks**: Both the base words and the annotations of `[文字]{注音}` / `[文字]^(zhùyīn)` ruby runs are indexed, and `[文字]{.}` emphasis marks unwrap cleanly while fenced and inline code spans stay untouched.
 - **CJK Segmentation**: Vendored `jieba` segments mixed Chinese and English prose with domain-specific technical symbol preservation (e.g. `C++`, `C#`, `.NET`, `Google+`, `TCP/IP`).
 
 #### 4. Ranking Algorithm & Scoring Weights
@@ -588,12 +600,14 @@ reads as it does on github.com, but in traditional colours:
 | Markup tag | 千歳緑 `#316745` | 柳色 `#A8C97F` |
 | Comment, line number | 墨 `#595857` | `#989896` |
 
-Highlighted lines take a 山吹色 wash, as `<mark>` does. The dark inks share
-one lightness band at lower chroma than GitHub Dark's, which is what keeps
-them from glaring. The roles are `--syntax-*` properties in `tokens.css`, and
-`syntax.css` maps Chroma's token classes onto them: override a role to recolour
-code, not the classes. After upgrading Hugo, follow
-`assets/css/syntax-upgrade.md` and run `tools/check_chroma.py`.
+Highlighted lines take a 山吹色 wash, as `<mark>` does, and hovered rows in
+numbered blocks take `--code-line-hover` across both the hanging line number
+and the code column. The dark inks share one lightness band at lower chroma
+than GitHub Dark's, which is what keeps them from glaring. The roles are
+`--syntax-*` properties in `tokens.css`, and `syntax.css` maps Chroma's token
+classes onto them: override a role to recolour code, not the classes. After
+upgrading Hugo, follow `assets/css/syntax-upgrade.md` and run
+`tools/check_chroma.py`.
 
 Chroma must emit classes rather than inline styles:
 
@@ -736,17 +750,18 @@ to drift out of step.
 
 The theme provides optimized print output for articles, ensuring a clean and readable experience:
 
-- **Print-Friendly Layout**: Automatically hides navigation, interactive elements, and other non-essential components for a clutter-free printout.
-- **Notes**: The article's Markdown footnotes and its external links are numbered as one sequence, in the order they appear, and listed together under "Notes" after the text and before the tags. A footnote's note is its text; a link's note is its URL, and a link inside a footnote has its URL set in brackets after it rather than a note of its own. Each mark in the text links to its note and each note links back, which a PDF keeps. Only the printout changes: on screen the footnotes stay as written.
-- **Smart Code Block Pagination**: Code blocks shorter than 14 lines stay together on one page. Longer blocks break naturally across pages with minimum 7 lines on each side, preventing awkward fragments while avoiding wasted blank space.
-- **Light-Mode Syntax Colours**: Code prints in the light-mode colours whatever mode the reader is in, all meeting WCAG AA.
+- **Print-Friendly Layout**: Automatically hides navigation, interactive elements, and other non-essential components, and keeps desktop prose layout (`768px` mobile breakpoints apply to screen only).
+- **Notes**: The article's Markdown footnotes and its cross-page links (both external links and links to other pages on the site, leaving same-page `#anchor` links unmarked) are numbered as one sequence, in the order they appear, and listed together under "Notes" after the text and before the tags, with note numbers hanging in the left margin. A footnote's note is its text; a link's note is its clickable URL in `--font-mono` (with standard-port `https://` and bare-origin `/` stripped from the visible text), and a link inside a footnote has its URL set in brackets after it rather than a note of its own. Each mark in the text links to its note and each note links back, which an exported PDF keeps. Only the printout changes: on screen the footnotes stay as written.
+- **Permalink QR Code**: A printed article ends with its permalink as a build-time QR code (`qr/*.png`, fetched only when printed) and clickable URL alongside the site's title.
+- **Smart Code Block Wrapping & Pagination**: Code blocks wrap long lines instead of clipping, hang per-row line numbers in the left margin, keep blocks shorter than 14 lines together on one page, and break longer blocks naturally across pages with minimum 7 lines on each side.
+- **Light-Mode Colours**: Code and Mermaid diagrams print in light-mode colours whatever mode the reader is in, all meeting WCAG AA.
 - **Optimized Typography**: Adjusts font sizes, line spacing, and page breaks for optimal readability on paper.
 
 ## Mobile Navigation
 
-On screens ≤600px, the navigation menu automatically switches to a hamburger menu:
+On screens ≤768px, the navigation menu automatically switches to a hamburger menu:
 
-- **Glass Effect**: Semi-transparent background with 12px backdrop blur
+- **Floating Surface**: Elevated `--surface` drawer beneath the frosted-glass sticky header
 - **Overlay Design**: Menu floats over content instead of pushing it down
 - **Smart Interactions**:
   - Click hamburger icon (☰) to toggle menu
@@ -763,14 +778,13 @@ Article pages automatically display a table of contents when the content has suf
 - **Desktop (≥1360px)**: Sticky sidebar on the right side
   - Remains visible while scrolling
   - Shows active section highlighting
-  - Article width: 960px for comfortable reading
-  - When TOC is absent, balanced spacing with equal left/right margins
+  - Article width: 780px (`--content-width`) alongside a 280px TOC sidebar
+  - Centered single column when TOC is absent
 
 - **Tablet/Mobile (<1360px)**: Floating button with overlay
-  - Article width: up to 780px for optimal code display
+  - Article width: up to 780px (`--content-width`) centered in the viewport
   - Floating button in bottom-right corner
-  - Click to show/hide full-screen TOC
-  - Glass-morphism effect with backdrop blur
+  - Click to show/hide full-screen TOC drawer
   - Close by clicking outside, on a link, or pressing Escape
 
 **Active Section Highlighting**:
@@ -812,7 +826,7 @@ The theme is optimized for performance with modern best practices:
 - **Instant Prerendering**: Integrates W3C Speculation Rules API for native 0ms background prerendering, with seamless fallback to [instant.page](https://instant.page/) 5.2.0 on older browsers
 - **View Transitions**: Native cross-document view transitions (`@view-transition { navigation: auto; }`) for smooth app-like page transitions without JavaScript router overhead
 - **Minimal JavaScript**: Small vanilla ES module baseline covering theme switching, mobile menu, code and section-link copy, TOC scrollspy, and print reference formatting. Optional modules (client-side search, interactive code parameters, on-demand Mermaid) load independently only when enabled or needed
-- **Partial Caching**: Header and footer cached per language for faster rendering
+- **Partial Caching**: Static head assets and footer cached per language for faster rendering (the header renders per page so its menu marks the current entry)
 - **Preconnect Links**: Early connection to external services (comment server)
 
 
@@ -834,7 +848,7 @@ The theme is optimized for performance with modern best practices:
 
 ### Content Delivery
 - **Lazy Loading**: Images load on-demand with `async` decoding
-- **WebP Conversion**: Automatic modern format support with fallbacks
+- **WebP Conversion**: Automatic WebP `srcset` generation for page-bundle images (animated GIFs preserved)
 - **Responsive Images**: Multiple resolutions and DPR variants; bundle images include explicit dimensions to prevent CLS
 - **Universal Image Fallback**: Seamless fallback for static and non-bundle images with native lazy loading
 - **Layout Stability**: Proper content width constraints prevent layout shifts from long code blocks
@@ -876,13 +890,13 @@ browser list.
 ## Accessibility
 
 **WCAG 2.1 AA Compliant:**
-- Semantic HTML5 elements (`<nav>`, `<article>`, `<button>`, `<aside>`)
-- ARIA labels and states (`aria-label`, `aria-expanded`, `aria-current`)
+- Semantic HTML5 elements (`<nav>`, `<article>`, `<button>`, `<aside>`, `<dialog>`)
+- ARIA labels, landmarks, and states (`aria-label`, `aria-expanded`, `aria-current`, ARIA 1.2 combobox/listbox search modal with live-region result announcements)
 - Full keyboard navigation:
-  - Tab/Shift+Tab for navigation
-  - Escape key closes mobile menu and TOC overlay
+  - Tab/Shift+Tab for navigation (code blocks join the Tab order only when horizontally overflowing; heading copy anchors reveal on keyboard focus)
+  - Escape key closes mobile menu, TOC overlay, and search dialog
   - Focus returns to trigger button on close
-- Focus indicators on all interactive elements
+- Focus indicators on all interactive elements, with `forced-colors` boundaries
 - Alt text on all images
 - Color contrast exceeds WCAG AA standards
 - Screen reader compatible
@@ -933,8 +947,8 @@ themes/chaos/
 ```
 
 `assets/js/` holds one entry point per thing the browser loads: `main.js`,
-which imports the feature modules in `assets/js/modules/`, plus `search.js`
-and `mermaid.js`, each loaded only on pages that need it.
+which imports the feature modules in `assets/js/modules/`, plus `search.js`,
+`code-vars.js` and `mermaid.js`, each loaded only on pages that need it.
 
 ### `tools/`
 
@@ -978,6 +992,7 @@ python3 themes/chaos/tools/check.py --public public
 - `theme.toml` and `hugo.toml` declare the same minimum Hugo version
 - no CJK outside comments, so a five-language theme never falls back to
   Chinese
+- no translated UI string inside a URL-typed attribute (`data-*-url-*`)
 - no authored script over eight lines left inline in a template, where
   `js.Build` cannot reach it
 - no space-indented tag in a built feed, the signature of a template shipping
@@ -1002,7 +1017,8 @@ Run after upgrading Hugo, or after changing the syntax colours. It compares
 `syntax.css` with the token classes the installed Hugo's Chroma emits, and
 reports classes that are new and unmapped, gone, or reassigned to another
 token, structural classes `prose.css` no longer matches, and any `--syntax-*`
-ink under 4.5:1 on the code ground or a highlighted line in either mode:
+ink under 4.5:1 on the code ground, a hovered row, a code-variable slot, or a
+highlighted line in either mode:
 
 ```bash
 python3 themes/chaos/tools/check_chroma.py
@@ -1068,7 +1084,7 @@ All dependencies are vendored in `static/_3p/` and `tools/vendor/` to ensure rel
 - **KaTeX 0.19.0**: Mathematical typesetting for scientific content
 - **instant.page 5.2.0**: Link prefetching for near-instant page transitions
 - **Mermaid 11.17.2**: Diagram and flowchart generation from text
-- **Noto Sans Mono 2.014**: Monospace font subset for code blocks and dates
+- **Noto Sans Mono 2.014**: Monospace font subset for code blocks, dates, reading-stats digits, and print URLs
 - **polyxslt 1.1.0**: XSLT 1.0 in the browser, so the feeds stay readable once browsers drop native XSLT
 - **jieba 0.42.1**: Chinese text segmentation for offline search index generator (in `tools/vendor/jieba/`)
 - **OpenCC 1.4.2** (character table only): Traditional to Simplified Chinese characters for the offline search index generator (in `tools/vendor/opencc/`)

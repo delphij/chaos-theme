@@ -1,7 +1,7 @@
 ---
 title: "全文检索与阅读交互"
 date: 2026-09-18
-description: "介绍 Chaos 主题的离线全文检索、打印外链自动转尾注、页面即时预渲染与无障碍辅助设计。"
+description: "介绍Chaos主题的离线全文检索、打印排版与文末二维码、页面即时预渲染与无障碍辅助设计。"
 categories: ["指南"]
 tags: ["Chaos", "搜索", "性能", "排版", "无障碍"]
 series: "Chaos 主题指南"
@@ -14,7 +14,7 @@ Chaos在不引入额外前端框架的前提下，提供了若干实用的交互
 
 ## 站内全文检索
 
-Chaos内置了轻量级的客户端离线全文检索，无需依赖任何第三方外部搜索服务。
+Chaos内置了轻量级的客户端离线全文检索，无需依赖任何第三方外部搜索服务，原生支持中文分词、繁简互通（输入简体或繁体均可命中）、拉丁词单步拼写容错，并完整保留代码片段与`<ruby>`注音词条。
 
 ### 快捷键
 
@@ -25,10 +25,10 @@ Chaos内置了轻量级的客户端离线全文检索，无需依赖任何第三
 
 ### 两层索引设计
 
-为兼顾搜索界面的即时响应与深层正文检索能力，索引采用两层分立设计：
+为兼顾搜索界面的即时响应与深层正文检索能力，索引采用两层零冗余设计：
 
-1. **第一层（`search-index.json`）**：仅包含标题、分类、标签与链接等核心元数据，体积精简，开启搜索界面时即时就绪。
-2. **第二层（`search-index-body.json`）**：包含正文与代码片段的倒排索引，由前端在后台空闲时异步加载，用于支持深层全文检索。
+1. **第一层（`search-index.json`）**：包含标题、分类、标签与链接等核心元数据及标题/标签倒排索引，体积精简，开启搜索界面时即时就绪。
+2. **第二层（`search-index-body.json`）**：仅包含第一层未出现过的正文与代码片段词项，由前端在后台空闲时异步加载并静默合并。
 
 ### 索引生成与配置
 
@@ -40,17 +40,17 @@ python3 themes/chaos/tools/build_search_index.py \
   --output assets/search-index.json
 ```
 
-执行时，脚本默认会同时生成核心索引（`assets/search-index.json`）并自动推导生成正文索引（`assets/search-index-body.json`）。将索引输出至 `assets/` 便于 Hugo 在构建时为其计算指纹（Fingerprint）。上述参数亦为该脚本的默认值。
+执行时，脚本会调用`hugo list published`读取实际发布的页面列表，默认同时生成核心索引（`assets/search-index.json`）与正文索引（`assets/search-index-body.json`）；若站点存在`data/stopwords.txt`，其中的自定义停用词会自动并入默认列表。将索引输出至`assets/`便于Hugo在构建时计算指纹（若希望增量部署时固定索引文件名、避免每篇文章随索引哈希改变而重传，可在`[params.search]`中设`fingerprint = false`并由服务器配置缓存重验证）。
 
 #### 单文件索引选项（`--single-file`）
 
-若不希望拆分为两份文件，可在生成时附加 `--single-file` 参数：
+若不希望拆分为两份文件，可在生成时附加`--single-file`参数：
 
 ```bash
 python3 themes/chaos/tools/build_search_index.py --single-file
 ```
 
-此时脚本会将标题、标签、分类以及正文与代码的全部倒排词条合并打包进单个 `assets/search-index.json` 中，且不生成 `-body.json` 文件。页面的 `search.js` 脚本完全向下兼容此模式：当检测到不存在第二层索引时，会自动跳过异步请求，直接基于单文件执行全量检索。
+此时脚本会将标题、标签、分类以及正文与代码的全部倒排词条合并打包进单个`assets/search-index.json`中，且不生成`-body.json`文件。页面的`search.js`脚本完全向下兼容此模式：当检测到不存在第二层索引时，会自动跳过异步请求，直接基于单文件执行全量检索。
 
 **两种模式的工程权衡**：
 - **两层索引（默认推荐）**：
@@ -60,7 +60,7 @@ python3 themes/chaos/tools/build_search_index.py --single-file
   - **优势**：部署结构简单清晰，单次HTTP请求即可获取完整索引，便于静态文件归档或在限制并发请求数的环境下分发。
   - **代价**：随文章数量增加，单次请求的JSON体积相对较大，网络较慢或初次开启搜索时可能产生短暂停顿。
 
-在 `hugo.toml` 中开启搜索支持与快捷键监听：
+在`hugo.toml`中开启搜索支持与快捷键监听：
 
 ```toml
 [params.search]
@@ -72,22 +72,25 @@ python3 themes/chaos/tools/build_search_index.py --single-file
 
 ## 打印与导出PDF
 
-纸质打印或导出PDF时，原本的超链接在纸质媒介上无法交互。Chaos在打印时把正文外部链接与Markdown脚注按出现顺序合编为同一组「注释」，于正文之后、标签之前列出：脚注列出原文，链接列出网址。屏幕上的显示不受影响。打印时还会隐藏导航栏与侧边栏等交互控件。
+纸质打印或导出PDF时，Chaos会自动隐藏导航栏与交互控件，并对长文引用与代码块做专门的版式重排（屏幕阅读完全不受影响）：
 
-可在本页直接按下 `Cmd + P`（或 `Ctrl + P`）在浏览器打印预览中查验效果。例如正文中的这些链接：
+- **统一悬挂注释与可点击网址**：正文中的跨页链接（含外部链接与指向站内其他页面的内部链接；页内`#`锚点保持原样）与Markdown脚注按出现顺序合编为同一组「注释」，于正文之后、标签之前列出，编号悬挂于版心左侧。网址以等宽字体排印并省去默认端口的`https://`前缀与裸域名末尾斜杠，同时在导出的PDF中保留完整的可点击双向跳转。
+- **代码块折行与悬挂行号**：带行号代码块在纸面上自动折行并将行号悬挂于左侧栏外；深色模式下的代码与Mermaid图表自动切换为浅色高对比度配色。
+- **文末永久链接二维码**：文章末尾附带构建期生成的永久链接二维码（`qr/*.png`，仅在打印时请求加载）与站点名称，便于纸质读者扫码回到线上原文或参与讨论。
 
-- 查阅 [Hugo 官方网站](https://gohugo.io/)。
-- 查阅 [MDN Web 文档](https://developer.mozilla.org/)。
-- 查看 [W3C Speculation Rules 规范](https://wicg.github.io/nav-speculation/speculation-rules.html)。
+可在本页直接按下`Cmd + P`（或`Ctrl + P`）在浏览器打印预览中查验效果。例如正文中的这些链接：
+
+- 查阅[Hugo官方网站](https://gohugo.io/)或站内的[少即是多：静态博客的依赖取舍](../on-minimalism/)。
+- 查阅[MDN Web文档](https://developer.mozilla.org/)。
+- 查看[W3C Speculation Rules规范](https://wicg.github.io/nav-speculation/speculation-rules.html)。
 
 ## 页面跳转与预渲染
 
-主题利用现代浏览器原生的 [Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API)，在指针悬停或轻触站内链接时预渲染目标页面，配合 [CSS View Transitions](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API) 实现平滑过渡，无需引入外部路由框架。
+主题利用现代浏览器原生的[Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API)，在指针悬停或轻触站内链接时预渲染目标页面，配合[CSS View Transitions](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API)实现平滑过渡，无需引入外部路由框架。
 
 ## 无障碍辅助
 
-- **跳过导航**：支持键盘焦点首项直达正文内容（[Skip to content](https://www.w3.org/WAI/WCAG21/Techniques/general/G1)）。
-- **状态播报**：切换外观模式时利用 [`aria-live`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions) 区域向辅助设备提供动态状态反馈。
-- **色彩对比**：前景色与背景色严格遵循 [WCAG 2.1 AA](https://www.w3.org/TR/WCAG21/) 可访问性标准。
-
+- **跳过导航与键盘可达**：支持首项焦点直达正文（[Skip to content](https://www.w3.org/WAI/WCAG21/Techniques/general/G1)），章节标题聚焦自动浮现复制锚点，代码块仅在横向溢出需要滚动时才纳入`Tab`焦点序列。
+- **语义控件与状态播报**：搜索弹窗遵循ARIA 1.2 `combobox`/`listbox`规范并实时播报检索状态与结果数；切换外观模式或复制内容时均通过[`aria-live`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions)区域向辅助设备反馈。
+- **色彩对比与高对比模式**：前景色与各级底色严格满足[WCAG 2.1 AA](https://www.w3.org/TR/WCAG21/)对比度要求，并在系统强制颜色模式（`forced-colors`）下自动补齐组件边界。
 

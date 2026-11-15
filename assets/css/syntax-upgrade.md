@@ -1,6 +1,6 @@
 # Syntax highlighting and Hugo upgrades
 
-Last verified against Chroma v2.27.0 (Hugo v0.166.0).
+Last verified against Chroma v2.27.0 (Hugo v0.169.0).
 
 Chaos does not ship a generated Chroma stylesheet. The colours are roles
 (`--syntax-keyword`, `--syntax-string`, …) defined once per mode in
@@ -51,8 +51,8 @@ output is used as a reference to check against, never pasted in.
 Edit only the `--syntax-*` roles in `tokens.css`. Keep to traditional colours
 at the values 和色大辞典 publishes (see the palette section of the README),
 keep each role near its GitHub hue so code reads as it does there, and run
-the checker: it fails any ink below 4.5:1 on the code ground or on a
-highlighted line, in either mode.
+the checker: it fails any ink below 4.5:1 on the code ground, a hovered row,
+a code-variable slot or a highlighted line, in either mode.
 
 ## Sample
 
