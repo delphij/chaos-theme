@@ -58,17 +58,24 @@ marks "like these", an em dash --- like this --- and an ellipsis... all pass thr
 受访者
 : 同一说话人若连续多段发言，直接续写`: `条目即可。
 : 第二段会与上一段保持更紧凑的段距，无需重复说话人标签。
+
+访谈者
+受访者
+: 若两位说话人同时应答或持相同意见，可连续写出多个术语行再接一条解释。
 {.dialogue}
 
-若角色仅为`p1`/`p2`之类的场记代号，
-附加`{.dialogue .script}`使话者退居次级墨色，让台词本身的语气修饰成为视觉重心：
+剧本排印可附加`{.dialogue .script}`使话者退居次级墨色；独占一行的`*〔…〕*`排为独立舞台提示段落，置于话者后或台词中的`*（…）*`则自动缩为次级动作注记：
 
-p1
+*〔场灯渐暗，仅余屏幕微光。〕*
+
+p1 *（低声）*
 : Have you tried *measuring* before rewriting the whole service?
 
 p2
-: **Never!** Benchmarks only slow down innovation.
+: **Never!** *（摊手）* Benchmarks only slow down innovation.
 {.dialogue .script}
+
+*〔幕落。〕*
 
 ## 引用 {#quotes}
 
