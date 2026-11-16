@@ -2208,6 +2208,18 @@
       margin: 16px 0;
     }
 
+    /* YouTube embeds swap the live player iframe for a QR reference card */
+    .youtube-embed {
+      display: none;
+    }
+
+    .youtube-print {
+      margin: 1em 0;
+      padding: 0.6em 0.85em;
+      border: var(--border);
+      border-radius: var(--radius-sm);
+    }
+
     /* Code styling - Consolidated styles for all code elements */
     code {
       background: var(--code-bg);

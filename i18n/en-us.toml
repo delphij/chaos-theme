@@ -152,8 +152,10 @@ searchNav = 'Navigate'
 searchOpen = 'Open'
 searchDeprecated = 'Deprecated'
 
-# X (Twitter) embeds
+# Media embeds
 xPostFrom = 'From X (Twitter)'
+youtubeVideo = 'YouTube video'
+youtubeVideoTitled = 'YouTube video: {{ .Title }}'
 
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]

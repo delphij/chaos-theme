@@ -149,8 +149,10 @@ searchNav = '移動'
 searchOpen = '開啟'
 searchDeprecated = '已過時'
 
-# X (Twitter) embeds
+# Media embeds
 xPostFrom = '來自X（Twitter）'
+youtubeVideo = 'YouTube影片'
+youtubeVideoTitled = 'YouTube影片：{{ .Title }}'
 
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]

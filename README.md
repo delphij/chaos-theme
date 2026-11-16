@@ -378,7 +378,14 @@ All markdown images are handled automatically by the custom render hook:
 - **Static & relative paths**: Fall back to lazy-loaded `<img>` elements with subpath-aware `relURL` resolution, ignoring empty destinations.
 - **Remote images & data URIs**: Rendered with native `loading="lazy"` and `decoding="async"`.
 
-### Social Media Embeds
+### Media & Social Embeds
+
+Embed YouTube videos (lazy-loaded 16:9 player on screen, automatically replaced in `@media print` with a compact QR code + `youtu.be/...` reference card, and wrapped with a direct watch link in RSS/Atom feeds):
+
+```markdown
+{{< youtube bzkRVzciAZg >}}
+{{< youtube id="bzkRVzciAZg" title="Talk Title" start=42 >}}
+```
 
 Embed X/Twitter posts:
 

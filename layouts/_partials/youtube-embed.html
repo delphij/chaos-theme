@@ -1,0 +1,91 @@
+{{- /*
+Renders a YouTube video for the youtube shortcode across HTML and web feeds.
+
+On screen, emits a responsive 16:9 lazy-loaded <iframe> without Hugo's inline
+padding-bottom hack. When printing, CSS hides .youtube-embed and reveals
+.youtube-print: a compact QR code and watch URL matching .print-permalink, with
+the QR PNG referenced via --qr so browsers never fetch it on screen.
+
+In RSS and Atom feeds (where .print-only would be visible because feed readers
+ignore main.css), omits the print QR block and wraps the player in a <figure>
+whose <figcaption> carries a direct watch link for readers that strip iframes.
+
+Emitted on one line without indentation so CDATA sections in RSS/Atom feeds
+stay free of template whitespace (see tools/check.py check_feed_whitespace).
+
+@param {shortcode} ctx   The shortcode context.
+@param {bool}      feed  True when rendering for RSS or Atom output formats.
+*/ -}}
+{{- $ctx := .ctx -}}
+{{- $pc := site.Config.Privacy.YouTube -}}
+{{- if not $pc.Disable -}}
+  {{- $id := "" -}}
+  {{- $class := "" -}}
+  {{- $allowFullScreen := true -}}
+  {{- $autoplay := false -}}
+  {{- $controls := true -}}
+  {{- $end := 0 -}}
+  {{- $loading := "lazy" -}}
+  {{- $loop := false -}}
+  {{- $mute := false -}}
+  {{- $start := 0 -}}
+  {{- $title := "" -}}
+  {{- if $ctx.IsNamedParams -}}
+    {{- $id = or ($ctx.Get "id") "" -}}
+    {{- $class = or ($ctx.Get "class") "" -}}
+    {{- /* Unquoted shortcode values arrive typed (false, 0), which `with`
+         would skip, so the off-by-default switches test with isset. */ -}}
+    {{- if isset $ctx.Params "allowFullScreen" -}}
+      {{- $allowFullScreen = not (in (slice "false" "0") (lower (printf "%v" ($ctx.Get "allowFullScreen")))) -}}
+    {{- end -}}
+    {{- with $ctx.Get "autoplay" }}{{ $autoplay = in (slice "true" "1") (lower (printf "%v" .)) }}{{ end -}}
+    {{- if isset $ctx.Params "controls" -}}
+      {{- $controls = not (in (slice "false" "0") (lower (printf "%v" ($ctx.Get "controls")))) -}}
+    {{- end -}}
+    {{- with $ctx.Get "end" }}{{ $end = int . }}{{ end -}}
+    {{- with $ctx.Get "loading" }}{{ $loading = . }}{{ end -}}
+    {{- with $ctx.Get "loop" }}{{ $loop = in (slice "true" "1") (lower (printf "%v" .)) }}{{ end -}}
+    {{- if isset $ctx.Params "mute" -}}
+      {{- $mute = in (slice "true" "1") (lower (printf "%v" ($ctx.Get "mute"))) -}}
+    {{- else if $autoplay -}}
+      {{- $mute = true -}}
+    {{- end -}}
+    {{- with $ctx.Get "start" }}{{ $start = int . }}{{ end -}}
+    {{- with $ctx.Get "title" }}{{ $title = . }}{{ end -}}
+  {{- else -}}
+    {{- $id = or ($ctx.Get 0) "" -}}
+    {{- with $ctx.Get 1 -}}
+      {{- $autoplay = in (slice "true" "1") (lower (printf "%v" .)) -}}
+      {{- $mute = $autoplay -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if not $id -}}
+    {{- errorf "The %q shortcode requires a video ID (positional or named 'id'). See %s" $ctx.Name $ctx.Position -}}
+  {{- end -}}
+  {{- $host := cond $pc.PrivacyEnhanced "www.youtube-nocookie.com" "www.youtube.com" -}}
+  {{- $q := slice -}}
+  {{- if $autoplay }}{{ $q = $q | append "autoplay=1" }}{{ end -}}
+  {{- if not $controls }}{{ $q = $q | append "controls=0" }}{{ end -}}
+  {{- if gt $end 0 }}{{ $q = $q | append (printf "end=%d" $end) }}{{ end -}}
+  {{- if $loop }}{{ $q = $q | append "loop=1" (printf "playlist=%s" (urlquery $id)) }}{{ end -}}
+  {{- if $mute }}{{ $q = $q | append "mute=1" }}{{ end -}}
+  {{- if gt $start 0 }}{{ $q = $q | append (printf "start=%d" $start) }}{{ end -}}
+  {{- $embedSrc := printf "https://%s/embed/%s" $host (urlquery $id) -}}
+  {{- if gt (len $q) 0 -}}
+    {{- $embedSrc = printf "%s?%s" $embedSrc (delimit $q "&") -}}
+  {{- end -}}
+  {{- $watchUrl := printf "https://youtu.be/%s" (urlquery $id) -}}
+  {{- if gt $start 0 -}}
+    {{- $watchUrl = printf "%s?t=%d" $watchUrl $start -}}
+  {{- end -}}
+  {{- $displayUrl := replaceRE `^https://` "" $watchUrl -}}
+  {{- $caption := cond (ne $title "") (T "youtubeVideoTitled" (dict "Title" $title)) (T "youtubeVideo") -}}
+  {{- $allow := "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" -}}
+  {{- if $allowFullScreen }}{{ $allow = printf "%s; fullscreen" $allow }}{{ end -}}
+  {{- if .feed -}}<figure class="youtube-feed">{{- end -}}
+  <div class="youtube-embed{{ with $class }} {{ . }}{{ end }}"><iframe src="{{ $embedSrc }}" title="{{ $caption }}" loading="{{ $loading }}" referrerpolicy="strict-origin-when-cross-origin" allow="{{ $allow }}"></iframe></div>
+  {{- if .feed -}}<figcaption><a href="{{ $watchUrl }}">{{ $caption }}</a></figcaption></figure>
+  {{- else -}}
+    {{- with images.QR $watchUrl (dict "scale" 2 "targetDir" "qr") -}}<div class="print-only print-permalink youtube-print" style="--qr: url('{{ .RelPermalink }}')"><p><span>{{ $caption }}</span><span><a class="print-url" href="{{ $watchUrl }}">{{ $displayUrl }}</a></span></p></div>{{- end -}}
+  {{- end -}}
+{{- end -}}

@@ -718,6 +718,27 @@
   }
 
   /* ==========================================================================
+     MEDIA EMBEDS
+     Responsive 16:9 frame for embedded video players (`{{< youtube >}}`),
+     shared by article pages and the XSLT feed preview.
+     ========================================================================== */
+
+  .youtube-embed {
+    margin: 1.5em 0;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: var(--ground);
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+  }
+
+  /* ==========================================================================
      HIGHLIGHTED CODE
      Chroma's markup: the wrapper, line numbers and horizontal scroll. The
      slab itself is the base pre above; colours are in syntax.css.
