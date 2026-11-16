@@ -35,7 +35,7 @@
 {{- range partial "_funcs/get-alternates.html" . -}}
 <link rel="alternate" hreflang="{{ .lang }}" href="{{ .href }}">
 {{- end -}}
-{{- $licenseURL := site.Params.licenseURL | default "https://creativecommons.org/licenses/by-nc/4.0/" -}}
+{{- $licenseURL := partial "_funcs/get-license-url.html" . -}}
 {{- with $licenseURL -}}
 <link rel="license" href="{{ . }}">
 {{- end -}}

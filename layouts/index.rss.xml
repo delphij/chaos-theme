@@ -55,10 +55,14 @@
       <title>{{ .Title }}</title>
       <link>{{ .Permalink }}</link>
       <pubDate>{{ .Date.UTC.Format "Mon, 02 Jan 2006 15:04:05 +0000" | safeHTML }}</pubDate>
+      {{- $pageAuthor := partial "_funcs/get-page-author.html" . }}
+      {{- /* <author> must be an email address; the site owner's would misattribute a page with its own author. */}}
+      {{- if not $pageAuthor }}
       {{- with site.Params.author.email }}
       <author>{{ . }}{{ with site.Params.author.name }} ({{ . }}){{ end }}</author>
       {{- end }}
-      <dc:creator>{{ or .Params.author site.Params.author.name site.Title }}</dc:creator>
+      {{- end }}
+      <dc:creator>{{ or (and $pageAuthor $pageAuthor.name) site.Params.author.name site.Title }}</dc:creator>
       <guid isPermaLink="true">{{ .Permalink }}</guid>
       {{- with .Params.categories }}
         {{- range . }}

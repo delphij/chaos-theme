@@ -118,6 +118,7 @@ contentTypePage = '頁面'
 
 # SEO, pagination and 404
 lastModified = '最後修改'
+license = '授權條款'
 pageNumber = '第{{ .Number }}頁'
 pageNotFound = '找不到頁面'
 pageNotFoundDesc = '抱歉，您訪問的頁面不存在或已被移除。'

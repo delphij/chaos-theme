@@ -8,5 +8,11 @@ Shows Remark42 attribution on individual article pages when Remark42 is enabled.
 @example: {{ partial "footer.html" . }}
 */}}
 
-{{ time.Now.Year }} {{ with site.Copyright }} {{ . | markdownify | safeHTML }} | {{ end }} {{ T "poweredBy" | safeHTML }}{{ if and (eq .Kind "page") site.Params.remarkURL }} {{ T "remarkAttribution" | safeHTML }}{{ end }}
+{{- $copyright := "" -}}
+{{- if isset .Params "copyright" -}}
+  {{- $copyright = .Params.copyright -}}
+{{- else if not .Params.license -}}
+  {{- $copyright = site.Copyright -}}
+{{- end -}}
+{{- with $copyright }}{{ time.Now.Year }} {{ . | markdownify | safeHTML }} | {{ end }}{{ T "poweredBy" | safeHTML }}{{ if and (eq .Kind "page") site.Params.remarkURL }} {{ T "remarkAttribution" | safeHTML }}{{ end }}
 

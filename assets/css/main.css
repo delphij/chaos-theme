@@ -1010,6 +1010,14 @@
         margin-left: 0;
       }
     }
+
+    .post-license {
+      flex-basis: 100%;
+
+      @media screen and (max-width: 768px) {
+        flex-basis: auto;
+      }
+    }
   }
 
   /* ==========================================================================

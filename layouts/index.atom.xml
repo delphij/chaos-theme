@@ -35,9 +35,20 @@
   <entry>
     <title>{{ .Title }}</title>
     <author>
+      {{- $pageAuthor := partial "_funcs/get-page-author.html" . -}}
+      {{- if $pageAuthor }}
+      <name>{{ $pageAuthor.name }}</name>
+      {{- with $pageAuthor.url }}
+      <uri>{{ . }}</uri>
+      {{- end }}
+      {{- else }}
       <name>{{ or site.Params.author.name site.Title }}</name>
       <uri>{{ or site.Params.author.url site.Home.Permalink }}</uri>
+      {{- end }}
     </author>
+    {{- with .Params.license }}
+    <rights>{{ . | markdownify | plainify | htmlUnescape }}</rights>
+    {{- end }}
     <id>{{ .Permalink }}</id>
     <link rel="alternate" type="text/html" href="{{ .Permalink }}"/>
     {{- if .IsTranslated -}}

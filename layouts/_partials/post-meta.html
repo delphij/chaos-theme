@@ -10,5 +10,6 @@ asked for, and categories. Shared by the article and its summary card.
 {{- $page := .page -}}
 <div class="meta">{{ partial "datetime.html" $page.Date }}
   {{- if .stats }}<span class="reading-stats"> • {{ partial "reading-stats.html" $page }}</span>{{ end }}
+  {{- with partial "_funcs/get-page-author.html" $page }}<span class="meta-sep"> • </span><span class="post-author">{{ $a := . }}{{ with .url }}<a href="{{ . }}">{{ $a.name }}</a>{{ else }}{{ $a.name }}{{ end }}</span>{{ end }}
   {{- with $page.Params.categories }}<span class="meta-sep"> • </span>{{ partial "taxonomy-links.html" (dict "page" $page "taxonomy" "categories") }}{{ end -}}
 </div>

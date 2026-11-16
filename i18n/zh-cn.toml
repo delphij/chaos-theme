@@ -118,6 +118,7 @@ contentTypePage = '页面'
 
 # SEO, pagination and 404
 lastModified = '最后修改'
+license = '许可协议'
 pageNumber = '第{{ .Number }}页'
 pageNotFound = '页面未找到'
 pageNotFoundDesc = '抱歉，您访问的页面不存在或已被移除。'

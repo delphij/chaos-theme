@@ -1,0 +1,16 @@
+{{- /*
+Returns the effective license URL for a page, honoring page-level `licenseURL`
+overrides (including an explicit empty string to suppress license metadata).
+A page with its own `license` note but no `licenseURL` gets no URL: the
+site's default would claim a license the note may contradict.
+
+@context {page} The current page context.
+@returns {string}
+*/ -}}
+{{- $url := site.Params.licenseURL | default "https://creativecommons.org/licenses/by-nc/4.0/" -}}
+{{- if isset .Params "licenseurl" -}}
+  {{- $url = .Params.licenseurl -}}
+{{- else if .Params.license -}}
+  {{- $url = "" -}}
+{{- end -}}
+{{- return $url -}}

@@ -8,14 +8,14 @@ Generates Schema.org structured data in JSON-LD format.
 @example: {{ partial "schema.html" . }}
 */}}
 
-{{- $author := false -}}
+{{- $siteAuthor := false -}}
 {{- with site.Params.author.name -}}
-  {{- $author = dict "@type" "Person" "name" . -}}
+  {{- $siteAuthor = dict "@type" "Person" "name" . -}}
   {{- with site.Params.author.url -}}
-    {{- $author = merge $author (dict "url" .) -}}
+    {{- $siteAuthor = merge $siteAuthor (dict "url" .) -}}
   {{- end -}}
 {{- end -}}
-{{- $licenseURL := site.Params.licenseURL | default "https://creativecommons.org/licenses/by-nc/4.0/" -}}
+{{- $licenseURL := partial "_funcs/get-license-url.html" . -}}
 {{- $inLanguage := site.Language.Locale -}}
 
 {{- if .IsHome -}}
@@ -27,8 +27,8 @@ Generates Schema.org structured data in JSON-LD format.
     "description" (partialCached "_funcs/get-meta-description.html" . .RelPermalink)
     "inLanguage" $inLanguage
   -}}
-  {{- if $author -}}
-    {{- $website = merge $website (dict "author" $author) -}}
+  {{- if $siteAuthor -}}
+    {{- $website = merge $website (dict "author" $siteAuthor) -}}
   {{- end -}}
   {{- with $licenseURL -}}
     {{- $website = merge $website (dict "license" .) -}}
@@ -76,8 +76,18 @@ Generates Schema.org structured data in JSON-LD format.
   {{- if gt (len $images) 0 -}}
     {{- $article = merge $article (dict "image" $images) -}}
   {{- end -}}
-  {{- if $author -}}
-    {{- $article = merge $article (dict "author" $author "publisher" $author) -}}
+  {{- $articleAuthor := $siteAuthor -}}
+  {{- with partial "_funcs/get-page-author.html" . -}}
+    {{- $articleAuthor = dict "@type" "Person" "name" .name -}}
+    {{- with .url -}}
+      {{- $articleAuthor = merge $articleAuthor (dict "url" .) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if $articleAuthor -}}
+    {{- $article = merge $article (dict "author" $articleAuthor) -}}
+  {{- end -}}
+  {{- if $siteAuthor -}}
+    {{- $article = merge $article (dict "publisher" $siteAuthor) -}}
   {{- end -}}
   {{- with $licenseURL -}}
     {{- $article = merge $article (dict "license" .) -}}

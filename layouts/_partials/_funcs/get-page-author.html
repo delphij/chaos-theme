@@ -1,0 +1,18 @@
+{{- /*
+Returns per-page author metadata (dict with "name" and optional "url") when
+`.Params.author` is set as a string or map, or false to fall back to site defaults.
+
+@context {page} The post page context.
+@returns {dict|bool}
+*/ -}}
+{{- $author := false -}}
+{{- with .Params.author -}}
+  {{- if reflect.IsMap . -}}
+    {{- with .name -}}
+      {{- $author = dict "name" . "url" ($.Params.author.url | default "") -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $author = dict "name" (printf "%v" .) "url" "" -}}
+  {{- end -}}
+{{- end -}}
+{{- return $author -}}

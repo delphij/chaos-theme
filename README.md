@@ -205,6 +205,10 @@ categories = ['Category1']
 tags = ['tag1', 'tag2']
 series = ['Series Name']               # Group related posts; renders a series nav card
 series_title = 'Part Subtitle'         # Optional cleaner title shown in the series nav card
+author = 'Author Name'                 # Optional per-page author (string or { name, url }); overrides site default
+license = 'Public domain'              # Optional per-page license note shown in post footer & Atom <rights>; also hides the site copyright in the page footer
+licenseURL = 'https://creativecommons.org/publicdomain/zero/1.0/' # Optional per-page <link rel="license"> & JSON-LD license; "" omits it, and so does a `license` note without one
+copyright = '© Author Name'            # Optional per-page footer copyright (markdown); "" omits it
 
 # Indexing & Deprecation controls (optional)
 deprecated = false                     # Set true to demote in on-site search and display [Deprecated] badge

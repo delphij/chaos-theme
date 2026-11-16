@@ -118,6 +118,7 @@ contentTypePage = 'ページ'
 
 # SEO, pagination and 404
 lastModified = '最終更新'
+license = 'ライセンス'
 pageNumber = '{{ .Number }}ページ'
 pageNotFound = 'ページが見つかりません'
 pageNotFoundDesc = 'お探しのページは存在しないか、移動された可能性があります。'
