@@ -18,6 +18,12 @@
    list such as `.a, .b .c` would raise the weaker member; those stay flat.
    Declarations always come before nested rules.
 
+   A nested @media whose declarations use `+` inside calc() wraps them in
+   `& { }`: Hugo's minifier (tdewolff/minify) strips the spaces around `+`
+   in declarations placed directly in a nested at-rule, and `calc(a+b)` is
+   invalid, so the browser drops the declaration. `-`, `*` and `/` are
+   unaffected, as is any declaration under a selector.
+
    THE BREAKPOINTS, all of them. They cannot be custom properties -- a media
    query is evaluated before var() is resolved -- so this list is the only
    place they are written down. Each is nested in the rule it modifies.

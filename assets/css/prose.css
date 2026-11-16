@@ -586,11 +586,13 @@
     }
 
     @media print, screen and (min-width: 960px) {
-      --dialogue-hang: 5.5em;
-      --dialogue-gap: 1em;
-      margin-left: calc(-1 * (var(--dialogue-hang) + var(--dialogue-gap)));
-      grid-template-columns: var(--dialogue-hang) minmax(0, 1fr);
-      column-gap: var(--dialogue-gap);
+      & {
+        --dialogue-hang: 5.5em;
+        --dialogue-gap: 1em;
+        margin-left: calc(-1 * (var(--dialogue-hang) + var(--dialogue-gap)));
+        grid-template-columns: var(--dialogue-hang) minmax(0, 1fr);
+        column-gap: var(--dialogue-gap);
+      }
     }
 
     @media screen and (max-width: 768px) {
@@ -780,8 +782,10 @@
       /* Hanging indent for line numbers on screens > 768px where there's space
          Synchronized with list hanging indent breakpoint (769px) */
       @media screen and (min-width: 769px) {
-        margin: 0 0 0 -3em;              /* Shift left so line numbers hang in margin */
-        width: calc(100% + 3em);         /* Keep code column right edge flush with prose */
+        & {
+          margin: 0 0 0 -3em;            /* Shift left so line numbers hang in margin */
+          width: calc(100% + 3em);       /* Keep code column right edge flush with prose */
+        }
       }
 
       tbody {
