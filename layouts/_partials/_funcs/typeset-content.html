@@ -114,6 +114,13 @@ the match can then run to the next "]...{...}" anywhere in the feed.
         {{- end -}}
       {{- end -}}
       {{- if $prose -}}
+        {{- /* Tag stage directions before ruby expansion introduces <ruby>
+             elements inside <em>, since the character class excludes "<". */ -}}
+        {{- $prose = $prose | replaceRE `<em>(（[^<]+）|〔[^<]+〕)</em>` `<em class="stage">$1</em>` -}}
+        {{- /* A paragraph holding nothing but a stage direction is marked
+             itself: CSS cannot tell it from one that also has speech, since
+             :only-child ignores text nodes. */ -}}
+        {{- $prose = $prose | replaceRE `<p>(<em class="stage">[^<]+</em>)</p>` `<p class="stage">$1</p>` -}}
         {{- /* The bracketed text excludes "[" as well as "]", so a stray "["
              earlier on the line ("[注：[经]{工}") cannot become part of the
              base. tools/build_search_index.py mirrors these patterns. */ -}}

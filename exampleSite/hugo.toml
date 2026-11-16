@@ -85,6 +85,9 @@ enableGitInfo = false
     block = [['$$', '$$']]
     inline = [['\(', '\)']]
 
+[markup.goldmark.parser.attribute]
+  block = true
+
 [params]
   subtitle = '一个*Chaos*主题的示例站点'
   description = 'Chaos主题的示例站点：中文排版、数学公式、提示框、代码高亮与深浅色模式。'

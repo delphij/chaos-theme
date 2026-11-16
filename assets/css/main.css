@@ -24,8 +24,10 @@
 
      1359px  max   the article layout loses room for the side TOC, which
                    becomes the floating toggle and drawer
-      769px  min   the one min-width query: the code block line-number
-                   column (prose.css). Complementary with 768px max, which hides that
+      960px  min   dialogue lists (prose.css) hang their speaker column into
+                   the left margin once the centered prose column has room
+      769px  min   the code block line-number column (prose.css).
+                   Complementary with 768px max, which hides that
                    column outright -- which is why it is 769 and not 768,
                    so the two can never both apply
       768px  max   the mobile layout proper: stacked nav behind the menu
@@ -35,7 +37,7 @@
       600px  max   the archive timeline's date column only: narrowed, and
                    the full date swapped for the short one
 
-   769px and 768px are written as `screen and (...)`: a page in Blink is
+   960px, 769px and 768px are written as `screen and (...)`: a page in Blink is
    about 680-703px wide on A4/Letter, which would otherwise pull the mobile
    layout onto paper. Print sets its own rules at the end of this file.
 
@@ -2019,6 +2021,12 @@
     /* Article styling for print */
     article.post {
       max-width: 100%;
+
+      /* Reserve left margin space when hanging dialogue speaker labels appear,
+         matching wide-screen layout without narrowing non-dialogue articles. */
+      &:has(dl.dialogue) {
+        padding-left: 3em;
+      }
     }
 
     /* Better paragraph handling with URLs */
@@ -2027,10 +2035,18 @@
       widows: 3;                       /* Prevent short widows with URLs */
     }
 
-    /* Improve heading breaks - avoid page breaks immediately after headings */
-    h1, h2, h3 {
+    /* Improve heading breaks - avoid page breaks immediately after headings or glossary terms.
+       Side-by-side dialogue rows must NOT apply break-after: avoid on <dt>, otherwise Blink
+       pushes whole multi-turn <dl> grids onto the next page, leaving large blank gaps. */
+    h1, h2, h3, dt {
       page-break-after: avoid;
       break-after: avoid-page;
+    }
+
+    dl.dialogue dt {
+      page-break-after: auto;
+      break-after: auto;
+      break-inside: avoid;
     }
 
     /* Images, diagrams and blockquotes should not break */

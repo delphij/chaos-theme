@@ -49,6 +49,27 @@ marks "like these", an em dash --- like this --- and an ellipsis... all pass thr
 术语
 : 定义列表的解释部分。
 
+定义列表末尾附加`{.dialogue}`块属性时排作访谈体（宽屏下话者悬挂于左栏外，
+与列表序号一致）：
+
+访谈者
+: 对话体默认采用单色半粗体话者名，适合人物专访与对谈记录。
+
+受访者
+: 同一说话人若连续多段发言，直接续写`: `条目即可。
+: 第二段会与上一段保持更紧凑的段距，无需重复说话人标签。
+{.dialogue}
+
+若角色仅为`p1`/`p2`之类的场记代号，
+附加`{.dialogue .script}`使话者退居次级墨色，让台词本身的语气修饰成为视觉重心：
+
+p1
+: Have you tried *measuring* before rewriting the whole service?
+
+p2
+: **Never!** Benchmarks only slow down innovation.
+{.dialogue .script}
+
 ## 引用 {#quotes}
 
 > 引用使用无边框的浅色底块，字号略小于正文，但颜色不变淡。

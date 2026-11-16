@@ -30,6 +30,9 @@
     block = [['$$', '$$']]
     inline = [['\(', '\)']]
 
+[markup.goldmark.parser.attribute]
+  block = true
+
 [params]
   # Remark42 comment system configuration (optional)
   # Uncomment and configure these to enable the comment system

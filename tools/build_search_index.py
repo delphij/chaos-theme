@@ -186,7 +186,14 @@ def clean_markdown(text: str) -> str:
         prose = _unwrap_links(prose)
         prose = RUBY_RUN_RE.sub(_unwrap_ruby, prose)
         prose = EM_DOT_RE.sub(r"\1", prose)
-        return _unwrap_links(prose)
+        prose = _unwrap_links(prose)
+        # Strip Goldmark block/heading attribute lists ({.dialogue}, {#custom-id})
+        return re.sub(
+            r"(?:^[ \t]*|\s)\{[.#][A-Za-z0-9_.-]+(?:\s+[^}\n]*)?\}[ \t]*$",
+            " ",
+            prose,
+            flags=re.MULTILINE,
+        )
 
     text = outside_code(text, _clean_prose)
     if ruby_notes:
