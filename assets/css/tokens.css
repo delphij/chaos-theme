@@ -303,6 +303,122 @@
                  U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
 }
 
+/* Display KaiTi for copybook grids (p.mizige in prose.css).
+   Unlike body-size --font-em (~16px, which steps KaiTi up in weight and 106%
+   size-adjust to match surrounding sans-serif ink density), copybook cells sit
+   at ~44-54px where native Regular brush taper and 100% em-box proportions
+   belong. Each foundry's outlines sit on a different vertical em-box center
+   relative to its hhea table -- notably Apple's Kaiti.ttc (STKaitiSC/TC),
+   which pairs SinoType's [-200, +800] outlines (ink center +0.30em) with
+   PingFang's [+1060, -340] hhea (line-box midpoint +0.36em), pushing glyphs
+   ~0.06em below the horizontal crosshair. Separate family names with no
+   unicode-range exclusion keep U+0020 in the matched face so CSS Inline 3 uses
+   its ascent-override / descent-override directly as the cell's strut. */
+@font-face {
+  font-family: "Chaos Mizige WenKai";
+  src: local("LXGWWenKai-Regular"), local("LXGW WenKai"),
+       local("LXGW WenKai Regular"), local("LXGWWenKaiScreen"),
+       local("LXGW WenKai Screen");
+  font-weight: 400;
+  font-style: normal;
+  ascent-override: 88%;
+  descent-override: 12%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Chaos Mizige Kaiti";
+  src: local("STKaitiSC-Regular"), local("Kaiti SC Regular"),
+       local("STKaiti"), local("AR PL UKai CN"), local("FandolKai-Regular");
+  font-weight: 400;
+  font-style: normal;
+  ascent-override: 80%;
+  descent-override: 20%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Chaos Mizige SimKai";
+  src: local("KaiTi"), local("SimKai");
+  font-weight: 400;
+  font-style: normal;
+  ascent-override: 86%;
+  descent-override: 14%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Chaos Mizige Serif";
+  src: local("Noto Serif CJK SC"), local("NotoSerifCJKsc-Regular"),
+       local("Source Han Serif SC"), local("SourceHanSerifSC-Regular"),
+       local("Noto Serif SC"), local("NotoSerifSC-Regular");
+  font-weight: 400;
+  font-style: normal;
+  ascent-override: 88%;
+  descent-override: 12%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Chaos Mizige Songti";
+  src: local("STSongti-SC-Regular"), local("Songti SC Regular"),
+       local("SimSun"), local("NSimSun");
+  font-weight: 400;
+  font-style: normal;
+  ascent-override: 80%;
+  descent-override: 20%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Chaos Mizige WenKai TC";
+  src: local("LXGWWenKaiTC-Regular"), local("LXGW WenKai TC"),
+       local("LXGW WenKai TC Regular");
+  font-weight: 400;
+  font-style: normal;
+  ascent-override: 88%;
+  descent-override: 12%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Chaos Mizige BiauKai";
+  src: local("BiauKaiTC-Regular"), local("BiauKaiTC Regular"),
+       local("BiauKaiHK-Regular"), local("BiauKaiHK Regular"), local("BiauKai"),
+       local("DFKai-SB"), local("TW-Kai"),
+       local("AR PL UKai TW"), local("AR PL UKai HK");
+  font-weight: 400;
+  font-style: normal;
+  ascent-override: 85%;
+  descent-override: 15%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Chaos Mizige Kaiti TC";
+  src: local("STKaitiTC-Regular"), local("Kaiti TC Regular");
+  font-weight: 400;
+  font-style: normal;
+  ascent-override: 80%;
+  descent-override: 20%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Chaos Mizige JA";
+  src: local("YuKyokasho Yoko Medium"), local("YuKyokasho Medium"),
+       local("UD Digi Kyokasho N-R"), local("UDDigiKyokashoN-R"),
+       local("KleeOne-Regular"), local("Klee One"), local("Klee One Regular"),
+       local("HiraMinProN-W3"), local("Hiragino Mincho ProN W3"),
+       local("YuMin-Medium"), local("Yu Mincho Regular"), local("YuMincho-Regular"),
+       local("Noto Serif CJK JP"), local("NotoSerifCJKjp-Regular");
+  font-weight: 400;
+  font-style: normal;
+  ascent-override: 88%;
+  descent-override: 12%;
+  line-gap-override: 0%;
+}
+
 @layer chaos.tokens {
   /* ==========================================================================
      CSS VARIABLES
@@ -461,6 +577,15 @@
                "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
                "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 
+    /* Copybook grid stack & cinnabar rules (p.mizige in prose.css).
+       Derived from --primary (蘇芳 Suō by day, 退紅 Arazome by night) so dark
+       mode automatically shifts to a muted rose grid without glaring. */
+    --font-mizige: "Chaos Mizige WenKai", "Chaos Mizige Kaiti",
+                   "Chaos Mizige SimKai", "Chaos Mizige Serif",
+                   "Chaos Mizige Songti", var(--font-sans);
+    --mizige-border: color-mix(in srgb, var(--primary) 45%, transparent);
+    --mizige-guide: color-mix(in srgb, var(--primary) 26%, transparent);
+
     /* Animation timing - Consistent transitions */
     --transition-fast: 0.2s ease;      /* Quick transitions for hover/focus */
     --transition-normal: 0.3s ease;    /* Standard transitions for UI elements */
@@ -488,6 +613,8 @@
                "Noto Sans", "Liberation Sans", "DejaVu Sans",
                "Noto Sans TC", "PingFang TC", "PingFang HK",
                "Microsoft JhengHei", sans-serif;
+    --font-mizige: "Chaos Mizige WenKai TC", "Chaos Mizige BiauKai",
+                   "Chaos Mizige Kaiti TC", var(--font-sans);
   }
 
   :lang(ja) {
@@ -496,6 +623,7 @@
                "Noto Sans", "Liberation Sans", "DejaVu Sans",
                "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
                "Yu Gothic", "Meiryo", sans-serif;
+    --font-mizige: "Chaos Mizige JA", var(--font-sans);
   }
 
   :lang(ko) {

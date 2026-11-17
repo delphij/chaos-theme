@@ -545,6 +545,214 @@
   }
 
   /* ==========================================================================
+     MIZIGE (COPYBOOK CHARACTER GRID)
+     Markdown paragraph with `{.mizige}`, transformed by `typeset-content.html`
+     into per-character cinnabar `米字格` cells with upright sans-serif ruby
+     glosses centered above each cell (or spanning multi-character compounds).
+     Positioned like display math (`$$...$$`) so surrounding explanations stay
+     in normal justified body paragraphs.
+     ========================================================================== */
+
+  p.mizige {
+    --mizige-cell: calc(var(--font-size-base) * 4.5);
+    --mizige-gap: calc(var(--font-size-base) * 0.55);
+    --mizige-row-gap: calc(var(--font-size-base) * 0.9);
+    --mizige-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 50H0M50 50H100M50 50V0M50 50V100M50 50L0 0M50 50L100 100M50 50L100 0M50 50L0 100' fill='none' stroke='black' stroke-width='1' stroke-dasharray='4 3.5' stroke-dashoffset='2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    row-gap: var(--mizige-row-gap);
+    column-gap: calc(var(--mizige-cell) * 0.4 + var(--mizige-gap));
+    margin: 1.85em 0 1.45em;
+    line-height: 1;
+    text-align: center;
+    hanging-punctuation: none;
+    text-autospace: no-autospace;
+    text-spacing-trim: space-all;
+    font-feature-settings: normal;
+
+    /* Reserve room between side-by-side clauses for the zero-width hanging
+       punctuation; when clauses wrap onto separate rows, flex `column-gap`
+       disappears so stacked 4-character rows share the exact same width and
+       align column-for-column on the center axis. `.mizige-hang-N` is the
+       most marks meeting at any one clause boundary (`，` = 1, `」，` or
+       `，「` = 2, `」，「` = 3), counted by typeset-content.html: telling
+       those boundaries apart here would need :has() nested in :has(), which
+       Selectors 4 forbids and browsers drop. Each halt-trimmed mark is about
+       0.25 cell plus 0.1 cell padding per side; the steps leave some slack. */
+    &.mizige-hang-1 {
+      column-gap: calc(var(--mizige-cell) * 0.55 + var(--mizige-gap));
+    }
+
+    &.mizige-hang-2 {
+      column-gap: calc(var(--mizige-cell) * 0.95 + var(--mizige-gap));
+    }
+
+    &.mizige-hang-3 {
+      column-gap: calc(var(--mizige-cell) * 1.25 + var(--mizige-gap));
+    }
+
+    .mizige-sep {
+      display: none;
+    }
+
+    sup {
+      vertical-align: top;
+      top: 0.35em;
+      margin-left: 0.15em;
+    }
+
+    @media screen and (max-width: 768px) {
+      --mizige-cell: calc(var(--font-size-base) * 3.75);
+      --mizige-gap: calc(var(--font-size-base) * 0.45);
+    }
+
+    @media screen and (max-width: 380px) {
+      --mizige-cell: calc(var(--font-size-base) * 3.35);
+      --mizige-gap: calc(var(--font-size-base) * 0.4);
+    }
+
+    /* Changing <ruby> from `display: ruby` to `inline-flex` bypasses UA rules
+       that only hide <rp> inside `display: ruby` boxes. */
+    rp {
+      display: none;
+    }
+
+    rt {
+      display: block;
+      margin-bottom: 0.35rem;
+      padding: 0 0.15em;
+      font-family: var(--font-sans);
+      font-size: var(--text-lg);
+      font-style: normal;
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: 0.02em;
+      text-indent: 0.02em;             /* Balance trailing letter-spacing on centered labels */
+      color: var(--muted);
+      white-space: nowrap;
+      -webkit-user-select: none;
+      user-select: none;
+
+      @media screen and (max-width: 768px) {
+        font-size: var(--text-md);
+        margin-bottom: 0.3rem;
+      }
+    }
+
+    /* Clause wrapper: keeps each punctuated clause intact until it exceeds the
+       row, so `天地玄黄，宇宙洪荒` breaks after `，` (4+4) instead of mid-clause
+       (6+2); if a single unpunctuated clause itself overflows, `text-wrap:
+       balance` equalizes its wrapped lines over `<wbr>` break points. */
+    .mizige-clause {
+      max-width: 100%;
+      margin-top: calc(-1 * var(--mizige-row-gap));
+      margin-inline: calc(var(--mizige-gap) / -2);
+      text-align: center;
+      text-wrap: balance;
+    }
+
+    .mizige-tail {
+      white-space: nowrap;
+    }
+
+    .mizige-unit {
+      display: inline-flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      vertical-align: bottom;
+      min-width: var(--mizige-cell);
+      margin-top: var(--mizige-row-gap);
+      margin-inline: calc(var(--mizige-gap) / 2);
+    }
+
+    .mizige-base {
+      display: inline-flex;
+      gap: var(--mizige-gap);
+    }
+
+    .mizige-char {
+      position: relative;
+      isolation: isolate;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: var(--mizige-cell);
+      height: var(--mizige-cell);
+      border: 1px solid var(--mizige-border);
+      /* Copybook golden ratio ("字占格七成半"): 74% em-box places ~82-90% KaiTi
+         outlines comfortably inside the frame with ~15% margin on all sides. */
+      font-family: var(--font-mizige);
+      font-size: calc(var(--mizige-cell) * 0.74);
+      font-weight: 400;
+      font-style: normal;
+      font-synthesis: none;
+      line-height: 1;
+      color: var(--heading);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background-color: var(--mizige-guide);
+        -webkit-mask-image: var(--mizige-svg);
+        mask-image: var(--mizige-svg);
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+
+        @media (forced-colors: active) {
+          forced-color-adjust: none;
+          background-color: GrayText;
+        }
+      }
+
+      @media (forced-colors: active) {
+        border-color: CanvasText;
+      }
+    }
+
+    .mizige-punct {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      vertical-align: bottom;
+      width: 0;
+      height: var(--mizige-cell);
+      overflow: visible;
+      padding-left: 0.2em;
+      /* Body CJK sans-serif rather than KaiTi (which lacks OpenType halt/chws
+         tables; see tokens.css), so consecutive marks such as `」，` set
+         half-width instead of overflowing into the next cell or mobile edge.
+         `halt` does the trimming, unconditionally per glyph; text-spacing-trim
+         is left at the paragraph's `space-all` because `trim-both` (the value
+         that would trim both ends of a run) is unsupported in Chrome 157 and
+         dropped, and the supported values only act at line starts or between
+         adjacent pairs, which `halt` already covers. */
+      font-family: var(--font-sans);
+      font-size: calc(var(--mizige-cell) * 0.5);
+      line-height: 1;
+      color: var(--muted);
+      font-feature-settings: "halt" 1;
+      white-space: nowrap;
+
+      &.mizige-punct-open {
+        justify-content: flex-end;
+        padding-left: 0;
+        padding-right: 0.2em;
+      }
+    }
+  }
+
+  /* ==========================================================================
      QUOTE CARDS
      Epigraph / standalone quote card with right-aligned attribution.
      render-blockquote.html marks the attribution: a last paragraph that

@@ -43,6 +43,19 @@ Shared by the HTML and feed pipelines so the two cannot drift.
     must not contain a nested element of its own kind (a sublist inside a
     keep-space list); the rest of the block would then lose its spaces.
 
+    A paragraph marked with `{.mizige}` is likewise cut out up front and
+    expanded into per-character copybook cells (`.mizige-unit` / `.mizige-char`
+    in prose.css), grouped into `.mizige-clause` runs at punctuation boundaries
+    so narrow viewports and print break at clause punctuation (`4+4`) before
+    balancing within a clause: `[守株待兔]{shǒu zhū dài tù}` splits 1-to-1 when
+    character and whitespace-separated syllable counts match, multi-character
+    glosses with unequal counts span adjacent cells, and unannotated characters
+    still receive individual cells while punctuation hangs in `.mizige-punct`.
+    Only ruby and footnote references survive inside the grid: a hard line
+    break (<br>) becomes a clause break like an ideographic space, other
+    inline tags are dropped (their text kept) and [text]{.} loses its dots,
+    since neither can straddle cells and clause boundaries as valid HTML.
+
  3. Inline <code> spans (>= 16 chars) and bare URL <a> links (>= 24 chars,
     outside <pre>) receive <wbr> break opportunities, so an unbreakable token
     no longer drops whole to the next line and tears open a justification
@@ -115,7 +128,202 @@ the match can then run to the next "]...{...}" anywhere in the feed.
   {{- $content = .content -}}
   {{- $strip = not .keepSpace -}}
 {{- end -}}
+{{- $ruby := `<ruby>$1<rp>（</rp><rt>$2</rt><rp>）</rp></ruby>` -}}
 {{- $kept := slice -}}
+{{- if and $strip (in $content "mizige") -}}
+  {{- /* A cell is one character plus any combining marks or variation
+       selectors (\p{M}: U+0300.., U+FE00-FE0F, U+E0100-E01EF), or one
+       escaped entity. Only quotation entities and the typographer's dashes and
+       ellipsis count as punctuation; any other entity (&amp;, &#39;) is a
+       character in its own cell. */ -}}
+  {{- $mizigeChar := `(?:&[A-Za-z0-9#]+;|.)\p{M}*` -}}
+  {{- $mizigeOpen := `(?:(?:&(?:ldquo|lsquo);|[\x{2018}\x{201c}\x{3008}\x{300a}\x{300c}\x{300e}\x{3010}\x{3014}\x{3016}\x{3018}\x{301a}\x{301d}\x{ff08}\x{ff3b}\x{ff5b}\x{ff5f}\x{ff62}(\[])\p{M}*)+` -}}
+  {{- $mizigeEnd := `(?:(?:&(?:rdquo|rsquo|hellip|ndash|mdash);|[\x{2014}\x{2019}\x{201d}\x{2026}\x{3001}\x{3002}\x{3009}\x{300b}\x{300d}\x{300f}\x{3011}\x{3015}\x{3017}\x{3019}\x{301b}\x{301c}\x{301e}\x{301f}\x{ff01}-\x{ff07}\x{ff09}-\x{ff0f}\x{ff1a}-\x{ff20}\x{ff3c}-\x{ff40}\x{ff5c}-\x{ff5e}\x{ff60}\x{ff61}\x{ff63}-\x{ff65}.,;:!?)\]-])\p{M}*)+` -}}
+  {{- $mizigeBareToken := printf `(?s)<sup\b[^>]*>.*?</sup>|\x{3000}+|%s|%s|%s` $mizigeOpen $mizigeEnd $mizigeChar -}}
+  {{- $mizigeEmUnit := `(?:[^\[\]<\x00\n]|<sup\b[^>]*>.*?</sup>|<ruby>[^\[\]<\n]*<rp>[^<\n]*</rp><rt>[^<\n]*</rt><rp>[^<\n]*</rp></ruby>)` -}}
+  {{- range $pBlock := findRE `(?s)<p\b[^>]*\bclass="(?:[^"]*\s)?mizige(?:\s[^"]*)?"[^>]*>.*?</p>` $content -}}
+    {{- $openTag := index (findRE `^<p\b[^>]*>` $pBlock 1) 0 -}}
+    {{- $inner := strings.TrimSuffix "</p>" (strings.TrimPrefix $openTag $pBlock) -}}
+    {{- /* A copybook grid is plain characters plus ruby and footnote
+         references. Hard line breaks (<br>) become ideographic-space clause
+         breaks; other inline markup (<em>, <a>, <code>...) would have to
+         straddle cells and clause boundaries, so its tags are dropped and
+         its text kept; [text]{.} emphasis dots likewise keep only the text
+         (including when wrapping ruby). Footnote <sup> is set aside, and
+         hand-written <ruby> is normalized to the canonical <ruby>...<rp> form
+         first so attributes, <rb>, optional <rp> and multi-pair <ruby> all
+         enter the cell splitter cleanly. */ -}}
+    {{- $inner = $inner | replaceRE `(?i)<br\b[^>]*>` "\u3000" -}}
+    {{- range $rawRuby := findRE `(?is)<ruby\b[^>]*>.*?</ruby>` $inner -}}
+      {{- $rbInner := replaceRE `(?is)^<ruby\b[^>]*>|</ruby>$` "" $rawRuby -}}
+      {{- $rbInner = replaceRE `(?is)<rp\b[^>]*>.*?</rp>` "" $rbInner -}}
+      {{- $rbInner = replaceRE `(?is)<rt\b[^>]*>` "\x00\x05" $rbInner -}}
+      {{- $rbInner = replaceRE `(?is)</rt>` "\x00\x06" $rbInner -}}
+      {{- $rbInner = replaceRE `<[^>]+>` "" $rbInner -}}
+      {{- $normRuby := slice -}}
+      {{- range split $rbInner "\x00\x06" -}}
+        {{- if in . "\x00\x05" -}}
+          {{- $pair := split . "\x00\x05" -}}
+          {{- $b := trim (index $pair 0) " \t\r\n" -}}
+          {{- $t := trim (delimit (after 1 $pair) "") " \t\r\n" -}}
+          {{- if and $b $t -}}
+            {{- $normRuby = $normRuby | append (printf "<ruby>%s<rp>（</rp><rt>%s</rt><rp>）</rp></ruby>" $b $t) -}}
+          {{- else if $b -}}
+            {{- $normRuby = $normRuby | append $b -}}
+          {{- end -}}
+        {{- else -}}
+          {{- $normRuby = $normRuby | append . -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $inner = replace $inner $rawRuby (delimit $normRuby "") 1 -}}
+    {{- end -}}
+    {{- $sups := findRE `(?s)<sup\b[^>]*>.*?</sup>|<ruby>.*?</ruby>` $inner -}}
+    {{- range $si, $sup := $sups -}}
+      {{- $inner = replace $inner $sup (printf "\x00\x04%d\x00" $si) 1 -}}
+    {{- end -}}
+    {{- $inner = $inner | replaceRE `<[^>]+>` "" -}}
+    {{- range $si, $sup := $sups -}}
+      {{- $inner = replace $inner (printf "\x00\x04%d\x00" $si) $sup -}}
+    {{- end -}}
+    {{- $inner = $inner | replaceRE `\[([^\[\]\n]{1,32})\]\^?\{([^.}\n]|[^}\n]{2,32})\}` $ruby -}}
+    {{- $inner = $inner | replaceRE `\[([^\[\]\n]{1,32})\]\^\(([^)\n]{1,32})\)` $ruby -}}
+    {{- $inner = $inner | replaceRE (printf `\[(%s{1,32})\]\{\.\}` $mizigeEmUnit) "$1" -}}
+    {{- $cells := slice -}}
+    {{- range $ri, $rChunk := split $inner "<ruby>" -}}
+      {{- $bare := $rChunk -}}
+      {{- if gt $ri 0 -}}
+        {{- $rPair := split $rChunk "</ruby>" -}}
+        {{- if ge (len $rPair) 2 -}}
+          {{- $rBody := index $rPair 0 -}}
+          {{- $bare = delimit (after 1 $rPair) "</ruby>" -}}
+          {{- $bPair := split $rBody "<rp>（</rp><rt>" -}}
+          {{- if eq (len $bPair) 2 -}}
+            {{- $base := index $bPair 0 -}}
+            {{- $rt := trim (strings.TrimSuffix "</rt><rp>）</rp>" (index $bPair 1)) " \t\r\n" -}}
+            {{- $chars := findRE $mizigeChar $base -}}
+            {{- $tokens := findRE `\S+` $rt -}}
+            {{- if and (gt (len $chars) 1) (eq (len $chars) (len $tokens)) -}}
+              {{- range $ci, $ch := $chars -}}
+                {{- $cells = $cells | append (printf `<ruby class="mizige-unit"><span class="mizige-char">%s</span><rp>（</rp><rt>%s</rt><rp>）</rp></ruby>` $ch (index $tokens $ci)) -}}
+              {{- end -}}
+            {{- else if eq (len $chars) 1 -}}
+              {{- $cells = $cells | append (printf `<ruby class="mizige-unit"><span class="mizige-char">%s</span><rp>（</rp><rt>%s</rt><rp>）</rp></ruby>` (index $chars 0) $rt) -}}
+            {{- else -}}
+              {{- $baseSpans := slice -}}
+              {{- range $chars -}}
+                {{- $baseSpans = $baseSpans | append (printf `<span class="mizige-char">%s</span>` .) -}}
+              {{- end -}}
+              {{- $cells = $cells | append (printf `<ruby class="mizige-unit mizige-span"><span class="mizige-base">%s</span><rp>（</rp><rt>%s</rt><rp>）</rp></ruby>` (delimit $baseSpans "") $rt) -}}
+            {{- end -}}
+          {{- else -}}
+            {{- $cells = $cells | append (printf "<ruby>%s</ruby>" $rBody) -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if $bare -}}
+        {{- range findRE $mizigeBareToken $bare -}}
+          {{- if hasPrefix . "<" -}}
+            {{- $cells = $cells | append . -}}
+          {{- else if findRE `^\s+$` . -}}
+          {{- else if findRE `^\x{3000}+$` . -}}
+            {{- $cells = $cells | append "\x00SEP\x00" -}}
+          {{- else if findRE (printf `^%s$` $mizigeOpen) . -}}
+            {{- $cells = $cells | append (printf `<span class="mizige-punct mizige-punct-open">%s</span>` .) -}}
+          {{- else if findRE (printf `^%s$` $mizigeEnd) . -}}
+            {{- $cells = $cells | append (printf `<span class="mizige-punct">%s</span>` .) -}}
+          {{- else -}}
+            {{- $cells = $cells | append (printf `<span class="mizige-unit"><span class="mizige-char">%s</span></span>` .) -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- /* Group cells into clause spans at punctuation boundaries so multi-clause
+         couplets break after `，` (`4+4`) before wrapping inside a clause, and
+         bind adjacent opening/closing punctuation inside `.mizige-tail` so UAX #14
+         contingent breaks never orphan `，` onto the next line.
+
+         The marks are zero-width and hang into the flex column-gap between
+         side-by-side clauses, so that gap must fit every mark meeting at the
+         widest boundary: the closing run ending one clause plus the opening
+         run starting the next (`」，` + `「` = 3). The count is put on the <p>
+         as `.mizige-hang-N` (N capped at 3) for prose.css to size the gap.
+         It is counted here rather than detected in CSS because finding a
+         boundary takes `.clause:has(close) + .clause:has(open)`, i.e. :has()
+         inside :has(), which Selectors 4 forbids: Chrome 157 drops any rule
+         containing it (the argument list is unforgiving, so the whole rule,
+         valid alternatives included). */ -}}
+    {{- $clauses := slice -}}
+    {{- $cur := slice -}}
+    {{- $leadOpen := "" -}}
+    {{- $curOpen := 0 -}}
+    {{- $prevClose := -1 -}}
+    {{- $hang := 0 -}}
+    {{- range $cells -}}
+      {{- $marks := 0 -}}
+      {{- if hasPrefix . `<span class="mizige-punct` -}}
+        {{- $marks = len (findRE $mizigeChar (replaceRE `<[^>]+>` "" .)) -}}
+      {{- end -}}
+      {{- if eq . "\x00SEP\x00" -}}
+        {{- if gt (len $cur) 0 -}}
+          {{- if ge $prevClose 0 -}}{{- $hang = math.Max $hang (add $prevClose $curOpen) -}}{{- end -}}
+          {{- $clauses = $clauses | append (printf `<span class="mizige-clause">%s</span><span class="mizige-sep">&#x3000;</span>` (delimit $cur "<wbr>")) -}}
+          {{- $cur = slice -}}
+          {{- $prevClose = 0 -}}
+          {{- $curOpen = 0 -}}
+        {{- end -}}
+      {{- else if hasPrefix . `<span class="mizige-punct mizige-punct-open` -}}
+        {{- if gt (len $cur) 0 -}}
+          {{- if ge $prevClose 0 -}}{{- $hang = math.Max $hang (add $prevClose $curOpen) -}}{{- end -}}
+          {{- $clauses = $clauses | append (printf `<span class="mizige-clause">%s</span>` (delimit $cur "<wbr>")) -}}
+          {{- $cur = slice -}}
+          {{- $prevClose = 0 -}}
+          {{- $curOpen = 0 -}}
+        {{- end -}}
+        {{- $leadOpen = printf "%s%s" $leadOpen . -}}
+        {{- $curOpen = add $curOpen $marks -}}
+      {{- else if hasPrefix . `<span class="mizige-punct` -}}
+        {{- if ge $prevClose 0 -}}{{- $hang = math.Max $hang (add $prevClose $curOpen) -}}{{- end -}}
+        {{- if gt (len $cur) 0 -}}
+          {{- $lastIdx := sub (len $cur) 1 -}}
+          {{- $last := printf `<span class="mizige-tail">%s%s</span>` (index $cur $lastIdx) . -}}
+          {{- $head := first $lastIdx $cur -}}
+          {{- $clauses = $clauses | append (printf `<span class="mizige-clause">%s</span>` (delimit ($head | append $last) "<wbr>")) -}}
+          {{- $cur = slice -}}
+        {{- else -}}
+          {{- $clauses = $clauses | append (printf `<span class="mizige-clause">%s</span>` .) -}}
+        {{- end -}}
+        {{- $prevClose = $marks -}}
+        {{- $curOpen = 0 -}}
+      {{- else if hasPrefix . "<sup" -}}
+        {{- if gt (len $cur) 0 -}}
+          {{- $lastIdx := sub (len $cur) 1 -}}
+          {{- $cur = (first $lastIdx $cur) | append (printf `<span class="mizige-tail">%s%s</span>` (index $cur $lastIdx) .) -}}
+        {{- else -}}
+          {{- $cur = $cur | append . -}}
+        {{- end -}}
+      {{- else -}}
+        {{- if $leadOpen -}}
+          {{- $cur = $cur | append (printf `<span class="mizige-tail">%s%s</span>` $leadOpen .) -}}
+          {{- $leadOpen = "" -}}
+        {{- else -}}
+          {{- $cur = $cur | append . -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $leadOpen -}}
+      {{- $cur = $cur | append $leadOpen -}}
+    {{- end -}}
+    {{- if gt (len $cur) 0 -}}
+      {{- if ge $prevClose 0 -}}{{- $hang = math.Max $hang (add $prevClose $curOpen) -}}{{- end -}}
+      {{- $clauses = $clauses | append (printf `<span class="mizige-clause">%s</span>` (delimit $cur "<wbr>")) -}}
+    {{- end -}}
+    {{- if gt $hang 0 -}}
+      {{- $openTag = replaceRE `^(<p\b[^>]*?\bclass="[^"]*)"` (printf `${1} mizige-hang-%d"` (int (math.Min $hang 3))) $openTag -}}
+    {{- end -}}
+    {{- $content = replace $content $pBlock (printf "\x00\x03%d\x00" (len $kept)) 1 -}}
+    {{- $kept = $kept | append (printf "%s%s</p>" $openTag (delimit $clauses "")) -}}
+  {{- end -}}
+{{- end -}}
 {{- if and $strip (in $content "keep-space") -}}
   {{- $keepRE := slice -}}
   {{- range slice "p" "blockquote" "ul" "ol" "dl" -}}
@@ -126,7 +334,6 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- $kept = $kept | append (partial "_funcs/typeset-content.html" (dict "content" . "keepSpace" true)) -}}
   {{- end -}}
 {{- end -}}
-{{- $ruby := `<ruby>$1<rp>（</rp><rt>$2</rt><rp>）</rp></ruby>` -}}
 {{- $cjk := `[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{3000}-\x{303f}\x{ff00}-\x{ffef}]` -}}
 {{- $cjkPunct := `[\x{3001}-\x{303f}\x{ff01}-\x{ff60}]` -}}
 
@@ -331,8 +538,13 @@ the match can then run to the next "]...{...}" anywhere in the feed.
   {{- $out = $out | append $pre $seg -}}
 {{- end -}}
 {{- $content = delimit $out "" -}}
-{{- range $k, $block := $kept -}}
-  {{- $content = replace $content (printf "\x00\x03%d\x00" $k) $block -}}
+{{- /* Restore last-cut first: a {.keep-space} block cut after a {.mizige}
+     paragraph it contains carries that paragraph's placeholder, which only
+     appears once the outer block is back. */ -}}
+{{- if $kept -}}
+  {{- range $k := seq (sub (len $kept) 1) 0 -}}
+    {{- $content = replace $content (printf "\x00\x03%d\x00" $k) (index $kept $k) -}}
+  {{- end -}}
 {{- end -}}
 
 {{- return $content -}}

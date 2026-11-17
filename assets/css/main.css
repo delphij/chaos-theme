@@ -2089,9 +2089,18 @@
       break-inside: avoid;
     }
 
-    /* Images, diagrams and blockquotes should not break */
-    img, blockquote, .mermaid {
+    /* Images, diagrams, copybook grids and blockquotes should not break */
+    img, blockquote, .mermaid, p.mizige {
       break-inside: avoid;
+    }
+
+    p.mizige {
+      --mizige-cell: calc(var(--font-size-base) * 4.1); /* 41pt (~14.5mm): fits 8-char couplets on one A4/Letter row */
+
+      rt {
+        font-size: var(--text-sm);
+        margin-bottom: 0.25em;
+      }
     }
 
     /* A table may break between rows, never inside one; the browser repeats
