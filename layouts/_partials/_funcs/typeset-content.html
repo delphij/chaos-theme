@@ -34,6 +34,15 @@ Shared by the HTML and feed pipelines so the two cannot drift.
     rules below restore spaces at unambiguous ASCII boundaries; remove them
     once Goldmark is fixed.
 
+    A block marked with `{.keep-space}` (<p>, <blockquote>, <ul>, <ol> or
+    <dl>; e.g. lyrics with caesura spaces) is exempt: it is cut out of the
+    page before anything else runs, typeset on its own with this step (and
+    the tag-boundary half of it below) switched off, and put back at the
+    end, so inline code or <pre> inside it cannot split it apart. The match
+    ends at the first closing tag of the same name, so a keep-space block
+    must not contain a nested element of its own kind (a sublist inside a
+    keep-space list); the rest of the block would then lose its spaces.
+
  3. Inline <code> spans (>= 16 chars) and bare URL <a> links (>= 24 chars,
     outside <pre>) receive <wbr> break opportunities, so an unbreakable token
     no longer drops whole to the next line and tears open a justification
@@ -80,13 +89,31 @@ IMPORTANT: pass one page's rendered content, never an assembled feed document.
 A string containing "<![CDATA[" offers the leading "[" something to match, and
 the match can then run to the next "]...{...}" anywhere in the feed.
 
-@param {string} content Rendered HTML for a single page.
+@param {string} content Rendered HTML for a single page. (Internally the
+  partial also calls itself with dict "content" <html> "keepSpace" true for
+  each {.keep-space} block.)
 @returns {string} The same HTML with the conventions applied.
 
 @example: {{ partial "_funcs/typeset-content.html" .Content }}
 */ -}}
 
 {{- $content := . -}}
+{{- $strip := true -}}
+{{- if reflect.IsMap . -}}
+  {{- $content = .content -}}
+  {{- $strip = not .keepSpace -}}
+{{- end -}}
+{{- $kept := slice -}}
+{{- if and $strip (in $content "keep-space") -}}
+  {{- $keepRE := slice -}}
+  {{- range slice "p" "blockquote" "ul" "ol" "dl" -}}
+    {{- $keepRE = $keepRE | append (printf `(?s)<%s\b[^>]*\bclass="(?:[^"]*\s)?keep-space(?:\s[^"]*)?"[^>]*>.*?</%s>` . .) -}}
+  {{- end -}}
+  {{- range findRE (delimit $keepRE "|") $content -}}
+    {{- $content = replace $content . (printf "\x00\x03%d\x00" (len $kept)) 1 -}}
+    {{- $kept = $kept | append (partial "_funcs/typeset-content.html" (dict "content" . "keepSpace" true)) -}}
+  {{- end -}}
+{{- end -}}
 {{- $ruby := `<ruby>$1<rp>（</rp><rt>$2</rt><rp>）</rp></ruby>` -}}
 {{- $cjk := `[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{3000}-\x{303f}\x{ff00}-\x{ffef}]` -}}
 {{- $cjkPunct := `[\x{3001}-\x{303f}\x{ff01}-\x{ff60}]` -}}
@@ -135,11 +162,13 @@ the match can then run to the next "]...{...}" anywhere in the feed.
              base. tools/build_search_index.py mirrors these patterns. */ -}}
         {{- $prose = $prose | replaceRE `\[([^\[\]\n]{1,32})\]\^?\{([^.}\n]|[^}\n]{2,32})\}` $ruby -}}
         {{- $prose = $prose | replaceRE `\[([^\[\]\n]{1,32})\]\^\(([^)\n]{1,32})\)` $ruby -}}
-        {{- range seq 2 -}}
-          {{- $prose = $prose | replaceRE (printf `(%s)\s+(%s)` $cjk $cjk) "$1$2" -}}
+        {{- if $strip -}}
+          {{- range seq 2 -}}
+            {{- $prose = $prose | replaceRE (printf `(%s)\s+(%s)` $cjk $cjk) "$1$2" -}}
+          {{- end -}}
+          {{- $prose = $prose | replaceRE (printf `(%s)\s+([a-zA-Z0-9])` $cjk) "$1$2" -}}
+          {{- $prose = $prose | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" -}}
         {{- end -}}
-        {{- $prose = $prose | replaceRE (printf `(%s)\s+([a-zA-Z0-9])` $cjk) "$1$2" -}}
-        {{- $prose = $prose | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" -}}
         {{- /* Work around Goldmark 1.8's css3draft rule 3, which drops a soft
              line break next to ANY Unicode punctuation instead of only
              space-discarding (CJK) punctuation, so wrapped English prose
@@ -198,12 +227,14 @@ the match can then run to the next "]...{...}" anywhere in the feed.
          ("， <code>/404.html</code>", "<code>.</code> ，"), the glyph already
          carries its own half-em blank space, so a typed space is always
          dropped. */ -}}
-    {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:strong|em|del|mark|a|ruby)\b)` $cjk) "$1$2" -}}
-    {{- $seg = $seg | replaceRE (printf `(</(?:strong|em|del|mark|a|ruby)>)\s+(%s)` $cjk) "$1$2" -}}
-    {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b)` $cjkPunct) "$1$2" -}}
-    {{- $seg = $seg | replaceRE (printf `(</(?:code|kbd|samp)>)\s+(%s)` $cjkPunct) "$1$2" -}}
-    {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b[^>]*>[A-Za-z0-9])` $cjk) "$1$2" -}}
-    {{- $seg = $seg | replaceRE (printf `([A-Za-z0-9]</(?:code|kbd|samp)>)\s+(%s)` $cjk) "$1$2" -}}
+    {{- if $strip -}}
+      {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:strong|em|del|mark|a|ruby)\b)` $cjk) "$1$2" -}}
+      {{- $seg = $seg | replaceRE (printf `(</(?:strong|em|del|mark|a|ruby)>)\s+(%s)` $cjk) "$1$2" -}}
+      {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b)` $cjkPunct) "$1$2" -}}
+      {{- $seg = $seg | replaceRE (printf `(</(?:code|kbd|samp)>)\s+(%s)` $cjkPunct) "$1$2" -}}
+      {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b[^>]*>[A-Za-z0-9])` $cjk) "$1$2" -}}
+      {{- $seg = $seg | replaceRE (printf `([A-Za-z0-9]</(?:code|kbd|samp)>)\s+(%s)` $cjk) "$1$2" -}}
+    {{- end -}}
     {{- /* Work around the same Goldmark 1.8 css3draft rule 3 bug when a wrapped
          line opens with ASCII punctuation (&ldquo;, &lsquo;, **, *, [, `),
          dropping the soft break before an opening curly quote or inline AST
@@ -277,5 +308,8 @@ the match can then run to the next "]...{...}" anywhere in the feed.
   {{- $out = $out | append $pre $seg -}}
 {{- end -}}
 {{- $content = delimit $out "" -}}
+{{- range $k, $block := $kept -}}
+  {{- $content = replace $content (printf "\x00\x03%d\x00" $k) $block -}}
+{{- end -}}
 
 {{- return $content -}}

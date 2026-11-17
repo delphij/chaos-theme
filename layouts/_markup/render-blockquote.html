@@ -61,5 +61,9 @@ gave it.
   {{- end -}}
   <blockquote class="alert alert-{{ .AlertType }}"><p class="alert-heading">{{ transform.Emojify (index $emojis .AlertType) }} {{ $title }}</p>{{ with $lead }}<p>{{ . }}</p>{{ end }}{{ .Text }}</blockquote>
 {{- else -}}
-  <blockquote>{{ .Text }}</blockquote>
+  <blockquote
+  {{- range $k, $v := .Attributes -}}
+    {{- if $v }} {{ printf `%s="%s"` $k (htmlEscape $v) | safeHTMLAttr }}{{ end -}}
+  {{- end -}}
+  >{{ .Text }}</blockquote>
 {{- end -}}
