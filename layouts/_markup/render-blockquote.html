@@ -61,9 +61,18 @@ gave it.
   {{- end -}}
   <blockquote class="alert alert-{{ .AlertType }}"><p class="alert-heading">{{ transform.Emojify (index $emojis .AlertType) }} {{ $title }}</p>{{ with $lead }}<p>{{ . }}</p>{{ end }}{{ .Text }}</blockquote>
 {{- else -}}
+  {{- $text := .Text -}}
+  {{- /* A {.quote} card's attribution is its last paragraph when that opens
+     with a dash (`— Author`, `——作者`) and is not the only one. The dash is
+     the author's own mark, so a quote of several paragraphs without one is
+     left alone. The last paragraph's body may hold inline tags but no <p>,
+     which keeps an earlier dash-led paragraph from matching. */ -}}
+  {{- if in (split (string (or .Attributes.class "")) " ") "quote" -}}
+    {{- $text = replaceRE `(?s)^(.+</p>\s*)<p>((?:—|―|--)(?:[^<]|<(?:[^p]|p[^>\s]))*</p>\s*)$` `${1}<p class="quote-by">${2}` $text | safeHTML -}}
+  {{- end -}}
   <blockquote
   {{- range $k, $v := .Attributes -}}
     {{- if $v }} {{ printf `%s="%s"` $k (htmlEscape $v) | safeHTMLAttr }}{{ end -}}
   {{- end -}}
-  >{{ .Text }}</blockquote>
+  >{{ $text }}</blockquote>
 {{- end -}}

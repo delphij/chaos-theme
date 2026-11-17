@@ -2208,8 +2208,10 @@
       contain: none;                   /* Prevent margin/spacing issues in print */
     }
 
-    /* Quotes print as an indent, without the ground; callouts keep theirs */
-    blockquote {
+    /* Quotes print as an indent, without the ground; callouts keep theirs.
+       blockquote.quote is named because its padding outranks a bare element. */
+    blockquote,
+    blockquote.quote {
       background: transparent;
       margin: 0.5em 0;
       padding-left: 1em;

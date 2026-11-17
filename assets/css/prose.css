@@ -508,11 +508,31 @@
   }
 
   /* ==========================================================================
+     QUOTE CARDS
+     Epigraph / standalone quote card with right-aligned attribution.
+     render-blockquote.html marks the attribution: a last paragraph that
+     opens with a dash, so a closing paragraph of the quote is not taken
+     for one by position alone.
+     ========================================================================== */
+
+  blockquote.quote {
+    padding: 1.25em 1.5em;
+    font-size: 1.05em;
+
+    > p.quote-by {
+      margin-top: 0.75em;
+      color: var(--muted);
+      font-size: 0.85em;
+      text-align: end;
+    }
+  }
+
+  /* ==========================================================================
      CALLOUTS
      GitHub-style alerts, rendered as blockquote.alert by render-blockquote.html,
-     so the quote card above gives them their shape. Each type sets its tint
-     and the colour of its labelled heading; the label and icon carry the
-     meaning, not the colour alone.
+     so the blockquote card in chaos.base gives them their shape. Each type
+     sets its tint and the colour of its labelled heading; the label and icon
+     carry the meaning, not the colour alone.
      ========================================================================== */
 
   .alert {

@@ -102,6 +102,20 @@ p2
 >
 > 引用里也可以有`行内代码`和[链接](https://commonmark.org/)。
 
+独立语录可附加`{.quote}`，以破折号开头的末段自动右对齐并弱化为出处署名：
+
+> It is better to remain silent at the risk of being thought a fool, than to talk and remove all doubt of it.
+>
+> — Maurice Switzer, *Mrs. Goose, Her Book* (1907)
+{.quote}
+
+末段不以破折号开头时，仍是引文本身：
+
+> 第一段引文。
+>
+> 第二段引文，没有出处署名，保持原样。
+{.quote}
+
 ## 提示框 {#callouts}
 
 > [!NOTE]
