@@ -436,13 +436,26 @@
 
   /* Ruby text - The small pronunciation guide */
   rt {
-    font-size: 0.65em;
+    font-size: 0.55em;
     line-height: 1;
+    margin-bottom: -0.1em;
     color: var(--muted);
     font-weight: normal;
     letter-spacing: 0.05em;
     padding: 0 0.1em;
     text-emphasis: none;               /* Never draw emphasis marks on ruby glosses */
+  }
+
+  /* Give blocks that contain ruby annotations slightly taller uniform leading
+     so a single annotated line does not open a noticeably wider gap above it.
+     Added to the block's own leading rather than fixed, so print's tighter
+     --line-height carries through. A component that sets its own leading
+     declares it as --leading and repeats this under &:has(ruby), since its
+     layer outranks this one (p.stage, dl.bilingual dd). A list item counts
+     only its own text, not a nested list's. */
+  :is(p, dd):has(ruby),
+  li:has(> ruby, > :not(ul, ol) ruby) {
+    line-height: calc(var(--leading, var(--line-height)) + var(--ruby-leading));
   }
 
   /* Highlighted text - search matches and marked text in content */
@@ -451,6 +464,30 @@
     color: var(--heading);
     padding: 0 3px;
     border-radius: var(--radius-sm);
+  }
+
+  /* Subscripts and superscripts (including footnote markers) - Lock line-height
+     to 0 so inline markers never inflate the 1.7 CJK line box. */
+  sub,
+  sup {
+    font-size: 0.75em;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+
+  sup {
+    top: -0.45em;
+  }
+
+  sub {
+    bottom: -0.25em;
+  }
+
+  /* Proper-name underline (<u>) - Offset below CJK descenders */
+  u {
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: from-font;
   }
 }
 
@@ -798,8 +835,13 @@
   }
 
   p.stage {
+    --leading: 1.75;
     margin: 0.75rem 0;
-    line-height: 1.75;
+    line-height: var(--leading);
+
+    &:has(ruby) {
+      line-height: calc(var(--leading) + var(--ruby-leading));
+    }
 
     + dl.dialogue {
       margin-top: 0.75rem;
@@ -899,7 +941,12 @@
       padding-left: 0;
       color: var(--muted);
       font-size: 0.9em;
-      line-height: 1.65;
+      --leading: 1.65;
+      line-height: var(--leading);
+
+      &:has(ruby) {
+        line-height: calc(var(--leading) + var(--ruby-leading));
+      }
 
       dt:first-child + & {
         margin-top: 0;
@@ -934,7 +981,7 @@
     &.wide-ref dd {
       color: inherit;
       font-size: inherit;
-      line-height: var(--line-height);
+      --leading: var(--line-height);
     }
 
     &[data-select-col="dt"] dd,

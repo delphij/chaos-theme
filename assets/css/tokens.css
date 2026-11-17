@@ -421,6 +421,7 @@
     /* Typography scale - Consistent font sizing system */
     --font-size-base: 16px;            /* Base font size */
     --line-height: 1.7;                /* Line height optimized for compact CJK reading texture */
+    --ruby-leading: 0.15;              /* Added to a block's leading when it holds ruby (prose.css) */
     --h1-size: 28px;                   /* Article titles */
     --h2-size: 22px;                   /* Section headings */
     --h3-size: 18px;                   /* Sub-section headings */
