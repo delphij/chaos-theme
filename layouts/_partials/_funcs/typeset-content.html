@@ -25,6 +25,15 @@ Shared by the HTML and feed pipelines so the two cannot drift.
     the space it reads as part of the word before it. See the boundary rules
     below for where that is decided.
 
+    Conversely, Goldmark 1.8's css3draft rule 3 drops soft line breaks next
+    to any Unicode punctuation rather than only space-discarding CJK
+    punctuation, gluing wrapped English prose across periods ("today.There"),
+    opening curly quotes ("to&ldquo;buy"), and lines starting with Markdown
+    delimiters such as **, *, [, or ` ("looking for<strong>MARRIAGE",
+    " -><code>TIME_INS</code>", "use<code>--flag</code>"). Targeted inverse
+    rules below restore spaces at unambiguous ASCII boundaries; remove them
+    once Goldmark is fixed.
+
  3. Inline <code> spans (>= 16 chars) and bare URL <a> links (>= 24 chars,
     outside <pre>) receive <wbr> break opportunities, so an unbreakable token
     no longer drops whole to the next line and tears open a justification
@@ -131,6 +140,21 @@ the match can then run to the next "]...{...}" anywhere in the feed.
         {{- end -}}
         {{- $prose = $prose | replaceRE (printf `(%s)\s+([a-zA-Z0-9])` $cjk) "$1$2" -}}
         {{- $prose = $prose | replaceRE (printf `([a-zA-Z0-9])\s+(%s)` $cjk) "$1$2" -}}
+        {{- /* Work around Goldmark 1.8's css3draft rule 3, which drops a soft
+             line break next to ANY Unicode punctuation instead of only
+             space-discarding (CJK) punctuation, so wrapped English prose
+             renders "today.There" or "However,there". The newline is gone
+             by now, so only unambiguous shapes are restored: a lowercase
+             word + "." + a capitalized word at a word boundary, or a 3+ letter
+             capitalized word (e.g. "New York.", "License.") + "." + a common
+             sentence starter at a word boundary. Requiring those bounds keeps
+             www.FreeBSD.org, Worm.Gibe.F, this.Think(), Dr.Web and Zoom.Quiet
+             intact. Commas and other punctuation are left alone: in prose they
+             cannot be told from host names, filenames and option lists.
+             Remove once Goldmark is fixed. */ -}}
+        {{- $sentEnd := `[\s,;:!?)]|&rdquo;|<|$` -}}
+        {{- $prose = $prose | replaceRE (printf `(^|[\s(>])([a-z]{2,})\.([A-Z][a-z]*(?:'|&rsquo;|&#39;)?[a-z]*(?:%s))` $sentEnd) "$1$2. $3" -}}
+        {{- $prose = $prose | replaceRE (printf `(^|[\s(>])([A-Z][a-z]{2,})\.((?:I(?:(?:'|&rsquo;|&#39;)(?:[dms]|ve|ll|re))?|The|This|That|It(?:s|(?:'|&rsquo;|&#39;)s)?|But|And|So|For|However)(?:%s))` $sentEnd) "$1$2. $3" -}}
       {{- end -}}
       {{- if and $hasEmDot $code -}}
         {{- $codeOut = $codeOut | append (printf "\x00\x01%d\x00" (len $codes)) $prose -}}
@@ -180,6 +204,17 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- $seg = $seg | replaceRE (printf `(</(?:code|kbd|samp)>)\s+(%s)` $cjkPunct) "$1$2" -}}
     {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b[^>]*>[A-Za-z0-9])` $cjk) "$1$2" -}}
     {{- $seg = $seg | replaceRE (printf `([A-Za-z0-9]</(?:code|kbd|samp)>)\s+(%s)` $cjk) "$1$2" -}}
+    {{- /* Work around the same Goldmark 1.8 css3draft rule 3 bug when a wrapped
+         line opens with ASCII punctuation (&ldquo;, &lsquo;, **, *, [, `),
+         dropping the soft break before an opening curly quote or inline AST
+         node ("to&ldquo;buy", "looking for<strong>...", " -><code>TIME_INS</code>",
+         "use<code>--flag</code>"). Trade-off: without the original newline,
+         intentional unspaced intraword emphasis (un*believ*able), unspaced
+         ASCII comma lists (`a`,`b`), or `foo<code>(args)</code>` would also
+         receive a space; plain `(` stays untouched to preserve item(s),
+         func(arg), and O(n). Remove once Goldmark is fixed. */ -}}
+    {{- $inlineTags := `strong|em|del|mark|a|code|kbd|samp` -}}
+    {{- $seg = $seg | replaceRE (printf `([A-Za-z0-9]|(?:[A-Za-z0-9]|</(?:%s)>)[,:]|\s-&gt;)(&(?:ldquo|lsquo);|<(?:%s)\b[^>]*>(?:[A-Za-z0-9(/.$~-]|&(?:ldquo|lsquo|quot|#39);))` $inlineTags $inlineTags) "$1 $2" -}}
     {{- range (findRE `(?:<code>[^<\n]{16,}</code>|<a\b[^>]*>https?://[^<\n]{24,}</a>)` $seg | uniq) -}}
       {{- $inner := replaceRE `^<[^>]+>|</[^>]+>$` "" . -}}
       {{- /* Match query &key= before _ or . inserts <wbr> inside the key name;
