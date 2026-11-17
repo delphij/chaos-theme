@@ -173,9 +173,10 @@ the match can then run to the next "]...{...}" anywhere in the feed.
         {{- /* A paragraph holding nothing but a stage direction is marked
              itself: CSS cannot tell it from one that also has speech, since
              :only-child ignores text nodes. Long scene-setting paragraphs
-             (60+ chars) or explicit `{.stage-scene}` opt into `stage-scene`
-             so they stay at body size and ink; explicit `{.stage}` opts out
-             of the length promotion. */ -}}
+             (60+ chars including brackets) or explicit `{.stage-scene}` (as
+             the sole class on `<p>`) opt into `stage-scene` so they stay at
+             body size and ink; explicit `{.stage}` opts out of the length
+             promotion. */ -}}
         {{- $prose = $prose | replaceRE `<p>(<em class="stage">[^<]{60,}</em>)</p>` `<p class="stage stage-scene">$1</p>` -}}
         {{- $prose = $prose | replaceRE `<p>(<em class="stage">[^<]+</em>)</p>` `<p class="stage">$1</p>` -}}
         {{- $prose = $prose | replaceRE `<p class="stage-scene">(<em class="stage">[^<]+</em>)</p>` `<p class="stage stage-scene">$1</p>` -}}

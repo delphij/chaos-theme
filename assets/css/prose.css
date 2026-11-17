@@ -607,6 +607,10 @@
       margin-bottom: 0.8rem;
     }
 
+    &:has(+ dl.dialogue.script) {
+      margin-bottom: 0.55rem;
+    }
+
     & + & {
       margin-top: 0.8rem;
     }

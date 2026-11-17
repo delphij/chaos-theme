@@ -41,11 +41,11 @@ the first chapter on.
       <div class="series-nav-pager">
         {{- with $prev }}
           {{- $label := or .Params.series_title .Title -}}
-          <a class="series-nav-prev" rel="prev" href="{{ .RelPermalink }}" aria-label="{{ T "seriesPrevLabel" (dict "Title" $label) }}">{{ T "seriesPrev" (dict "Title" $label) }}</a>
+          <a class="series-nav-prev" href="{{ .RelPermalink }}" aria-label="{{ T "seriesPrevLabel" (dict "Title" $label) }}">{{ T "seriesPrev" (dict "Title" $label) }}</a>
         {{- end }}
         {{- with $next }}
           {{- $label := or .Params.series_title .Title -}}
-          <a class="series-nav-next" rel="next" href="{{ .RelPermalink }}" aria-label="{{ T "seriesNextLabel" (dict "Title" $label) }}">{{ T "seriesNext" (dict "Title" $label) }}</a>
+          <a class="series-nav-next" href="{{ .RelPermalink }}" aria-label="{{ T "seriesNextLabel" (dict "Title" $label) }}">{{ T "seriesNext" (dict "Title" $label) }}</a>
         {{- end }}
       </div>
       {{- end }}
