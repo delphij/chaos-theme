@@ -12,8 +12,10 @@ Displays post title, date, taxonomy links, summary text, and optional
 <article class="post-entry">
   <h2 class="post-title"><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
   {{ partial "post-meta.html" (dict "page" .) }}
+  {{- $summary := partial "_funcs/typeset-content.html" .Summary -}}
+  {{- $summary = $summary | replaceRE `<a\b[^>]*>(\s*<img\b[^>]*>\s*)</a>` (printf `<a href="%s">$1</a>` .RelPermalink) -}}
   <div class="post-summary-content">
-    {{ partial "_funcs/typeset-content.html" .Summary | safeHTML }}
+    {{ $summary | safeHTML }}
   </div>
   {{- /* A truncated summary leads on to the rest of the post; a complete one
          has nothing more to read, so it leads to the discussion instead. */}}

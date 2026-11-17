@@ -504,8 +504,9 @@ As of 2026: Chrome/Edge 122+, Firefox 124+, Safari/iOS 17.4+.
   expands `[text]{.}` emphasis marks and ruby annotations (outside `<pre>` and
   `<code>`), adds `<wbr>` break opportunities inside inline `<code>` (>= 16
   chars), bare URL `<a>` links (>= 24 chars), and ahead of the final CJK break
-  unit before ASCII-leading inline tags, and is shared by the HTML and feed
-  pipelines.
+  unit before ASCII-leading inline tags, collapses the image hook's link
+  nested inside an author's link around an image (`[![alt](img)](url)`), and
+  is shared by the HTML and feed pipelines.
 - JS: ES2024 syntax floor, ES modules, `<dialog>`, modern array/DOM methods, Intersection Observer
 
 ## 13. Quality Assurance Checklist

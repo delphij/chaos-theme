@@ -76,12 +76,24 @@ Shared by the HTML and feed pipelines so the two cannot drift.
     splitting off the final break unit bounds that fallback without breaking
     kinsoku or punctuation kerning.
 
-All of these stay string rewrites over rendered HTML because none is a Markdown
+ 5. A linked image ([![alt](img)](url)) loses the image render hook's own
+    link to the full-size file. The hook wraps every image in <a>, but it
+    cannot see that Goldmark has already opened the author's <a> around it,
+    so the two nest - invalid HTML that the parser resolves by closing the
+    author's link before the inner one opens, leaving the image pointing at
+    itself and the author's target unreachable. Only the shape the
+    Markdown above produces is collapsed (the image is the outer link's
+    sole content, whitespace aside); an image sharing a link with text keeps
+    both anchors.
+
+Steps 1-4 stay string rewrites over rendered HTML because none is a Markdown
 construct: Goldmark has no hook for them, and Hugo cannot load a custom
 Goldmark extension. (Everything that IS a Markdown construct - math, images,
 links, diagrams - is handled structurally instead, by the per-output-format
-render hooks in layouts/_markup/. Line-wrap newlines are handled at parse time
-by markup.goldmark.extensions.cjk, which is why they never reach code blocks.)
+render hooks in layouts/_markup/; step 5 exists only because a render hook
+receives no context about its parent node. Line-wrap newlines are handled at
+parse time by markup.goldmark.extensions.cjk, which is why they never reach
+code blocks.)
 The ruby patterns are bounded and newline-free so one stray bracket cannot let
 a match run away.
 
@@ -133,6 +145,11 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- end -}}
   {{- end -}}
   {{- if $seg -}}
+    {{- /* Step 5: keep the author's link around a linked image, dropping the
+         render hook's inner one. */ -}}
+    {{- if in $seg "<a" -}}
+      {{- $seg = $seg | replaceRE `(<a\b[^>]*>\s*)<a\b[^>]*>(\s*<img\b[^>]*>\s*)</a>(\s*</a>)` "${1}${2}${3}" -}}
+    {{- end -}}
     {{- $hasEmDot := in $seg "]{.}" -}}
     {{- $codes := slice -}}
     {{- $codeOut := slice -}}

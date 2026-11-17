@@ -914,14 +914,9 @@
         display: flex;
       }
 
-      /* Eye-tracking ruler on multi-line blocks: subtle neutral band on the
-         code row (leaving .hl's Yamabuki ground intact) and brighter ink on
-         its margin line number, paired across columns by modules/code-copy.js. */
+      /* Brighter ink on the margin line number paired with the hovered code row
+         by modules/code-copy.js. */
       @media screen and (hover: hover) {
-        .line:not(.hl):is(:hover, .is-hovered) {
-          background-color: var(--code-line-hover);
-        }
-
         .lnt:is(:hover, .is-hovered) {
           color: var(--heading);
         }
@@ -969,6 +964,14 @@
 
       @media screen {
         padding-inline: 12px;
+      }
+
+      /* Eye-tracking ruler across all Chroma blocks (leaving .hl's Yamabuki
+         ground intact); .is-hovered is added when .lntable pairs columns. */
+      @media screen and (hover: hover) {
+        &:not(.hl):is(:hover, .is-hovered) {
+          background-color: var(--code-line-hover);
+        }
       }
     }
   }
