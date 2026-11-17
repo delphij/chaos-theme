@@ -73,3 +73,44 @@ static const char *default_zone = "sjc.example.net";
 ## 行内公式与句读禁则 {#inline-math}
 
 数学公式与中文句读混排时，公式包裹在原子行内盒（`.math-inline`）中并在末尾附带字连接符（`U+2060`），防止紧随其后的全角逗号、句号、顿号或右括号在折行时孤零零掉到下一行行首。拖动窗口宽度检验下列公式与标点的粘合度：设倒排索引第一层词项集合为\(P_{T_1}(w)\)、第二层正文词项集合为\(P_{T_2}(w)\)，构建脚本保证两层严格不相交（即\(P_{T_1}(w) \cap P_{T_2}(w) = \emptyset\)），检索合并复杂度保持在\(O(|P_{T_1}| + |P_{T_2}|)\)，单次查询耗时通常低于\(1\,\text{ms}\)。当逻辑斯谛映射参数落入\(3.56995 < r \le 4\)区间时，微小初值扰动\(\delta_0 = 10^{-12}\)会按指数率\(\lvert\delta_n\rvert \approx \lvert\delta_0\rvert e^{\lambda n}\)迅速放大（其中Lyapunov指数\(\lambda > 0\)）：此时即便双精度浮点数的机器精度达到\(\varepsilon = 2^{-53}\)，迭代数十步后轨迹也会彻底分道扬镳。
+
+## 英文换行句末空格恢复与标识符豁免 {#sentence-space}
+
+Goldmark 1.8的`css3draft`断行规则会把任意Unicode标点（而非仅全角标点）旁的软换行当成无空格边界吞掉，导致英文段落折行处若恰好落在句号之后，渲染后会发生前后两句粘连。下面摘录《独立宣言》段落，刻意将句子断点放在小写词末尾（`accustomed.\nBut`）与首字母大写的3字母以上词末尾（`Government.\nThe`），检验`typeset-content.html`是否能准确补回句间空格：
+
+> We hold these truths to be self-evident, that all men are created equal, that
+> they are endowed by their Creator with certain unalienable Rights, that among
+> these are Life, Liberty and the pursuit of Happiness. That to secure these
+> rights, Governments are instituted among Men, deriving their just powers from
+> the consent of the governed.
+>
+> Prudence, indeed, will dictate that Governments long established should not be
+> changed for light and transient causes; and accordingly all experience hath
+> shewn, that mankind are more disposed to suffer, while evils are sufferable,
+> than to right themselves by abolishing the forms to which they are accustomed.
+> But when a long train of abuses and usurpations, pursuing invariably the same
+> Object evinces a design to reduce them under absolute Despotism, it is their
+> right, it is their duty, to throw off such Government, and to provide new
+> Guards for their future security. Such has been the patient sufferance of
+> these Colonies; and such is now the necessity which constrains them to alter
+> their former Systems of Government.
+> The history of the present King of Great Britain is a history of repeated
+> injuries and usurpations, all having in direct object the establishment of an
+> absolute Tyranny over these States.
+
+同一`css3draft`缺陷还会在下一行以ASCII标点（`**`、`[`、`` ` ``、`"`、`'`）开头时吞掉软换行。下面段落刻意在这些定界符前折行，检验渲染后是否均保留了词间空格：
+
+> When a wrapped line opens with
+> **strong emphasis**, a
+> [Markdown link](https://example.org/),
+> "double quotes", or
+> 'single quotes', or when inline code opens with a symbol such as
+> `--flag` or
+> `/etc/rc.conf`, or follows an ASCII arrow like `TIME_OK` ->
+> `TIME_INS`, the space ahead of each token must remain intact.
+
+与此同时，正则必须放过域名、方法调用、人名与字段属性：正文里的 www.FreeBSD.org、Worm.Gibe.F、this.Think()、Dr.Web、Zoom.Quiet、User.Id 与 Order.Is 必须保持紧凑无空格；而带有`{.keep-space}`的区块则完整保留作者手写的节奏空格：
+
+> 白日依山尽 黄河入海流  
+> 欲穷千里目 更上一层楼
+{.keep-space}

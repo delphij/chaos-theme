@@ -77,6 +77,23 @@ p2
 
 *〔幕落。〕*
 
+双语对照使用`{.bilingual}`（左栏为主要语言，右栏为对照原文，手机端自动转为先中后外堆叠，并支持按起拖位置锁定单栏复制）：
+
+我们认为下面这些真理是不言而喻的：人人生而平等，造物者赋予他们若干不可剥夺的权利，其中包括生命权、自由权和追求幸福的权利。
+: We hold these truths to be self-evident, that all men are created equal, that
+  they are endowed by their Creator with certain unalienable Rights, that among
+  these are Life, Liberty and the pursuit of Happiness.
+
+为了保障这些权利，人类才在他们之间建立政府，而政府之正当权力，是经被治理者的同意而产生的。
+: That to secure these rights, Governments are instituted among Men, deriving
+  their just powers from the consent of the governed.
+{.bilingual}
+
+诗词、歌词中刻意手打的节奏停顿空格，或需跳过CJK空格清理的区块，可附加`{.keep-space}`：
+
+明月 几时有  把酒 问青天
+{.keep-space}
+
 ## 引用 {#quotes}
 
 > 引用使用无边框的浅色底块，字号略小于正文，但颜色不变淡。
