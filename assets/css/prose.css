@@ -601,6 +601,12 @@
     grid-template-columns: fit-content(7em) minmax(0, 1fr);
     column-gap: 1em;
 
+    /* Compress margins between consecutive dialogue blocks so margin collapse
+       does not fall back to the 1.15em default `dl` margin. */
+    &:has(+ dl.dialogue) {
+      margin-bottom: 0.8rem;
+    }
+
     & + & {
       margin-top: 0.8rem;
     }
@@ -701,7 +707,10 @@
     }
 
     &.script {
-      & + &,
+      &:has(+ dl.dialogue) {
+        margin-bottom: 0.55rem;
+      }
+
       dl.dialogue + & {
         margin-top: 0.55rem;
       }
@@ -763,11 +772,12 @@
   }
 
   /* Parenthesised or tortoise-shell bracketed stage directions (`*（…）*`,
-     `*〔…〕*`), tagged by `typeset-content.html`. Both inline cues inside `<dd>`
-     and standalone stage-direction paragraphs (`p.stage`, also tagged there)
-     step back into smaller muted ink,
-     with tighter vertical rhythm when a stage paragraph bridges two dialogue
-     blocks. Long scene-setting paragraphs (`p.stage.stage-scene`) keep body
+     `*〔…〕*`), tagged by `typeset-content.html`. Inline cues (`em.stage`) and
+     short standalone stage paragraphs (`p.stage`) step back into smaller muted
+     ink, with tighter vertical rhythm when bridging `.script` blocks while
+     non-script metadata headers (`:not(.script)`) keep 1.5rem breathing room
+     before an opening stage paragraph. Long scene-setting paragraphs
+     (`p.stage.stage-scene`, 60+ chars or explicit `{.stage-scene}`) keep body
      size and ink so multi-sentence opening descriptions stay comfortable. */
   em.stage {
     font-size: var(--text-sm);
@@ -788,7 +798,7 @@
     }
   }
 
-  dl.dialogue:has(+ p.stage) {
+  dl.dialogue.script:has(+ p.stage) {
     margin-bottom: 0.75rem;
   }
 

@@ -1114,8 +1114,8 @@
     }
 
     .series-nav-next {
-      margin-left: auto;
-      text-align: right;
+      margin-inline-start: auto;
+      text-align: end;
     }
   }
 
