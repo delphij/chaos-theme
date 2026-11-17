@@ -661,9 +661,18 @@
         font-weight: 400;
         line-height: 1.35;
         color: var(--muted);
+        /* Trim outer half-width space from opening/closing brackets at line
+           edges so short cues align crisply with the speaker name above, and
+           balance line lengths to avoid 1-2 character orphans. */
+        text-spacing-trim: trim-both;
+        font-feature-settings: "halt" 1;
+        text-wrap: balance;
 
         @media screen and (max-width: 768px) {
           display: inline;
+          text-spacing-trim: normal;
+          font-feature-settings: normal;
+          text-wrap: auto;
         }
       }
 
