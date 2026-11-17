@@ -1093,6 +1093,32 @@
     text-align: left;
   }
 
+  .series-nav-pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding: 8px 16px;
+    border-top: 1px solid var(--ground-head);
+    font-size: var(--text-sm);
+
+    a {
+      color: var(--heading);
+      font-weight: 500;
+      border: none;
+
+      &:hover {
+        color: var(--primary);
+      }
+    }
+
+    .series-nav-next {
+      margin-left: auto;
+      text-align: right;
+    }
+  }
+
   /* ==========================================================================
      COMPONENTS - X (TWITTER) EMBED CARDS
      Refined static embed cards for X/Twitter posts with theme-consistent styling.

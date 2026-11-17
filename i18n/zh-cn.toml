@@ -74,6 +74,10 @@ allTagsLink = '全部标签（{{ .Count }}）→'
 categoryTitle = '分类：{{ .Name }}'
 tagTitle = '标签：{{ .Name }}'
 seriesTitle = '系列：{{ .Name }}'
+seriesPrev = '← {{ .Title }}'
+seriesNext = '{{ .Title }} →'
+seriesPrevLabel = '系列上一篇：{{ .Title }}'
+seriesNextLabel = '系列下一篇：{{ .Title }}'
 
 # Archives
 archivesYearNav = '归档年份导航'

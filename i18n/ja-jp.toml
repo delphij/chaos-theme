@@ -74,6 +74,10 @@ allTagsLink = 'すべてのタグ（{{ .Count }}）→'
 categoryTitle = 'カテゴリー：{{ .Name }}'
 tagTitle = 'タグ：{{ .Name }}'
 seriesTitle = 'シリーズ：{{ .Name }}'
+seriesPrev = '← {{ .Title }}'
+seriesNext = '{{ .Title }} →'
+seriesPrevLabel = 'シリーズ前の記事：{{ .Title }}'
+seriesNextLabel = 'シリーズ次の記事：{{ .Title }}'
 
 # Archives
 archivesYearNav = 'アーカイブの年別ナビゲーション'

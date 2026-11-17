@@ -174,6 +174,7 @@ the match can then run to the next "]...{...}" anywhere in the feed.
              itself: CSS cannot tell it from one that also has speech, since
              :only-child ignores text nodes. */ -}}
         {{- $prose = $prose | replaceRE `<p>(<em class="stage">[^<]+</em>)</p>` `<p class="stage">$1</p>` -}}
+        {{- $prose = $prose | replaceRE `<p class="stage">(<em class="stage">[^<]{60,}</em>)</p>` `<p class="stage stage-scene">$1</p>` -}}
         {{- /* The bracketed text excludes "[" as well as "]", so a stray "["
              earlier on the line ("[注：[经]{工}") cannot become part of the
              base. tools/build_search_index.py mirrors these patterns. */ -}}

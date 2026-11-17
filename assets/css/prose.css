@@ -700,11 +700,65 @@
       }
     }
 
-    &.script dt {
-      color: var(--muted);
-      font-size: var(--text-sm);
-      font-weight: 500;
-      letter-spacing: 0.02em;
+    &.script {
+      & + &,
+      dl.dialogue + & {
+        margin-top: 0.55rem;
+      }
+
+      dt {
+        margin-top: 0.55rem;
+        color: var(--muted);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        letter-spacing: 0.02em;
+
+        &:first-child {
+          margin-top: 0;
+        }
+
+        dt + & {
+          margin-top: 0.1rem;
+        }
+
+        @media screen and (max-width: 768px) {
+          margin-top: 0.7rem;
+
+          &:first-child {
+            margin-top: 0;
+          }
+        }
+      }
+
+      dd {
+        margin-top: 0.55rem;
+        text-align: start;
+
+        dt:first-child + & {
+          margin-top: 0;
+        }
+
+        dt + dt + & {
+          margin-top: 0.15rem;
+        }
+
+        dd + & {
+          margin-top: 0.35rem;
+        }
+
+        @media screen and (max-width: 768px) {
+          margin-top: 0.15rem;
+
+          dt:first-child + &,
+          dt + dt + & {
+            margin-top: 0.15rem;
+          }
+
+          dd + & {
+            margin-top: 0.4rem;
+          }
+        }
+      }
     }
   }
 
@@ -713,7 +767,8 @@
      and standalone stage-direction paragraphs (`p.stage`, also tagged there)
      step back into smaller muted ink,
      with tighter vertical rhythm when a stage paragraph bridges two dialogue
-     blocks. */
+     blocks. Long scene-setting paragraphs (`p.stage.stage-scene`) keep body
+     size and ink so multi-sentence opening descriptions stay comfortable. */
   em.stage {
     font-size: var(--text-sm);
     color: var(--muted);
@@ -726,10 +781,19 @@
     + dl.dialogue {
       margin-top: 0.75rem;
     }
+
+    &.stage-scene em.stage {
+      font-size: inherit;
+      color: var(--text);
+    }
   }
 
   dl.dialogue:has(+ p.stage) {
     margin-bottom: 0.75rem;
+  }
+
+  dl.dialogue:not(.script):has(+ p.stage) {
+    margin-bottom: 1.5rem;
   }
 
   /* Keep speaker labels inside quote and callout cards rather than hanging off

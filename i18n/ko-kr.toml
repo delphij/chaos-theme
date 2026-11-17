@@ -74,6 +74,10 @@ allTagsLink = '전체 태그 ({{ .Count }}) →'
 categoryTitle = '분류: {{ .Name }}'
 tagTitle = '태그: {{ .Name }}'
 seriesTitle = '시리즈: {{ .Name }}'
+seriesPrev = '← {{ .Title }}'
+seriesNext = '{{ .Title }} →'
+seriesPrevLabel = '시리즈 이전 글: {{ .Title }}'
+seriesNextLabel = '시리즈 다음 글: {{ .Title }}'
 
 # Archives
 archivesYearNav = '아카이브 연도 탐색'

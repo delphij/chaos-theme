@@ -9,6 +9,19 @@ the first chapter on.
 {{- range .GetTerms "series" -}}
   {{- $pages := (partial "_funcs/filter-listed-pages.html" .Pages).ByDate -}}
   {{- if gt (len $pages) 1 -}}
+    {{- $prev := false -}}
+    {{- $next := false -}}
+    {{- $n := len $pages -}}
+    {{- range $i, $p := $pages -}}
+      {{- if eq $p $ -}}
+        {{- if gt $i 0 -}}
+          {{- $prev = index $pages (sub $i 1) -}}
+        {{- end -}}
+        {{- if lt (add $i 1) $n -}}
+          {{- $next = index $pages (add $i 1) -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
     {{- $title := T "seriesTitle" (dict "Name" .LinkTitle) -}}
     <nav class="series-nav" aria-label="{{ $title }}">
       <h2 class="series-nav-title"><a href="{{ .RelPermalink }}">{{ $title }}</a></h2>
@@ -24,6 +37,18 @@ the first chapter on.
           </li>
         {{- end -}}
       </ol>
+      {{- if or $prev $next }}
+      <div class="series-nav-pager">
+        {{- with $prev }}
+          {{- $label := or .Params.series_title .Title -}}
+          <a class="series-nav-prev" href="{{ .RelPermalink }}" aria-label="{{ T "seriesPrevLabel" (dict "Title" $label) }}">{{ T "seriesPrev" (dict "Title" $label) }}</a>
+        {{- end }}
+        {{- with $next }}
+          {{- $label := or .Params.series_title .Title -}}
+          <a class="series-nav-next" href="{{ .RelPermalink }}" aria-label="{{ T "seriesNextLabel" (dict "Title" $label) }}">{{ T "seriesNext" (dict "Title" $label) }}</a>
+        {{- end }}
+      </div>
+      {{- end }}
     </nav>
   {{- end -}}
 {{- end -}}

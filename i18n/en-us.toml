@@ -77,6 +77,10 @@ allTagsLink = 'All tags ({{ .Count }}) →'
 categoryTitle = 'Category: {{ .Name }}'
 tagTitle = 'Tag: {{ .Name }}'
 seriesTitle = 'Series: {{ .Name }}'
+seriesPrev = '← {{ .Title }}'
+seriesNext = '{{ .Title }} →'
+seriesPrevLabel = 'Previous in series: {{ .Title }}'
+seriesNextLabel = 'Next in series: {{ .Title }}'
 
 # Archives
 archivesYearNav = 'Archive year navigation'
