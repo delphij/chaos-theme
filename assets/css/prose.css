@@ -720,6 +720,124 @@
   }
 
   /* ==========================================================================
+     BILINGUAL
+     Markdown definition list with `{.bilingual}`: side-by-side parallel text
+     on desktop and print (`<dt>` left primary column, `<dd>` right reference
+     column), stacking as primary-above-reference on narrow viewports
+     (`<= 768px`).
+     Using `fit-content(N%) minmax(0, 1fr)` lets short-line poetry (such as
+     four-character verse) keep Column 2 snug at `column-gap` instead of leaving
+     a wide void, while full prose paragraphs expand up to the N% cap.
+     - Default (`.bilingual`): primary capped at `44%` (`~1 : 1.27`) with
+       reference stepped back (`0.9em`, `--muted`) so Chinese and English
+       heights balance.
+     - `.bilingual.even`: `50%` cap (`1 : 1` for long prose) and equal
+       typography.
+     - `.bilingual.wide-ref`: `38%` cap (`~1 : 1.63`) when `<dt>` holds short
+       glosses against long `<dd>` source passages.
+     ========================================================================== */
+
+  dl.bilingual {
+    --bilingual-cols: fit-content(44%) minmax(0, 1fr);
+    display: grid;
+    grid-template-columns: var(--bilingual-cols);
+    column-gap: 2rem;
+
+    &.even {
+      --bilingual-cols: fit-content(50%) minmax(0, 1fr);
+    }
+
+    &.wide-ref {
+      --bilingual-cols: fit-content(38%) minmax(0, 1fr);
+    }
+
+    & + & {
+      margin-top: 1rem;
+    }
+
+    @media screen and (max-width: 768px) {
+      display: block;
+    }
+
+    dt,
+    dd {
+      align-self: start;
+      min-width: 0;
+      margin-top: 1rem;
+      overflow-wrap: break-word;
+    }
+
+    dt {
+      grid-column: 1;
+      color: inherit;
+      font-weight: 400;
+      line-height: var(--line-height);
+
+      &:first-child {
+        margin-top: 0;
+      }
+
+      @media screen and (max-width: 768px) {
+        margin-top: 1.1rem;
+
+        &:first-child {
+          margin-top: 0;
+        }
+      }
+    }
+
+    dd {
+      grid-column: 2;
+      margin-left: 0;
+      padding-left: 0;
+      color: var(--muted);
+      font-size: 0.9em;
+      line-height: 1.65;
+
+      dt:first-child + & {
+        margin-top: 0;
+      }
+
+      dd + & {
+        margin-top: 0.5rem;
+      }
+
+      p {
+        margin: 0;
+
+        & + p {
+          margin-top: 0.5rem;
+        }
+      }
+
+      @media screen and (max-width: 768px) {
+        margin-top: 0.35rem;
+
+        dt:first-child + & {
+          margin-top: 0.35rem;
+        }
+
+        dd + & {
+          margin-top: 0.5rem;
+        }
+      }
+    }
+
+    &.even dd,
+    &.wide-ref dd {
+      color: inherit;
+      font-size: inherit;
+      line-height: var(--line-height);
+    }
+
+    &[data-select-col="dt"] dd,
+    &[data-select-col="dd"] dt {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  }
+
+  /* ==========================================================================
      MEDIA EMBEDS
      Responsive 16:9 frame for embedded video players (`{{< youtube >}}`),
      shared by article pages and the XSLT feed preview.
