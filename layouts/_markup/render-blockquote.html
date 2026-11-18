@@ -40,12 +40,15 @@ gave it.
   {{- $default := or (i18n .AlertType) (title .AlertType) -}}
   {{- $title := $default -}}
   {{- $lead := "" -}}
+  {{- $text := .Text -}}
   {{- with .AlertTitle -}}
     {{- $title = . -}}
     {{- /* os.ReadFile takes paths relative to the project, not absolute ones */ -}}
     {{- $file := strings.TrimPrefix (printf "%s/" hugo.WorkingDir) $.Position.Filename -}}
     {{- if and $file (gt $.Position.LineNumber 0) (fileExists $file) -}}
-      {{- $line := index (split (os.ReadFile $file) "\n") (sub $.Position.LineNumber 1) -}}
+      {{- $lines := split (os.ReadFile $file) "\n" -}}
+      {{- $markerIdx := sub $.Position.LineNumber 1 -}}
+      {{- $line := index $lines $markerIdx -}}
       {{- $own := trim (replaceRE `^\s*>\s*\[![A-Za-z]+\][+-]?` "" $line) " \t\r" -}}
       {{- if not $own -}}
         {{- $title = $default -}}
@@ -57,9 +60,32 @@ gave it.
           {{- $lead = trim (strings.TrimPrefix $ownHTML .) " " | safeHTML -}}
         {{- end -}}
       {{- end -}}
+      {{- /* Hugo ends .AlertTitle at the first softbreak Goldmark keeps in
+         the paragraph (e.g. between ASCII words under eastAsianLineBreaks),
+         and the rest of that paragraph opens .Text. A paragraph wrapped over
+         several source lines is not enough to tell: when every break in it
+         is dropped, the whole paragraph is $lead and .Text opens with the
+         next one. So render the paragraph's body lines (after the marker
+         line, up to the first blank one) on their own, and merge $lead back
+         only when a softbreak survives there. The newline joining them is
+         the softbreak Goldmark would have emitted. */ -}}
+      {{- if and $lead (hasPrefix $text "<p>") -}}
+        {{- $body := slice -}}
+        {{- range after (add $markerIdx 1) $lines -}}
+          {{- $l := replaceRE `^\s*>\s?` "" . -}}
+          {{- if or (not (findRE `^\s*>` .)) (not (trim $l " \t\r")) -}}
+            {{- break -}}
+          {{- end -}}
+          {{- $body = $body | append $l -}}
+        {{- end -}}
+        {{- if in ($.Page.RenderString (delimit $body "\n")) "\n" -}}
+          {{- $text = printf "<p>%s\n%s" $lead (strings.TrimPrefix "<p>" $text) | safeHTML -}}
+          {{- $lead = "" -}}
+        {{- end -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
-  <blockquote class="alert alert-{{ .AlertType }}"><p class="alert-heading">{{ transform.Emojify (index $emojis .AlertType) }} {{ $title }}</p>{{ with $lead }}<p>{{ . }}</p>{{ end }}{{ .Text }}</blockquote>
+  <blockquote class="alert alert-{{ .AlertType }}"><p class="alert-heading">{{ transform.Emojify (index $emojis .AlertType) }} {{ $title }}</p>{{ with $lead }}<p>{{ . }}</p>{{ end }}{{ $text }}</blockquote>
 {{- else -}}
   {{- $text := .Text -}}
   {{- /* A {.quote} card's attribution is its last paragraph when that opens
