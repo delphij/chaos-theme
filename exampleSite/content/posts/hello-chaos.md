@@ -15,8 +15,8 @@ Chaos是一个专为个人博客设计的极简[Hugo](https://gohugo.io/)主题�
 
 ## 设计理念
 
-主题配色源自[日本传统色](https://zh.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E4%BC%A0%E7%BB%9F%E8%89%B2%E7%B3%BB)（[和色]^(wairo)）：日间以[**生成り色**]{きなりいろ}为纸底、[**黒**]^(kuro)与[**墨**]^(sumi)为字墨，
-辅以[**蘇芳**]{すおう}与[**藍色**]{あいいろ}作为强调与链接色；夜间则采用沉静的暖炭底色，配以[**白鼠**]^(shiro-nezumi)、[**退紅**]^(arazome)与[**浅縹**]^(asa-hanada)。
+主题配色源自[日本传统色](https://zh.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E4%BC%A0%E7%BB%9F%E8%89%B2%E7%B3%BB)（[和色]^(wairo)）：日间以[]{#FBFAF5}[**生成り色**]{きなりいろ}为纸底、[]{#2B2B2B}[**黒**]^(kuro)与[]{#595857}[**墨**]^(sumi)为字墨，
+辅以[]{#9E3D3F}[**蘇芳**]{すおう}与[]{#165E83}[**藍色**]{あいいろ}作为强调与链接色；夜间则采用沉静的[暖炭底色]{#151514}，配以[]{#DCDDDD}[**白鼠**]^(shiro-nezumi)、[]{#D69090}[**退紅**]^(arazome)与[]{#84B9CB}[**浅縹**]^(asa-hanada)。
 兼顾素雅纸张质感与[WCAG](https://www.w3.org/WAI/standards-guidelines/wcag/)规定的色彩对比度要求。
 
 > [!TIP]
