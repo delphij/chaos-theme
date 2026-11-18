@@ -437,7 +437,7 @@ the match can then run to the next "]...{...}" anywhere in the feed.
              cannot be told from host names, filenames and option lists.
              Remove once Goldmark is fixed. */ -}}
         {{- $sentEnd := `[\s,;:!?)]|&rdquo;|<|$` -}}
-        {{- $prose = $prose | replaceRE (printf `(^|[\s(>])([a-z]{2,})\.([A-Z][a-z]*(?:'|&rsquo;|&#39;)?[a-z]*(?:%s))` $sentEnd) "$1$2. $3" -}}
+        {{- $prose = $prose | replaceRE (printf `((?:^|[\s(>])[a-z]{2,}|</(?:sup|a|code|strong|em|del|mark|kbd|samp)>)\.([A-Z][a-z]*(?:'|&rsquo;|&#39;)?[a-z]*(?:%s))` $sentEnd) "$1. $2" -}}
         {{- $prose = $prose | replaceRE (printf `(^|[\s(>])([A-Z][a-z]{2,})\.((?:I(?:(?:'|&rsquo;|&#39;)(?:[dms]|ve|ll|re))?|The|This|That|It(?:s|(?:'|&rsquo;|&#39;)s)?|But|And|So|For|However)(?:%s))` $sentEnd) "$1$2. $3" -}}
       {{- end -}}
       {{- if and $holdCode $code -}}
@@ -511,7 +511,7 @@ the match can then run to the next "]...{...}" anywhere in the feed.
          receive a space; plain `(` stays untouched to preserve item(s),
          func(arg), and O(n). Remove once Goldmark is fixed. */ -}}
     {{- $inlineTags := `strong|em|del|mark|a|code|kbd|samp` -}}
-    {{- $seg = $seg | replaceRE (printf `([A-Za-z0-9]|(?:[A-Za-z0-9]|</(?:%s)>)[,:]|\s-&gt;)(&(?:ldquo|lsquo);|<(?:%s)\b[^>]*>(?:[A-Za-z0-9(/.$~-]|&(?:ldquo|lsquo|quot|#39);))` $inlineTags $inlineTags) "$1 $2" -}}
+    {{- $seg = $seg | replaceRE (printf `([A-Za-z0-9]|(?:[A-Za-z0-9)]|</(?:%s)>)[.,:]|\s-&gt;)(&(?:ldquo|lsquo);|(?:<(?:%s)\b[^>]*>)+(?:[A-Za-z0-9(/.$~-]|&(?:ldquo|lsquo|quot|#39);))` $inlineTags $inlineTags) "$1 $2" -}}
     {{- /* The same bug drops the break before a swatch's "[". Restore it only
          when Latin text sits on both sides, so autospace still handles a CJK
          label, and never after a hex code ("#9E3D3F[]{#9E3D3F}"), which an
