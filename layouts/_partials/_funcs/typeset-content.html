@@ -127,9 +127,11 @@ the match can then run to the next "]...{...}" anywhere in the feed.
 
 {{- $content := . -}}
 {{- $strip := true -}}
+{{- $stripOrphanFootnotes := false -}}
 {{- if reflect.IsMap . -}}
   {{- $content = .content -}}
   {{- $strip = not .keepSpace -}}
+  {{- $stripOrphanFootnotes = .stripOrphanFootnotes | default false -}}
 {{- end -}}
 {{- $ruby := `<ruby>$1<rp>（</rp><rt>$2</rt><rp>）</rp></ruby>` -}}
 {{- $kept := slice -}}
@@ -622,6 +624,13 @@ the match can then run to the next "]...{...}" anywhere in the feed.
   {{- range $k := seq (sub (len $kept) 1) 0 -}}
     {{- $content = replace $content (printf "\x00\x03%d\x00" $k) (index $kept $k) -}}
   {{- end -}}
+{{- end -}}
+{{- /* Summaries truncated at <!--more--> carry footnote references whose
+     definitions live at the end of the post; drop them when no footnote list
+     is present so list pages and descriptions do not emit dead anchors,
+     duplicate fnref IDs, or stray numbers. */ -}}
+{{- if and $stripOrphanFootnotes (not (in $content `class="footnotes"`)) -}}
+  {{- $content = $content | replaceRE `<sup id="fnref[0-9]*:[^"]*"><a\b[^>]*class="footnote-ref"[^>]*>.*?</a></sup>` "" -}}
 {{- end -}}
 
 {{- return $content -}}

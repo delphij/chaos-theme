@@ -20,7 +20,7 @@ Fallback order:
 {{- else if .IsHome -}}
   {{- $description = site.Params.subtitle | default site.Title -}}
 {{- else if .Summary -}}
-  {{- $description = partial "_funcs/typeset-content.html" .Summary -}}
+  {{- $description = partial "_funcs/typeset-content.html" (dict "content" .Summary "stripOrphanFootnotes" true) -}}
 {{- else if .IsSection -}}
   {{- $description = printf "%s - %s" .Title site.Title -}}
 {{- else -}}

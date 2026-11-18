@@ -75,7 +75,7 @@
         {{- end }}
       {{- end }}
       <comments>{{ .Permalink }}#comments</comments>
-      <description>{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" .Summary | safeHTML }}{{ "]]>" | safeHTML }}</description>
+      <description>{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" (dict "content" .Summary "stripOrphanFootnotes" true) | safeHTML }}{{ "]]>" | safeHTML }}</description>
       <content:encoded>{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" .Content | safeHTML }}{{ "]]>" | safeHTML }}</content:encoded>
     </item>
       {{- end }}
