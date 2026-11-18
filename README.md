@@ -180,6 +180,9 @@ hasCJKLanguage = true
   # Set true to always show HH:MM, or false to show only YYYY-MM-DD.
   # showTime = true
 
+  # Code block soft wrapping (optional, disabled by default)
+  # codeWrap = true                      # Soft-wrap fenced code blocks by default (override per page with `codeWrap`, or per fence with `{.wrap}` / `{.nowrap}`)
+
   # Client-side full-text search (optional, disabled by default)
   [params.search]
     enable = true                      # Enable search button and '/' hotkey
@@ -339,6 +342,10 @@ Fenced code blocks are rendered via Chroma (`render-codeblock.html`) with role-b
 # Force line numbers off
 ```
 
+```markdown {.wrap}
+Long single-line prose or log output that soft-wraps visually while copying as one line
+```
+
 ```mermaid
 flowchart LR
     A[Markdown] --> B[Hugo]
@@ -346,6 +353,7 @@ flowchart LR
 ````
 
 - **Automatic line numbers**: Line numbers are enabled automatically when a fenced block has 5 or more lines, and omitted for shorter snippets unless `linenos` is set explicitly. Code blocks disable `text-autospace`, `text-spacing-trim`, and OpenType `chws` so box-drawing characters and full-width columns stay aligned.
+- **Opt-in soft wrapping (`{.wrap}` / `codeWrap`)**: Disabled by default so code indentation and ASCII tables stay intact; adding `{.wrap}` to a fence soft-wraps long lines inside the measure with a `2ch` hanging continuation indent and a leading `↪` wrap indicator on each continuation row, while preserving unbroken single-line text when copied or drag-selected and tracking logical line numbers via a per-row CSS counter. With `anchorlinenos`, a wrapped block switches to Chroma's inline line numbers so the number links and their fragment targets stay visible. Set `codeWrap = true` under `[params]` (or `codeWrap` in a page's front matter) to make soft wrapping the default, and use `{.nowrap}` on individual fences to opt out.
 - **Mermaid diagrams**: Fences with language `mermaid` emit `<pre class="mermaid">` and load `mermaid.js` on demand in matching light/dark theme colors; Atom/RSS feeds render the diagram source with a notice linking back to the article.
 
 ### Interactive Code Parameters

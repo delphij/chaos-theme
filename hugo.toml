@@ -48,6 +48,12 @@
   # Set true to always display HH:MM, or false to show only YYYY-MM-DD.
   # showTime = true
 
+  # Code block soft wrapping (optional, disabled by default)
+  # Set true to soft-wrap fenced code blocks by default across the site;
+  # individual pages can override via `codeWrap = true/false` in front matter,
+  # and individual fences can override via `{.wrap}` or `{.nowrap}`.
+  # codeWrap = false
+
   # Client-side full-text search (optional, disabled by default)
   # When enabled, adds a search button to the header and hotkey '/' modal.
   # Generate search index with: python3 themes/chaos/tools/build_search_index.py --output assets/search-index.json

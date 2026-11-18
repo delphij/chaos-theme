@@ -349,8 +349,8 @@
     background: var(--code-bg);
     overflow-x: auto;
     font-size: var(--small-size);
-    /* article.post justifies its prose; soft-wrapped rows (such as in print)
-       would otherwise stretch their spaces */
+    /* article.post justifies its prose; a soft-wrapped block ({.wrap}) would
+       otherwise stretch the spaces of every wrapped row */
     text-align: start;
     /* Disable prose CJK spacing/punctuation trimming inside monospace slabs */
     hanging-punctuation: none;
@@ -1297,8 +1297,8 @@
       padding: 0 0 0 0.4em;
     }
 
-    /* Inline line numbers (linenos=inline): a fixed column with a 1ch gap
-       before the code text */
+    /* Inline line numbers (linenos=inline, or {.wrap} with anchorlinenos):
+       a fixed column with a gap before the text so wrapped rows hang clear */
     .ln {
       flex: none;
       padding-inline-end: 1ch;
@@ -1368,4 +1368,125 @@
     }
   }
 
+  /* Opt-in soft wrapping ({.wrap} on a fenced block): wraps long lines inside
+     the measure with a 2ch hanging continuation indent and a leading hook on
+     each continuation row, while keeping logical newlines intact for copy and
+     selection and tracking line numbers per logical row via a CSS counter. */
+  pre.wrap {
+    overflow-x: visible;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+
+    code {
+      overflow-wrap: inherit;
+    }
+  }
+
+  .highlight.wrap {
+    --code-wrap-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7.5v4a3 3 0 0 0 3 3h5.5M8.8 11.8l2.7 2.7-2.7 2.7'/%3E%3C/svg%3E");
+
+    pre {
+      overflow-x: visible;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: var(--line-height);
+      line-height: round(calc(1em * var(--line-height)), 1px);
+
+      /* pre code resets overflow-wrap for scrolling blocks */
+      code {
+        overflow-wrap: inherit;
+      }
+    }
+
+    pre.chroma:has(> code > .line) > code {
+      width: auto;
+    }
+
+    .cl {
+      position: relative;
+      flex: 1 1 0%;
+      min-width: 0;
+      padding-inline-start: 2ch;
+      text-indent: -2ch;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 1lh;
+        bottom: 0;
+        inset-inline-start: 0;
+        width: 2ch;
+        background-color: var(--muted);
+        opacity: 0.6;
+        pointer-events: none;
+        mask: var(--code-wrap-icon) left 0 / 100% 1lh repeat-y;
+
+        /* The hook is painted as a masked background, which print drops by
+           default; keep it so paper shows where a line was wrapped. */
+        @media print {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        @media (forced-colors: active) {
+          background-color: GrayText;
+          opacity: 1;
+        }
+      }
+    }
+
+    @media screen and (hover: hover) {
+      .line:is(:hover, .is-hovered) .cl::before {
+        opacity: 0.95;
+      }
+    }
+
+    .lntable {
+      counter-reset: code-line var(--ln-start, 0);
+
+      @media screen and (min-width: 769px) {
+        & {
+          margin-left: 0;
+          width: 100%;
+        }
+      }
+
+      .lntd:first-child {
+        display: none;
+      }
+
+      @media screen and (min-width: 769px) {
+        .line {
+          position: relative;
+
+          &::before {
+            counter-increment: code-line;
+            /* Empty alt text keeps the numbers out of the accessibility tree,
+               as aria-hidden does for the unwrapped column. The plain
+               declaration is the fallback for Safari below 17.4 and Firefox
+               below 128. */
+            content: counter(code-line);
+            content: counter(code-line) / "";
+            position: absolute;
+            right: calc(100% + 12px);
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+          }
+
+          @media (hover: hover) {
+            &:is(:hover, .is-hovered)::before {
+              color: var(--heading);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media screen and (min-width: 769px) {
+    blockquote .highlight.wrap:has(.lntable) {
+      margin-left: 2em;
+    }
+  }
 }

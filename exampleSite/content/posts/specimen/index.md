@@ -248,6 +248,17 @@ HTML代码检查标签与属性的配色：
        --surface: #1B1B19;
 ```
 
+按需启用软折行（`{.wrap}`）的代码块检查长行折行后逻辑行号与空行高度的对齐：
+
+```markdown {.wrap}
+在人类历史事件的进程中，当一个民族有必要解除其与另一个民族之间的政治纽带，并在世界列国之中取得独立而平等的地位时，出于对人类舆论的恰当尊重，她应当把促使其独立的缘由昭告天下。
+: When in the Course of human events, it becomes necessary for one people to dissolve the political bands which have connected them with another, a decent respect to the opinions of mankind requires that they should declare the causes which impel them to the separation.
+
+我们认为下面这些真理是不言而喻的：人人生而平等。
+: We hold these truths to be self-evident, that all men are created equal.
+{.bilingual}
+```
+
 没有语言标记的预格式文本：
 
 ```

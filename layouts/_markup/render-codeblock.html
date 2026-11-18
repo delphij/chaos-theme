@@ -39,12 +39,64 @@ hl_lines' line-number offset a second time, highlighting the line below.
        a newline and its <pre>; the \s* allows for that whitespace changing in
        a Chroma upgrade without the match silently failing. Fenced blocks
        highlighted outside this hook ({{< highlight >}}) get the same tabindex
-       treatment from code-copy.js. */ -}}
-{{- $hl := string (transform.HighlightCodeBlock . $opts).Wrapped -}}
+       treatment from code-copy.js.
+
+       Opt-in soft wrapping ({.wrap}) puts class="wrap" on .highlight via
+       Chroma (falling back to the plain "text" lexer when the fence names no
+       language, so bare fences still get per-line .line / .cl wrappers);
+       sites or individual pages can also make wrapping the default via
+       site.Params.codeWrap or page.Params.codeWrap, with {.nowrap} overriding
+       it per fence. Since a wrapped block never scrolls horizontally, its code
+       <pre> drops tabindex="0" up front too. transform.Highlight does not carry
+       the fence's attributes, so the text-lexer path copies all of them onto
+       .highlight itself, as HighlightCodeBlock would (code-vars.js reads
+       code_vars="false" there).
+
+       A wrapped block hides the line-number column and numbers its rows with
+       a CSS counter, which would also hide anchorlinenos' links and their
+       fragment targets; with anchorlinenos it takes Chroma's inline numbers
+       instead, which stay in each row beside the wrapped text. */ -}}
+{{- $classes := split (.Attributes.class | default "") " " -}}
+{{- $wrap := site.Params.codeWrap | default false -}}
+{{- if isset .Page.Params "codewrap" -}}
+  {{- $wrap = .Page.Params.codewrap -}}
+{{- end -}}
+{{- if in $classes "nowrap" -}}
+  {{- $wrap = false -}}
+{{- else if in $classes "wrap" -}}
+  {{- $wrap = true -}}
+{{- end -}}
+{{- $anchorLinenos := and .Options.anchorlinenos (ne (printf "%v" .Options.anchorlinenos) "false") -}}
+{{- $linenos := cond (isset .Options "linenos") .Options.linenos $opts.linenos -}}
+{{- if and $wrap $anchorLinenos $linenos (ne (printf "%v" $linenos) "false") -}}
+  {{- $opts = merge $opts (dict "linenos" "inline") -}}
+{{- end -}}
+{{- $hl := "" -}}
+{{- if and (eq .Type "") $wrap -}}
+  {{- $classList := cond (in $classes "wrap") .Attributes.class (strings.TrimSpace (printf "wrap %s" (.Attributes.class | default ""))) -}}
+  {{- $attrs := printf ` class="%s"` (htmlEscape (printf "highlight %s" $classList)) -}}
+  {{- range $k, $v := .Attributes -}}
+    {{- if ne $k "class" -}}
+      {{- $attrs = printf `%s %s="%s"` $attrs $k (htmlEscape (printf "%v" $v)) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- /* HighlightCodeBlock prefixes line anchors with hl-<ordinal>; without
+         it they would be bare numbers shared by every block on the page. */ -}}
+  {{- $anchors := dict "lineanchors" (printf "hl-%d" .Ordinal) -}}
+  {{- $hl = string (transform.Highlight .Inner "text" (merge $anchors .Options $opts)) -}}
+  {{- $hl = replace $hl `<div class="highlight">` (printf `<div%s>` $attrs) 1 -}}
+{{- else -}}
+  {{- $hl = string (transform.HighlightCodeBlock . $opts).Wrapped -}}
+  {{- if and $wrap (not (in $classes "wrap")) -}}
+    {{- $hl = replace $hl `<div class="highlight` `<div class="highlight wrap` 1 -}}
+  {{- end -}}
+{{- end -}}
 {{- $lnStart := sub (int (or .Options.linenostart 1)) 1 -}}
 {{- $lnStyle := cond (ne $lnStart 0) (printf ` style="--ln-start: %d"` $lnStart) "" -}}
 {{- $hl = replace $hl `<table class="lntable">` (printf `<table class="lntable" role="presentation"%s>` $lnStyle) -}}
-{{- $anchorLinenos := and .Options.anchorlinenos (ne (printf "%v" .Options.anchorlinenos) "false") -}}
 {{- $lnAttr := cond (not $anchorLinenos) ` aria-hidden="true"` "" -}}
 {{- $hl = replaceRE `<tr><td class="lntd">(\s*)<pre tabindex="0"` (printf `<tr><td class="lntd"%s>$1<pre` $lnAttr) $hl -}}
+{{- if $wrap -}}
+  {{- $hl = replace $hl `<pre tabindex="0"` `<pre` 1 -}}
+{{- end -}}
 {{- $hl | safeHTML -}}

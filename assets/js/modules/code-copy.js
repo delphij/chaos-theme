@@ -117,8 +117,8 @@ export function initCodeCopy() {
     btn.className = 'code-copy-btn';
     btn.textContent = copyLabel;
     btn.addEventListener('click', () => {
-      // Inline line numbers (.ln, from linenos=inline) live inside the code
-      // element; read .cl rows so copied
+      // Inline line numbers (.ln, from linenos=inline or {.wrap} with
+      // anchorlinenos) live inside the code element; read .cl rows so copied
       // code stays free of line numbers while keeping live code_vars edits.
       const text = hasInlineLn
         ? Array.from(code.querySelectorAll('.cl'), el => el.textContent).join('')

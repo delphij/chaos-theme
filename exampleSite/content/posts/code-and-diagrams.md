@@ -63,6 +63,42 @@ def lorenz(x, y, z, sigma=10.0, rho=28.0, beta=8 / 3):
     return sigma * (y - x), x * (rho - z) - y, x * y - beta * z
 ```
 
+### 长行自动软折行（`{.wrap}`） {#wrap}
+
+代码块默认保持横向滚动而不主动折行，避免破坏缩进层级、对齐表格或ASCII图形。
+当展示系统日志、长命令行参数或语法要求单行书写的Markdown段落源码时，
+可在围栏后附加`{.wrap}`属性开启软折行：
+
+- **带语言或无语言围栏**：写作```` ```text {.wrap} ````、
+  ```` ```markdown {.wrap} ````，无语言标记时写作```` ``` {.wrap} ````
+  （反引号与`{.wrap}`之间保留一个空格，主题会自动按`text`词法生成行容器）。
+- **与其他围栏属性组合**：同一对花括号内用空格分隔即可，例如
+  ```` ```sh {.wrap hl_lines=[2] linenostart=10} ````、```` ```text {.wrap linenos=false} ````
+  或```` ```text {.wrap code_vars="false"} ````；若同时开启`anchorlinenos=true`，
+  会自动改用Chroma内联行号以保留行锚点链接。
+- **全局或单页默认开启**：若希望全站或某篇文章默认启用软折行，可在站点配置`[params]`
+  或文章Front Matter中设置`codeWrap = true`（YAML写作`codeWrap: true`），
+  再对个别需要保持横向滚动的代码块附加`{.nowrap}`（如```` ```sh {.nowrap} ````，效果对照见[混排样张](../typography-specimen/#lists-and-blocks)）单独关闭。
+
+开启后，长行会在版心宽度内自动软折行，续行自动悬挂缩进`2ch`并在缩进槽内标注软换行符`↪`；
+复制按钮与鼠标拖选仍还原为不含额外空格或符号的原始单行，
+桌面端悬挂行号也会自动跟随逻辑行（折为多行的长行只占一个行号，
+下一逻辑行继续对齐其首行）。Markdown源码写法如下：
+
+````markdown {.wrap}
+```text {.wrap}
+[delphij@sirius] ~> uname -a
+FreeBSD sirius.infra.delphij.net 16.0-CURRENT FreeBSD 16.0-CURRENT #23 main-n290211-cc162abeeec0-dirty: Mon Oct 19 09:06:27 PDT 2026     delphij@sirius.infra.delphij.net:/usr/obj/usr/src/amd64.amd64/sys/GENERIC amd64
+```
+````
+
+渲染效果如下：
+
+```text {.wrap}
+[delphij@sirius] ~> uname -a
+FreeBSD sirius.infra.delphij.net 16.0-CURRENT FreeBSD 16.0-CURRENT #23 main-n290211-cc162abeeec0-dirty: Mon Oct 19 09:06:27 PDT 2026     delphij@sirius.infra.delphij.net:/usr/obj/usr/src/amd64.amd64/sys/GENERIC amd64
+```
+
 ## 可交互代码参数（code_vars） {#code-vars}
 
 在撰写系统配置、运维部署或网络管理文章时，代码与配置片段中常包含具体的主机名、IP地址、子网、密钥或目录路径。
