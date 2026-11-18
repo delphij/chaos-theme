@@ -67,6 +67,12 @@ hasCJKLanguage = true
 4. **[用KaTeX书写数学公式](../math-with-katex/)**：行内与块级公式、Goldmark passthrough配置与洛伦兹方程组。
 5. **[文章元数据与内容控制](../front-matter-and-metadata/)**：`deprecated`（过时降权）、`searchHidden`（隐藏检索）、`noindex`（避免收录）、`series`（系列导航与时间线）与标题段落链接。
 6. **[全文检索与阅读交互](../search-and-reading-experience/)**：两层离线全文检索（支持繁简互通）、快捷键、打印注释与文末二维码、页面即时预渲染。
-7. **[行内色卡与独立语录卡片](../color-swatches-and-quotes/)**：`[label]{#hex}` / `[]{#hex}` 行内十六进制色卡，以及带出处右对齐署名的`{.quote}`语录卡片。
-8. **[少即是多：静态博客的依赖取舍](../on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
+7. **[引用外部数据：YouTube与X静态嵌入](../external-embeds/)**：响应式YouTube短代码与打印二维码降级，以及静态缓存零追踪脚本的X帖文卡片。
+8. **[行内色卡与独立语录卡片](../color-swatches-and-quotes/)**：`[label]{#hex}` / `[]{#hex}` 行内十六进制色卡，以及带出处右对齐署名的`{.quote}`语录卡片。
+9. **[对谈与剧本：对话体排版示例](../dialogue-and-scripts/)**：基于定义列表与`{.dialogue}` / `{.dialogue .script}`的访谈与剧本版式。
+10. **[双语对照：两栏平行文本排版示例](../bilingual-parallel-text/)**：基于`{.bilingual}`（含`.even`与`.wide-ref`变体）的中外文平行对照与单栏防误选。
+11. **[米字格与注音：字词展示排版示例](../mizige-copybook/)**：`{.mizige}`朱砂米字格字帖与整词/跨格义训注音。
+12. **[少即是多：静态博客的依赖取舍](../on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
+
+如需一页对照全部组件的视觉效果，可查阅[组件一览样张](../specimen/)与[中西文混排样张](../typography-specimen/)。
 
