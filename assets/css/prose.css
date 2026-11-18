@@ -548,6 +548,59 @@
   }
 
   /* ==========================================================================
+     INLINE COLOR SWATCHES
+     Small square preview chips emitted by `typeset-content.html` for
+     `[label]{#hex}` (a `.color-swatch` wrapping a chip and the label) and
+     `[]{#hex}` (a bare chip). Only the chip takes `--swatch`, leaving the
+     label in the surrounding ink; a checkerboard drawn from the text color
+     shows through alpha hex values, and a hairline border separates
+     near-ground swatches from both light and dark surfaces.
+     ========================================================================== */
+
+  .color-swatch-chip {
+    text-emphasis: none;
+
+    &::before {
+      content: "";
+      display: inline-block;
+      box-sizing: border-box;
+      width: 0.8em;
+      height: 0.8em;
+      margin-inline: 0.12em 0.25em;
+      vertical-align: -0.09em;
+      border-radius: 2px;
+      border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+      background:
+        linear-gradient(var(--swatch), var(--swatch)),
+        repeating-conic-gradient(color-mix(in srgb, currentColor 20%, transparent) 0 25%, transparent 0 50%) 0 0 / 6px 6px;
+      text-emphasis: none;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    @media (forced-colors: active) {
+      &::before {
+        forced-color-adjust: none;
+        border-color: CanvasText;
+      }
+    }
+  }
+
+  /* Blink breaks after an atomic inline-block even across U+2060, so
+     `typeset-content.html` wraps each chip with its opening unit (or bare
+     following token) in `.color-swatch-bind` while letting long labels wrap. */
+  .color-swatch-bind {
+    white-space: nowrap;
+  }
+
+  /* A chip moved inside long inline code (`[]{#165E83}` before a 16+
+     character `code`) would shrink with the code's 0.9em; scale it back so
+     it matches the chips in the surrounding prose. */
+  code > .color-swatch-bind > .color-swatch-chip {
+    font-size: calc(1em / 0.9);
+  }
+
+  /* ==========================================================================
      MIZIGE (COPYBOOK CHARACTER GRID)
      Markdown paragraph with `{.mizige}`, transformed by `typeset-content.html`
      into per-character cinnabar `米字格` cells with upright sans-serif ruby

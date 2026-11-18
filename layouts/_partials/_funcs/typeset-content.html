@@ -2,9 +2,12 @@
 Applies the theme's post-rendering text conventions to a block of rendered HTML.
 Shared by the HTML and feed pipelines so the two cannot drift.
 
- 1. Emphasis marks (着重号) and ruby (義訓) annotations, outside <pre> and
-    <code>: [text]{.} becomes <em class="em-dot">text</em> (degrading to plain
-    <em> in feed readers without the theme's stylesheet); [base]{annotation},
+ 1. Emphasis marks (着重号), color swatches, and ruby (義訓) annotations,
+    outside <pre> and <code>: [text]{.} becomes <em class="em-dot">text</em>
+    (degrading to plain <em> in feed readers without the theme's stylesheet);
+    [label]{#hex} becomes <span class="color-swatch"> holding an inline colour
+    chip (<span class="color-swatch-chip">) and the label, and []{#hex} a bare
+    chip; [base]{annotation},
     [base]^{annotation} or [base]^(annotation) becomes standard HTML <ruby>
     (<rb> is obsolete, so the base text is a bare child, and <rp> supplies the
     parenthetical fallback "民国十八（一九二九）" when ruby is unsupported).
@@ -336,6 +339,20 @@ the match can then run to the next "]...{...}" anywhere in the feed.
 {{- end -}}
 {{- $cjk := `[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{3000}-\x{303f}\x{ff00}-\x{ffef}]` -}}
 {{- $cjkPunct := `[\x{3001}-\x{303f}\x{ff01}-\x{ff60}]` -}}
+{{- /* Color swatches: only 3/4/6/8-digit CSS hex colours are matched, to
+     avoid colliding with prose braces. A label is up to 64 units, a tag
+     counting as one so attributes do not eat into it; the second pass also
+     takes a held <code> placeholder as a unit. The chip is its own element
+     so its ::after (U+2060) binds it to the label or following token without
+     putting nowrap on the whole label. */ -}}
+{{- $hexColor := `#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})` -}}
+{{- $swatchLabelRE := printf `\[((?:[^\[\]<\n]|<[^>\n]*>){1,64})\]\{(%s)\}` $hexColor -}}
+{{- $swatchCodeLabelRE := printf `\[((?:[^\[\]<\x00\n]|<[^>\n]*>|\x00\x01[0-9]+\x00){1,64})\]\{(%s)\}` $hexColor -}}
+{{- $swatchOnlyRE := printf `\[\]\{(%s)\}` $hexColor -}}
+{{- $swatchLabelOut := `<span class="color-swatch" title="$2"><span class="color-swatch-chip" style="--swatch:$2" aria-hidden="true"></span>$1</span>` -}}
+{{- $swatchOnlyOut := `<span class="color-swatch-chip" style="--swatch:$1" title="$1" aria-hidden="true"></span>` -}}
+{{- $chipTag := `<span class="color-swatch-chip"[^>]*></span>` -}}
+{{- $labelSwatch := printf `<span class="color-swatch"[^>]*>%s(?:[^<\n]|</?(?:strong|em|del|mark|a|code|kbd|samp|b|i|s|u|sub|sup|ruby|rp|rt)\b[^>]*>)*</span>` $chipTag -}}
 
 {{- $out := slice -}}
 {{- range $i, $chunk := split $content "<pre" -}}
@@ -358,6 +375,8 @@ the match can then run to the next "]...{...}" anywhere in the feed.
       {{- $seg = $seg | replaceRE `(<a\b[^>]*>\s*)<a\b[^>]*>(\s*<img\b[^>]*>\s*)</a>(\s*</a>)` "${1}${2}${3}" -}}
     {{- end -}}
     {{- $hasEmDot := in $seg "]{.}" -}}
+    {{- $hasSwatch := in $seg "]{#" -}}
+    {{- $holdCode := or $hasEmDot $hasSwatch -}}
     {{- $codes := slice -}}
     {{- $codeOut := slice -}}
     {{- range $j, $cchunk := split $seg "<code" -}}
@@ -387,6 +406,12 @@ the match can then run to the next "]...{...}" anywhere in the feed.
         {{- $prose = $prose | replaceRE `<p>(<em class="stage">[^<]{60,}</em>)</p>` `<p class="stage stage-scene">$1</p>` -}}
         {{- $prose = $prose | replaceRE `<p>(<em class="stage">[^<]+</em>)</p>` `<p class="stage">$1</p>` -}}
         {{- $prose = $prose | replaceRE `<p class="stage-scene">(<em class="stage">[^<]+</em>)</p>` `<p class="stage stage-scene">$1</p>` -}}
+        {{- /* Color swatches ([label]{#hex} or []{#hex}) run before ruby so
+             hex codes are not consumed as <rt> glosses. A label holding
+             <code> spans chunks here and is left whole for the pass below;
+             ruby cannot take it either, as its "]{#hex}" chunk has no "[". */ -}}
+        {{- $prose = $prose | replaceRE $swatchLabelRE $swatchLabelOut -}}
+        {{- $prose = $prose | replaceRE $swatchOnlyRE $swatchOnlyOut -}}
         {{- /* The bracketed text excludes "[" as well as "]", so a stray "["
              earlier on the line ("[注：[经]{工}") cannot become part of the
              base. tools/build_search_index.py mirrors these patterns. */ -}}
@@ -415,7 +440,7 @@ the match can then run to the next "]...{...}" anywhere in the feed.
         {{- $prose = $prose | replaceRE (printf `(^|[\s(>])([a-z]{2,})\.([A-Z][a-z]*(?:'|&rsquo;|&#39;)?[a-z]*(?:%s))` $sentEnd) "$1$2. $3" -}}
         {{- $prose = $prose | replaceRE (printf `(^|[\s(>])([A-Z][a-z]{2,})\.((?:I(?:(?:'|&rsquo;|&#39;)(?:[dms]|ve|ll|re))?|The|This|That|It(?:s|(?:'|&rsquo;|&#39;)s)?|But|And|So|For|However)(?:%s))` $sentEnd) "$1$2. $3" -}}
       {{- end -}}
-      {{- if and $hasEmDot $code -}}
+      {{- if and $holdCode $code -}}
         {{- $codeOut = $codeOut | append (printf "\x00\x01%d\x00" (len $codes)) $prose -}}
         {{- $codes = $codes | append $code -}}
       {{- else -}}
@@ -423,13 +448,21 @@ the match can then run to the next "]...{...}" anywhere in the feed.
       {{- end -}}
     {{- end -}}
     {{- $seg = delimit $codeOut "" -}}
+    {{- if $hasSwatch -}}
+      {{- /* Swatch labels holding inline code ([`#hex`]{#hex}), with the
+           code held in placeholders as for [text]{.} below. */ -}}
+      {{- $seg = $seg | replaceRE $swatchCodeLabelRE $swatchLabelOut -}}
+    {{- end -}}
     {{- if $hasEmDot -}}
       {{- /* Expand [text]{.} with <code> held in placeholders (counted as 1
            unit) so code inside emphasis dots works without matching literal
-           [x]{.} inside <code>, and allow balanced inline tags and <ruby>
-           without counting tag attributes against the 32-unit cap. */ -}}
-      {{- $emUnit := `(?:[^\[\]<\x00\n]|\x00\x01[0-9]+\x00|<(?:a|strong|em|del|mark)\b[^>]*>[^\[\]<\n]*</(?:a|strong|em|del|mark)>|<ruby>[^\[\]<\n]*<rp>[^<\n]*</rp><rt>[^<\n]*</rt><rp>[^<\n]*</rp></ruby>)` -}}
+           [x]{.} inside <code>, and allow balanced inline tags, <ruby> and
+           color swatches without counting tag attributes against the 32-unit
+           cap. */ -}}
+      {{- $emUnit := printf `(?:[^\[\]<\x00\n]|\x00\x01[0-9]+\x00|<(?:a|strong|em|del|mark)\b[^>]*>[^\[\]<\n]*</(?:a|strong|em|del|mark)>|<span class="color-swatch"[^>]*>%s(?:[^\[\]<\n]|\x00\x01[0-9]+\x00|</?(?:a|strong|em|del|mark)\b[^>]*>)*</span>|%s|<ruby>[^\[\]<\n]*<rp>[^<\n]*</rp><rt>[^<\n]*</rt><rp>[^<\n]*</rp></ruby>)` $chipTag $chipTag -}}
       {{- $seg = $seg | replaceRE (printf `\[(%s{1,32})\]\{\.\}` $emUnit) `<em class="em-dot">$1</em>` -}}
+    {{- end -}}
+    {{- if $holdCode -}}
       {{- range $k, $c := $codes -}}
         {{- $seg = replace $seg (printf "\x00\x01%d\x00" $k) $c -}}
       {{- end -}}
@@ -460,6 +493,9 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- if $strip -}}
       {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:strong|em|del|mark|a|ruby)\b)` $cjk) "$1$2" -}}
       {{- $seg = $seg | replaceRE (printf `(</(?:strong|em|del|mark|a|ruby)>)\s+(%s)` $cjk) "$1$2" -}}
+      {{- $seg = $seg | replaceRE (printf `(%s)\s+(<span class="color-swatch)` $cjk) "$1$2" -}}
+      {{- $seg = $seg | replaceRE (printf `(%s)\s+(%s)` $labelSwatch $cjk) "$1$2" -}}
+      {{- $seg = $seg | replaceRE (printf `(%s)\s+(%s|<(?:code|ruby)\b|<(?:strong|em|a)\b[^>]*>%s)` $chipTag $cjk $cjk) "$1$2" -}}
       {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b)` $cjkPunct) "$1$2" -}}
       {{- $seg = $seg | replaceRE (printf `(</(?:code|kbd|samp)>)\s+(%s)` $cjkPunct) "$1$2" -}}
       {{- $seg = $seg | replaceRE (printf `(%s)\s+(<(?:code|kbd|samp)\b[^>]*>[A-Za-z0-9])` $cjk) "$1$2" -}}
@@ -476,6 +512,12 @@ the match can then run to the next "]...{...}" anywhere in the feed.
          func(arg), and O(n). Remove once Goldmark is fixed. */ -}}
     {{- $inlineTags := `strong|em|del|mark|a|code|kbd|samp` -}}
     {{- $seg = $seg | replaceRE (printf `([A-Za-z0-9]|(?:[A-Za-z0-9]|</(?:%s)>)[,:]|\s-&gt;)(&(?:ldquo|lsquo);|<(?:%s)\b[^>]*>(?:[A-Za-z0-9(/.$~-]|&(?:ldquo|lsquo|quot|#39);))` $inlineTags $inlineTags) "$1 $2" -}}
+    {{- /* The same bug drops the break before a swatch's "[". Restore it only
+         when Latin text sits on both sides, so autospace still handles a CJK
+         label, and never after a hex code ("#9E3D3F[]{#9E3D3F}"), which an
+         author places against its chip on purpose. */ -}}
+    {{- $latinLead := `(?:<(?:strong|em|del|mark|a|code|kbd|samp)\b[^>]*>)*[A-Za-z0-9#(]` -}}
+    {{- $seg = $seg | replaceRE (printf `(^|[^0-9A-Za-z#])([A-Za-z0-9]*[A-Za-z0-9,])(<span class="color-swatch"[^>]*>%s%s|%s%s)` $chipTag $latinLead $chipTag $latinLead) "$1$2 $3" -}}
     {{- range (findRE `(?:<code>[^<\n]{16,}</code>|<a\b[^>]*>https?://[^<\n]{24,}</a>)` $seg | uniq) -}}
       {{- $inner := replaceRE `^<[^>]+>|</[^>]+>$` "" . -}}
       {{- /* Match query &key= before _ or . inserts <wbr> inside the key name;
@@ -534,6 +576,41 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- $inlineStart := `(?:<(?:a|code|kbd|samp|strong|em|del|mark|ruby)\b[^>\n]*>)+[A-Za-z0-9]` -}}
     {{- $seg = $seg | replaceRE (printf `(%s|%s|%s)(%s(?:%s+%s+%s)?%s)` $cjkChar $cjkEndPunct $cjkInsep $cjkUnit $cjkEndPunct $openPunct $cjkUnit $inlineStart) "${1}<wbr>${2}" -}}
     {{- $seg = $seg | replaceRE (printf `(%s|%s)(%s+%s%s)` $cjkChar $cjkInsep $openPunct $cjkUnit $inlineStart) "${1}<wbr>${2}" -}}
+    {{- if in $seg "color-swatch-chip" -}}
+      {{- /* Bind every swatch chip to its opening unit (or bare following
+           token) with white-space: nowrap so Blink cannot strand a lonely
+           chip at the end of a line while long labels can still wrap.
+
+           Pass 1 binds the chip with a whole following unit, but only a short
+           one: a ruby base, inline code or tag holding at most 15 characters,
+           an entity, or one character. An uncapped unit would put a whole
+           label under nowrap, so
+             [**这是一段相当长的加粗色名标签……**]{#9E3D3F}
+           could not wrap and overflowed narrow screens; long inline code
+           (16+ characters, already holding <wbr>) was not matched at all and
+           left []{#165E83}`/usr/local/share/very/long` unbound.
+
+           Pass 2 handles what pass 1 left: a chip followed by a longer
+           <strong>, <em>, <a>, <code>, ... moves inside that element and binds
+           to its first character only:
+             <strong><span class="color-swatch-bind">[chip]这</span>是一段……</strong>
+             <code><span class="color-swatch-bind">[chip]/</span>usr<wbr>/local…</code>
+           The chip holds no text, so copying the link or code is unchanged.
+           A longer ruby is left unbound instead: a chip inside the ruby base
+           would shift the <rt> annotation off its characters.
+
+           A bound chip's "<span" is marked with \x00\x05 so a later pass
+           cannot bind it twice. */ -}}
+      {{- $inlineOpen := `strong|em|del|mark|a|b|i|s|u|sub|sup|code|kbd|samp` -}}
+      {{- $shortRuby := `<ruby>(?:<(?:strong|em|del|mark|a|b|i|s|u)\b[^>]*>)*[^<\n]{1,15}(?:</(?:strong|em|del|mark|a|b|i|s|u)>)*<rp>[^<\n]*</rp><rt>[^<\n]*</rt><rp>[^<\n]*</rp></ruby>` -}}
+      {{- $leadUnit := printf `(?:%s|&[A-Za-z0-9#]+;|[^\s<])` $shortRuby -}}
+      {{- $bindUnit := printf `(?:%s|<(?:%s)\b[^>]*>[^<\n]{1,15}</(?:%s)>|%s)` $shortRuby $inlineOpen $inlineOpen $leadUnit -}}
+      {{- $chipParts := `(<span)( class="color-swatch-chip"[^>]*></span>)` -}}
+      {{- $bound := "<span class=\"color-swatch-bind\">${2}\x00\x05${3}" -}}
+      {{- $seg = $seg | replaceRE (printf `()%s(%s)` $chipParts $bindUnit) (printf "%s${4}</span>" $bound) -}}
+      {{- $seg = $seg | replaceRE (printf `()%s((?:<(?:%s)\b[^>]*>)+)(%s)` $chipParts $inlineOpen $leadUnit) (printf "${4}%s${5}</span>" $bound) -}}
+      {{- $seg = replace $seg "\x00\x05" "" -}}
+    {{- end -}}
   {{- end -}}
   {{- $out = $out | append $pre $seg -}}
 {{- end -}}

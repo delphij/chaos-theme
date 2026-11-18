@@ -289,6 +289,22 @@ For Chinese/Japanese ruby annotations, semantic glosses (*gikun* / 义训), and 
 - **Emphasis dots (`.em-dot`)**: `[text]{.}` renders upright body type at normal weight with filled dots under the text in Chinese, filled dots over it in Korean (`드러냄표`), and sesame marks (`傍点`) over it in Japanese; it degrades to plain `<em>` in feed readers. Up to 32 inline units (including inline `<code>`, links, and `<ruby>`) are supported inside `[...]{.}`, and link underlines automatically pad downward (`0.4em`) so they do not collide with under-dots.
 - **Bold vs. italic (`**bold**` / `*italic*` / `***bold italic***`)**: `**bold**` increases font weight without adding emphasis dots; `*italic*` keeps true italic for Latin text and switches Chinese characters to upright KaiTi/serif (with optical weight and `106%` scale compensation so paragraph gray level stays uniform), Japanese Kana/Kanji to upright Mincho, and Korean Hangul to synthesized oblique (`--font-em`).
 
+### Inline Color Swatches
+
+Display a small square color chip inline next to a color name or hex code using 3-, 4-, 6-, or 8-digit CSS hex values:
+
+```markdown
+[蘇芳色]{#9E3D3F}
+[]{#165E83}`#165E83`
+[半透山吹]{#F8B50055}
+```
+
+- `[label]{#hex}` renders a `0.8em` square swatch before `label` while keeping `label` in the surrounding text color (`title="#hex"` on hover). The label holds up to 64 characters without `[`, `]`, or newlines; inline markup such as `**bold**` or `` `code` `` counts as one character per tag, so `` [`#9E3D3F`]{#9E3D3F} `` works.
+- `[]{#hex}` renders a standalone chip (`aria-hidden="true"`), useful right before a ruby-annotated color name.
+- Every chip is bound to what follows it without adding copyable text to the DOM, so it never ends a line on its own while a long label can still wrap. A short unit (one character, an entity, or a ruby, inline code or tag of up to 15 characters) is bound whole; before a longer `**bold**`, link or inline code the chip moves inside that element and binds to its first character only, e.g. ``[]{#165E83}`/usr/local/share/very/long` `` keeps the chip with `/`. A ruby base longer than 15 characters, or a space typed after `[]{#hex}` before Latin text, leaves the chip unbound.
+- Alpha hex codes (`#RGBA`, `#RRGGBBAA`) show a checkerboard drawn from the text color underneath, a hairline border separates near-ground swatches on both light and dark surfaces, and `@media print` / `forced-colors` preserve the true swatch fill. Swatch tags are matched before ruby so `#hex` is never treated as an `<rt>` gloss, and `tools/build_search_index.py` strips `{#hex}` so only the label is indexed.
+- Do not end a heading with a swatch: Goldmark reads a trailing `{#9E3D3F}` as the heading's ID (`## 蘇芳色[]{#9E3D3F}` becomes `<h2 id="9E3D3F">`). Move the swatch away from the end, or follow it with an explicit ID (`## [蘇芳]{#9E3D3F}色 {#suou}`).
+
 ### CJK Typography & Soft Line Breaks
 
 When `markup.goldmark.extensions.cjk` is enabled with `eastAsianLineBreaksStyle = "css3draft"`, source line breaks between East Asian characters and after full-width punctuation are collapsed at parse time without introducing stray spaces. Post-rendering typesetting (`layouts/_partials/_funcs/typeset-content.html`, shared with HTML and Atom/RSS feeds) additionally:

@@ -108,9 +108,9 @@ def load_stopwords_file(filepath: str) -> set:
     return words
 
 
-# Emphasis-dot [text]{.} and ruby [base]{rt} / [base]^{rt} / [base]^(rt), the
-# theme's own inline syntax (expanded for the page by typeset-content.html,
-# whose patterns these mirror).
+# Emphasis-dot [text]{.}, color swatches [label]{#hex} / []{#hex}, and ruby
+# [base]{rt} / [base]^{rt} / [base]^(rt), the theme's own inline syntax
+# (expanded for the page by typeset-content.html, whose patterns these mirror).
 #
 # The bracketed text excludes "[" as well as "]". Without that, a ruby run
 # inside link text, "[[義]{ぎ}[訓]{くん}](url)", matched from the link's own
@@ -118,6 +118,11 @@ def load_stopwords_file(filepath: str) -> set:
 # but any other stray "[" before a ruby on the line ("[注：[经]{工}…") would
 # leak into the indexed word.
 EM_DOT_RE = re.compile(r"\[((?:\x00\d+\x00|[^\[\]\x00\n]){1,32})\]\{\.\}")
+# A swatch label counts held inline code as one unit, as the template does.
+COLOR_SWATCH_RE = re.compile(
+    r"\[((?:\x00\d+\x00|[^\[\]\x00\n]){0,64})\]"
+    r"\{#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\}"
+)
 RUBY_UNIT_RE = re.compile(
     r"\[([^\[\]\n]{1,32})\](?:\^?\{([^.}\n]|[^}\n]{2,32})\}|\^\(([^)\n]{1,32})\))"
 )
@@ -180,10 +185,12 @@ def clean_markdown(text: str) -> str:
         prose = re.sub(r"\{\{[%<].*?[%>]\}\}", " ", prose)
         # Remove HTML comments and tags without eating "< 2" inequalities across lines
         prose = HTML_TAG_RE.sub(" ", prose)
-        # Unwrap inner links/images, then ruby and [text]{.} (code is in \x00N\x00
-        # placeholders, so [`code`](url) and [text `code`]{.} unwrap cleanly while
-        # literal [x]{2} or arr[i](x) inside code stays untouched), then outer links.
+        # Unwrap inner links/images, color swatches, then ruby and [text]{.}
+        # (code is in \x00N\x00 placeholders, so [`code`](url) and [text `code`]{.}
+        # unwrap cleanly while literal [x]{2} or arr[i](x) inside code stays
+        # untouched), then outer links.
         prose = _unwrap_links(prose)
+        prose = COLOR_SWATCH_RE.sub(r"\1", prose)
         prose = RUBY_RUN_RE.sub(_unwrap_ruby, prose)
         prose = EM_DOT_RE.sub(r"\1", prose)
         prose = _unwrap_links(prose)
