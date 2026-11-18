@@ -67,5 +67,6 @@ hasCJKLanguage = true
 4. **[用KaTeX书写数学公式](../math-with-katex/)**：行内与块级公式、Goldmark passthrough配置与洛伦兹方程组。
 5. **[文章元数据与内容控制](../front-matter-and-metadata/)**：`deprecated`（过时降权）、`searchHidden`（隐藏检索）、`noindex`（避免收录）、`series`（系列导航与时间线）与标题段落链接。
 6. **[全文检索与阅读交互](../search-and-reading-experience/)**：两层离线全文检索（支持繁简互通）、快捷键、打印注释与文末二维码、页面即时预渲染。
-7. **[少即是多：静态博客的依赖取舍](../on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
+7. **[行内色卡与独立语录卡片](../color-swatches-and-quotes/)**：`[label]{#hex}` / `[]{#hex}` 行内十六进制色卡，以及带出处右对齐署名的`{.quote}`语录卡片。
+8. **[少即是多：静态博客的依赖取舍](../on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
 
