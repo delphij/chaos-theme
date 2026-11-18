@@ -133,7 +133,7 @@ function decorateContainer(root, patterns, editableInPlace) {
     {
       acceptNode(node) {
         const parent = node.parentElement;
-        return (!parent || parent.closest('var.code-var, a'))
+        return (!parent || parent.closest('var.code-var, a, .ln'))
           ? NodeFilter.FILTER_REJECT
           : NodeFilter.FILTER_ACCEPT;
       }

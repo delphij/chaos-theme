@@ -2329,9 +2329,12 @@
         &::before {
           counter-increment: code-line;
           content: counter(code-line);
+          content: counter(code-line) / "";
           position: absolute;
           right: calc(100% + 8px + 0.5em);
           color: var(--muted);
+          font-variant-numeric: tabular-nums;
+          white-space: nowrap;
         }
       }
 

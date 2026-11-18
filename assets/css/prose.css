@@ -349,6 +349,9 @@
     background: var(--code-bg);
     overflow-x: auto;
     font-size: var(--small-size);
+    /* article.post justifies its prose; soft-wrapped rows (such as in print)
+       would otherwise stretch their spaces */
+    text-align: start;
     /* Disable prose CJK spacing/punctuation trimming inside monospace slabs */
     hanging-punctuation: none;
     text-autospace: no-autospace;
@@ -1294,6 +1297,13 @@
       padding: 0 0 0 0.4em;
     }
 
+    /* Inline line numbers (linenos=inline): a fixed column with a 1ch gap
+       before the code text */
+    .ln {
+      flex: none;
+      padding-inline-end: 1ch;
+    }
+
     /* Line-number column: hangs in the page margin on wide screens, on the
        page ground so the indent leaves no code-coloured strip; hidden on
        narrow ones to keep the reading width. */
@@ -1334,6 +1344,10 @@
         &:not(.hl):is(:hover, .is-hovered) {
           background-color: var(--code-line-hover);
         }
+
+        &:hover > .ln {
+          color: var(--heading);
+        }
       }
     }
   }
@@ -1353,4 +1367,5 @@
       }
     }
   }
+
 }

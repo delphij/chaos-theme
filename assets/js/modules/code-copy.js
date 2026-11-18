@@ -111,12 +111,19 @@ export function initCodeCopy() {
     }
 
     const code = scroller || block.querySelector('code');
+    const hasInlineLn = Boolean(code?.querySelector('.ln'));
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'code-copy-btn';
     btn.textContent = copyLabel;
     btn.addEventListener('click', () => {
-      copyWithFeedback(code?.textContent ?? '', btn, copyLabel, setText);
+      // Inline line numbers (.ln, from linenos=inline) live inside the code
+      // element; read .cl rows so copied
+      // code stays free of line numbers while keeping live code_vars edits.
+      const text = hasInlineLn
+        ? Array.from(code.querySelectorAll('.cl'), el => el.textContent).join('')
+        : (code?.textContent ?? '');
+      copyWithFeedback(text, btn, copyLabel, setText);
     });
     block.append(btn);
   });

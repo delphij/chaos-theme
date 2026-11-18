@@ -198,7 +198,13 @@ def clean_markdown(text: str) -> str:
     text = outside_code(text, _clean_prose)
     if ruby_notes:
         text = f"{text} {' '.join(ruby_notes)}"
-    # Remove code fence markers (```lang ... ```) while preserving technical code content
+    # Remove code fence markers (```lang {opts} ... ```) while preserving technical code content
+    text = re.sub(
+        r"^[ \t>]*(?:`{3,}|~{3,})[a-zA-Z0-9_\-\.+]*(?:[ \t]+\{[^}\n]*\})?[ \t]*$",
+        " ",
+        text,
+        flags=re.MULTILINE,
+    )
     text = re.sub(r"(?:`{3,}|~{3,})[a-zA-Z0-9_\-\.]*", " ", text)
     # Remove inline code backticks while preserving code identifier text
     text = re.sub(r"`([^`]+)`", r" \1 ", text)
