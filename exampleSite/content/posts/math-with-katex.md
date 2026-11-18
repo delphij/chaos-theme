@@ -29,7 +29,7 @@ Chaos集成了[KaTeX](https://katex.org/)数学排版引擎，
 
 在正文中使用`\(`和`\)`包裹[LaTeX](https://zh.wikipedia.org/wiki/LaTeX)数学表达式。
 
-```markdown
+```markdown {.wrap}
 [质能方程](https://zh.wikipedia.org/wiki/%E8%B4%A8%E8%83%BD%E7%AD%89%E4%BB%B7)\(E = mc^2\)是现代物理学的基石；而[欧拉恒等式](https://zh.wikipedia.org/wiki/%E6%AC%A7%E6%8B%89%E6%81%92%E7%AD%89%E5%BC%8F)\(e^{i\pi} + 1 = 0\)则融合了五个最重要的数学常数。
 ```
 
@@ -55,7 +55,7 @@ $$
 
 ### 多行对齐公式
 
-支持使用 `aligned` 环境排版多行对齐的微分方程组（例如[洛伦兹吸引子](https://zh.wikipedia.org/wiki/%E6%B4%9B%E4%BC%A6%E8%8C%A8%E5%90%B8%E5%BC%95%E5%AD%90)）：
+支持使用 `aligned` 环境排版多行对齐的微分方程组（例如[洛伦兹吸引子](https://zh.wikipedia.org/wiki/%E6%B4%9B%E4%BC%A6%E8%8C%A8%E5%90%B8%E5%BC%95%E5%AD%90)，在[代码语法高亮、交互参数与Mermaid图表](../code-and-diagrams/)中另有Python实现；KaTeX按需加载的体积对照见[少即是多：静态博客的依赖取舍](../on-minimalism/)）：
 
 ````markdown
 $$

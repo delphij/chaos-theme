@@ -93,7 +93,7 @@ tags: ["Chaos", "CJK", "中文排版", "样张"]
 
 独立代码块（`<pre>`）必须彻底关闭从正文继承来的`text-autospace`、`text-spacing-trim`与OpenType `chws`标点挤压，确保全角字符与等宽ASCII表格在代码块内维持严格的字格对齐：
 
-```c
+```c {.nowrap}
 /*
  * 检验代码块内不触发正文的 chws 标点挤压与中西文自动留白：
  *
