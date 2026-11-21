@@ -28,6 +28,11 @@ here.
 
 ## [Unreleased]
 
+### Fixed
+
+- `index.rss.xml`: handle scalar string values for `categories` and `tags` in
+  front matter instead of failing with a template range error.
+
 ## [1.5.0] - 2026-11-14
 
 A timeline and chapter card for series; Chinese and Japanese emphasis in

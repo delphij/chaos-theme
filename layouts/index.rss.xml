@@ -65,12 +65,12 @@
       <dc:creator>{{ or (and $pageAuthor $pageAuthor.name) site.Params.author.name site.Title }}</dc:creator>
       <guid isPermaLink="true">{{ .Permalink }}</guid>
       {{- with .Params.categories }}
-        {{- range . }}
+        {{- range (cond (reflect.IsSlice .) . (slice .)) }}
       <category>{{ . }}</category>
         {{- end }}
       {{- end }}
       {{- with .Params.tags }}
-        {{- range . }}
+        {{- range (cond (reflect.IsSlice .) . (slice .)) }}
       <category>{{ . }}</category>
         {{- end }}
       {{- end }}
