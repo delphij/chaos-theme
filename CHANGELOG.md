@@ -49,6 +49,12 @@ here.
   an HTML attribute) and `{.fixed}` (`table-layout: fixed` equal-width columns
   with multi-line wrapping headers and punctuation-trimmed parenthetical
   qualifiers).
+- **Build-time SVG theme adaptation (`svgAdapt`)**: Page-bundle SVGs are adapted
+  at build time by default — injecting a missing `viewBox` from numeric
+  `width`/`height`, stripping a full-canvas pure-white background `<rect>`, and
+  inverting luminance in dark mode via `.svg-adapt` while leaving source `.svg`
+  files untouched. Opt out per-image with `#raw`, per-page with
+  `svgAdapt: false`, or site-wide with `params.svgAdapt = false`.
 
 ### Fixed
 

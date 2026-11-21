@@ -426,6 +426,7 @@ All markdown images are handled automatically by the custom render hook:
 ```
 
 - **Page bundle images**: Automatically processed into responsive `<img>` elements with WebP `srcset` conversion (animated GIFs stay GIFs), multiple viewport resolutions (360px, 640px, 960px, 1232px), 1x/2x DPR variants, and explicit `width`/`height` to eliminate Cumulative Layout Shift (CLS). Every browser at the theme's floor reads WebP, so no `<picture>` wrapper or duplicate fallback format is generated.
+- **SVG diagrams (`svgAdapt`)**: Page-bundle SVGs are adapted at build time by default (adding a missing `viewBox` from numeric `width`/`height`, stripping a full-canvas pure-white background `<rect>`, and inverting luminance in dark mode via `.svg-adapt` while keeping the source `.svg` untouched). Disable per-image with a `#raw` fragment (`![Logo](logo.svg#raw)`), per-page with `svgAdapt: false` in front matter, or site-wide with `svgAdapt = false` under `[params]`.
 - **Static & relative paths**: Fall back to lazy-loaded `<img>` elements with subpath-aware `relURL` resolution, ignoring empty destinations.
 - **Remote images & data URIs**: Rendered with native `loading="lazy"` and `decoding="async"`.
 

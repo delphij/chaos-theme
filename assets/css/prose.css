@@ -361,6 +361,12 @@
     }
   }
 
+  /* Theme-adapted vector diagrams (svgAdapt, default on; opt out via #raw) */
+  @media screen {
+    html.dark img.svg-adapt {
+      filter: invert(0.88) hue-rotate(180deg);
+    }
+  }
 
   /* ==========================================================================
      CODE

@@ -16,18 +16,52 @@ A remote URL, data URI or static file is rendered as given.
 */ -}}
 {{- $dest := .Destination -}}
 {{- $alt := .PlainText -}}
-{{- $src := .Page.Resources.GetMatch $dest -}}
-{{- if findRE `^([A-Za-z][A-Za-z0-9+.-]*:|//)` $dest -}}
-  {{- if hasPrefix $dest "data:" -}}
-<img src="{{ $dest | safeURL }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
+{{- $isRaw := hasSuffix $dest "#raw" -}}
+{{- $cleanDest := strings.TrimSuffix "#raw" $dest -}}
+{{- $src := .Page.Resources.GetMatch $cleanDest -}}
+{{- if findRE `^([A-Za-z][A-Za-z0-9+.-]*:|//)` $cleanDest -}}
+  {{- if hasPrefix $cleanDest "data:" -}}
+<img src="{{ $cleanDest | safeURL }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
   {{- else -}}
-<a href="{{ $dest }}"><img src="{{ $dest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+<a href="{{ $cleanDest }}"><img src="{{ $cleanDest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
   {{- end -}}
 {{- else if $src -}}
   {{- /* SVG is a vector resource: Hugo cannot inspect .Width or .Resize it,
-         so emit it directly and let CSS max-width: 100% scale it. */ -}}
+         so emit it directly and let CSS max-width: 100% scale it. When
+         svgAdapt is enabled (default true; disable via site/page param
+         svgAdapt = false or per-image #raw fragment), add a missing viewBox,
+         strip a full-canvas pure-white background rect, and mark the <img>
+         for dark-mode inversion. */ -}}
   {{- if eq $src.MediaType.SubType "svg" -}}
+    {{- $svgAdapt := true -}}
+    {{- if isset site.Params "svgadapt" -}}{{- $svgAdapt = site.Params.svgAdapt -}}{{- end -}}
+    {{- if isset .Page.Params "svgadapt" -}}{{- $svgAdapt = .Page.Params.svgAdapt -}}{{- end -}}
+    {{- if $isRaw -}}{{- $svgAdapt = false -}}{{- end -}}
+    {{- if $svgAdapt -}}
+      {{- $svg := $src.Content -}}
+      {{- $w := replaceRE `(?s)^.*<svg[^>]*\bwidth="([0-9.]+)".*$` `$1` $svg -}}
+      {{- $h := replaceRE `(?s)^.*<svg[^>]*\bheight="([0-9.]+)".*$` `$1` $svg -}}
+      {{- $hasDims := and (findRE `^[0-9.]+$` $w) (findRE `^[0-9.]+$` $h) -}}
+      {{- if and $hasDims (not (findRE `viewBox=` $svg)) -}}
+        {{- $svg = replaceRE `(<svg\b)` (printf `$1 viewBox="0 0 %s %s"` $w $h) $svg 1 -}}
+      {{- end -}}
+      {{- /* Only strip a pure-white <rect> at (0,0) whose width spans the full canvas. */ -}}
+      {{- $wPat := cond $hasDims (printf `(?:%s|100%%)` $w) `100%` -}}
+      {{- $whitePat := `(?:rgb\(\s*255\s*,\s*255\s*,\s*255\s*\)|#(?:fff|ffffff|FFF|FFFFFF)|white)` -}}
+      {{- range findRE `<rect\b[^>]*/?>` $svg 1 -}}
+        {{- if and (findRE (printf `\bfill="%s"` $whitePat) .) (findRE `\bx="0"` .) (findRE `\by="0"` .) (findRE (printf `\bwidth="%s"` $wPat) .) -}}
+          {{- $svg = strings.Replace $svg . "" 1 -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $svgURL := $src.RelPermalink -}}
+      {{- if ne $svg $src.Content -}}
+        {{- $adaptedPath := printf "%s.adapted.svg" (strings.TrimPrefix "/" (strings.TrimSuffix ".svg" $src.RelPermalink)) -}}
+        {{- $svgURL = (resources.FromString $adaptedPath $svg).RelPermalink -}}
+      {{- end -}}
+<a href="{{ $svgURL }}"><img src="{{ $svgURL }}" class="svg-adapt" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+    {{- else -}}
 <a href="{{ $src.RelPermalink }}"><img src="{{ $src.RelPermalink }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+    {{- end -}}
   {{- else -}}
     {{- $format := cond (eq $src.MediaType.SubType "gif") "" "webp" -}}
     {{- $srcset := slice -}}
@@ -60,7 +94,7 @@ A remote URL, data URI or static file is rendered as given.
     {{- $sizes = $sizes | append (printf "%dpx" (cond (lt $src.Width 1232) $src.Width 1232)) -}}
 <a href="{{ $largest.RelPermalink }}"><img src="{{ $largest.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="{{ delimit $sizes ", " }}" width="{{ $src.Width }}" height="{{ $src.Height }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
   {{- end -}}
-{{- else if $dest -}}
-  {{- $linkDest := strings.TrimPrefix "/" $dest | relURL -}}
+{{- else if $cleanDest -}}
+  {{- $linkDest := strings.TrimPrefix "/" $cleanDest | relURL -}}
 <a href="{{ $linkDest }}"><img src="{{ $linkDest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
 {{- end -}}

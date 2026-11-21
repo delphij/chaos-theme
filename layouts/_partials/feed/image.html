@@ -16,7 +16,7 @@ published.
 
 @example: {{ partial "feed/image.html" . }}
 */ -}}
-{{- $dest := .Destination -}}
+{{- $dest := strings.TrimSuffix "#raw" .Destination -}}
 {{- $alt := .PlainText -}}
 {{- $isRemote := or (hasPrefix $dest "//") (findRE `^[A-Za-z][A-Za-z0-9+.-]*:` $dest) -}}
 {{- $src := .Page.Resources.GetMatch ($dest | safeURL) -}}
