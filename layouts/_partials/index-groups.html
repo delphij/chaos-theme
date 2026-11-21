@@ -1,0 +1,43 @@
+{{- /*
+Renders a grouped or flat index-style list of archive rows.
+
+Shared by list.html, archives/list.html and the no-category fallback of
+home.html so all index views emit identical markup and row options.
+
+@param {slice} groups      Output of _funcs/get-index-groups.html.
+@param {bool}  showHeaders Emit section headings for each group (default: false).
+@param {bool}  showCat     Show primary category on the right of each row.
+@param {bool}  showSeries  Show primary series on the right of each row (when showCat is false).
+@param {bool}  seriesTitle Prefer `series_title` front matter when set.
+
+@example: {{ partial "index-groups.html" (dict "groups" $groups "showHeaders" true "showCat" true) }}
+*/ -}}
+{{- $showDate := not site.Params.hidePostDate -}}
+{{- $showCat := .showCat | default false -}}
+{{- $showSeries := .showSeries | default false -}}
+{{- $seriesTitle := .seriesTitle | default false -}}
+{{- if .showHeaders -}}
+  <div class="archive-timeline">
+    {{- range .groups }}
+      <div class="archive-section" id="{{ .id }}">
+        <h2 class="archive-section-title">
+          {{- with .url }}<a href="{{ . }}">{{ end }}{{ .title }}{{ if .url }}</a>{{ end }}
+          <span class="archive-section-count">({{ len .pages }})</span>
+        </h2>
+        <div class="archive-post-list">
+          {{- range .pages }}
+            {{ partial "archive-row.html" (dict "page" . "seriesTitle" $seriesTitle "showDate" $showDate "fullDate" true "category" $showCat "series" $showSeries) }}
+          {{- end }}
+        </div>
+      </div>
+    {{- end }}
+  </div>
+{{- else -}}
+  <div class="archive-post-list">
+    {{- range .groups }}
+      {{- range .pages }}
+        {{ partial "archive-row.html" (dict "page" . "seriesTitle" $seriesTitle "showDate" $showDate "fullDate" true "category" $showCat "series" $showSeries) }}
+      {{- end }}
+    {{- end }}
+  </div>
+{{- end -}}

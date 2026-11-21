@@ -13,14 +13,25 @@ same filtered collection, listed in full.
 */ -}}
 {{ define "main" }}
   {{ partial "page-header.html" . }}
-  {{ with .Store.Get "paginator" }}
-    {{ range .Pages }}
-      {{ partial "post-summary.html" . }}
-    {{ end }}
-    {{ partial "pager.html" $ }}
-  {{ else }}
+  {{- if eq (partial "_funcs/get-list-style.html" .) "index" -}}
+    {{- $order := site.Params.pagerOrder | default "date" -}}
+    {{- $pages := partial "_funcs/get-list-pages.html" . -}}
+    {{- $groups := partial "_funcs/get-index-groups.html" (dict "pages" $pages "order" $order) -}}
+    {{- $isCatTerm := and (eq .Kind "term") (eq .Data.Plural "categories") -}}
+    {{- $isSeriesTerm := and (eq .Kind "term") (eq .Data.Plural "series") -}}
+    {{- $showHeaders := and (gt (len $groups) 1) (ne (index $groups 0).title "") -}}
+    {{- $showCat := and (not $isCatTerm) (or (not $showHeaders) (ne $order "category")) -}}
+    {{ partial "index-groups.html" (dict "groups" $groups "showHeaders" $showHeaders "showCat" $showCat "showSeries" (and (not $showCat) (not $isSeriesTerm)) "seriesTitle" $isSeriesTerm) }}
+  {{- else if .Store.Get "paginator" -}}
+    {{- with .Store.Get "paginator" }}
+      {{ range .Pages }}
+        {{ partial "post-summary.html" . }}
+      {{ end }}
+      {{ partial "pager.html" $ }}
+    {{- end }}
+  {{- else -}}
     {{ range partial "_funcs/get-list-pages.html" $ }}
       {{ partial "post-summary.html" . }}
     {{ end }}
-  {{ end }}
+  {{- end -}}
 {{ end }}

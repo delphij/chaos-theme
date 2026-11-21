@@ -76,6 +76,19 @@
   # and individual fences can override via `{.wrap}` or `{.nowrap}`.
   # codeWrap = false
 
+  # Wiki / reference-site presentation options (optional, all disabled by default)
+  # hidePostDate = false       # omit creation date from post metadata and compact index rows
+  #                            # (build_search_index.py also switches search dates to lastmod)
+  # hideReadingStats = false   # omit word count and reading time from posts and summaries
+  # alwaysShowLastmod = false  # always show last-modified time in post footer (falling back to date)
+  # listStyle = "summary"      # "summary" (default) or "index" (compact unpaginated directory lists
+  #                            # on home, section, term and archives pages, following pagerOrder;
+  #                            # overridable per page or via Hugo [[cascade]])
+
+  # Number of preview posts listed under each category on /categories/ and
+  # index-style homepages (default: 10; 0 shows all posts)
+  # categoryPreviewCount = 10
+
   # Client-side full-text search (optional, disabled by default)
   # When enabled, adds a search button to the header and hotkey '/' modal.
   # Generate search index with: python3 themes/chaos/tools/build_search_index.py --output assets/search-index.json

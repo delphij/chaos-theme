@@ -1,8 +1,26 @@
 {{- /*
 Sidebar for /archives/ page.
-Provides sticky Year & Month timeline jump navigation.
+Provides sticky jump navigation: by year in chronological mode, or by group
+(category/section) when listStyle is "index" with a grouped pagerOrder.
 */}}
-{{ $posts := partial "_funcs/get-main-pages.html" . }}
+{{- $posts := partial "_funcs/get-main-pages.html" . -}}
+{{- $isIndex := eq (partial "_funcs/get-list-style.html" .) "index" -}}
+{{- if $isIndex -}}
+  {{- $order := site.Params.pagerOrder | default "date" -}}
+  {{- $groups := partial "_funcs/get-index-groups.html" (dict "pages" $posts "order" $order) -}}
+<aside class="home-sidebar toc-wrapper" aria-label="{{ T `indexGroupNav` }}">
+  <div class="sidebar-card">
+    <div class="sidebar-widget">
+      <h2 class="sidebar-widget-title">{{ T "indexQuickJump" }}</h2>
+      <div class="sidebar-tags-cloud sidebar-cat-nav">
+        {{- range $groups }}
+        <a class="sidebar-tag-item" href="#{{ .id }}">{{ .title }} ({{ len .pages }})</a>
+        {{- end }}
+      </div>
+    </div>
+  </div>
+</aside>
+{{- else -}}
 <aside class="home-sidebar toc-wrapper" aria-label="{{ T `archivesYearNav` }}">
   <div class="sidebar-card">
     <div class="sidebar-widget">
@@ -17,3 +35,4 @@ Provides sticky Year & Month timeline jump navigation.
     </div>
   </div>
 </aside>
+{{- end -}}

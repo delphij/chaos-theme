@@ -196,6 +196,16 @@ hasCJKLanguage = true
   # Code block soft wrapping (optional, disabled by default)
   # codeWrap = true                      # Soft-wrap fenced code blocks by default (override per page with `codeWrap`, or per fence with `{.wrap}` / `{.nowrap}`)
 
+  # Wiki / reference-site presentation options (optional, disabled by default)
+  # hidePostDate = true                  # Omit publication date from post metadata and compact index rows
+  # hideReadingStats = true              # Omit word count and reading time from posts and summaries
+  # alwaysShowLastmod = true             # Always show last-modified time in post footer (falling back to date)
+  # listStyle = "index"                  # "summary" (default) or "index" (compact unpaginated directory lists
+                                         # on home, section, term and archives pages; also overridable per page
+                                         # or via Hugo [[cascade]] for individual sections/taxonomies)
+  # categoryPreviewCount = 10            # Preview posts per category on /categories/ and index-style homepages
+                                         # (default: 10; 0 shows all posts)
+
   # Client-side full-text search (optional, disabled by default)
   [params.search]
     enable = true                      # Enable search button and '/' hotkey

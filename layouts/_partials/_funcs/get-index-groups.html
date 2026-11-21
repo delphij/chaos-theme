@@ -1,0 +1,88 @@
+{{- /*
+Orders and optionally groups a page collection for index-style listings,
+matching the ordering rules of _funcs/get-pager-map.html (site.Params.pagerOrder).
+
+Returns a slice of group dicts:
+  { id, title, url, pages }
+
+For "date" and "title", returns a single ungrouped entry with empty id/title/url
+so callers can render a flat list. For "section" and "category", returns one
+entry per group in deterministic order, with pages sorted by title within each
+group.
+
+@param {Pages}  pages The page collection to order.
+@param {string} order One of "date", "section", "category", "title".
+@returns {slice} Slice of group dicts.
+@example: {{ $groups := partial "_funcs/get-index-groups.html" (dict "pages" $posts "order" $order) }}
+*/ -}}
+{{- $pages := .pages -}}
+{{- $order := .order | default site.Params.pagerOrder | default "date" -}}
+{{- if not (in (slice "date" "section" "category" "title") $order) -}}
+  {{- errorf "chaos: params.pagerOrder must be \"date\", \"section\", \"category\" or \"title\", not %q" $order -}}
+{{- end -}}
+
+{{- $groups := slice -}}
+{{- if eq $order "date" -}}
+  {{- if gt (len $pages) 0 -}}
+    {{- $groups = slice (dict "id" "" "title" "" "url" "" "pages" $pages) -}}
+  {{- end -}}
+{{- else if eq $order "title" -}}
+  {{- if gt (len $pages) 0 -}}
+    {{- $groups = slice (dict "id" "" "title" "" "url" "" "pages" $pages.ByTitle) -}}
+  {{- end -}}
+{{- else if eq $order "section" -}}
+  {{- $buckets := newScratch -}}
+  {{- $sectionPages := newScratch -}}
+  {{- range $pages.ByTitle -}}
+    {{- $key := printf "%s/" (strings.TrimRight "/" .CurrentSection.Path) -}}
+    {{- $buckets.Add $key (slice .) -}}
+    {{- if not ($sectionPages.Get $key) -}}
+      {{- $sectionPages.Set $key .CurrentSection -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $k, $group := $buckets.Values -}}
+    {{- $sec := $sectionPages.Get $k -}}
+    {{- $title := partial "_funcs/get-page-title.html" $sec -}}
+    {{- $id := printf "section-%s" (replace (strings.Trim "/" $k) "/" "-") -}}
+    {{- $groups = $groups | append (dict "id" $id "title" $title "url" $sec.RelPermalink "pages" $group) -}}
+  {{- end -}}
+{{- else -}}
+  {{- /* Group by primary category in locale-aware .ByTitle order, matching
+         _funcs/get-pager-map.html, with uncategorized pages at the end. */ -}}
+  {{- $buckets := newScratch -}}
+  {{- $termPages := newScratch -}}
+  {{- $uncat := slice -}}
+  {{- range $p := $pages.ByTitle -}}
+    {{- with $p.GetTerms "categories" -}}
+      {{- $t := index . 0 -}}
+      {{- $buckets.Add $t.Path (slice $p) -}}
+      {{- if not ($termPages.Get $t.Path) -}}
+        {{- $termPages.Set $t.Path $t -}}
+      {{- end -}}
+    {{- else -}}
+      {{- $uncat = $uncat | append $p -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $emitted := newScratch -}}
+  {{- with site.GetPage "/categories" -}}
+    {{- range .Pages.ByTitle -}}
+      {{- $t := . -}}
+      {{- with $buckets.Get $t.Path -}}
+        {{- $id := printf "category-%s" (path.Base $t.Path) -}}
+        {{- $groups = $groups | append (dict "id" $id "title" $t.LinkTitle "url" $t.RelPermalink "pages" .) -}}
+      {{- end -}}
+      {{- $emitted.Set $t.Path true -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $k, $group := $buckets.Values -}}
+    {{- if not ($emitted.Get $k) -}}
+      {{- $t := $termPages.Get $k -}}
+      {{- $id := printf "category-%s" (path.Base $k) -}}
+      {{- $groups = $groups | append (dict "id" $id "title" $t.LinkTitle "url" $t.RelPermalink "pages" $group) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if gt (len $uncat) 0 -}}
+    {{- $groups = $groups | append (dict "id" "category-uncategorized" "title" (T "uncategorized") "url" "" "pages" $uncat) -}}
+  {{- end -}}
+{{- end -}}
+{{- return $groups -}}

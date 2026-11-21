@@ -20,7 +20,8 @@ function setupScrollSpy(navContainer, targetSelector) {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       const id = entry.target.id;
-      const navLink = navContainer.querySelector(`a[href="#${CSS.escape(id)}"]`);
+      const navLink = navContainer.querySelector(`a[href="#${CSS.escape(id)}"]`) ||
+        navContainer.querySelector(`a[href="#${CSS.escape(encodeURIComponent(id))}"]`);
 
       if (navLink && entry.isIntersecting) {
         if (currentActive && currentActive !== navLink) {
@@ -45,6 +46,9 @@ export function initScrollSpy() {
   // 2. A-Z Tag Navigation on Tags page
   setupScrollSpy(document.querySelector('.sidebar-tag-nav'), '#hot-tags, .tag-letter-group[id]');
 
-  // 3. Year Timeline Navigation on Archives page
-  setupScrollSpy(document.querySelector('.sidebar-year-list'), '.archive-year-section[id]');
+  // 3. Year / Group Timeline Navigation on Archives page
+  setupScrollSpy(document.querySelector('.sidebar-year-list'), '.archive-year-section[id], .archive-section[id]');
+
+  // 4. Category Jump Navigation on Categories and Index Homepage
+  setupScrollSpy(document.querySelector('.sidebar-cat-nav'), '.archive-section[id]');
 }

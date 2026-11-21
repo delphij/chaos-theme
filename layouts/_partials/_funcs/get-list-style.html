@@ -1,0 +1,16 @@
+{{- /*
+Returns the effective list style for a list page: "summary" (default, full
+summary cards and chronological archives) or "index" (compact, unpaginated
+directory listing).
+
+A page may override site.Params.listStyle via its own front matter.
+
+@context {page} page The list page context.
+@returns {string} "summary" or "index".
+@example: {{ $style := partial "_funcs/get-list-style.html" . }}
+*/ -}}
+{{- $style := .Params.listStyle | default site.Params.listStyle | default "summary" -}}
+{{- if not (in (slice "summary" "index") $style) -}}
+  {{- errorf "chaos: listStyle must be \"summary\" or \"index\", not %q" $style -}}
+{{- end -}}
+{{- return $style -}}

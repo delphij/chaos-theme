@@ -14,11 +14,14 @@ paginating them would emit one identical full-size page per pager entry.
 */}}
 
 {{- $unpaginatedSections := site.Params.unpaginatedSections | default (slice "archives") -}}
+{{- $isIndex := eq (partial "_funcs/get-list-style.html" .) "index" -}}
 {{- $paginate := false -}}
-{{- if or .IsHome (eq .Kind "term") -}}
-  {{- $paginate = true -}}
+{{- if .IsHome -}}
+  {{- $paginate = not $isIndex -}}
+{{- else if eq .Kind "term" -}}
+  {{- $paginate = not $isIndex -}}
 {{- else if eq .Kind "section" -}}
-  {{- $paginate = not (in $unpaginatedSections .Section) -}}
+  {{- $paginate = and (not $isIndex) (not (in $unpaginatedSections .Section)) -}}
 {{- end -}}
 
 {{- $paginator := false -}}

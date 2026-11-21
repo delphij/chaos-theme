@@ -7,10 +7,20 @@ column drops the year and shows MM-DD.
 @context {bool} seriesTitle   Label the row with `series_title` when set, the
                               full title kept as the tooltip (default: false).
 @context {bool} category      Show the page's first category (default: false).
+@context {bool} series        Show the page's first series when category is not
+                              shown (default: false).
+@context {bool} showDate      Show the date column (default: true).
+@context {bool} fullDate      Keep YYYY-MM-DD on narrow screens when rows are not
+                              grouped under year headings (default: false).
 
 @example: {{ partial "archive-row.html" (dict "page" . "category" true) }}
 */ -}}
 {{- $p := .page -}}
+{{- $showDate := true -}}
+{{- if isset . "showDate" -}}
+  {{- $showDate = .showDate -}}
+{{- end -}}
+{{- $fullDate := .fullDate | default false -}}
 {{- $label := $p.Title -}}
 {{- $tooltip := "" -}}
 {{- if .seriesTitle -}}
@@ -20,14 +30,24 @@ column drops the year and shows MM-DD.
   {{- end -}}
 {{- end -}}
 <div class="archive-post-row">
+  {{- if $showDate }}
+  {{- if $fullDate }}
+  <time class="archive-date archive-date--full" datetime="{{ $p.Date.Format "2006-01-02" }}">{{ $p.Date.Format "2006-01-02" }}</time>
+  {{- else }}
   <time class="archive-date" datetime="{{ $p.Date.Format "2006-01-02" }}">
     <span class="archive-date-full">{{ $p.Date.Format "2006-01-02" }}</span>
     <span class="archive-date-short">{{ $p.Date.Format "01-02" }}</span>
   </time>
+  {{- end }}
+  {{- end }}
   <a class="archive-post-title" href="{{ $p.RelPermalink }}"{{ with $tooltip }} title="{{ . }}"{{ end }}>{{ $label }}</a>
   {{- if .category -}}
     {{- range first 1 ($p.GetTerms "categories") }}
   <a class="archive-cat-label" href="{{ .RelPermalink }}" title="{{ T `categoryTitle` (dict `Name` .LinkTitle) }}">{{ .LinkTitle }}</a>
+    {{- end -}}
+  {{- else if .series -}}
+    {{- range first 1 ($p.GetTerms "series") }}
+  <a class="archive-cat-label" href="{{ .RelPermalink }}" title="{{ T `seriesTitle` (dict `Name` .LinkTitle) }}">{{ .LinkTitle }}</a>
     {{- end -}}
   {{- end }}
 </div>

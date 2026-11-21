@@ -1,10 +1,20 @@
 {{ define "main" }}
   <h1 class="sr-only">{{ site.Title }}</h1>
   {{ .Content }}
-  {{ with .Store.Get "paginator" }}
-    {{ range .Pages }}
-      {{ partial "post-summary.html" . }}
+  {{- if eq (partial "_funcs/get-list-style.html" .) "index" -}}
+    {{- if gt (len site.Taxonomies.categories) 0 -}}
+      {{ partial "category-index.html" (dict "page" . "terms" site.Taxonomies.categories.ByCount) }}
+    {{- else -}}
+      {{- $posts := partial "_funcs/get-main-pages.html" . -}}
+      {{- $groups := partial "_funcs/get-index-groups.html" (dict "pages" $posts "order" (site.Params.pagerOrder | default "date")) -}}
+      {{ partial "index-groups.html" (dict "groups" $groups "showHeaders" false "showSeries" true) }}
+    {{- end -}}
+  {{- else -}}
+    {{ with .Store.Get "paginator" }}
+      {{ range .Pages }}
+        {{ partial "post-summary.html" . }}
+      {{ end }}
     {{ end }}
-  {{ end }}
-  {{ partial "pager.html" . }}
+    {{ partial "pager.html" . }}
+  {{- end -}}
 {{ end }}

@@ -1,0 +1,50 @@
+{{- /*
+Renders categories as archive-style sections with a configurable number of
+preview posts per category and a "more posts" link when truncated.
+
+Used by /categories/ (taxonomy.html) and by the homepage (home.html) when
+listStyle = "index".
+
+@param {page}            page  The current list page context.
+@param {OrderedTaxonomy} terms The ordered category terms (e.g. .Data.Terms.ByCount).
+
+@example: {{ partial "category-index.html" (dict "page" . "terms" .Data.Terms.ByCount) }}
+*/ -}}
+{{- $page := .page -}}
+{{- $isIndex := eq (partial "_funcs/get-list-style.html" $page) "index" -}}
+{{- $order := site.Params.pagerOrder | default "date" -}}
+{{- $limit := 10 -}}
+{{- if isset site.Params "categorypreviewcount" -}}
+  {{- $limit = int site.Params.categoryPreviewCount -}}
+{{- end -}}
+<div class="archive-timeline">
+  {{- range .terms -}}
+    {{- $posts := partial "_funcs/filter-listed-pages.html" .Pages -}}
+    {{- if gt (len $posts) 0 -}}
+      {{- if and $isIndex (ne $order "date") -}}
+        {{- $posts = $posts.ByTitle -}}
+      {{- end -}}
+      {{- $total := len $posts -}}
+      {{- $shown := $posts -}}
+      {{- if gt $limit 0 -}}
+        {{- $shown = first $limit $posts -}}
+      {{- end -}}
+      <div class="archive-section" id="category-{{ path.Base .Page.Path }}">
+        <h2 class="archive-section-title">
+          <a href="{{ .Page.RelPermalink }}">{{ .Page.LinkTitle }}</a>
+          <span class="archive-section-count">({{ $total }})</span>
+        </h2>
+        <div class="archive-post-list">
+          {{- range $shown }}
+            {{ partial "archive-row.html" (dict "page" . "showDate" (not site.Params.hidePostDate) "fullDate" true "series" true) }}
+          {{- end }}
+        </div>
+        {{- if and (gt $limit 0) (gt $total $limit) }}
+        <div class="archive-section-more">
+          <a href="{{ .Page.RelPermalink }}" aria-label="{{ T `moreCategoryPostsAbout` (dict `Name` .Page.LinkTitle `Count` $total) }}">{{ T "moreCategoryPosts" }}</a>
+        </div>
+        {{- end }}
+      </div>
+    {{- end -}}
+  {{- end -}}
+</div>

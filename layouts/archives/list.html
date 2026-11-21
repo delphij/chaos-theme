@@ -1,21 +1,30 @@
 {{ define "main" }}
+  {{- $isIndex := eq (partial "_funcs/get-list-style.html" .) "index" -}}
+  {{- $posts := partial "_funcs/get-main-pages.html" . -}}
   <div class="page-title-group">
     <h1 class="page-title">{{ partial "_funcs/get-page-title.html" . }}</h1>
-    {{ $posts := partial "_funcs/get-main-pages.html" . }}
-    <p class="page-subtitle">{{ T "archivesSummary" (dict "Count" (len $posts)) }}</p>
+    <p class="page-subtitle">{{ T (cond $isIndex "listPostCount" "archivesSummary") (dict "Count" (len $posts)) }}</p>
   </div>
 
-  <div class="archive-timeline">
-    {{ range $posts.GroupByDate "2006" }}
-      <div class="archive-year-section" id="year-{{ .Key }}">
-        <h2 class="archive-year-title">{{ T "yearLabel" (dict "Year" .Key) }}</h2>
-        <div class="archive-post-list">
-          {{ range .Pages }}
-            {{ partial "archive-row.html" (dict "page" . "category" true) }}
-          {{ end }}
+  {{- if $isIndex -}}
+    {{- $order := site.Params.pagerOrder | default "date" -}}
+    {{- $groups := partial "_funcs/get-index-groups.html" (dict "pages" $posts "order" $order) -}}
+    {{- $showHeaders := and (gt (len $groups) 0) (ne (index $groups 0).title "") -}}
+    {{- $showCat := or (not $showHeaders) (ne $order "category") -}}
+    {{ partial "index-groups.html" (dict "groups" $groups "showHeaders" $showHeaders "showCat" $showCat "showSeries" (not $showCat)) }}
+  {{- else -}}
+    <div class="archive-timeline">
+      {{ range $posts.GroupByDate "2006" }}
+        <div class="archive-year-section" id="year-{{ .Key }}">
+          <h2 class="archive-year-title">{{ T "yearLabel" (dict "Year" .Key) }}</h2>
+          <div class="archive-post-list">
+            {{ range .Pages }}
+              {{ partial "archive-row.html" (dict "page" . "category" true) }}
+            {{ end }}
+          </div>
         </div>
-      </div>
-    {{ end }}
-  </div>
+      {{ end }}
+    </div>
+  {{- end -}}
 {{ end }}
 

@@ -10,11 +10,17 @@ Dispatcher partial to select the appropriate contextual sidebar.
 {{- else if and (eq .Kind "taxonomy") (eq .Data.Plural "tags") -}}
   {{ partial "tags-sidebar.html" . }}
 {{- else if or (eq .Section "archives") (eq .Type "archives") -}}
-  {{ partial "archives-sidebar.html" . }}
+  {{- $isIndex := eq (partial "_funcs/get-list-style.html" .) "index" -}}
+  {{- $order := site.Params.pagerOrder | default "date" -}}
+  {{- if and $isIndex (not (in (slice "section" "category") $order)) -}}
+    {{ partialCached "home-sidebar.html" . false site.Language.Lang }}
+  {{- else -}}
+    {{ partial "archives-sidebar.html" . }}
+  {{- end -}}
 {{- else -}}
-  {{- /* Cached: the browsing guide is the same on every list page but one,
-         and ranking its terms is the costliest thing a list page does --
-         uncached, it was most of a full build. It varies only with whether
-         this is the /categories/ index, which drops the category widget. */ -}}
-  {{ partialCached "home-sidebar.html" . (and (eq .Kind "taxonomy") (eq .Data.Plural "categories")) site.Language.Lang }}
+  {{- /* Cached: the browsing guide is the same on every list page except
+         /categories/ and an index-style homepage, which switch to the in-page
+         category jump cloud. */ -}}
+  {{- $hideCategories := or (and (eq .Kind "taxonomy") (eq .Data.Plural "categories")) (and .IsHome (eq (partial "_funcs/get-list-style.html" .) "index")) -}}
+  {{ partialCached "home-sidebar.html" . $hideCategories site.Language.Lang }}
 {{- end -}}

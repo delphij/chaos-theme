@@ -104,6 +104,7 @@
   .series-nav-title a,
   .series-nav-link,
   .archive-section-title a,
+  .archive-section-more a,
   blockquote.twitter-tweet > a {
     border-bottom: none;
   }
@@ -137,6 +138,7 @@
     background: var(--paper);
   }
 
+  .sidebar-tag-item.active,
   .sidebar-nav-jump.active,
   .sidebar-az-item.active,
   .sidebar-year-item.active,
@@ -868,6 +870,12 @@
     }
   }
 
+  .archive-date--full {
+    @media (max-width: 600px) {
+      width: 82px;
+    }
+  }
+
   .archive-date-full {
     @media (max-width: 600px) {
       display: none;
@@ -896,6 +904,22 @@
 
     &:hover {
       color: var(--primary);
+    }
+  }
+
+  .archive-section-more {
+    margin-top: 6px;
+    padding-left: 8px;
+
+    a {
+      font-size: var(--text-sm);
+      color: var(--link);
+      font-weight: 500;
+
+      &:hover {
+        color: var(--link-hover);
+        text-decoration: underline;
+      }
     }
   }
 

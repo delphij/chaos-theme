@@ -57,57 +57,13 @@ right, matching .NextInSection / .PrevInSection.
   {{- $ordered = $pages -}}
 {{- else if or (eq $order "title") (and (eq $order "section") (eq $scope "section")) -}}
   {{- $ordered = $pages.ByTitle -}}
-{{- else if eq $order "section" -}}
-  {{- /* Iterate $pages.ByTitle first so each bucket preserves Hugo's native
-         title order, then emit buckets in ascending content-path order. */ -}}
-  {{- $buckets := newScratch -}}
-  {{- range $pages.ByTitle -}}
-    {{- /* Content path (not RelPermalink) so uglyURLs / permalinks cannot
-           scramble section ordering; trailing "/" keeps subsections directly
-           after their parent section. */ -}}
-    {{- $buckets.Add (printf "%s/" (strings.TrimRight "/" .CurrentSection.Path)) (slice .) -}}
-  {{- end -}}
-  {{- range $_, $group := $buckets.Values -}}
-    {{- range $group -}}
+{{- else -}}
+  {{- /* Delegate section/category grouping to _funcs/get-index-groups.html so
+         pager order and index-page order cannot drift apart. */ -}}
+  {{- range partial "_funcs/get-index-groups.html" (dict "pages" $pages "order" $order) -}}
+    {{- range .pages -}}
       {{- $ordered = $ordered | append . -}}
     {{- end -}}
-  {{- end -}}
-{{- else -}}
-  {{- /* Group by the canonical term Page from GetTerms "categories" so
-         variants like "Shared Chaos" and "shared-chaos" merge, and emit
-         groups in the categories taxonomy's locale-aware .ByTitle order
-         with uncategorized pages at the end. */ -}}
-  {{- $buckets := newScratch -}}
-  {{- $uncat := slice -}}
-  {{- range $p := $pages.ByTitle -}}
-    {{- with $p.GetTerms "categories" -}}
-      {{- $buckets.Add (index . 0).Path (slice $p) -}}
-    {{- else -}}
-      {{- $uncat = $uncat | append $p -}}
-    {{- end -}}
-  {{- end -}}
-  {{- $emitted := newScratch -}}
-  {{- with site.GetPage "/categories" -}}
-    {{- range .Pages.ByTitle -}}
-      {{- with $buckets.Get .Path -}}
-        {{- range . -}}
-          {{- $ordered = $ordered | append . -}}
-        {{- end -}}
-      {{- end -}}
-      {{- $emitted.Set .Path true -}}
-    {{- end -}}
-  {{- end -}}
-  {{- /* Any category whose term page was unlisted (e.g. build: { list: never })
-         still joins the chain in key order, ahead of uncategorized pages. */ -}}
-  {{- range $k, $group := $buckets.Values -}}
-    {{- if not ($emitted.Get $k) -}}
-      {{- range $group -}}
-        {{- $ordered = $ordered | append . -}}
-      {{- end -}}
-    {{- end -}}
-  {{- end -}}
-  {{- range $uncat -}}
-    {{- $ordered = $ordered | append . -}}
   {{- end -}}
 {{- end -}}
 
