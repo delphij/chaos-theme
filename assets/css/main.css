@@ -1711,21 +1711,61 @@
   }
 
   /* ==========================================================================
-     SPECIALIZED - INLINE MATH
-     Inline math line-breaking. CJK typography (emphasis, ruby) is in prose.css.
+     SPECIALIZED - MATH
+     Inline math line-breaking and CJK spacing, plus scrollable display math.
+     CJK typography (emphasis, ruby) is in prose.css.
      ========================================================================== */
 
-  /* Inline math wrapper - Prevent line breaks before following punctuation
-     Works in Safari with CJK line-breaking rules; known limitation in Chrome
-     The wrapper treats the formula as an atomic inline unit for line-breaking */
-  .math-inline {
-    display: inline-block;             /* Atomic inline unit - works with Safari's CJK line-break rules */
-    text-emphasis: none;               /* Never draw emphasis marks over inline formulas */
+  /* Inline math wrapper - Stays inline (not inline-block) so KaTeX's internal
+     .katex-base segments can break naturally at binary/relation operators
+     (+, -, =, ×) instead of dropping a whole formula to the next line and
+     tearing open a justification river in surrounding CJK prose.
 
-    /* Insert word joiner after inline math to prevent line break before punctuation
-       Provides additional protection in Safari; Chrome doesn't respect this for CJK */
+     Proportional CJK-to-math breathing room (.math-gap-start / .math-gap-end)
+     is applied by typeset-content.html only next to CJK ideographs/kana (never
+     next to CJK punctuation or at paragraph edges), because CSS text-autospace
+     does not insert a gap across KaTeX's atomic inline-block .katex-base
+     boundary. Inline margins stay unstretched under text-align: justify, add
+     nothing to copied text, and apply only to the first/last fragment when a
+     formula wraps across lines. */
+  .math-inline {
+    text-emphasis: none;               /* Never draw emphasis marks over inline formulas */
+    text-autospace: no-autospace;      /* KaTeX supplies its own math spacing */
+
+    &.math-gap-start {
+      margin-inline-start: 0.15em;
+    }
+
+    &.math-gap-end {
+      margin-inline-end: 0.15em;
+    }
+
+    /* Word joiner keeps trailing CJK punctuation attached in Safari/Firefox
+       for multi-base formulas that can break internally. */
     &::after {
       content: '\2060';                /* Word joiner (U+2060) */
+    }
+  }
+
+  /* Short inline formulas (single-base, or 2-base up to 10 visible characters)
+     adjacent to CJK opening/closing punctuation are wrapped in .math-bind by
+     typeset-content.html so Blink cannot break between an atomic .katex-base
+     and its punctuation even across U+2060. */
+  .math-bind {
+    white-space: nowrap;
+  }
+
+  /* Display math - Centered and horizontally scrollable on narrow viewports
+     rather than overflowing the article measure. Extra vertical padding keeps
+     tall integrals/sums from clipping under overflow-y: hidden (which prevents
+     spurious vertical scrollbars when overflow-x: auto is set). */
+  .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25em;
+
+    @media print {
+      overflow: visible;
     }
   }
 

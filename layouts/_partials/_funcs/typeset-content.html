@@ -96,7 +96,17 @@ Shared by the HTML and feed pipelines so the two cannot drift.
     in placeholders while prose rewrites run, so LaTeX constructs such as
     `\sqrt[3]{2}` inside `<annotation encoding="application/x-tex">` cannot be
     misread as ruby (`[3]{2}`), color swatches, emphasis dots, or CJK/English
-    space boundaries.
+    space boundaries. Inline math (`.math-inline`, emitted by
+    `render-passthrough.html`) stays `display: inline` so KaTeX's internal
+    `.katex-base` segments can break naturally at operators without opening
+    justify rivers. Because CSS `text-autospace` cannot cross KaTeX's atomic
+    `inline-block` `.katex-base` boundary, author-typed spaces between CJK and
+    `.math-inline` are stripped, `.math-gap-start` / `.math-gap-end` supply
+    uniform proportional margins next to CJK ideographs/kana (never next to CJK
+    punctuation or at paragraph edges), and short formulas (single-base, or
+    2-base up to 10 visible chars) adjacent to CJK opening/closing punctuation
+    are wrapped in `.math-bind` (`white-space: nowrap`) so Blink cannot orphan
+    punctuation across an `inline-block` boundary.
 
  6. A linked image ([![alt](img)](url)) loses the image render hook's own
     link to the full-size file. The hook wraps every image in <a>, but it
@@ -614,6 +624,75 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- $inlineStart := `(?:<(?:a|code|kbd|samp|strong|em|del|mark|ruby)\b[^>\n]*>)+[A-Za-z0-9]` -}}
     {{- $seg = $seg | replaceRE (printf `(%s|%s|%s)(%s(?:%s+%s+%s)?%s)` $cjkChar $cjkEndPunct $cjkInsep $cjkUnit $cjkEndPunct $openPunct $cjkUnit $inlineStart) "${1}<wbr>${2}" -}}
     {{- $seg = $seg | replaceRE (printf `(%s|%s)(%s+%s%s)` $cjkChar $cjkInsep $openPunct $cjkUnit $inlineStart) "${1}<wbr>${2}" -}}
+    {{- if in $seg `<span class="math-inline">` -}}
+      {{- /* Inline math (.math-inline) stays display: inline so KaTeX's
+           .katex-base segments can break naturally at operators instead of
+           forcing whole formulas onto the next line and tearing open justify
+           rivers. Strip author-typed CJK spaces around .math-inline, add
+           proportional margin classes (.math-gap-start / .math-gap-end) next
+           to CJK ideographs/kana (where text-autospace cannot cross KaTeX's
+           atomic inline-block .katex-base), and bind short formulas (single-base,
+           or 2-base up to 10 visible chars) with adjacent CJK opening/closing
+           punctuation in .math-bind so Blink cannot orphan punctuation across
+           an inline-block boundary. */ -}}
+      {{- $mathParts := split $seg `<span class="math-inline">` -}}
+      {{- $mathOut := slice -}}
+      {{- $prev := index $mathParts 0 -}}
+      {{- $mathInlineTags := `(?:</?(?:strong|em|del|mark|a|ruby|b|i|u)\b[^>]*>)*` -}}
+      {{- $reStripLeft := printf `(%s%s)\s+$` $cjk $mathInlineTags -}}
+      {{- $reStripRight := printf `^\s+(%s%s)` $mathInlineTags $cjk -}}
+      {{- $reGapStart := printf `%s%s$` $cjkChar $mathInlineTags -}}
+      {{- $reGapEnd := printf `^%s%s` $mathInlineTags $cjkChar -}}
+      {{- $reLeadOpen := printf `%s+$` $openPunct -}}
+      {{- $reTrailClose := printf `^%s+` $cjkEndPunct -}}
+      {{- range after 1 $mathParts -}}
+        {{- $mp := split . "</span>" -}}
+        {{- $mathInner := index $mp 0 -}}
+        {{- $after := delimit (after 1 $mp) "</span>" -}}
+        {{- $mathRaw := $mathInner -}}
+        {{- if and (hasPrefix $mathInner "\x00\x02") (hasSuffix $mathInner "\x00") -}}
+          {{- $idx := int (strings.TrimSuffix "\x00" (strings.TrimPrefix "\x00\x02" $mathInner)) -}}
+          {{- $mathRaw = index $katexHeld $idx -}}
+        {{- end -}}
+        {{- if $strip -}}
+          {{- $prev = replaceRE $reStripLeft "$1" $prev -}}
+          {{- $after = replaceRE $reStripRight "$1" $after -}}
+        {{- end -}}
+        {{- $mathClasses := "math-inline" -}}
+        {{- if findRE $reGapStart $prev -}}
+          {{- $mathClasses = printf "%s math-gap-start" $mathClasses -}}
+        {{- end -}}
+        {{- if findRE $reGapEnd $after -}}
+          {{- $mathClasses = printf "%s math-gap-end" $mathClasses -}}
+        {{- end -}}
+        {{- $mathEl := printf `<span class="%s">%s</span>` $mathClasses $mathInner -}}
+        {{- $baseCount := strings.Count `<span class="katex-base">` $mathRaw -}}
+        {{- $isShortMath := le $baseCount 1 -}}
+        {{- if eq $baseCount 2 -}}
+          {{- $mathHtml := index (after 1 (split $mathRaw `class="katex-html"`)) 0 | default "" -}}
+          {{- $mathVisible := replaceRE `^[^>]*>|<[^>]+>|\x{200b}` "" $mathHtml -}}
+          {{- $isShortMath = le (strings.RuneCount $mathVisible) 10 -}}
+        {{- end -}}
+        {{- if $isShortMath -}}
+          {{- $leadOpen := "" -}}
+          {{- $trailClose := "" -}}
+          {{- with findRE $reLeadOpen $prev 1 -}}
+            {{- $leadOpen = index . 0 -}}
+            {{- $prev = strings.TrimSuffix $leadOpen $prev -}}
+          {{- end -}}
+          {{- with findRE $reTrailClose $after 1 -}}
+            {{- $trailClose = index . 0 -}}
+            {{- $after = strings.TrimPrefix $trailClose $after -}}
+          {{- end -}}
+          {{- if or $leadOpen $trailClose -}}
+            {{- $mathEl = printf `<span class="math-bind">%s%s%s</span>` $leadOpen $mathEl $trailClose -}}
+          {{- end -}}
+        {{- end -}}
+        {{- $mathOut = $mathOut | append $prev $mathEl -}}
+        {{- $prev = $after -}}
+      {{- end -}}
+      {{- $seg = delimit ($mathOut | append $prev) "" -}}
+    {{- end -}}
     {{- if in $seg "color-swatch-chip" -}}
       {{- /* Bind every swatch chip to its opening unit (or bare following
            token) with white-space: nowrap so Blink cannot strand a lonely

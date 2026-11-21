@@ -294,7 +294,7 @@ $$
 $$
 ```
 
-Inline formulas are wrapped in `.math-inline` with a trailing word joiner (`U+2060`) so trailing CJK punctuation (`，`, `。`, `、`, `）`) stays attached to the formula instead of wrapping alone to the next line. Display formulas are centered and horizontally scrollable on narrow viewports.
+Inline formulas are wrapped in `.math-inline` (`display: inline`) so KaTeX's internal `.katex-base` segments can break naturally at operators (`+`, `-`, `=`, `×`) without creating justification rivers in CJK prose. `typeset-content.html` strips author-typed spaces between CJK and inline formulas, applies uniform proportional margins (`.math-gap-start` / `.math-gap-end`) next to CJK characters (not punctuation), and binds short formulas (single-base, or 2-base up to 10 visible characters) with adjacent CJK punctuation in `.math-bind` (`white-space: nowrap`); longer multi-base formulas carry a trailing word joiner (`U+2060`) for Safari and Firefox. Display formulas are centered and horizontally scrollable on narrow viewports.
 
 ### Ruby Annotations & CJK Emphasis Marks
 
@@ -1005,7 +1005,7 @@ browser list.
   held to the same Baseline rule.
 
 **Known Limitations:**
-- Chrome/Edge: CJK line-breaking rules not applied to inline math formulas. Chinese punctuation may appear at line start after KaTeX formulas. Works correctly in Safari and Firefox.
+- Chrome/Edge: for longer multi-base inline formulas that break internally across lines, Blink may still break between the final `.katex-base` (`inline-block`) and trailing CJK punctuation despite `U+2060`. Short inline formulas (single-base, or 2-base up to 10 visible characters) are bound with `.math-bind` and work across Chrome, Safari, and Firefox.
 
 ## Accessibility
 
