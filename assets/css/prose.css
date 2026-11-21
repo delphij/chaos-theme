@@ -322,11 +322,45 @@
       border-top: 2px solid var(--border-color);
     }
 
+    /* Optional table title (via {caption="..."} attribute) */
+    caption {
+      caption-side: top;
+      padding: 0 0 0.5rem;
+      font-size: 0.95em;
+      font-weight: 600;
+      color: var(--heading);
+      text-align: left;
+      text-wrap: balance;
+    }
+
     /* Striped rows - Zebra striping for easier row scanning */
     tbody tr:nth-of-type(even) {
       background-color: var(--table-stripe);
     }
+
+    /* Equal-width columns with wrapping headers (via {.fixed} attribute) */
+    &.fixed {
+      table-layout: fixed;
+
+      thead th {
+        white-space: normal;
+
+        .th-paren {
+          display: inline-block;
+          text-spacing-trim: trim-both;
+          font-feature-settings: "halt" 1;
+        }
+      }
+
+      @media screen and (max-width: 768px) {
+        th,
+        td {
+          padding: 0.6rem 0.4rem;
+        }
+      }
+    }
   }
+
 
   /* ==========================================================================
      CODE

@@ -44,6 +44,11 @@ here.
   uncategorized pages at the end, and alphabetical by title within each group),
   or `"title"` (alphabetical by title across the scope), switching ARIA labels
   to neutral previous/next wording for non-chronological orders.
+- **Table `caption` and `.fixed` layout**: Markdown tables now support
+  `{caption="..."}` (emitted as a styled `<caption>` above the table rather than
+  an HTML attribute) and `{.fixed}` (`table-layout: fixed` equal-width columns
+  with multi-line wrapping headers and punctuation-trimmed parenthetical
+  qualifiers).
 
 ### Fixed
 

@@ -19,17 +19,26 @@ not read as an escape.
 @context {table} The table render hook context.
 */ -}}
 
+{{- $caption := index .Attributes "caption" -}}
+{{- $isFixed := in (split (or (index .Attributes "class") "") " ") "fixed" -}}
 <table
 {{- range $k, $v := .Attributes -}}
-  {{- if $v }} {{ printf `%s="%s"` $k (htmlEscape $v) | safeHTMLAttr }}{{ end -}}
+  {{- if and $v (ne $k "caption") }} {{ printf `%s="%s"` $k (htmlEscape $v) | safeHTMLAttr }}{{ end -}}
 {{- end -}}
 >
+{{- with $caption }}
+<caption>{{ . }}</caption>
+{{- end }}
 {{- with .THead }}
 <thead>
 {{- range . }}
 <tr>
-{{- range . }}
-<th{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</th>
+{{- range . -}}
+  {{- $thText := .Text -}}
+  {{- if $isFixed -}}
+    {{- $thText = replaceRE `(（[^（）]{1,8}）)` `<wbr><span class="th-paren">$1</span>` .Text | safeHTML -}}
+  {{- end }}
+<th{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ $thText }}</th>
 {{- end }}
 </tr>
 {{- end }}
