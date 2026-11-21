@@ -23,7 +23,7 @@ A remote URL, data URI or static file is rendered as given.
   {{- if hasPrefix $cleanDest "data:" -}}
 <img src="{{ $cleanDest | safeURL }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async">
   {{- else -}}
-<a href="{{ $cleanDest }}"><img src="{{ $cleanDest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+<a href="{{ $cleanDest }}" data-lightbox="true"><img src="{{ $cleanDest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
   {{- end -}}
 {{- else if $src -}}
   {{- /* SVG is a vector resource: Hugo cannot inspect .Width or .Resize it,
@@ -58,9 +58,9 @@ A remote URL, data URI or static file is rendered as given.
         {{- $adaptedPath := printf "%s.adapted.svg" (strings.TrimPrefix "/" (strings.TrimSuffix ".svg" $src.RelPermalink)) -}}
         {{- $svgURL = (resources.FromString $adaptedPath $svg).RelPermalink -}}
       {{- end -}}
-<a href="{{ $svgURL }}"><img src="{{ $svgURL }}" class="svg-adapt" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+<a href="{{ $svgURL }}" data-lightbox="true"><img src="{{ $svgURL }}" class="svg-adapt" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
     {{- else -}}
-<a href="{{ $src.RelPermalink }}"><img src="{{ $src.RelPermalink }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+<a href="{{ $src.RelPermalink }}" data-lightbox="true"><img src="{{ $src.RelPermalink }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
     {{- end -}}
   {{- else -}}
     {{- $format := cond (eq $src.MediaType.SubType "gif") "" "webp" -}}
@@ -92,9 +92,9 @@ A remote URL, data URI or static file is rendered as given.
       {{- $sizes = $sizes | append (printf "(max-width: %dpx) %dpx" (index . 0) (cond (lt $src.Width (index . 1)) $src.Width (index . 1))) -}}
     {{- end -}}
     {{- $sizes = $sizes | append (printf "%dpx" (cond (lt $src.Width 1232) $src.Width 1232)) -}}
-<a href="{{ $largest.RelPermalink }}"><img src="{{ $largest.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="{{ delimit $sizes ", " }}" width="{{ $src.Width }}" height="{{ $src.Height }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+<a href="{{ $largest.RelPermalink }}" data-lightbox="true"><img src="{{ $largest.RelPermalink }}" srcset="{{ delimit $srcset ", " }}" sizes="{{ delimit $sizes ", " }}" width="{{ $src.Width }}" height="{{ $src.Height }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
   {{- end -}}
 {{- else if $cleanDest -}}
   {{- $linkDest := strings.TrimPrefix "/" $cleanDest | relURL -}}
-<a href="{{ $linkDest }}"><img src="{{ $linkDest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
+<a href="{{ $linkDest }}" data-lightbox="true"><img src="{{ $linkDest }}" alt="{{ $alt }}" title="{{ $alt }}" loading="lazy" decoding="async"></a>
 {{- end -}}

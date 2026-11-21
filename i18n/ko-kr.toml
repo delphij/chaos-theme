@@ -165,6 +165,14 @@ xPostFrom = 'X (Twitter) 출처'
 youtubeVideo = 'YouTube 동영상'
 youtubeVideoTitled = 'YouTube 동영상: {{ .Title }}'
 
+# Image lightbox
+lightboxPreview = '이미지 미리보기'
+lightboxZoomIn = '확대'
+lightboxZoomOut = '축소'
+lightboxResetZoom = '확대/축소 재설정'
+lightboxOpenOriginal = '원본 열기'
+lightboxClose = '닫기'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }} ({{ .Count }}개의 글)'

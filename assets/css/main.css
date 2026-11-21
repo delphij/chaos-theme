@@ -2051,6 +2051,125 @@
   }
 
   /* ==========================================================================
+     IMAGE LIGHTBOX
+     Native <dialog> overlay for inspecting article images and SVG diagrams.
+     ========================================================================== */
+
+  dialog.image-lightbox {
+    box-sizing: border-box;
+    width: min(94vw, 1280px);
+    max-width: 94vw;
+    max-height: 92vh;
+    margin: auto;
+    padding: 0;
+    border: var(--border);
+    border-radius: var(--radius-md);
+    background-color: var(--bg);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+    overflow: hidden;
+
+    &[open] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &::backdrop {
+      background-color: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(4px);
+    }
+  }
+
+  .image-lightbox-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem 0.5rem 1rem;
+    border-bottom: var(--border);
+    background-color: var(--ground);
+  }
+
+  .image-lightbox-caption {
+    min-width: 0;
+    font-size: var(--text-sm);
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .image-lightbox-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .image-lightbox-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text);
+    font-size: 1.1rem;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--hover-bg);
+      color: var(--heading);
+    }
+  }
+
+  .image-lightbox-zoom {
+    width: auto;
+    min-width: 3.2rem;
+    padding: 0 0.4rem;
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .image-lightbox-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 1rem;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+
+    &.is-zoomed {
+      cursor: grab;
+    }
+
+    &.is-dragging {
+      cursor: grabbing;
+    }
+  }
+
+  .image-lightbox-img {
+    display: block;
+    flex-shrink: 0;
+    max-width: 100%;
+    max-height: calc(92vh - 5rem);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* ==========================================================================
      PRINT STYLES
      Optimized layout for printing articles.
      Removes navigation, interactive elements, and applies print-friendly colors.

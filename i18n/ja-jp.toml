@@ -165,6 +165,14 @@ xPostFrom = 'X（Twitter）より'
 youtubeVideo = 'YouTube動画'
 youtubeVideoTitled = 'YouTube動画：{{ .Title }}'
 
+# Image lightbox
+lightboxPreview = '画像プレビュー'
+lightboxZoomIn = '拡大'
+lightboxZoomOut = '縮小'
+lightboxResetZoom = 'ズームをリセット'
+lightboxOpenOriginal = '元の画像を開く'
+lightboxClose = '閉じる'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }}（{{ .Count }}件の記事）'

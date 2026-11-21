@@ -17,6 +17,7 @@ import { initPrintFootnotes } from './modules/print-footnotes.js';
 import { initCodeCopy } from './modules/code-copy.js';
 import { initHeadingCopy } from './modules/heading-copy.js';
 import { initBilingualSelect } from './modules/bilingual-select.js';
+import { initLightbox } from './modules/lightbox.js';
 
 initTheme();
 initOverlays();
@@ -25,3 +26,4 @@ initPrintFootnotes();
 initCodeCopy();
 initHeadingCopy();
 initBilingualSelect();
+initLightbox();

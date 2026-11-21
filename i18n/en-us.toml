@@ -168,6 +168,14 @@ xPostFrom = 'From X (Twitter)'
 youtubeVideo = 'YouTube video'
 youtubeVideoTitled = 'YouTube video: {{ .Title }}'
 
+# Image lightbox
+lightboxPreview = 'Image preview'
+lightboxZoomIn = 'Zoom in'
+lightboxZoomOut = 'Zoom out'
+lightboxResetZoom = 'Reset zoom'
+lightboxOpenOriginal = 'Open original'
+lightboxClose = 'Close'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   one = '{{ .Name }} ({{ .Count }} post)'

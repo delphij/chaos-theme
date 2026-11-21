@@ -55,6 +55,12 @@ here.
   inverting luminance in dark mode via `.svg-adapt` while leaving source `.svg`
   files untouched. Opt out per-image with `#raw`, per-page with
   `svgAdapt: false`, or site-wide with `params.svgAdapt = false`.
+- **Native `<dialog>` image lightbox**: Left-clicking any article image opens a
+  zero-dependency modal preview with pointer-anchored wheel/pinch zoom
+  (`100%`–`800%`, resizing layout dimensions so SVG vectors and high-resolution
+  photos stay sharp), drag-to-pan, double-click zoom toggle, keyboard zoom
+  (`+`/`-`/`0`), localized controls across all 5 languages, `Esc`/backdrop
+  dismiss, and a direct original-file link.
 
 ### Fixed
 
