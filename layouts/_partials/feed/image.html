@@ -24,10 +24,14 @@ published.
 {{- if $isRemote -}}
   <img src="{{ $dest }}" alt="{{ $alt }}">
 {{- else if $src -}}
-  {{- $width := cond (le $src.Width 1232) $src.Width 1232 -}}
-  {{- $format := cond (eq $src.MediaType.SubType "gif") "" "webp" -}}
-  {{- $img := $src.Resize (printf "%dx %s" $width $format) -}}
+  {{- if eq $src.MediaType.SubType "svg" -}}
+  <a href="{{ $src.Permalink }}"><img src="{{ $src.Permalink }}" alt="{{ $alt }}"></a>
+  {{- else -}}
+    {{- $width := cond (le $src.Width 1232) $src.Width 1232 -}}
+    {{- $format := cond (eq $src.MediaType.SubType "gif") "" "webp" -}}
+    {{- $img := $src.Resize (printf "%dx %s" $width $format) -}}
   <a href="{{ $img.Permalink }}"><img src="{{ $img.Permalink }}" width="{{ $img.Width }}" height="{{ $img.Height }}" alt="{{ $alt }}"></a>
+  {{- end -}}
 {{- else if $dest -}}
   <img src="{{ strings.TrimPrefix "/" $dest | absURL }}" alt="{{ $alt }}">
 {{- end -}}

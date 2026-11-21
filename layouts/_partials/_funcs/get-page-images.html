@@ -23,9 +23,23 @@ the source unreferenced (see build.publishResources).
   {{- end -}}
 {{- end -}}
 {{- if eq (len $images) 0 -}}
+  {{- /* Skip SVG resources: Hugo cannot resize them and Open Graph / Twitter
+         Cards only accept raster images. */ -}}
   {{- with .Resources.ByType "image" -}}
-    {{- $featured := .GetMatch "{*feature*,*cover*,*thumbnail*}" -}}
-    {{- with or $featured (index . 0) -}}
+    {{- $candidate := false -}}
+    {{- with .GetMatch "{*feature*,*cover*,*thumbnail*}" -}}
+      {{- if ne .MediaType.SubType "svg" -}}
+        {{- $candidate = . -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not $candidate -}}
+      {{- range . -}}
+        {{- if and (not $candidate) (ne .MediaType.SubType "svg") -}}
+          {{- $candidate = . -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- with $candidate -}}
       {{- $card := . -}}
       {{- if ne .MediaType.SubType "gif" -}}
         {{- $width := cond (gt .Width 1200) 1200 .Width -}}
