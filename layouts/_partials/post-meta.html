@@ -8,8 +8,16 @@ asked for, and categories. Shared by the article and its summary card.
 @example: {{ partial "post-meta.html" (dict "page" . "stats" true) }}
 */ -}}
 {{- $page := .page -}}
-<div class="meta">{{ partial "datetime.html" $page.Date }}
-  {{- if .stats }}<span class="reading-stats"> • {{ partial "reading-stats.html" $page }}</span>{{ end }}
-  {{- with partial "_funcs/get-page-author.html" $page }}<span class="meta-sep"> • </span><span class="post-author">{{ $a := . }}{{ with .url }}<a href="{{ . }}">{{ $a.name }}</a>{{ else }}{{ $a.name }}{{ end }}</span>{{ end }}
-  {{- with $page.Params.categories }}<span class="meta-sep"> • </span>{{ partial "taxonomy-links.html" (dict "page" $page "taxonomy" "categories") }}{{ end -}}
+{{- $showDate := not site.Params.hidePostDate -}}
+{{- $showStats := and .stats (not site.Params.hideReadingStats) -}}
+{{- $author := partial "_funcs/get-page-author.html" $page -}}
+{{- $cats := $page.Params.categories -}}
+{{- if or $showDate $showStats $author $cats -}}
+{{- $needSep := false -}}
+<div class="meta">
+  {{- if $showDate -}}{{ partial "datetime.html" $page.Date }}{{- $needSep = true -}}{{- end -}}
+  {{- if $showStats -}}<span class="reading-stats">{{ if $needSep }} • {{ end }}{{ partial "reading-stats.html" $page }}</span>{{- $needSep = true -}}{{- end -}}
+  {{- with $author -}}{{ if $needSep }}<span class="meta-sep"> • </span>{{ end }}<span class="post-author">{{ $a := . }}{{ with .url }}<a href="{{ . }}">{{ $a.name }}</a>{{ else }}{{ $a.name }}{{ end }}</span>{{- $needSep = true -}}{{- end -}}
+  {{- with $cats -}}{{ if $needSep }}<span class="meta-sep"> • </span>{{ end }}{{ partial "taxonomy-links.html" (dict "page" $page "taxonomy" "categories") }}{{- end -}}
 </div>
+{{- end -}}

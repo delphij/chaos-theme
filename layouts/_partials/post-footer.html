@@ -7,7 +7,16 @@ Renders post footer metadata (tags and last modified date) at the end of an arti
 */}}
 
 {{- $hasTags := and .Params.tags (gt (len .Params.tags) 0) -}}
-{{- $hasMod := and (not .Lastmod.IsZero) (gt (.Lastmod.Sub .Date).Hours 24) -}}
+{{- $modTime := .Lastmod -}}
+{{- $hasMod := false -}}
+{{- if site.Params.alwaysShowLastmod -}}
+  {{- if $modTime.IsZero -}}
+    {{- $modTime = .Date -}}
+  {{- end -}}
+  {{- $hasMod = not $modTime.IsZero -}}
+{{- else -}}
+  {{- $hasMod = and (not $modTime.IsZero) (gt ($modTime.Sub .Date).Hours 24) -}}
+{{- end -}}
 {{- $hasLicense := .Params.license -}}
 
 {{- if or $hasTags $hasMod $hasLicense -}}
@@ -19,7 +28,7 @@ Renders post footer metadata (tags and last modified date) at the end of an arti
   {{- end -}}
   {{- if $hasMod -}}
   <div class="post-modified">
-    <span>{{ T "lastModified" }}：{{ partial "datetime.html" .Lastmod }}</span>
+    <span>{{ T "lastModified" }}：{{ partial "datetime.html" $modTime }}</span>
   </div>
   {{- end -}}
   {{- with $hasLicense -}}

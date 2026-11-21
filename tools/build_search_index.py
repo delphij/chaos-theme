@@ -262,6 +262,7 @@ def parse_frontmatter(content: str):
 
     meta = {
         "description": scalar("description"),
+        "lastmod": scalar("lastmod"),
         "tags": items("tags"),
         "categories": items("categories"),
         # Three ways to keep a post out, or down. noindex / private / robots:
@@ -297,6 +298,40 @@ def published_pages(site_dir: str, hugo: str, base_url: str) -> list:
     # is what this script knows how to read.
     return [row for row in csv.DictReader(result.stdout.splitlines())
             if row["kind"] == "page" and row["path"].endswith(".md")]
+
+
+def site_hides_post_date(site_dir: str, hugo: str) -> bool:
+    """Reports whether the site sets params.hidePostDate = true."""
+    try:
+        result = subprocess.run([hugo, "config", "--format", "json", "--source", site_dir],
+                                capture_output=True, text=True, encoding="utf-8")
+        if result.returncode == 0:
+            cfg = json.loads(result.stdout)
+            return bool((cfg.get("params") or {}).get("hidepostdate"))
+    except (OSError, ValueError):
+        pass
+    return False
+
+
+def git_lastmod_dates(site_dir: str) -> dict:
+    """Returns {repo-relative-path: 'YYYY-MM-DD'} from git history (latest commit per file)."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", site_dir, "log", "--format=::%cs", "--name-only"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+    except OSError:
+        return {}
+    if result.returncode != 0:
+        return {}
+    dates = {}
+    current = ""
+    for line in result.stdout.splitlines():
+        if line.startswith("::"):
+            current = line[2:].strip()
+        elif line and current and line not in dates:
+            dates[line] = current
+    return dates
 
 
 # Common technical terms with symbols that should be preserved intact
@@ -430,6 +465,7 @@ def main():
     parser.add_argument("--stopwords", default="", help="Path to custom stopwords file (overrides default)")
     parser.add_argument("--extra-stopwords", default="", help="Path to extra stopwords file (augments default)")
     parser.add_argument("--keep-traditional", action="store_true", help="Index Traditional Chinese characters as written instead of as their Simplified forms")
+    parser.add_argument("--use-lastmod", action="store_true", help="Store lastmod instead of creation date in search results (auto-enabled when params.hidePostDate = true)")
     args = parser.parse_args()
 
     content_dir = os.path.abspath(args.content)
@@ -473,6 +509,8 @@ def main():
 
     site_dir = os.path.dirname(content_dir)
     pages = published_pages(site_dir, args.hugo, args.base_url)
+    use_lastmod = args.use_lastmod or site_hides_post_date(site_dir, args.hugo)
+    git_dates = git_lastmod_dates(site_dir) if use_lastmod else {}
 
     print(f"Active stop words: {len(stop_words)} terms")
     print(f"Reading the {len(pages)} pages Hugo publishes from {site_dir}...")
@@ -492,8 +530,13 @@ def main():
             continue
 
         title = page["title"].strip() or os.path.splitext(os.path.basename(filepath))[0]
-        # Hugo's zero date is a page without one.
+        # Hugo's zero date is a page without one. When hidePostDate is active,
+        # prefer front-matter lastmod, then git's last commit date, then date.
         date = "" if page["date"].startswith("0001-") else page["date"][:10]
+        if use_lastmod:
+            fm_mod = meta.get("lastmod", "").strip()[:10]
+            git_mod = git_dates.get(page["path"], "")
+            date = fm_mod or git_mod or date
         tags = meta.get("tags", [])
         # A tag with a symbol in it (C++, C#) is taught to jieba as one word.
         # Every post is read before any is tokenized below, so the word holds

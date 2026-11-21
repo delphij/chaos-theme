@@ -22,7 +22,7 @@ Displays post title, date, taxonomy links, summary text, and optional
   {{- $more := cond .Truncated (slice "readMore" "readMoreAbout") (slice "joinDiscussion" "joinDiscussionAbout") }}
   <div class="post-more">
     <a class="read-more" href="{{ .RelPermalink }}" aria-label="{{ T (index $more 1) (dict `Title` .LinkTitle) }}">{{ T (index $more 0) }}</a>
-    {{- if .Truncated }}<span class="meta reading-stats">{{ T "readingStatsParen" (dict "Stats" (partial "reading-stats.html" .)) }}</span>{{ end }}
+    {{- if and .Truncated (not site.Params.hideReadingStats) }}<span class="meta reading-stats">{{ T "readingStatsParen" (dict "Stats" (partial "reading-stats.html" .)) }}</span>{{ end }}
   </div>
 </article>
 
