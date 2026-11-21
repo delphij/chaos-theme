@@ -28,6 +28,23 @@ here.
 
 ## [Unreleased]
 
+### Added
+
+- `pagerScope` and `pagerOrder`: control which regular pages an article's pager
+  steps through and in what order. `pagerScope` accepts `"section"` (default,
+  the article's own Hugo section), `"mainSections"` (the site's main-section
+  pages; pages outside them fall back to their section's chronological
+  neighbours), or `"site"` (every listed regular page across the site,
+  including root-level pages unless excluded with `build: { list: never }`;
+  branch-bundle section index pages are not part of the chain). `pagerOrder`
+  accepts `"date"` (default, newest first), `"section"` (grouped by Hugo
+  section content path — directories with `_index.md` — and alphabetical by
+  title within each section), `"category"` (grouped by each page's first
+  category in the site's locale-aware title order, with unlisted categories and
+  uncategorized pages at the end, and alphabetical by title within each group),
+  or `"title"` (alphabetical by title across the scope), switching ARIA labels
+  to neutral previous/next wording for non-chronological orders.
+
 ### Fixed
 
 - `index.rss.xml`: handle scalar string values for `categories` and `tags` in

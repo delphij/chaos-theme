@@ -1,0 +1,127 @@
+{{- /*
+Builds a RelPermalink -> { prev, next } neighbour map for pager.html, cached
+once per language (or once per section when pagerScope = "section").
+
+Centralizing config validation and sequence construction here does two things:
+  1. Invalid pagerScope / pagerOrder values fail once per language instead of
+     once per article page.
+  2. Every article looks up its neighbours in O(1) instead of scanning the
+     page collection repeatedly.
+
+Scope (site.Params.pagerScope):
+  "section"       (default) the current Hugo section's regular pages
+  "mainSections"  the site's main-section pages (_funcs/get-main-pages.html)
+  "site"          every listed regular page across the site (site.RegularPages,
+                  respecting Hugo's build: { list: never }; root-level pages
+                  such as an about page are included unless marked never, and
+                  branch-bundle section index pages are not part of the chain)
+
+Order (site.Params.pagerOrder):
+  "date"          (default) site order, newest first (Weight, Date desc, ...)
+  "section"       grouped by Hugo section content path ascending (directories
+                  with _index.md, subsections immediately after their parent),
+                  then alphabetical by title within each section
+  "category"      grouped by primary category (first term from GetTerms,
+                  sorted by Hugo's locale-aware title order; uncategorized
+                  pages grouped at the end), then alphabetical by title
+                  within each group
+  "title"         alphabetical by title across the whole scope
+
+In every order, prev is index i - 1 (left link) and next is index i + 1 (right
+link): for "date" that puts the newer post on the left and the older on the
+right, matching .NextInSection / .PrevInSection.
+
+@context {page} page The current page (used for .CurrentSection when scope is "section").
+@returns {map} Map of RelPermalink to dict(prev, next) page objects (or false).
+*/ -}}
+{{- $scope := site.Params.pagerScope | default "section" -}}
+{{- if not (in (slice "section" "mainSections" "site") $scope) -}}
+  {{- errorf "chaos: params.pagerScope must be \"section\", \"mainSections\" or \"site\", not %q" $scope -}}
+{{- end -}}
+{{- $order := site.Params.pagerOrder | default "date" -}}
+{{- if not (in (slice "date" "section" "category" "title") $order) -}}
+  {{- errorf "chaos: params.pagerOrder must be \"date\", \"section\", \"category\" or \"title\", not %q" $order -}}
+{{- end -}}
+
+{{- $pages := slice -}}
+{{- if eq $scope "mainSections" -}}
+  {{- $pages = partialCached "_funcs/get-main-pages.html" . site.Language.Lang -}}
+{{- else if eq $scope "site" -}}
+  {{- $pages = site.RegularPages -}}
+{{- else -}}
+  {{- $pages = .CurrentSection.RegularPages -}}
+{{- end -}}
+
+{{- $ordered := slice -}}
+{{- if eq $order "date" -}}
+  {{- $ordered = $pages -}}
+{{- else if or (eq $order "title") (and (eq $order "section") (eq $scope "section")) -}}
+  {{- $ordered = $pages.ByTitle -}}
+{{- else if eq $order "section" -}}
+  {{- /* Iterate $pages.ByTitle first so each bucket preserves Hugo's native
+         title order, then emit buckets in ascending content-path order. */ -}}
+  {{- $buckets := newScratch -}}
+  {{- range $pages.ByTitle -}}
+    {{- /* Content path (not RelPermalink) so uglyURLs / permalinks cannot
+           scramble section ordering; trailing "/" keeps subsections directly
+           after their parent section. */ -}}
+    {{- $buckets.Add (printf "%s/" (strings.TrimRight "/" .CurrentSection.Path)) (slice .) -}}
+  {{- end -}}
+  {{- range $_, $group := $buckets.Values -}}
+    {{- range $group -}}
+      {{- $ordered = $ordered | append . -}}
+    {{- end -}}
+  {{- end -}}
+{{- else -}}
+  {{- /* Group by the canonical term Page from GetTerms "categories" so
+         variants like "Shared Chaos" and "shared-chaos" merge, and emit
+         groups in the categories taxonomy's locale-aware .ByTitle order
+         with uncategorized pages at the end. */ -}}
+  {{- $buckets := newScratch -}}
+  {{- $uncat := slice -}}
+  {{- range $p := $pages.ByTitle -}}
+    {{- with $p.GetTerms "categories" -}}
+      {{- $buckets.Add (index . 0).Path (slice $p) -}}
+    {{- else -}}
+      {{- $uncat = $uncat | append $p -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $emitted := newScratch -}}
+  {{- with site.GetPage "/categories" -}}
+    {{- range .Pages.ByTitle -}}
+      {{- with $buckets.Get .Path -}}
+        {{- range . -}}
+          {{- $ordered = $ordered | append . -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $emitted.Set .Path true -}}
+    {{- end -}}
+  {{- end -}}
+  {{- /* Any category whose term page was unlisted (e.g. build: { list: never })
+         still joins the chain in key order, ahead of uncategorized pages. */ -}}
+  {{- range $k, $group := $buckets.Values -}}
+    {{- if not ($emitted.Get $k) -}}
+      {{- range $group -}}
+        {{- $ordered = $ordered | append . -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $uncat -}}
+    {{- $ordered = $ordered | append . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $neighbors := newScratch -}}
+{{- $n := len $ordered -}}
+{{- range $i, $p := $ordered -}}
+  {{- $prev := false -}}
+  {{- $next := false -}}
+  {{- if gt $i 0 -}}
+    {{- $prev = index $ordered (sub $i 1) -}}
+  {{- end -}}
+  {{- if lt (add $i 1) $n -}}
+    {{- $next = index $ordered (add $i 1) -}}
+  {{- end -}}
+  {{- $neighbors.Set $p.RelPermalink (dict "prev" $prev "next" $next) -}}
+{{- end -}}
+{{- return $neighbors.Values -}}

@@ -60,6 +60,8 @@ newerPost = '← {{ .Title }}'
 olderPost = '{{ .Title }} →'
 newerPostLabel = '較新文章：{{ .Title }}'
 olderPostLabel = '較早文章：{{ .Title }}'
+previousPageLabel = '上一篇：{{ .Title }}'
+nextPageLabel = '下一篇：{{ .Title }}'
 
 # Sidebar navigation
 browsingGuide = '瀏覽導引'

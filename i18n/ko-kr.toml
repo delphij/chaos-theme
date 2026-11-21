@@ -60,6 +60,8 @@ newerPost = '← {{ .Title }}'
 olderPost = '{{ .Title }} →'
 newerPostLabel = '최신 글: {{ .Title }}'
 olderPostLabel = '이전 글: {{ .Title }}'
+previousPageLabel = '이전 페이지: {{ .Title }}'
+nextPageLabel = '다음 페이지: {{ .Title }}'
 
 # Sidebar navigation
 browsingGuide = '둘러보기'

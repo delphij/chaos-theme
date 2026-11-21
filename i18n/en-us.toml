@@ -63,6 +63,8 @@ newerPost = '← {{ .Title }}'
 olderPost = '{{ .Title }} →'
 newerPostLabel = 'Newer post: {{ .Title }}'
 olderPostLabel = 'Older post: {{ .Title }}'
+previousPageLabel = 'Previous page: {{ .Title }}'
+nextPageLabel = 'Next page: {{ .Title }}'
 
 # Sidebar navigation
 browsingGuide = 'Browsing guide'

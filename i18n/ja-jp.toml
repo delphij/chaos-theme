@@ -60,6 +60,8 @@ newerPost = '← {{ .Title }}'
 olderPost = '{{ .Title }} →'
 newerPostLabel = '新しい記事：{{ .Title }}'
 olderPostLabel = '古い記事：{{ .Title }}'
+previousPageLabel = '前のページ：{{ .Title }}'
+nextPageLabel = '次のページ：{{ .Title }}'
 
 # Sidebar navigation
 browsingGuide = '閲覧ガイド'

@@ -180,6 +180,19 @@ hasCJKLanguage = true
   # Set true to always show HH:MM, or false to show only YYYY-MM-DD.
   # showTime = true
 
+  # Article pager navigation (optional)
+  # pagerScope = "section"               # "section" (default): article's own Hugo section;
+                                         # "mainSections": site's main-section pages
+                                         # (pages outside them fall back to "section");
+                                         # "site": all listed regular pages across the site
+                                         # (set build: { list: never } to exclude a page)
+  # pagerOrder = "date"                  # "date" (default): newest first;
+                                         # "section": grouped by Hugo section
+                                         # (_index.md), A-Z by title;
+                                         # "category": grouped by first category
+                                         # (uncategorized last), A-Z by title;
+                                         # "title": A-Z by title across the scope
+
   # Code block soft wrapping (optional, disabled by default)
   # codeWrap = true                      # Soft-wrap fenced code blocks by default (override per page with `codeWrap`, or per fence with `{.wrap}` / `{.nowrap}`)
 

@@ -48,6 +48,28 @@
   # Set true to always display HH:MM, or false to show only YYYY-MM-DD.
   # showTime = true
 
+  # Article pager navigation (optional)
+  # pagerScope:
+  #   "section"      (default) step through the article's own Hugo section
+  #   "mainSections" step through the site's main-section pages (those the
+  #                  homepage, archives and feeds list); pages outside them
+  #                  fall back to their section's chronological neighbours
+  #   "site"         step through every listed regular page across the site
+  #                  (including root-level pages unless marked
+  #                  build = { list = 'never' }; branch-bundle section index
+  #                  pages are not part of the chain)
+  # pagerScope = "section"
+  #
+  # pagerOrder:
+  #   "date"         (default) newest first (Hugo's default page order)
+  #   "section"      grouped by Hugo section path (directories with _index.md),
+  #                  alphabetical by title within each section
+  #   "category"     grouped by primary category (first entry in categories,
+  #                  locale-aware title order; uncategorized pages at the end),
+  #                  alphabetical by title within each group
+  #   "title"        alphabetical by title across the whole scope
+  # pagerOrder = "date"
+
   # Code block soft wrapping (optional, disabled by default)
   # Set true to soft-wrap fenced code blocks by default across the site;
   # individual pages can override via `codeWrap = true/false` in front matter,

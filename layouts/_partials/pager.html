@@ -1,11 +1,28 @@
 {{- /*
 Renders the page's previous/next pager: the paginator's neighbours on a
-paginated list page, the newer and older post in its section on an article.
+paginated list page, the newer and older post on an article.
 One partial for both, so the two cannot drift apart in markup.
 
 Paginator links are labelled by their text alone; post links carry a longer
 aria-label naming the neighbouring post. Nothing is emitted when there is no
 neighbour on either side.
+
+site.Params.pagerScope picks which regular pages an article's pager steps through:
+  "section"       (default) the pages of its own Hugo section
+  "mainSections"  the site's main-section pages (_funcs/get-main-pages.html);
+                  pages outside it fall back to their section's neighbours
+  "site"          all listed regular pages across the site (site.RegularPages,
+                  respecting build: { list: never }; branch-bundle section
+                  index pages are not part of the chain)
+
+site.Params.pagerOrder picks the order within that scope:
+  "date"          (default) newest first, matching .NextInSection / .PrevInSection
+  "section"       grouped by Hugo section content path (directories with
+                  _index.md), alphabetical by title within each section
+  "category"      grouped by primary category (first term in locale-aware title
+                  order; uncategorized pages at the end), alphabetical by title
+                  within each group
+  "title"         alphabetical by title across the whole scope
 
 @context {page} page The current page.
 
@@ -14,11 +31,34 @@ neighbour on either side.
 {{- $prev := false -}}
 {{- $next := false -}}
 {{- if .IsPage -}}
-  {{- with .NextInSection -}}
-    {{- $prev = dict "url" .RelPermalink "text" (T "newerPost" (dict "Title" .Title)) "label" (T "newerPostLabel" (dict "Title" .Title)) -}}
+  {{- $scope := site.Params.pagerScope | default "section" -}}
+  {{- $order := site.Params.pagerOrder | default "date" -}}
+  {{- $prevPage := false -}}
+  {{- $nextPage := false -}}
+  {{- $isChrono := eq $order "date" -}}
+  {{- if and (eq $scope "section") $isChrono -}}
+    {{- $prevPage = .NextInSection -}}
+    {{- $nextPage = .PrevInSection -}}
+  {{- else -}}
+    {{- $cacheKey := cond (and (eq $scope "section") (in (slice "section" "category" "title") $order)) .CurrentSection.Path "" -}}
+    {{- $map := partialCached "_funcs/get-pager-map.html" . site.Language.Lang $cacheKey -}}
+    {{- with index $map .RelPermalink -}}
+      {{- $prevPage = .prev -}}
+      {{- $nextPage = .next -}}
+    {{- else -}}
+      {{- /* Page outside the chosen collection (e.g. an about page under
+             pagerScope = "mainSections") falls back to .NextInSection /
+             .PrevInSection, which are always chronological. */ -}}
+      {{- $prevPage = .NextInSection -}}
+      {{- $nextPage = .PrevInSection -}}
+      {{- $isChrono = true -}}
+    {{- end -}}
   {{- end -}}
-  {{- with .PrevInSection -}}
-    {{- $next = dict "url" .RelPermalink "text" (T "olderPost" (dict "Title" .Title)) "label" (T "olderPostLabel" (dict "Title" .Title)) -}}
+  {{- with $prevPage -}}
+    {{- $prev = dict "url" .RelPermalink "text" (T "newerPost" (dict "Title" .Title)) "label" (T (cond $isChrono "newerPostLabel" "previousPageLabel") (dict "Title" .Title)) -}}
+  {{- end -}}
+  {{- with $nextPage -}}
+    {{- $next = dict "url" .RelPermalink "text" (T "olderPost" (dict "Title" .Title)) "label" (T (cond $isChrono "olderPostLabel" "nextPageLabel") (dict "Title" .Title)) -}}
   {{- end -}}
 {{- else -}}
   {{- with .Store.Get "paginator" -}}
