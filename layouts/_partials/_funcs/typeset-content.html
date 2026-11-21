@@ -92,7 +92,13 @@ Shared by the HTML and feed pipelines so the two cannot drift.
     splitting off the final break unit bounds that fallback without breaking
     kinsoku or punctuation kerning.
 
- 5. A linked image ([![alt](img)](url)) loses the image render hook's own
+ 5. KaTeX subtrees (`<span class="katex">`, both inline and display) are held
+    in placeholders while prose rewrites run, so LaTeX constructs such as
+    `\sqrt[3]{2}` inside `<annotation encoding="application/x-tex">` cannot be
+    misread as ruby (`[3]{2}`), color swatches, emphasis dots, or CJK/English
+    space boundaries.
+
+ 6. A linked image ([![alt](img)](url)) loses the image render hook's own
     link to the full-size file. The hook wraps every image in <a>, but it
     cannot see that Goldmark has already opened the author's <a> around it,
     so the two nest - invalid HTML that the parser resolves by closing the
@@ -376,6 +382,36 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- if in $seg "<a" -}}
       {{- $seg = $seg | replaceRE `(<a\b[^>]*>\s*)<a\b[^>]*>(\s*<img\b[^>]*>\s*)</a>(\s*</a>)` "${1}${2}${3}" -}}
     {{- end -}}
+    {{- $katexHeld := slice -}}
+    {{- if in $seg `<span class="katex">` -}}
+      {{- /* Hold every KaTeX subtree (inline and display) in a placeholder so
+           prose rewrites (ruby [base]{rt} matching \sqrt[3]{2}, color swatches,
+           emphasis dots, CJK space stripping, sentence-space restoration, and
+           <wbr> insertion) cannot corrupt <annotation> TeX source or KaTeX
+           markup. Restored in a single pass at the end of this segment. */ -}}
+      {{- $kParts := split $seg `<span class="katex">` -}}
+      {{- $kOut := slice (index $kParts 0) -}}
+      {{- range after 1 $kParts -}}
+        {{- $depth := 1 -}}
+        {{- $kPieces := slice -}}
+        {{- $kAfter := slice -}}
+        {{- $closed := false -}}
+        {{- range $sp := split . "</span>" -}}
+          {{- if $closed -}}
+            {{- $kAfter = $kAfter | append $sp -}}
+          {{- else -}}
+            {{- $depth = sub (add $depth (strings.Count "<span" $sp)) 1 -}}
+            {{- $kPieces = $kPieces | append $sp -}}
+            {{- if le $depth 0 -}}
+              {{- $closed = true -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+        {{- $kOut = $kOut | append (printf "\x00\x02%d\x00" (len $katexHeld)) (delimit $kAfter "</span>") -}}
+        {{- $katexHeld = $katexHeld | append (printf `<span class="katex">%s</span>` (delimit $kPieces "</span>")) -}}
+      {{- end -}}
+      {{- $seg = delimit $kOut "" -}}
+    {{- end -}}
     {{- $hasEmDot := in $seg "]{.}" -}}
     {{- $hasSwatch := in $seg "]{#" -}}
     {{- $holdCode := or $hasEmDot $hasSwatch -}}
@@ -612,6 +648,15 @@ the match can then run to the next "]...{...}" anywhere in the feed.
       {{- $seg = $seg | replaceRE (printf `()%s(%s)` $chipParts $bindUnit) (printf "%s${4}</span>" $bound) -}}
       {{- $seg = $seg | replaceRE (printf `()%s((?:<(?:%s)\b[^>]*>)+)(%s)` $chipParts $inlineOpen $leadUnit) (printf "${4}%s${5}</span>" $bound) -}}
       {{- $seg = replace $seg "\x00\x05" "" -}}
+    {{- end -}}
+    {{- if $katexHeld -}}
+      {{- $rParts := split $seg "\x00\x02" -}}
+      {{- $rOut := slice (index $rParts 0) -}}
+      {{- range after 1 $rParts -}}
+        {{- $rp := split . "\x00" -}}
+        {{- $rOut = $rOut | append (index $katexHeld (int (index $rp 0))) (delimit (after 1 $rp) "\x00") -}}
+      {{- end -}}
+      {{- $seg = delimit $rOut "" -}}
     {{- end -}}
   {{- end -}}
   {{- $out = $out | append $pre $seg -}}
