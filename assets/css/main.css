@@ -1612,7 +1612,7 @@
     box-shadow: var(--shadow-dialog);
     pointer-events: none;
     white-space: nowrap;
-    max-width: min(360px, 90vw);
+    max-width: min(360px, 90dvw);
 
     &[hidden] {
       display: none;
@@ -1825,12 +1825,12 @@
     background: var(--surface);
     color: var(--text);
     border-radius: var(--radius-card);
-    width: min(680px, 92vw);
+    width: min(680px, 92dvw);
     max-width: 680px;
     padding: 0;
     box-shadow: var(--shadow-dialog);
     overflow: hidden;
-    top: 10vh;                         /* A modal dialog is fixed in the top layer */
+    top: 10dvh;                        /* A modal dialog is fixed in the top layer */
     margin: 0 auto;
     overscroll-behavior: contain;
 
@@ -1913,7 +1913,7 @@
   }
 
   .search-results {
-    max-height: min(480px, 55vh);
+    max-height: min(480px, 55dvh);
     overflow-y: auto;
     overscroll-behavior: contain;      /* Don't chain to the page under the modal */
     padding: 8px 12px;
@@ -2167,7 +2167,7 @@
     display: block;
     flex-shrink: 0;
     max-width: 100%;
-    max-height: calc(92vh - 5rem);
+    max-height: calc(92dvh - 5rem);
     width: auto;
     height: auto;
     object-fit: contain;
