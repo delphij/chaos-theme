@@ -1820,6 +1820,23 @@
      Styled consistently with Chaos design tokens (Japanese papercraft aesthetic)
      ========================================================================== */
 
+  /* Shared modal dialog scroll containment: prevents wheel/touch scroll
+     chaining to the underlying page in Chromium/Firefox (via overscroll-behavior
+     on :modal and ::backdrop) and Safari (via html:has(dialog:modal); html
+     already has scrollbar-gutter: stable, so hiding the scrollbar shifts nothing). */
+  dialog:modal {
+    overscroll-behavior: contain;
+
+    &::backdrop {
+      overflow: hidden;
+      overscroll-behavior: contain;
+    }
+  }
+
+  html:has(dialog:modal) {
+    overflow: hidden;
+  }
+
   dialog.search-dialog {
     border: none;
     background: var(--surface);
@@ -1832,27 +1849,12 @@
     overflow: hidden;
     top: 10dvh;                        /* A modal dialog is fixed in the top layer */
     margin: 0 auto;
-    overscroll-behavior: contain;
 
-    /* A wheel over the backdrop starts its scroll chain at the backdrop, not
-       in the dialog, so the page underneath would scroll. Making the backdrop
-       a contained scroll container stops it where overscroll-behavior applies
-       to non-scrollable scroll containers (current Chrome); the :modal lock
-       below covers the other engines. */
     &::backdrop {
-      overflow: hidden;
-      overscroll-behavior: contain;
       background: rgba(0, 0, 0, 0.35);
       -webkit-backdrop-filter: blur(12px);
       backdrop-filter: blur(12px);
     }
-  }
-
-  /* Lock the page while the search dialog is modal; :modal stops matching on
-     close, so no script has to undo it. html already has scrollbar-gutter:
-     stable (prose.css), so hiding the scrollbar shifts nothing. */
-  html:has(dialog.search-dialog:modal) {
-    overflow: hidden;
   }
 
   .search-box {
@@ -2071,7 +2073,6 @@
     color: var(--text);
     box-shadow: var(--shadow-dialog);
     overflow: hidden;
-    overscroll-behavior: contain;
 
     &[open] {
       display: flex;
@@ -2079,8 +2080,6 @@
     }
 
     &::backdrop {
-      overflow: hidden;
-      overscroll-behavior: contain;
       background-color: rgba(0, 0, 0, 0.72);
       backdrop-filter: blur(4px);
     }
