@@ -19,6 +19,7 @@ Hugo has no opinion about.
 """
 
 import argparse
+from html.parser import HTMLParser
 import json
 import re
 import sys
@@ -359,11 +360,117 @@ def check_search_links(public):
             notes.append(f'search-links: {f.name}, {len(docs)} result(s)')
 
 
+def check_unparsed_strong(public, content=None):
+    """No unparsed Markdown `**` leaking into rendered prose.
+
+    Under CommonMark flanking delimiter rules, `**` adjacent to both a CJK
+    character and punctuation (such as `的**[link](url)**`, `大写**`M`**`, or
+    `**Box 3（...）**与`) fails to open or close emphasis and renders as
+    literal `**` in the HTML.
+
+    To avoid false positives on intentional literal asterisks:
+    - Code, pre, script, style, math/katex, and SVG subtrees are skipped.
+    - Only paired `(?<!*)**(?!*)` (two or more within the same block element)
+      are flagged, so lone `**` markers and `***`/`****` runs are ignored.
+    - When a `content/` directory is available (via `--content` or inferred
+      next to `--public`), escaped `\\*\\*` in the corresponding Markdown
+      source is subtracted so intentional `\\*\\*` in prose is never flagged.
+    """
+    skip_tags = {'code', 'pre', 'script', 'style', 'textarea', 'title', 'math', 'svg'}
+    block_tags = {'p', 'li', 'td', 'th', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                  'summary', 'dd', 'dt', 'figcaption', 'blockquote'}
+    star_re = re.compile(r'(?<!\*)\*\*(?!\*)')
+
+    class BlockStarParser(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.skip_depth = 0
+            self.skip_stack = []
+            self.blocks = []
+            self.hits = []
+
+        def handle_starttag(self, tag, attrs):
+            attr_map = dict(attrs)
+            classes = set((attr_map.get('class') or '').split())
+            is_skip = tag in skip_tags or 'katex' in classes
+            self.skip_stack.append(is_skip)
+            if is_skip:
+                self.skip_depth += 1
+            elif tag in block_tags and self.skip_depth == 0:
+                self.blocks.append([])
+
+        def handle_endtag(self, tag):
+            if self.skip_stack:
+                if self.skip_stack.pop():
+                    self.skip_depth = max(0, self.skip_depth - 1)
+                    return
+            if tag in block_tags and self.blocks and self.skip_depth == 0:
+                text = ''.join(self.blocks.pop())
+                matches = list(star_re.finditer(text))
+                if len(matches) >= 2:
+                    m = matches[0]
+                    snippet = text[max(0, m.start() - 16):min(len(text), m.end() + 24)].strip()
+                    snippet = re.sub(r'\s+', ' ', snippet)
+                    self.hits.append((len(matches), snippet))
+
+        def handle_data(self, data):
+            if self.skip_depth == 0 and self.blocks:
+                self.blocks[-1].append(data)
+
+    def count_escaped_in_source(html_file):
+        if not content:
+            return 0
+        rel = html_file.relative_to(public)
+        parts = rel.parts[:-1] if rel.name == 'index.html' else rel.with_suffix('').parts
+        candidates = []
+        base = content.joinpath(*parts) if parts else content
+        if base.is_dir():
+            candidates.extend(sorted(base.glob('index*.md')))
+            candidates.extend(sorted(base.glob('_index*.md')))
+        md_file = base.with_suffix('.md') if parts else None
+        if md_file and md_file.is_file():
+            candidates.append(md_file)
+        total = 0
+        for src in candidates:
+            if not src.is_file():
+                continue
+            raw = src.read_text(encoding='utf-8', errors='replace')
+            # Strip fenced code blocks and inline code spans before counting \*\*
+            raw = re.sub(r'(?m)^```.*?^```', '', raw, flags=re.S)
+            raw = re.sub(r'`[^`\n]+`', '', raw)
+            total += len(re.findall(r'\\\*\\\*', raw))
+        return total
+
+    checked = 0
+    offenders = []
+    for f in sorted(public.rglob('*.html')):
+        checked += 1
+        parser = BlockStarParser()
+        parser.feed(f.read_text(encoding='utf-8', errors='replace'))
+        if not parser.hits:
+            continue
+        total_stars = sum(n for n, _ in parser.hits)
+        if total_stars <= count_escaped_in_source(f):
+            continue
+        where = f.relative_to(public)
+        offenders.append(f'{where} ({parser.hits[0][1]!r})')
+
+    if offenders:
+        fail('unparsed-strong',
+             f'{len(offenders)} page(s) have unparsed `**` in prose '
+             f'(use `[**text**](url)`, move punctuation outside `**`, or add `\\ `): '
+             f'{"; ".join(offenders[:5])}')
+    else:
+        notes.append(f'unparsed-strong: {checked} page(s) clean')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--public', type=Path, default=None,
                     help='built site, for the checks that read output (default: skip them)')
+    ap.add_argument('--content', type=Path, default=None,
+                    help='site content directory, to allow intentional \\*\\* escapes (default: <public>/../content if present)')
     args = ap.parse_args()
 
     theme = Path(__file__).resolve().parent.parent
@@ -376,15 +483,20 @@ def main():
     check_no_authored_inline_js(theme)
     if args.public:
         public = args.public.resolve()
+        content = args.content.resolve() if args.content else (
+            public.parent / 'content' if (public.parent / 'content').is_dir() else None
+        )
         check_feed_whitespace(public)
         check_xsl_wellformed(public)
         check_nav_active(public)
         check_search_links(public)
+        check_unparsed_strong(public, content)
     else:
         notes.append('feed-whitespace: skipped (no --public)')
         notes.append('xsl-wellformed: skipped (no --public)')
         notes.append('nav-active: skipped (no --public)')
         notes.append('search-links: skipped (no --public)')
+        notes.append('unparsed-strong: skipped (no --public)')
 
     for n in notes:
         print(f'  ok    {n}')
