@@ -459,7 +459,7 @@ function initSearch() {
   // One pattern for a whole render. Longest token first, so that where two
   // start at the same place the longer is the one marked.
   function highlightPattern(tokens) {
-    const sortedTokens = [...tokens].sort((a, b) => b.length - a.length);
+    const sortedTokens = tokens.toSorted((a, b) => b.length - a.length);
     return new RegExp(`(${sortedTokens.map(escapeRegExp).join('|')})`, 'gi');
   }
 
