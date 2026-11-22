@@ -10,6 +10,7 @@ note = '備考'
 tip = 'ヒント'
 warning = '警告'
 historical = '歴史的ファイル、現実的な意義はありません'
+details = '詳細'
 archives = '一覧'
 
 # Navigation

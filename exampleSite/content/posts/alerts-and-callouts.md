@@ -1,7 +1,7 @@
 ---
 title: "提示框的语义类型与语法"
 date: 2026-05-04
-description: "介绍Chaos主题支持的提示框类型：NOTE、TIP、IMPORTANT、WARNING、CAUTION、HISTORICAL与DISCLAIMER，以及自定义标题与多语言适配。"
+description: "介绍Chaos主题支持的提示框类型：NOTE、TIP、IMPORTANT、WARNING、CAUTION、HISTORICAL、DISCLAIMER与可折叠的DETAILS，以及自定义标题与多语言适配。"
 categories: ["指南"]
 tags: ["Chaos", "Markdown", "提示框"]
 series: "Chaos 主题指南"
@@ -101,3 +101,39 @@ Chaos支持[GitHub风格的提示框语法](https://docs.github.com/en/get-start
 
 > [!TIP]
 > **多语言适配**：不论在简体中文（zh-CN）、繁体中文（zh-TW）、英语（EN）、日语（JA）还是韩语（KO）页面下，默认标题均会自动渲染为对应的母语文字（如Note、注意、友情提示、歴史的ファイル等），作者统一书写大写的英文关键词即可。
+
+## 可折叠提示框与 `DETAILS`
+
+对于作弊条或长文档中可选阅读的技术背景、协议细节或较长日志，可以使用原生 `<details>` 折叠卡片将其收起，避免打断主线阅读。
+
+### 中性折叠卡片：`DETAILS`
+
+`DETAILS` 沿用与 `code_vars` 参数面板一致的中性底色（`--ground` / `--ground-head`），不带图标，默认处于折叠状态；在标记后加上 `+` 则默认展开。
+
+```markdown {.wrap}
+> [!DETAILS] 背景：`Date`头、`Received`头与IMAP `INTERNALDATE`
+> 电子邮件里与时间相关的字段主要有三个来源：发件方填写的`Date:`头、沿途MTA写入的`Received:`头，以及IMAP服务器维护的`INTERNALDATE`。
+```
+
+> [!DETAILS] 背景：`Date`头、`Received`头与IMAP `INTERNALDATE`
+> 电子邮件里与时间相关的字段主要有三个来源：发件方填写的`Date:`头、沿途MTA写入的`Received:`头，以及IMAP服务器维护的`INTERNALDATE`。
+
+```markdown {.wrap}
+> [!DETAILS]+ 默认展开的补充说明
+> 在标记末尾加上`+`，页面初次加载时即处于展开状态，读者仍可手动收起。
+```
+
+> [!DETAILS]+ 默认展开的补充说明
+> 在标记末尾加上`+`，页面初次加载时即处于展开状态，读者仍可手动收起。
+
+### 为任意提示框启用折叠
+
+在任意现有提示框类型后追加 `-`（默认折叠）或 `+`（默认展开），即可保留其和色底纹与图标并转换为可折叠卡片：
+
+```markdown {.wrap}
+> [!TIP]- 展开查看命令行参数说明
+> 可折叠提示框支持嵌套列表、代码块与链接，浏览器的页内查找（`Cmd+F` / `Ctrl+F`）仍可命中并自动展开其中文字；打印页面时所有正文折叠块也会自动全部展开，以免纸面遗漏信息。
+```
+
+> [!TIP]- 展开查看命令行参数说明
+> 可折叠提示框支持嵌套列表、代码块与链接，浏览器的页内查找（`Cmd+F` / `Ctrl+F`）仍可命中并自动展开其中文字；打印页面时所有正文折叠块也会自动全部展开，以免纸面遗漏信息。

@@ -85,7 +85,14 @@ gave it.
       {{- end -}}
     {{- end -}}
   {{- end -}}
-  <blockquote class="alert alert-{{ .AlertType }}"><p class="alert-heading">{{ transform.Emojify (index $emojis .AlertType) }} {{ $title }}</p>{{ with $lead }}<p>{{ . }}</p>{{ end }}{{ $text }}</blockquote>
+  {{- $prefix := "" -}}
+  {{- with index $emojis .AlertType }}{{ $prefix = printf "%s " (transform.Emojify .) }}{{ end -}}
+  {{- $collapsible := or (eq .AlertSign "-") (eq .AlertSign "+") (eq .AlertType "details") -}}
+  {{- if $collapsible -}}
+  <details class="alert alert-{{ .AlertType }}"{{ if eq .AlertSign "+" }} open{{ end }}><summary class="alert-heading"><span class="alert-title">{{ $prefix }}{{ $title }}</span></summary><div class="alert-body">{{ with $lead }}<p>{{ . }}</p>{{ end }}{{ $text }}</div></details>
+  {{- else -}}
+  <blockquote class="alert alert-{{ .AlertType }}"><p class="alert-heading">{{ $prefix }}{{ $title }}</p>{{ with $lead }}<p>{{ . }}</p>{{ end }}{{ $text }}</blockquote>
+  {{- end -}}
 {{- else -}}
   {{- $text := .Text -}}
   {{- /* A {.quote} card's attribution is its last paragraph when that opens

@@ -1432,9 +1432,14 @@
   }
 
   .code-vars-chevron {
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
     flex-shrink: 0;
     color: var(--muted);
-    transition: transform var(--transition-fast);
+
+    @media screen and (prefers-reduced-motion: no-preference) {
+      transition: transform var(--transition-fast);
+    }
   }
 
   .code-vars-details[open] > .code-vars-header .code-vars-chevron {

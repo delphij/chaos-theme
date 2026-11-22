@@ -364,9 +364,18 @@ Create styled alert boxes using GitHub-style blockquote markers (`render-blockqu
 
 > [!NOTE] Custom Alert Title
 > Optional custom title on the marker line, with body paragraphs below.
+
+> [!DETAILS] Background details (collapsed by default)
+> Neutral disclosure card (`<details class="alert alert-details">`),
+> matching the `code_vars` panel aesthetic. Use `[!DETAILS]+` to start
+> expanded.
+
+> [!TIP]- Collapsible alert (collapsed by default)
+> Append `-` (collapsed) or `+` (expanded) to any alert type to render
+> it as a native `<details>` disclosure block.
 ```
 
-Each alert renders as a tinted Wairo card (`blockquote.alert`) at full body font size (unlike regular blockquotes, which are `0.95em`) with a localized heading and emoji (`NOTE` / `HISTORICAL` in indigo, `TIP` in forest green, `IMPORTANT` in persimmon amber, `WARNING` / `DISCLAIMER` in crimson rose, `CAUTION` in iris violet). When `eastAsianLineBreaks` is enabled, keep `[!TYPE]` (and any optional custom title) on its own line and start body paragraphs on subsequent `>` lines.
+Each alert renders as a tinted Wairo card (`blockquote.alert`) at full body font size (unlike regular blockquotes, which are `0.95em`) with a localized heading and emoji (`NOTE` / `HISTORICAL` in indigo, `TIP` in forest green, `IMPORTANT` in persimmon amber, `WARNING` / `DISCLAIMER` in crimson rose, `CAUTION` in iris violet). Adding a `-` or `+` fold sign after `[!TYPE]`, or using the neutral `[!DETAILS]` type (which collapses by default and uses `--ground`/`--ground-head` without an emoji), renders a native `<details>`/`<summary>` disclosure card so secondary technical details stay out of the way while remaining searchable via browser Find-in-Page. When `eastAsianLineBreaks` is enabled, keep `[!TYPE]` (and any optional custom title) on its own line and start body paragraphs on subsequent `>` lines.
 
 ### Code Blocks & Mermaid Diagrams
 

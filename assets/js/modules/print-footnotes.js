@@ -89,6 +89,8 @@ function numberNotes() {
 
   for (const mark of articlePost.querySelectorAll('a[href]')) {
     if (mark.closest(CHROME_SELECTOR)) continue;
+    // Do not number links inside a <details> that stayed closed on paper.
+    if (mark.closest('details:not([open])')) continue;
 
     if (mark.classList.contains('footnote-ref')) {
       const target = mark.getAttribute('href');
@@ -139,6 +141,15 @@ export function initPrintFootnotes() {
     if (!printNotes || !articlePost) return;
     // A second beforeprint with no afterprint between would number twice.
     undo();
+
+    // Paper cannot be clicked: open all collapsed content disclosures (but not
+    // the interactive code-vars parameter panel, which is hidden in print)
+    // before numbering links so content and references stay in sync, then
+    // restore them to their prior state on afterprint.
+    for (const details of articlePost.querySelectorAll('details:not([open]):not(.code-vars-details)')) {
+      details.open = true;
+      restore.push(() => { details.open = false; });
+    }
 
     const notes = numberNotes();
     if (notes.length === 0) return;

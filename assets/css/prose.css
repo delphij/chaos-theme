@@ -160,8 +160,13 @@
     }
 
     /* System colours drop the tinted grounds that are a quote's only edge. */
-    blockquote {
+    blockquote,
+    details.alert {
       border: 1px solid CanvasText;
+    }
+
+    details.alert > summary.alert-heading::before {
+      background-color: CanvasText;
     }
   }
 
@@ -920,6 +925,153 @@
   .alert-caution {
     --alert-accent: var(--alert-caution-border);
     background: var(--alert-caution-bg);
+  }
+
+  .alert-details {
+    --alert-accent: var(--heading);
+    background: var(--ground);
+  }
+
+  /* Collapsible callouts: rendered as <details class="alert ..."> when an alert
+     carries a +/- fold sign or uses [!DETAILS]. Uses native <details>/<summary>
+     so find-in-page still reveals collapsed text; ::details-content animates
+     progressively in supporting browsers. Styled to match .code-vars-panel
+     (compact --ground-head header band, 12px muted chevron, 12px 16px body). */
+  details.alert {
+    --disclosure-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    margin: 1.25em 0;
+    padding: 0;
+    border-radius: var(--radius-card);
+    color: var(--blockquote-fg);
+    text-align: start;
+    overflow: hidden;
+
+    > summary.alert-heading {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px 10px;
+      margin: 0;
+      padding: 8px 16px;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+      -webkit-user-select: none;
+      user-select: none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
+      &::before {
+        content: "";
+        inline-size: 0.75rem;
+        block-size: 0.75rem;
+        margin-top: calc((1lh - 0.75rem) / 2);
+        flex-shrink: 0;
+        background-color: var(--alert-chevron, currentColor);
+        /* Down-pointing chevron (open state); rotated -90deg when closed. */
+        mask: var(--disclosure-chevron) no-repeat center / contain;
+        rotate: -90deg;
+      }
+
+      &:dir(rtl)::before {
+        rotate: 90deg;
+      }
+    }
+
+    &[open] > summary.alert-heading::before {
+      rotate: 0deg;
+    }
+
+    &.alert-details {
+      --alert-chevron: var(--muted);
+
+      > summary.alert-heading {
+        background: var(--ground-head);
+      }
+    }
+
+    > .alert-body {
+      padding: 12px 16px;
+
+      > :first-child {
+        margin-top: 0;
+      }
+
+      > :last-child {
+        margin-bottom: 0;
+      }
+
+      > ol,
+      > ul {
+        padding-left: 1.5em;
+      }
+    }
+
+    &:not(.alert-details) > .alert-body {
+      padding-top: 2px;
+    }
+
+    @media screen and (prefers-reduced-motion: no-preference) {
+      > summary.alert-heading::before {
+        transition: rotate var(--transition-fast);
+      }
+    }
+
+    /* Paper cannot be clicked: expand all content disclosures immediately in
+       print (both via pure CSS ::details-content and via beforeprint in
+       print-footnotes.js for older engines), drop the interactive chevron,
+       keep the heading attached to its body, and draw subtle rules when
+       background fills are omitted. */
+    @media print {
+      contain: none;
+      overflow: visible;
+      border: 1px solid var(--border-color);
+
+      &::details-content {
+        content-visibility: visible;
+      }
+
+      > summary.alert-heading {
+        page-break-after: avoid;
+        break-after: avoid-page;
+
+        &::before {
+          display: none;
+        }
+      }
+
+      &.alert-details > summary.alert-heading {
+        border-bottom: 1px solid var(--border-color);
+      }
+    }
+  }
+
+  /* Shared progressive open/close height animation for theme disclosure cards
+     (collapsible callouts and the code_vars parameter panel). Scoped to screen
+     so print never clips, contains, or animates collapsed disclosures. */
+  @media screen {
+    details:is(.alert, .code-vars-details) {
+      &::details-content {
+        interpolate-size: allow-keywords;
+        overflow: clip;
+        contain: layout;
+      }
+
+      &:not([open])::details-content {
+        block-size: 0;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        &::details-content {
+          transition: block-size, content-visibility, display;
+          transition-duration: 0.25s;
+          transition-timing-function: ease-in-out;
+          transition-behavior: allow-discrete;
+        }
+      }
+    }
   }
 
   /* ==========================================================================

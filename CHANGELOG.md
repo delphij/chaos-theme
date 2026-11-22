@@ -55,6 +55,13 @@ here.
   inverting luminance in dark mode via `.svg-adapt` while leaving source `.svg`
   files untouched. Opt out per-image with `#raw`, per-page with
   `svgAdapt: false`, or site-wide with `params.svgAdapt = false`.
+- **Collapsible callouts and `[!DETAILS]` disclosure blocks**: Any alert type
+  with Hugo's native `-` (collapsed) or `+` (expanded) fold sign (e.g.
+  `> [!NOTE]- Title`), as well as the new neutral `> [!DETAILS] Title` type
+  (collapsed by default, matching the `--ground`/`--ground-head` panel style),
+  now renders as a native `<details>`/`<summary>` disclosure card with a
+  rotating chevron mask, progressive `::details-content` height animation,
+  and intact browser Find-in-Page support.
 - **Native `<dialog>` image lightbox**: Left-clicking any article image opens a
   zero-dependency modal preview with pointer-anchored wheel/pinch zoom
   (`100%`–`800%`, resizing layout dimensions so SVG vectors and high-resolution

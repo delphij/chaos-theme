@@ -10,6 +10,7 @@ note = '注意'
 tip = '友情提示'
 warning = '警告'
 historical = '历史文件已不具备现实意义'
+details = '详情'
 archives = '归档'
 
 # Navigation

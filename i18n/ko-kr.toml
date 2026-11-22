@@ -10,6 +10,7 @@ note = '참고'
 tip = '팁'
 warning = '경고'
 historical = '과거 파일로 현실적인 의미가 없습니다'
+details = '세부 정보'
 archives = '보관'
 
 # Navigation

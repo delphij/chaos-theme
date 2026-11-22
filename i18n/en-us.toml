@@ -10,6 +10,7 @@ note = 'Note'
 tip = 'Tip'
 warning = 'Warning'
 historical = 'Historical'
+details = 'Details'
 archives = 'Archives'
 
 # Navigation
