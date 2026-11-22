@@ -12,6 +12,7 @@
 // the site's pages to serve the few that have a figure.
 
 import { THEME_CHANGE_EVENT } from './modules/events.js';
+import { isDarkScheme } from './modules/color-scheme.js';
 
 const diagrams = [...document.querySelectorAll('pre.mermaid')].map((el, i) => ({
   el,
@@ -19,13 +20,6 @@ const diagrams = [...document.querySelectorAll('pre.mermaid')].map((el, i) => ({
   id: `mermaid-diagram-${i}`
 }));
 const rendered = {};
-
-// theme-init.js and theme.js keep <meta name="color-scheme"> in sync before
-// first render and before dispatching THEME_CHANGE_EVENT.
-function isDarkTheme() {
-  const scheme = document.querySelector('meta[name="color-scheme"]')?.content;
-  return scheme === 'dark' || (scheme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-}
 
 function show(isDark) {
   const key = isDark ? 'dark' : 'light';
@@ -62,7 +56,7 @@ function render(isDark) {
 
 async function renderMermaid() {
   if (typeof mermaid === 'undefined' || diagrams.length === 0) return;
-  const isDark = isDarkTheme();
+  const isDark = isDarkScheme();
   await render(isDark);
   show(isDark);
   // Pre-render the light SVG in dark mode so beforeprint can swap it in
@@ -76,4 +70,4 @@ async function renderMermaid() {
 renderMermaid();
 document.addEventListener(THEME_CHANGE_EVENT, renderMermaid);
 window.addEventListener('beforeprint', () => show(false));
-window.addEventListener('afterprint', () => show(isDarkTheme()));
+window.addEventListener('afterprint', () => show(isDarkScheme()));

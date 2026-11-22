@@ -7,6 +7,7 @@
 
 import { THEME_CHANGE_EVENT } from './events.js';
 import { announce } from './announce.js';
+import { systemDark } from './color-scheme.js';
 
 // Constants
 const THEME_AUTO = 'auto';
@@ -16,7 +17,6 @@ const THEME_LIGHT = 'light';
 const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
 const btn = document.getElementById('themeToggle');
 const storageKey = 'theme-mode';
-const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 // Localised strings, from the toggle button's data-* attributes (see
 // _partials/header.html). Read once: the button does not change.
