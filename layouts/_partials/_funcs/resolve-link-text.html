@@ -1,0 +1,43 @@
+{{- /*
+Resolves display text for a Markdown link render hook.
+
+When link text is provided, returns it as-is. When left empty (`[](/path/)` or
+`[](../sibling/)`), looks up the target internal page and returns its title so
+cross-references stay in sync when a page is renamed; unresolved internal paths
+emit a warning and fall back to the destination so an empty <a> is never
+rendered.
+
+@context {link} The link render hook context.
+
+@returns {template.HTML} Safe HTML link label.
+*/ -}}
+{{- $text := .Text -}}
+{{- if not $text -}}
+  {{- $dest := .Destination -}}
+  {{- $u := urls.Parse $dest -}}
+  {{- $target := false -}}
+  {{- if and (not $u.IsAbs) $u.Path -}}
+    {{- $p := strings.TrimSuffix "/" $u.Path -}}
+    {{- if not $p -}}
+      {{- $p = "/" -}}
+    {{- end -}}
+    {{- $target = .Page.GetPage $p -}}
+    {{- if not $target -}}
+      {{- if hasPrefix $p "/" -}}
+        {{- $target = site.GetPage $p -}}
+      {{- else -}}
+        {{- $resolved := path.Clean (path.Join (printf "%s/" .Page.Path) $p) -}}
+        {{- $target = site.GetPage $resolved -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not $target -}}
+      {{- warnf "chaos: empty link text for unresolved internal target %q in %s" $dest .Page.Path -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if and $target $target.Title -}}
+    {{- $text = $target.Title | htmlEscape | safeHTML -}}
+  {{- else -}}
+    {{- $text = $dest | htmlEscape | safeHTML -}}
+  {{- end -}}
+{{- end -}}
+{{- return $text -}}

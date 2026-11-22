@@ -55,6 +55,10 @@ here.
   inverting luminance in dark mode via `.svg-adapt` while leaving source `.svg`
   files untouched. Opt out per-image with `#raw`, per-page with
   `svgAdapt: false`, or site-wide with `params.svgAdapt = false`.
+- **Auto-titled internal links**: Leaving the label empty on an internal
+  Markdown link (e.g. `[](/notes/t/dkim/)` or `[](../other-post/)`) resolves
+  the target page's `.Title` at build time across HTML, Atom, and RSS outputs,
+  and emits a build warning if the target page cannot be found.
 - **Collapsible callouts and `[!DETAILS]` disclosure blocks**: Any alert type
   with Hugo's native `-` (collapsed) or `+` (expanded) fold sign (e.g.
   `> [!NOTE]- Title`), as well as the new neutral `> [!DETAILS] Title` type

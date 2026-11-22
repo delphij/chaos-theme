@@ -18,7 +18,11 @@ enough readers ignore it that relying on it is not worth the broken links.
 {{- else if not (or (hasPrefix $dest "//") (findRE `^[A-Za-z][A-Za-z0-9+.-]*:` $dest)) -}}
   {{- $dest = printf "%s%s" .Page.Permalink $dest -}}
 {{- end -}}
-<a href="{{ $dest }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>
+{{- $text := .Text -}}
+{{- if not $text -}}
+  {{- $text = partial "_funcs/resolve-link-text.html" . -}}
+{{- end -}}
+<a href="{{ $dest }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ $text }}</a>
 {{- /* No trailing newline: a render hook's output goes straight into .Content,
        and in the feed nothing collapses it - it would show as a stray space
        mid-sentence, and between CJK characters as a visible gap. */ -}}

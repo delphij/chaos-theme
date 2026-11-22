@@ -1,0 +1,14 @@
+{{- /*
+Renders a Markdown link for HTML output.
+
+Preserves Hugo's default link output while resolving empty link text
+(`[](/path/)`) to the target internal page's title via resolve-link-text.html.
+No trailing newline so inline links in CJK prose never gain a stray gap.
+
+@context {link} The link render hook context.
+*/ -}}
+{{- $text := .Text -}}
+{{- if not $text -}}
+  {{- $text = partial "_funcs/resolve-link-text.html" . -}}
+{{- end -}}
+<a href="{{ .Destination | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ $text }}</a>{{- "" -}}

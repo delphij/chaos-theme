@@ -377,6 +377,10 @@ Create styled alert boxes using GitHub-style blockquote markers (`render-blockqu
 
 Each alert renders as a tinted Wairo card (`blockquote.alert`) at full body font size (unlike regular blockquotes, which are `0.95em`) with a localized heading and emoji (`NOTE` / `HISTORICAL` in indigo, `TIP` in forest green, `IMPORTANT` in persimmon amber, `WARNING` / `DISCLAIMER` in crimson rose, `CAUTION` in iris violet). Adding a `-` or `+` fold sign after `[!TYPE]`, or using the neutral `[!DETAILS]` type (which collapses by default and uses `--ground`/`--ground-head` without an emoji), renders a native `<details>`/`<summary>` disclosure card so secondary technical details stay out of the way while remaining searchable via browser Find-in-Page. When `eastAsianLineBreaks` is enabled, keep `[!TYPE]` (and any optional custom title) on its own line and start body paragraphs on subsequent `>` lines.
 
+### Auto-Titled Internal Links
+
+Leaving the label empty on an internal Markdown link (`[](/notes/t/dkim/)` or `[](../other-post/)`) automatically resolves the target page's `.Title` at build time in HTML, Atom, and RSS outputs, so cross-references stay in sync if the target page is renamed. An unresolved internal target with empty link text emits a Hugo warning (which fails builds run with `--panicOnWarning`).
+
 ### Code Blocks & Mermaid Diagrams
 
 Fenced code blocks are rendered via Chroma (`render-codeblock.html`) with role-based traditional colors and a copy button:
