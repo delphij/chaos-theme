@@ -30,8 +30,6 @@
 
      1359px  max   the article layout loses room for the side TOC, which
                    becomes the floating toggle and drawer
-      960px  min   dialogue lists (prose.css) hang their speaker column into
-                   the left margin once the centered prose column has room
       769px  min   the code block line-number column (prose.css).
                    Complementary with 768px max, which hides that
                    column outright -- which is why it is 769 and not 768,
@@ -43,7 +41,7 @@
       600px  max   the archive timeline's date column only: narrowed, and
                    the full date swapped for the short one
 
-   960px, 769px and 768px are written as `screen and (...)`: a page in Blink is
+   769px and 768px are written as `screen and (...)`: a page in Blink is
    about 680-703px wide on A4/Letter, which would otherwise pull the mobile
    layout onto paper. Print sets its own rules at the end of this file.
 

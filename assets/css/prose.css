@@ -1086,17 +1086,30 @@
      - `.dialogue.script`: playscript / stage-cue style for placeholder labels
        such as `p1`/`p2` — speaker codes step back into smaller `--muted` ink
        so vocal emphasis inside the lines carries full typographic weight.
-     - Wide screens (`>= 960px`, outside `blockquote`) and print: hang the speaker
-       column into the left margin like list markers so dialogue lines stay
-       flush with surrounding prose (`main.css` reserves the print left gutter
-       on articles that contain `dl.dialogue`); narrower tablets keep the two
-       columns inside the measure; mobile stacks speaker above speech.
+     - Desktop and tablet (`> 768px`, outside `blockquote`): hang the speaker
+       column smoothly into whatever left margin is available outside the
+       centered prose measure (`--dialogue-avail`, keeping `1rem` clearance
+       from the viewport edge). On wide screens (`>= 972px`), the full `5.5em`
+       column hangs outside so dialogue stays flush with prose; as the viewport
+       narrows, the speaker column first compresses down to `4.2em` (still
+       keeping dialogue flush down to ~`930px`), then glides smoothly into the
+       measure without any breakpoint jump or per-block width shifts.
+     - Print: always uses the full `5.5em` hanging column (`main.css` reserves
+       the print left gutter on articles that contain `dl.dialogue`).
+     - Mobile (`<= 768px`): stack speaker above speech.
      ========================================================================== */
 
   dl.dialogue {
+    --dialogue-col-min: 4.2em;
+    --dialogue-col-max: 5.5em;
+    --dialogue-gap: 1em;
+    --dialogue-edge: 1rem;
+    --dialogue-avail: max(0px, (100dvw - var(--content-width)) / 2 + var(--gutter) - var(--dialogue-edge));
+    --dialogue-col: clamp(var(--dialogue-col-min), var(--dialogue-avail) - var(--dialogue-gap), var(--dialogue-col-max));
     display: grid;
-    grid-template-columns: fit-content(7em) minmax(0, 1fr);
-    column-gap: 1em;
+    grid-template-columns: var(--dialogue-col) minmax(0, 1fr);
+    column-gap: var(--dialogue-gap);
+    margin-left: calc(-1 * min(var(--dialogue-col) + var(--dialogue-gap), var(--dialogue-avail)));
 
     /* Compress margins between consecutive dialogue blocks so margin collapse
        does not fall back to the 1.15em default `dl` margin. */
@@ -1112,18 +1125,16 @@
       margin-top: 0.8rem;
     }
 
-    @media print, screen and (min-width: 960px) {
+    @media print {
       & {
-        --dialogue-hang: 5.5em;
-        --dialogue-gap: 1em;
-        margin-left: calc(-1 * (var(--dialogue-hang) + var(--dialogue-gap)));
-        grid-template-columns: var(--dialogue-hang) minmax(0, 1fr);
-        column-gap: var(--dialogue-gap);
+        --dialogue-col: var(--dialogue-col-max);
+        margin-left: calc(-1 * (var(--dialogue-col) + var(--dialogue-gap)));
       }
     }
 
     @media screen and (max-width: 768px) {
       display: block;
+      margin-left: 0;
     }
 
     dt {
