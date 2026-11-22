@@ -26,8 +26,10 @@ function setupScrollSpy(navContainer, targetSelector) {
       if (navLink && entry.isIntersecting) {
         if (currentActive && currentActive !== navLink) {
           currentActive.classList.remove('active');
+          currentActive.removeAttribute('aria-current');
         }
         navLink.classList.add('active');
+        navLink.setAttribute('aria-current', 'true');
         currentActive = navLink;
       }
     });
