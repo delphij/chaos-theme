@@ -366,13 +366,21 @@
     }
   }
 
-  /* Theme-adapted vector diagrams (svgAdapt, default on; opt out via #raw) */
+  /* Theme-adapted vector diagrams (svgAdapt, default on; opt out via #raw).
+     Branch on <meta name="color-scheme"> plus prefers-color-scheme so dark
+     adaptation works even when JS is disabled. */
   @media screen {
     a[data-lightbox] img {
       cursor: zoom-in;
     }
 
-    html.dark img.svg-adapt {
+    :root:has(> head > meta[name="color-scheme"][content="dark"]) img.svg-adapt {
+      filter: invert(0.88) hue-rotate(180deg);
+    }
+  }
+
+  @media screen and (prefers-color-scheme: dark) {
+    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) img.svg-adapt {
       filter: invert(0.88) hue-rotate(180deg);
     }
   }

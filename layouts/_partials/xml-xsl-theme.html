@@ -3,9 +3,9 @@ Applies the reader's site theme to an XSLT-rendered page.
 
 These pages cannot run the site's main.js, so this does just the one thing
 that matters visually: resolve the same `theme-mode` preference the theme
-toggle stores and stamp `dark` on the root element when it resolves so, which is what
-the dark token block, syntax colours included, keys off. Belongs in <head> so the
-class lands before first paint. The script is the one head.html inlines on
+toggle stores and sync `<meta name="color-scheme">`, which the `light-dark()`
+tokens and syntax colours key off. Belongs in <head> so the override lands
+before first paint. The script is the one head.html inlines on
 every other page; only the CDATA wrapping, which XML needs, is particular to
 this partial.
 

@@ -48,10 +48,11 @@
   {{- end -}}
 {{- end -}}
 {{ partialCached "head/css.html" . }}
-{{- /* Stamps `dark` on the root element, when that is the theme, before first paint. main.js
-       is deferred, so leaving this to it paints one light frame first, which
-       a dark reader sees as a white flash on every navigation. The same
-       script the XSLT-rendered pages use (see xml-xsl-theme.html).
+{{- /* Syncs <meta name="color-scheme"> with any stored override before first
+       paint. main.js is deferred, so leaving this to it paints one wrong-scheme
+       frame first. Without JS, the meta stays "light dark" and CSS follows the
+       OS preference automatically. The same script the XSLT-rendered pages use
+       (see xml-xsl-theme.html).
 
        After the stylesheet on purpose. A classic script waits for the sheets
        before it, so the parser cannot move past <head> until main.css, and

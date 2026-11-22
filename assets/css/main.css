@@ -2185,9 +2185,9 @@
      ========================================================================== */
 
   @media print {
-    /* Print takes the light palette (the dark tokens are screen-only) on
-       white paper, with black ink for text; only what differs from the
-       light values is restated. No !important needed: chaos.components
+    /* Print pins color-scheme to light so every light-dark() token resolves to
+       its light value on white paper, with black ink for text; only what differs
+       from the light values is restated. No !important needed: chaos.components
        outranks the chaos.tokens layer. */
     :root {
       color-scheme: light;

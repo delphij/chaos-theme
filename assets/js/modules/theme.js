@@ -13,7 +13,7 @@ const THEME_AUTO = 'auto';
 const THEME_DARK = 'dark';
 const THEME_LIGHT = 'light';
 
-const root = document.documentElement;
+const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
 const btn = document.getElementById('themeToggle');
 const storageKey = 'theme-mode';
 const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -52,7 +52,9 @@ function getNextMode(currentMode) {
 function applyTheme(mode) {
   const effectiveTheme = getEffectiveTheme(mode);
   const isDark = effectiveTheme === THEME_DARK;
-  root.classList.toggle(THEME_DARK, isDark);
+  if (colorSchemeMeta) {
+    colorSchemeMeta.content = mode === THEME_AUTO ? 'light dark' : mode;
+  }
 
   // Anything that has to redraw itself for the new theme listens for this
   // rather than watching the toggle button, so it also fires when the OS

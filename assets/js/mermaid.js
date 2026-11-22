@@ -20,10 +20,11 @@ const diagrams = [...document.querySelectorAll('pre.mermaid')].map((el, i) => ({
 }));
 const rendered = {};
 
-// theme.js sets the class before it announces a change, so the element is
-// right both on the first render and on THEME_CHANGE_EVENT.
+// theme-init.js and theme.js keep <meta name="color-scheme"> in sync before
+// first render and before dispatching THEME_CHANGE_EVENT.
 function isDarkTheme() {
-  return document.documentElement.classList.contains('dark');
+  const scheme = document.querySelector('meta[name="color-scheme"]')?.content;
+  return scheme === 'dark' || (scheme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 }
 
 function show(isDark) {
