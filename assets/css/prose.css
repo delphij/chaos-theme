@@ -295,6 +295,117 @@
     }
   }
 
+  /* Task lists (GFM `- [ ]` / `- [x]`):
+     Drop the bullet only on task items so mixed lists keep regular bullets on
+     ordinary items while every item's text shares one left margin. The checkbox
+     hangs in the marker gutter (outside the measure on desktop; inside the
+     1.4em/1.5em indent on mobile, nested lists and blockquotes). */
+  li:has(> input[type="checkbox"], > p:first-child > input[type="checkbox"]) {
+    list-style-type: none;
+    position: relative;
+  }
+
+  li > input[type="checkbox"],
+  li > p:first-child > input[type="checkbox"] {
+    appearance: none;
+    position: absolute;
+    inset-inline-start: -1.35em;
+    top: calc((var(--leading, var(--line-height)) * 1em - 0.95em) / 2);
+    width: 0.95em;
+    height: 0.95em;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1.5px solid color-mix(in srgb, var(--muted) 65%, transparent);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+
+    &::after {
+      content: "";
+      width: 0.28em;
+      height: 0.52em;
+      border: solid var(--bg);
+      border-width: 0 0.14em 0.14em 0;
+      transform: translateY(-0.06em) rotate(42deg);
+      opacity: 0;
+    }
+
+    &:hover:not(:disabled):not(:checked) {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+    }
+
+    &:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+
+      &::after {
+        opacity: 1;
+      }
+
+      &:hover:not(:disabled) {
+        background: var(--link-hover);
+        border-color: var(--link-hover);
+      }
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    /* Print: never rely on filled backgrounds (browsers strip background
+       graphics by default), so render an ink-outlined square and a dark
+       border-drawn checkmark that stays crisp on paper. */
+    @media print {
+      background: transparent;
+      border: 1.25px solid var(--muted);
+      opacity: 1;
+
+      &:checked {
+        background: transparent;
+        border-color: var(--text);
+
+        &::after {
+          border-color: var(--text);
+          opacity: 1;
+        }
+      }
+    }
+
+    @media (forced-colors: active) {
+      appearance: auto;
+
+      &::after {
+        content: none;
+      }
+    }
+  }
+
+  /* Optional checked-item styling: site/page `taskListChecked` ("muted" or
+     "strikethrough") stays in :where() so any per-list override (.task-muted,
+     .task-strike, .task-plain) always wins on specificity without !important. */
+  :where([data-task-checked="muted"]) li:has(> input[type="checkbox"]:checked, > p:first-child > input[type="checkbox"]:checked),
+  ul.task-muted > li:has(> input[type="checkbox"]:checked, > p:first-child > input[type="checkbox"]:checked) {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  :where([data-task-checked="strikethrough"]) li:has(> input[type="checkbox"]:checked, > p:first-child > input[type="checkbox"]:checked),
+  ul.task-strike > li:has(> input[type="checkbox"]:checked, > p:first-child > input[type="checkbox"]:checked) {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  ul.task-plain > li:has(> input[type="checkbox"]:checked, > p:first-child > input[type="checkbox"]:checked) {
+    color: inherit;
+    text-decoration: none;
+  }
+
   /* ==========================================================================
      TABLES
      Responsive table styling with striped rows and a strong header row.

@@ -76,6 +76,14 @@
   # and individual fences can override via `{.wrap}` or `{.nowrap}`.
   # codeWrap = false
 
+  # Checked task list item styling (optional; default: "none")
+  # "none"          keep item text unchanged when checked (checkbox only)
+  # "muted"         soften checked item text to --muted
+  # "strikethrough" soften to --muted and strike through checked item text
+  # Overridable per page in front matter (`taskListChecked`) or per list via
+  # `{.task-plain}`, `{.task-muted}`, or `{.task-strike}`.
+  # taskListChecked = "none"
+
   # Wiki / reference-site presentation options (optional, all disabled by default)
   # hidePostDate = false       # omit creation date from post metadata and compact index rows
   #                            # (build_search_index.py also switches search dates to lastmod)

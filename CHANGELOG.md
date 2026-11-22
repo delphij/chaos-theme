@@ -55,6 +55,19 @@ here.
   inverting luminance in dark mode via `.svg-adapt` while leaving source `.svg`
   files untouched. Opt out per-image with `#raw`, per-page with
   `svgAdapt: false`, or site-wide with `params.svgAdapt = false`.
+- **Interactive hanging task lists (`taskListChecked`)**: GFM task list items
+  (`- [ ]` / `- [x]`) now drop their bullet only on checkbox items (so mixed
+  lists keep regular bullets and share one text margin), hang a theme-matched
+  `appearance: none` checkbox in the left marker gutter across light, dark, and
+  print modes, and become clickable in-session via `modules/task-list.js`.
+  Checked-item styling defaults to `"none"` and can be set to `"muted"` or
+  `"strikethrough"` site-wide, per page (`taskListChecked`), or per list
+  (`{.task-plain}`, `{.task-muted}`, `{.task-strike}`).
+- **`tools/check.py` `unparsed-strong` check**: Detects paired unparsed
+  Markdown `**` leaking into rendered HTML prose (commonly triggered by
+  CommonMark flanking rules next to CJK characters and punctuation), while
+  skipping code/math subtrees and allowing intentional `\*\*` escapes in source
+  Markdown (auto-detected next to `--public` or via `--content`).
 - **Auto-titled internal links**: Leaving the label empty on an internal
   Markdown link (e.g. `[](/notes/t/dkim/)` or `[](../other-post/)`) resolves
   the target page's `.Title` at build time across HTML, Atom, and RSS outputs,

@@ -44,8 +44,9 @@ marks "like these", an em dash --- like this --- and an ellipsis... all pass thr
    2. 第二个子项
 3. 第三步
 
-- [x] 已完成的任务
+- [x] 已完成的任务（可点击切换）
 - [ ] 尚未完成的任务
+- 混排在同一列表中的普通条目（保留圆点且文字与任务项左对齐）
 
 术语
 : 定义列表的解释部分。

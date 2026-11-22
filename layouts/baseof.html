@@ -23,7 +23,8 @@
   <header class="site-nav">
     {{ partial "header.html" . }}
   </header>
-  <main id="main-content" class="container">
+  {{- $taskChecked := .Params.taskListChecked | default site.Params.taskListChecked | default "none" -}}
+  <main id="main-content" class="container"{{ if in (slice "muted" "strikethrough") $taskChecked }} data-task-checked="{{ $taskChecked }}"{{ end }}>
     <div class="content-layout">
       {{- if .IsPage }}
       <article class="post">
