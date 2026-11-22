@@ -132,6 +132,7 @@ export function initLightbox() {
     if (dialog) return dialog;
     dialog = document.createElement('dialog');
     dialog.className = 'image-lightbox';
+    dialog.setAttribute('closedby', 'any');
     dialog.setAttribute('aria-label', labels.preview);
 
     const toolbar = document.createElement('div');
@@ -237,16 +238,34 @@ export function initLightbox() {
       }
     });
 
-    // Dismiss on backdrop / empty stage click, unless finishing a pan drag.
-    dialog.addEventListener('click', (e) => {
+    // Dismiss on empty stage click, unless finishing a pan drag.
+    stage.addEventListener('click', (e) => {
       if (dragged) {
         dragged = false;
         return;
       }
-      if (e.target === dialog || e.target === stage) {
+      if (e.target === stage) {
         dialog.close();
       }
     });
+
+    // Fallback light-dismiss on backdrop for browsers lacking <dialog closedby="any">.
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+      const outside = (e) => {
+        const r = dialog.getBoundingClientRect();
+        return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+      };
+      let pressedOutside = false;
+      dialog.addEventListener('pointerdown', (e) => {
+        pressedOutside = outside(e);
+      });
+      dialog.addEventListener('pointerup', (e) => {
+        if (pressedOutside && outside(e)) {
+          dialog.close();
+        }
+        pressedOutside = false;
+      });
+    }
 
     dialog.addEventListener('close', resetZoom);
 

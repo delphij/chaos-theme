@@ -2060,9 +2060,9 @@
 
   dialog.image-lightbox {
     box-sizing: border-box;
-    width: min(94vw, 1280px);
-    max-width: 94vw;
-    max-height: 92vh;
+    width: min(94dvw, 1280px);
+    max-width: 94dvw;
+    max-height: 92dvh;
     margin: auto;
     padding: 0;
     border: var(--border);
@@ -2071,6 +2071,7 @@
     color: var(--text);
     box-shadow: var(--shadow-dialog);
     overflow: hidden;
+    overscroll-behavior: contain;
 
     &[open] {
       display: flex;
@@ -2078,6 +2079,8 @@
     }
 
     &::backdrop {
+      overflow: hidden;
+      overscroll-behavior: contain;
       background-color: rgba(0, 0, 0, 0.72);
       backdrop-filter: blur(4px);
     }
