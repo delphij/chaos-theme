@@ -114,19 +114,20 @@
     widows: 2;                         /* Minimum 2 lines at top of column */
   }
 
-  /* Links - Dotted underline with smooth transition to solid on hover.
+  /* Links - Native dotted underline transitioning to solid on hover.
      Here in the base layer, a link state loses to any component rule, so a
-     component that drops the underline need not drop it again for :hover. */
+     component that drops the underline (text-decoration: none) need not drop
+     it again for :hover. */
   a {
     color: var(--link);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--link);
-    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+    text-decoration: underline dotted var(--link) 1px;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
 
     &:hover {
       color: var(--link-hover);
-      border-bottom-style: solid;
-      border-bottom-color: var(--link-hover);
+      text-decoration-style: solid;
+      text-decoration-color: var(--link-hover);
     }
   }
 
@@ -579,29 +580,13 @@
     }
   }
 
-  /* Links draw their underline as a border-bottom at the bottom of the
-     inline box, and under-dots (Chinese only; Japanese and Korean marks sit
-     over the text) land on it. Padding moves the border below the dots,
-     whether the link sits inside .em-dot or wraps it.
-
-     Why 0.4em (and not larger):
-     - Without Noto Sans SC installed on Apple platforms, -apple-system (SFNS,
-       hhea descent -0.211em / -3.38px at 16px) sizes the inline box while
-       PingFang SC (hhea descent -0.340em / -5.44px, the deepest among common
-       CJK sans faces) places the under-dots (~9px below baseline). That pair
-       is already the worst-case gap: 0.25em (4px) overlapped in Chrome, while
-       0.4em (6.4px -> 9.78px below baseline) clears the dots cleanly.
-     - Inline vertical padding does not grow the 1.7 line box (27.2px at 16px).
-       When Noto Sans SC (first in body's font stack, hhea descent -0.288em /
-       -4.61px) IS installed, the inline box itself starts 1.23px deeper while
-       its dots sit higher than PingFang's: 0.5em (8px) + 1px border reaches
-       13.61px below Line 1's baseline (13.59px above Line 2's), grazing or
-       overlapping Line 2's CJK glyph tops (~13.8px regular, ~14.6px 106%
-       KaiTi). Keeping 0.4em preserves ~2px of inter-line clearance across
-       both stacks. */
+  /* Chinese emphasis dots sit under the text (~9px / ~0.56em below baseline on
+     PingFang SC; Japanese and Korean marks sit over the text). Push native link
+     underlines past the dots without inflating line boxes or grazing the next
+     line's CJK glyph tops. */
   .em-dot:not(:lang(ja), :lang(ko)) a,
   a:has(.em-dot:not(:lang(ja), :lang(ko))) {
-    padding-bottom: 0.4em;
+    text-underline-offset: 0.6em;
   }
 
   /* ==========================================================================
@@ -1510,9 +1495,9 @@
 
   /* Chroma structural styles - Layout for syntax highlighting components */
   .chroma {
-    /* Line number links - The base link underline is a border */
+    /* Line number links - Drop the base link underline */
     .lnlinks {
-      border-bottom: none;
+      text-decoration: none;
       color: inherit;
     }
 

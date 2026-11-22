@@ -104,7 +104,7 @@
   .archive-section-title a,
   .archive-section-more a,
   blockquote.twitter-tweet > a {
-    border-bottom: none;
+    text-decoration: none;
   }
 
   /* Navigation items - every "row" style link (sidebar entries, taxonomy
@@ -2322,7 +2322,7 @@
 
     /* Remove link underlines for cleaner print */
     a {
-      border-bottom: none;
+      text-decoration: none;
       color: var(--text);
     }
 

@@ -15,7 +15,7 @@
 
 /* Chrome and row links stay plain and turn primary on hover */
 .link-plain {
-  border-bottom: none;
+  text-decoration: none;
   color: inherit;
 }
 
