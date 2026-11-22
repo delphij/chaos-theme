@@ -2,6 +2,8 @@
 // Use of this source code is governed by an Apache-2.0
 // license that can be found in the LICENSE file.
 
+import { addLightDismissFallback } from './dialog-dismiss.js';
+
 /**
  * Progressive-enhancement lightbox for article images (`a[data-lightbox]`).
  * Left-clicking an image opens a native `<dialog>` overlay supporting wheel /
@@ -249,23 +251,7 @@ export function initLightbox() {
       }
     });
 
-    // Fallback light-dismiss on backdrop for browsers lacking <dialog closedby="any">.
-    if (!('closedBy' in HTMLDialogElement.prototype)) {
-      const outside = (e) => {
-        const r = dialog.getBoundingClientRect();
-        return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
-      };
-      let pressedOutside = false;
-      dialog.addEventListener('pointerdown', (e) => {
-        pressedOutside = outside(e);
-      });
-      dialog.addEventListener('pointerup', (e) => {
-        if (pressedOutside && outside(e)) {
-          dialog.close();
-        }
-        pressedOutside = false;
-      });
-    }
+    addLightDismissFallback(dialog);
 
     dialog.addEventListener('close', resetZoom);
 

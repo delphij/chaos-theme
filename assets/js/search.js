@@ -7,6 +7,8 @@
  * only when site.Params.search.enable is set.
  */
 
+import { addLightDismissFallback } from './modules/dialog-dismiss.js';
+
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
 
 function escapeHTML(str) {
@@ -282,16 +284,7 @@ function initSearch() {
     closeBtn?.addEventListener('click', () => dialog.close());
   }
 
-  // Fallback for browsers without <dialog closedby="any"> light dismiss
-  if (!('closedBy' in HTMLDialogElement.prototype)) {
-    const outside = e => {
-      const r = dialog.getBoundingClientRect();
-      return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
-    };
-    let pressedOutside = false;
-    dialog.addEventListener('pointerdown', e => { pressedOutside = outside(e); });
-    dialog.addEventListener('pointerup', e => { if (pressedOutside && outside(e)) dialog.close(); });
-  }
+  addLightDismissFallback(dialog);
 
   // Global hotkey '/' to open search (unless typing in input/textarea)
   document.addEventListener('keydown', e => {
