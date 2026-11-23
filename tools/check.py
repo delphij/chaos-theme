@@ -406,6 +406,11 @@ def check_unparsed_strong(public, content=None):
             elif self.skip_depth == 0:
                 if tag in block_tags:
                     self.blocks.append([])
+                elif tag == 'br':
+                    if self.blocks:
+                        self.blocks[-1].append('\n')
+                    if self.strong_stack:
+                        self.strong_stack[-1][0].append('\n')
                 if tag == 'strong':
                     if self.strong_stack:
                         self.strong_stack[-1][1] = True
