@@ -40,12 +40,21 @@ export function initLightbox() {
   let baseH = 0;
   let tx = 0;
   let ty = 0;
+  const activePointers = new Map();
+  let pinching = false;
+  let pinchStartDist = 0;
+  let pinchStartScale = 1;
+  let prevMidX = 0;
+  let prevMidY = 0;
   let dragging = false;
   let dragged = false;
   let startX = 0;
   let startY = 0;
   let startTx = 0;
   let startTy = 0;
+  let lastTapTime = 0;
+  let lastTapX = 0;
+  let lastTapY = 0;
 
   const clampPan = () => {
     if (scale <= 1) {
@@ -146,9 +155,9 @@ export function initLightbox() {
     const actions = document.createElement('div');
     actions.className = 'image-lightbox-actions';
 
-    const zoomOutBtn = makeBtn('−', labels.zoomOut, () => zoomTo(scale / 1.35));
+    const zoomOutBtn = makeBtn('−', labels.zoomOut, () => zoomTo(scale / 1.35), 'image-lightbox-step');
     zoomResetBtn = makeBtn('100%', labels.reset, resetZoom, 'image-lightbox-zoom');
-    const zoomInBtn = makeBtn('+', labels.zoomIn, () => zoomTo(scale * 1.35));
+    const zoomInBtn = makeBtn('+', labels.zoomIn, () => zoomTo(scale * 1.35), 'image-lightbox-step');
 
     openLink = document.createElement('a');
     openLink.className = 'image-lightbox-btn';
@@ -184,47 +193,144 @@ export function initLightbox() {
       { passive: false }
     );
 
-    // Double-click toggles between 1x and 2.5x at the clicked point.
-    imgEl.addEventListener('dblclick', (e) => {
-      e.preventDefault();
+    const toggleZoomAt = (x, y) => {
       if (scale > 1.05) {
         resetZoom();
       } else {
-        zoomTo(2.5, e.clientX, e.clientY);
+        zoomTo(2.5, x, y);
+      }
+    };
+
+    const beginDrag = (x, y) => {
+      dragging = true;
+      startX = x;
+      startY = y;
+      startTx = tx;
+      startTy = ty;
+      stage.classList.add('is-dragging');
+    };
+
+    const getPinch = () => {
+      const [p1, p2] = activePointers.values();
+      return {
+        dist: Math.hypot(p2.x - p1.x, p2.y - p1.y) || 1,
+        midX: (p1.x + p2.x) / 2,
+        midY: (p1.y + p2.y) / 2,
+      };
+    };
+
+    // Double-click toggles between 1x and 2.5x at the clicked point.
+    imgEl.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+      toggleZoomAt(e.clientX, e.clientY);
+    });
+
+    // Multi-touch pinch-to-zoom, single-pointer drag-to-pan, and touch double-tap.
+    stage.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (e.pointerType === 'touch' || scale > 1) {
+        try {
+          stage.setPointerCapture(e.pointerId);
+        } catch {
+          // Ignore synthetic or already-released pointers.
+        }
+      }
+
+      if (activePointers.size === 2) {
+        const { dist, midX, midY } = getPinch();
+        pinching = true;
+        dragging = false;
+        dragged = true;
+        lastTapTime = 0;
+        stage.classList.remove('is-dragging');
+        pinchStartDist = dist;
+        pinchStartScale = scale;
+        prevMidX = midX;
+        prevMidY = midY;
+        e.preventDefault();
+      } else if (activePointers.size === 1) {
+        dragged = false;
+        if (scale > 1) {
+          beginDrag(e.clientX, e.clientY);
+          e.preventDefault();
+        }
       }
     });
 
-    // Pointer drag to pan when zoomed in.
-    stage.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0 || scale <= 1) return;
-      dragging = true;
-      dragged = false;
-      startX = e.clientX;
-      startY = e.clientY;
-      startTx = tx;
-      startTy = ty;
-      stage.setPointerCapture(e.pointerId);
-      stage.classList.add('is-dragging');
-      e.preventDefault();
-    });
-
     stage.addEventListener('pointermove', (e) => {
+      if (!activePointers.has(e.pointerId)) return;
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (pinching && activePointers.size >= 2) {
+        const { dist, midX, midY } = getPinch();
+        const nextScale = pinchStartScale * (dist / pinchStartDist);
+        if (scale > 1) {
+          tx += midX - prevMidX;
+          ty += midY - prevMidY;
+        }
+        const prevScale = scale;
+        zoomTo(nextScale, midX, midY);
+        if (scale === prevScale && scale > 1) {
+          applyTransform();
+        }
+        prevMidX = midX;
+        prevMidY = midY;
+        return;
+      }
+
       if (!dragging) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-      if (Math.hypot(dx, dy) > 3) dragged = true;
+      if (Math.hypot(dx, dy) > 4) dragged = true;
       tx = startTx + dx;
       ty = startTy + dy;
       applyTransform();
     });
 
-    const endDrag = () => {
-      if (!dragging) return;
-      dragging = false;
-      stage.classList.remove('is-dragging');
+    const endPointer = (e, cancelled) => {
+      activePointers.delete(e.pointerId);
+
+      if (pinching) {
+        if (activePointers.size < 2) {
+          pinching = false;
+          if (!cancelled && activePointers.size === 1 && scale > 1) {
+            const [rem] = activePointers.values();
+            beginDrag(rem.x, rem.y);
+          }
+        }
+        return;
+      }
+
+      if (dragging) {
+        dragging = false;
+        stage.classList.remove('is-dragging');
+      }
+
+      // Touch double-tap zoom (iOS Safari does not fire dblclick under touch-action: none).
+      if (
+        !cancelled &&
+        e.pointerType === 'touch' &&
+        !dragged &&
+        activePointers.size === 0 &&
+        e.target === imgEl
+      ) {
+        const now = performance.now();
+        if (
+          now - lastTapTime < 300 &&
+          Math.hypot(e.clientX - lastTapX, e.clientY - lastTapY) < 32
+        ) {
+          lastTapTime = 0;
+          toggleZoomAt(e.clientX, e.clientY);
+        } else {
+          lastTapTime = now;
+          lastTapX = e.clientX;
+          lastTapY = e.clientY;
+        }
+      }
     };
-    stage.addEventListener('pointerup', endDrag);
-    stage.addEventListener('pointercancel', endDrag);
+    stage.addEventListener('pointerup', (e) => endPointer(e, false));
+    stage.addEventListener('pointercancel', (e) => endPointer(e, true));
 
     // Keyboard zoom shortcuts while open.
     dialog.addEventListener('keydown', (e) => {
@@ -253,7 +359,15 @@ export function initLightbox() {
 
     addLightDismissFallback(dialog);
 
-    dialog.addEventListener('close', resetZoom);
+    dialog.addEventListener('close', () => {
+      activePointers.clear();
+      pinching = false;
+      dragging = false;
+      dragged = false;
+      lastTapTime = 0;
+      stage.classList.remove('is-dragging');
+      resetZoom();
+    });
 
     window.addEventListener('resize', () => {
       if (dialog?.open && scale > 1) {

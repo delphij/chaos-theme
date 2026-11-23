@@ -2174,6 +2174,52 @@
     -webkit-user-drag: none;
   }
 
+  /* Mobile / touch lightbox: full-viewport canvas with 44px touch targets;
+     pinch-to-zoom and double-tap replace the desktop +/- step buttons. */
+  @media screen and (max-width: 768px) {
+    dialog.image-lightbox {
+      width: 100dvw;
+      height: 100dvh;
+      max-width: 100dvw;
+      max-height: 100dvh;
+      border: none;
+      border-radius: 0;
+    }
+
+    .image-lightbox-bar {
+      padding: calc(0.5rem + env(safe-area-inset-top, 0px))
+        calc(0.5rem + env(safe-area-inset-right, 0px))
+        0.5rem
+        calc(1rem + env(safe-area-inset-left, 0px));
+    }
+
+    .image-lightbox-btn {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+
+      &:not(.image-lightbox-zoom) {
+        font-size: 1.25rem;
+      }
+    }
+
+    .image-lightbox-stage {
+      padding: 0.5rem
+        calc(0.5rem + env(safe-area-inset-right, 0px))
+        calc(0.5rem + env(safe-area-inset-bottom, 0px))
+        calc(0.5rem + env(safe-area-inset-left, 0px));
+    }
+
+    .image-lightbox-img {
+      max-height: 100%;
+    }
+  }
+
+  @media screen and (pointer: coarse) and (max-width: 768px) {
+    .image-lightbox-step {
+      display: none;
+    }
+  }
+
   /* ==========================================================================
      PRINT STYLES
      Optimized layout for printing articles.

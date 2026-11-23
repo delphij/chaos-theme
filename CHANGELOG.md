@@ -80,11 +80,12 @@ here.
   rotating chevron mask, progressive `::details-content` height animation,
   and intact browser Find-in-Page support.
 - **Native `<dialog>` image lightbox**: Left-clicking any article image opens a
-  zero-dependency modal preview with pointer-anchored wheel/pinch zoom
-  (`100%`–`800%`, resizing layout dimensions so SVG vectors and high-resolution
-  photos stay sharp), drag-to-pan, double-click zoom toggle, keyboard zoom
-  (`+`/`-`/`0`), localized controls across all 5 languages, `Esc`/backdrop
-  dismiss, and a direct original-file link.
+  zero-dependency modal preview with pointer-anchored wheel/trackpad/multi-touch
+  pinch zoom (`100%`–`800%`, resizing layout dimensions so SVG vectors and
+  high-resolution photos stay sharp), single-finger drag-to-pan, desktop
+  double-click and touch double-tap zoom toggle, keyboard zoom (`+`/`-`/`0`),
+  full-viewport mobile layout with 44px touch targets, localized controls across
+  all 5 languages, `Esc`/backdrop dismiss, and a direct original-file link.
 
 ### Fixed
 
