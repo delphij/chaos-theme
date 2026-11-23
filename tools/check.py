@@ -361,17 +361,22 @@ def check_search_links(public):
 
 
 def check_unparsed_strong(public, content=None):
-    """No unparsed Markdown `**` leaking into rendered prose.
+    """No unparsed Markdown `**` or misparsed nested `<strong>` in rendered prose.
 
     Under CommonMark flanking delimiter rules, `**` adjacent to both a CJK
-    character and punctuation (such as `的**[link](url)**`, `大写**`M`**`, or
-    `**Box 3（...）**与`) fails to open or close emphasis and renders as
-    literal `**` in the HTML.
+    character and punctuation (such as `的**[link](url)**`, `大写**`M`**`,
+    `**Box 3（...）**与`, or `**3%–5%**的`) fails to open or close emphasis:
+    - When a single bold span fails, literal `**` leaks into the HTML.
+    - When two or more bold spans share a block and an earlier closing `**`
+      fails right-flanking (becoming a nested opener instead), Goldmark
+      consumes all `**` into nested `<strong>...<strong>...</strong>...</strong>`
+      with zero literal `**` left behind.
 
     To avoid false positives on intentional literal asterisks:
     - Code, pre, script, style, math/katex, and SVG subtrees are skipped.
-    - Only paired `(?<!*)**(?!*)` (two or more within the same block element)
-      are flagged, so lone `**` markers and `***`/`****` runs are ignored.
+    - Outside `<strong>`, only paired `(?<!*)**(?!*)` (two or more within the
+      same block element) are flagged, so lone `**` markers and `***`/`****`
+      runs are ignored; inside `<strong>`, even a single `**` is flagged.
     - When a `content/` directory is available (via `--content` or inferred
       next to `--public`), escaped `\\*\\*` in the corresponding Markdown
       source is subtracted so intentional `\\*\\*` in prose is never flagged.
@@ -387,7 +392,9 @@ def check_unparsed_strong(public, content=None):
             self.skip_depth = 0
             self.skip_stack = []
             self.blocks = []
+            self.strong_stack = []
             self.hits = []
+            self.nested_hits = []
 
         def handle_starttag(self, tag, attrs):
             attr_map = dict(attrs)
@@ -396,15 +403,37 @@ def check_unparsed_strong(public, content=None):
             self.skip_stack.append(is_skip)
             if is_skip:
                 self.skip_depth += 1
-            elif tag in block_tags and self.skip_depth == 0:
-                self.blocks.append([])
+            elif self.skip_depth == 0:
+                if tag in block_tags:
+                    self.blocks.append([])
+                if tag == 'strong':
+                    if self.strong_stack:
+                        self.strong_stack[-1][1] = True
+                    self.strong_stack.append([[], False])
 
         def handle_endtag(self, tag):
             if self.skip_stack:
                 if self.skip_stack.pop():
                     self.skip_depth = max(0, self.skip_depth - 1)
                     return
-            if tag in block_tags and self.blocks and self.skip_depth == 0:
+            if self.skip_depth != 0:
+                return
+            if tag == 'strong' and self.strong_stack:
+                chunks, has_nested = self.strong_stack.pop()
+                text = ''.join(chunks)
+                if self.strong_stack:
+                    self.strong_stack[-1][0].append(text)
+                if has_nested and not self.strong_stack:
+                    snippet = re.sub(r'\s+', ' ', text).strip()[:60]
+                    self.nested_hits.append(snippet)
+                elif not self.strong_stack:
+                    matches = list(star_re.finditer(text))
+                    if len(matches) == 1:
+                        m = matches[0]
+                        snippet = text[max(0, m.start() - 16):min(len(text), m.end() + 24)].strip()
+                        snippet = re.sub(r'\s+', ' ', snippet)
+                        self.hits.append((1, snippet))
+            if tag in block_tags and self.blocks:
                 text = ''.join(self.blocks.pop())
                 matches = list(star_re.finditer(text))
                 if len(matches) >= 2:
@@ -414,8 +443,11 @@ def check_unparsed_strong(public, content=None):
                     self.hits.append((len(matches), snippet))
 
         def handle_data(self, data):
-            if self.skip_depth == 0 and self.blocks:
-                self.blocks[-1].append(data)
+            if self.skip_depth == 0:
+                if self.blocks:
+                    self.blocks[-1].append(data)
+                if self.strong_stack:
+                    self.strong_stack[-1][0].append(data)
 
     def count_escaped_in_source(html_file):
         if not content:
@@ -443,24 +475,30 @@ def check_unparsed_strong(public, content=None):
 
     checked = 0
     offenders = []
+    nested_offenders = []
     for f in sorted(public.rglob('*.html')):
         checked += 1
         parser = BlockStarParser()
         parser.feed(f.read_text(encoding='utf-8', errors='replace'))
-        if not parser.hits:
-            continue
-        total_stars = sum(n for n, _ in parser.hits)
-        if total_stars <= count_escaped_in_source(f):
-            continue
         where = f.relative_to(public)
-        offenders.append(f'{where} ({parser.hits[0][1]!r})')
+        if parser.nested_hits:
+            nested_offenders.append(f'{where} ({parser.nested_hits[0]!r})')
+        if parser.hits:
+            total_stars = sum(n for n, _ in parser.hits)
+            if total_stars > count_escaped_in_source(f):
+                offenders.append(f'{where} ({parser.hits[0][1]!r})')
 
     if offenders:
         fail('unparsed-strong',
              f'{len(offenders)} page(s) have unparsed `**` in prose '
              f'(use `[**text**](url)`, move punctuation outside `**`, or add `\\ `): '
              f'{"; ".join(offenders[:5])}')
-    else:
+    if nested_offenders:
+        fail('nested-strong',
+             f'{len(nested_offenders)} page(s) have nested `<strong>` (usually a cross-paired CJK `**` boundary; '
+             f'move punctuation outside `**` or add `\\ `): '
+             f'{"; ".join(nested_offenders[:5])}')
+    if not offenders and not nested_offenders:
         notes.append(f'unparsed-strong: {checked} page(s) clean')
 
 
