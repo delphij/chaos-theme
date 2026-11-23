@@ -98,8 +98,16 @@ Generates Schema.org structured data in JSON-LD format.
 {{- end -}}
 
 {{- if not .IsHome -}}
-  {{- $breadcrumbs := slice (dict "@type" "ListItem" "position" 1 "name" site.Title "item" site.BaseURL) -}}
-  {{- $pos := 2 -}}
+  {{- $homeName := site.Title | plainify | htmlUnescape | strings.TrimSpace -}}
+  {{- $homeURL := site.Home.Permalink | default site.BaseURL -}}
+  {{- $breadcrumbs := slice -}}
+  {{- $pos := 1 -}}
+  {{- $lastURL := "" -}}
+  {{- if and $homeName $homeURL -}}
+    {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" $homeName "item" $homeURL) -}}
+    {{- $lastURL = $homeURL -}}
+    {{- $pos = add $pos 1 -}}
+  {{- end -}}
   {{- /* Sites that redirect a section to /archives/ (site.Params.archiveBreadcrumbSections)
          get the archives page as the crumb parent; everyone else gets the section itself. */ -}}
   {{- $parent := "" -}}
@@ -112,11 +120,18 @@ Generates Schema.org structured data in JSON-LD format.
     {{- end -}}
   {{- end -}}
   {{- with $parent -}}
-    {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" (partial "_funcs/get-page-title.html" .) "item" .Permalink) -}}
-    {{- $pos = add $pos 1 -}}
+    {{- $parentTitle := partial "_funcs/get-page-title.html" . | plainify | htmlUnescape | strings.TrimSpace -}}
+    {{- if and .Permalink $parentTitle (ne .Permalink $lastURL) -}}
+      {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" $parentTitle "item" .Permalink) -}}
+      {{- $lastURL = .Permalink -}}
+      {{- $pos = add $pos 1 -}}
+    {{- end -}}
   {{- end -}}
-  {{- if .IsPage -}}
-    {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" .Title "item" .Permalink) -}}
+  {{- if and (in (slice "page" "section" "taxonomy" "term") .Kind) .Permalink (ne .Permalink $lastURL) -}}
+    {{- $pageTitle := partial "_funcs/get-page-title.html" . | plainify | htmlUnescape | strings.TrimSpace -}}
+    {{- with $pageTitle -}}
+      {{- $breadcrumbs = $breadcrumbs | append (dict "@type" "ListItem" "position" $pos "name" . "item" $.Permalink) -}}
+    {{- end -}}
   {{- end -}}
   {{- if gt (len $breadcrumbs) 1 -}}
     {{- $breadcrumbList := dict

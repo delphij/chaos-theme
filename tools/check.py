@@ -507,6 +507,113 @@ def check_unparsed_strong(public, content=None):
         notes.append(f'unparsed-strong: {checked} page(s) clean')
 
 
+def check_schema_jsonld(public):
+    """Every JSON-LD block parses cleanly and satisfies required Schema.org fields.
+
+    A parent section or taxonomy configured with `build.render: never` and no
+    front-matter `title` (for example a suppressed `/categories/_index.md`)
+    still resolves via `site.GetPage`, but has an empty `.Permalink` and
+    `.Title`. Appending it unconditionally emitted `{"name": "", "item": ""}`,
+    which Google Search Console flags as missing `name`/`item.name` in
+    `itemListElement`. Validates `BreadcrumbList`, `BlogPosting`, and `WebSite`
+    so broken structured data is caught at build time rather than by crawlers.
+    """
+    ld_re = re.compile(r'<script[^>]*application/ld\+json[^>]*>(.*?)</script>', re.S | re.I)
+
+    def non_empty_str(val):
+        return isinstance(val, str) and bool(val.strip())
+
+    def is_http_url(val):
+        return isinstance(val, str) and val.startswith(('http://', 'https://')) and len(val) > 8
+
+    def has_entity_name(val):
+        if isinstance(val, dict):
+            return non_empty_str(val.get('name'))
+        if isinstance(val, list) and val:
+            return all(isinstance(v, dict) and non_empty_str(v.get('name')) for v in val)
+        return False
+
+    blocks = 0
+    pages = 0
+    issues = []
+    for f in sorted(public.rglob('*.html')):
+        text = f.read_text(encoding='utf-8', errors='replace')
+        matches = list(ld_re.finditer(text))
+        if not matches:
+            continue
+        pages += 1
+        where = f.relative_to(public)
+        for m in matches:
+            try:
+                data = json.loads(m.group(1))
+            except json.JSONDecodeError as e:
+                issues.append(f'{where} (invalid JSON: {e.msg})')
+                continue
+            objs = data if isinstance(data, list) else [data]
+            for obj in objs:
+                blocks += 1
+                if not isinstance(obj, dict):
+                    issues.append(f'{where} (JSON-LD entry is not an object)')
+                    continue
+                kind = obj.get('@type')
+                if not non_empty_str(kind):
+                    issues.append(f'{where} (missing @type)')
+                    continue
+                if kind == 'BreadcrumbList':
+                    items = obj.get('itemListElement')
+                    if not isinstance(items, list) or not items:
+                        issues.append(f'{where} (BreadcrumbList has empty itemListElement)')
+                        continue
+                    prev_url = None
+                    for idx, entry in enumerate(items, 1):
+                        if not isinstance(entry, dict):
+                            issues.append(f'{where} (BreadcrumbList position {idx} is not an object)')
+                            break
+                        if entry.get('@type') != 'ListItem':
+                            issues.append(f'{where} (BreadcrumbList position {idx} has @type {entry.get("@type")!r})')
+                            break
+                        pos = entry.get('position')
+                        if type(pos) is not int or pos != idx:
+                            issues.append(f'{where} (BreadcrumbList expected position {idx}, got {pos!r})')
+                            break
+                        item = entry.get('item')
+                        item_url = item.get('@id') if isinstance(item, dict) else item
+                        item_name = item.get('name') if isinstance(item, dict) else None
+                        if not non_empty_str(entry.get('name')) and not non_empty_str(item_name):
+                            issues.append(f'{where} (BreadcrumbList position {idx} missing name)')
+                            break
+                        if item is not None or idx < len(items):
+                            if not is_http_url(item_url):
+                                issues.append(f'{where} (BreadcrumbList position {idx} has invalid item URL {item_url!r})')
+                                break
+                            if item_url == prev_url:
+                                issues.append(f'{where} (BreadcrumbList position {idx} duplicates previous URL {item_url!r})')
+                                break
+                            prev_url = item_url
+                elif kind == 'BlogPosting':
+                    if not non_empty_str(obj.get('headline')):
+                        issues.append(f'{where} (BlogPosting missing headline)')
+                    if not is_http_url(obj.get('url')):
+                        issues.append(f'{where} (BlogPosting has invalid url {obj.get("url")!r})')
+                    me = obj.get('mainEntityOfPage')
+                    if me is not None:
+                        me_id = me.get('@id') if isinstance(me, dict) else me
+                        if not is_http_url(me_id):
+                            issues.append(f'{where} (BlogPosting has invalid mainEntityOfPage {me_id!r})')
+                    for role in ('author', 'publisher'):
+                        if role in obj and not has_entity_name(obj[role]):
+                            issues.append(f'{where} (BlogPosting {role} missing name)')
+                elif kind == 'WebSite':
+                    if not non_empty_str(obj.get('name')):
+                        issues.append(f'{where} (WebSite missing name)')
+                    if not is_http_url(obj.get('url')):
+                        issues.append(f'{where} (WebSite has invalid url {obj.get("url")!r})')
+    if issues:
+        fail('schema-jsonld', f'{len(issues)} issue(s) in JSON-LD structured data: {"; ".join(issues[:5])}')
+    else:
+        notes.append(f'schema-jsonld: {blocks} block(s) across {pages} page(s) clean')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -534,12 +641,14 @@ def main():
         check_nav_active(public)
         check_search_links(public)
         check_unparsed_strong(public, content)
+        check_schema_jsonld(public)
     else:
         notes.append('feed-whitespace: skipped (no --public)')
         notes.append('xsl-wellformed: skipped (no --public)')
         notes.append('nav-active: skipped (no --public)')
         notes.append('search-links: skipped (no --public)')
         notes.append('unparsed-strong: skipped (no --public)')
+        notes.append('schema-jsonld: skipped (no --public)')
 
     for n in notes:
         print(f'  ok    {n}')
