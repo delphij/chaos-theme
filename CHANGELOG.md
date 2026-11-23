@@ -63,11 +63,16 @@ here.
   Checked-item styling defaults to `"none"` and can be set to `"muted"` or
   `"strikethrough"` site-wide, per page (`taskListChecked`), or per list
   (`{.task-plain}`, `{.task-muted}`, `{.task-strike}`).
-- **`tools/check.py` `unparsed-strong` check**: Detects paired unparsed
-  Markdown `**` leaking into rendered HTML prose (commonly triggered by
-  CommonMark flanking rules next to CJK characters and punctuation), while
+- **`tools/check.py` `unparsed-strong` / `nested-strong` checks**: Detects
+  unparsed Markdown `**` leaking into rendered HTML prose as well as nested
+  `<strong>` caused by cross-paired CJK/punctuation emphasis boundaries, while
   skipping code/math subtrees and allowing intentional `\*\*` escapes in source
   Markdown (auto-detected next to `--public` or via `--content`).
+- **Auto-detected favicons and web manifest (`head/icons.html`)**: Automatically
+  emits `<link>` tags (via `relURL`) for `static/favicon.ico` (`sizes="32x32"`),
+  `static/favicon.svg` (`type="image/svg+xml"`), `static/apple-touch-icon.png`,
+  and `static/site.webmanifest` whenever present, cached once per build via
+  `partialCached`.
 - **Auto-titled internal links**: Leaving the label empty on an internal
   Markdown link (e.g. `[](/notes/t/dkim/)` or `[](../other-post/)`) resolves
   the target page's `.Title` at build time across HTML, Atom, and RSS outputs,

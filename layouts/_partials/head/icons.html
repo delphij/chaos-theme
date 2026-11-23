@@ -1,0 +1,16 @@
+{{- /* Auto-detect standard site icons placed in static/ so sites get modern
+       favicon support (ICO fallback, dark-mode-capable SVG, Apple touch icon,
+       and optional web manifest) without extra config. Using sizes="32x32" on
+       favicon.ico ensures modern browsers prefer favicon.svg over ICO. */ -}}
+{{- if fileExists "static/favicon.ico" }}
+<link rel="icon" href="{{ "favicon.ico" | relURL }}" sizes="32x32">
+{{- end }}
+{{- if fileExists "static/favicon.svg" }}
+<link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+{{- end }}
+{{- if fileExists "static/apple-touch-icon.png" }}
+<link rel="apple-touch-icon" href="{{ "apple-touch-icon.png" | relURL }}">
+{{- end }}
+{{- if fileExists "static/site.webmanifest" }}
+<link rel="manifest" href="{{ "site.webmanifest" | relURL }}">
+{{- end }}
