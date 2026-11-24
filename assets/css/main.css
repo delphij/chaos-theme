@@ -2535,9 +2535,9 @@
       padding: 8px;
     }
 
-    /* Keep hanging line numbers inside quote/callout cards */
-    blockquote .highlight:has(.lntable) {
-      margin-left: 1.5em;
+    /* Keep hanging line numbers inside bounded quote/callout/disclosure cards */
+    .highlight:has(.lntable) {
+      margin-left: calc(1.5em * (1 - var(--prose-outdent, 1)));
     }
 
     /* Hanging line numbers on paper: hide the screen's separate scroll-pinned

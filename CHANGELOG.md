@@ -68,6 +68,11 @@ here.
   `<strong>` caused by cross-paired CJK/punctuation emphasis boundaries, while
   skipping code/math subtrees and allowing intentional `\*\*` escapes in source
   Markdown (auto-detected next to `--public` or via `--content`).
+- **`tools/check.py` `schema-jsonld` check**: Validates every
+  `<script type="application/ld+json">` block across the built site for JSON
+  syntax and required Schema.org fields (`BreadcrumbList`, `BlogPosting`, and
+  `WebSite`), catching empty breadcrumb names/URLs, non-sequential positions,
+  and duplicate consecutive URLs at build time.
 - **Auto-detected favicons and web manifest (`head/icons.html`)**: Automatically
   emits `<link>` tags (via `relURL`) for `static/favicon.ico` (`sizes="32x32"`),
   `static/favicon.svg` (`type="image/svg+xml"`), `static/apple-touch-icon.png`,
@@ -96,6 +101,17 @@ here.
 
 - `index.rss.xml`: handle scalar string values for `categories` and `tags` in
   front matter instead of failing with a template range error.
+- `_partials/schema.html`: skip unrendered parent sections/taxonomies
+  (`build.render: never`, empty `.Permalink` or title) when generating
+  `BreadcrumbList` JSON-LD, plainify/trim crumb names, prevent consecutive
+  duplicate URLs, and include `term` and nested `section` pages as the leaf
+  crumb.
+- **Hanging gutters inside bounded containers**: introduced an inherited
+  `--prose-outdent` token (set to `0` alongside `--code-ln-bg: var(--code-bg)`
+  on `blockquote` and `details.alert`) so unwrapped code line numbers,
+  `{.wrap}` code counters, print line numbers, and `dl.dialogue` lists stay
+  inside quote, callout, and `[!DETAILS]` disclosure cards instead of being
+  clipped or crossing container borders.
 
 ## [1.5.0] - 2026-11-14
 

@@ -981,6 +981,16 @@
     }
   }
 
+  /* Bounded prose containers (quotes, callouts, [!DETAILS] cards) have no outer
+     page margin to hang gutters into (and details.alert clips overflow). Flip
+     --prose-outdent to 0 once here so every hanging component (code line
+     numbers, wrapped code counters, dl.dialogue) stays inside the card. */
+  blockquote,
+  details.alert {
+    --prose-outdent: 0;
+    --code-ln-bg: var(--code-bg);
+  }
+
   /* ==========================================================================
      CALLOUTS
      GitHub-style alerts, rendered as blockquote.alert by render-blockquote.html,
@@ -1208,7 +1218,7 @@
     --dialogue-col-max: 5.5em;
     --dialogue-gap: 1em;
     --dialogue-edge: 1rem;
-    --dialogue-avail: max(0px, (100dvw - var(--content-width)) / 2 + var(--gutter) - var(--dialogue-edge));
+    --dialogue-avail: calc(var(--prose-outdent, 1) * max(0px, (100dvw - var(--content-width)) / 2 + var(--gutter) - var(--dialogue-edge)));
     --dialogue-col: clamp(var(--dialogue-col-min), var(--dialogue-avail) - var(--dialogue-gap), var(--dialogue-col-max));
     display: grid;
     grid-template-columns: var(--dialogue-col) minmax(0, 1fr);
@@ -1232,7 +1242,7 @@
     @media print {
       & {
         --dialogue-col: var(--dialogue-col-max);
-        margin-left: calc(-1 * (var(--dialogue-col) + var(--dialogue-gap)));
+        margin-left: calc(-1 * var(--prose-outdent, 1) * (var(--dialogue-col) + var(--dialogue-gap)));
       }
     }
 
@@ -1630,8 +1640,8 @@
          Synchronized with list hanging indent breakpoint (769px) */
       @media screen and (min-width: 769px) {
         & {
-          margin: 0 0 0 -3em;            /* Shift left so line numbers hang in margin */
-          width: calc(100% + 3em);       /* Keep code column right edge flush with prose */
+          margin: 0 0 0 calc(-3em * var(--prose-outdent, 1));
+          width: calc(100% + 3em * var(--prose-outdent, 1));
         }
       }
 
@@ -1676,7 +1686,7 @@
 
       @media screen and (min-width: 769px) {
         pre {
-          background: var(--bg);
+          background: var(--code-ln-bg, var(--bg));
         }
       }
 
@@ -1849,8 +1859,8 @@
   }
 
   @media screen and (min-width: 769px) {
-    blockquote .highlight.wrap:has(.lntable) {
-      margin-left: 2em;
+    .highlight.wrap:has(.lntable) {
+      margin-left: calc(2em * (1 - var(--prose-outdent, 1)));
     }
   }
 }

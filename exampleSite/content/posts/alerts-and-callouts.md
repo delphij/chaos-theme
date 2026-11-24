@@ -137,3 +137,47 @@ Chaos支持[GitHub风格的提示框语法](https://docs.github.com/en/get-start
 
 > [!TIP]- 展开查看命令行参数说明
 > 可折叠提示框支持嵌套列表、代码块与链接，浏览器的页内查找（`Cmd+F` / `Ctrl+F`）仍可命中并自动展开其中文字；打印页面时所有正文折叠块也会自动全部展开，以免纸面遗漏信息。
+
+### 容器内嵌套外挂组件（代码块与对话列表）
+
+顶层正文中的带行号代码块与`{.dialogue}`列表在宽屏下会将行号或话者外挂至左侧页边距；而放入`blockquote`、提示框或`[!DETAILS]`折叠卡片等有边界容器内时，主题会自动收拢外挂边距（`--prose-outdent: 0`），避免行号或左栏被卡片边界裁切。
+
+> [!DETAILS]+ 折叠卡片内嵌套带行号代码块、自动换行代码块与 `{.dialogue .script}`
+> 普通带行号代码块（行号收拢在代码块内部，不会被 `overflow: hidden` 裁掉）：
+>
+> ```go
+> package main
+>
+> import "fmt"
+>
+> func main() {
+> 	fmt.Println("line numbers stay inside the disclosure card")
+> }
+> ```
+>
+> 启用 `{.wrap}` 的长行代码块（行号计数器自动向内留出边距）：
+>
+> ```sh {.wrap}
+> # 模拟一条较长的命令行，用于验证折叠卡片内启用 .wrap 时的折行挂钩与行号对齐效果
+> hugo --minify --printI18nWarnings --printPathWarnings --panicOnWarning --baseURL https://example.org/docs/
+> ```
+>
+> 嵌套的 `{.dialogue .script}` 列表（左栏留在卡片内部，不再向页边距外挂）：
+>
+> 09:00
+> : 收到告警并确认受影响范围，开始采集日志。
+>
+> 09:15
+> : 定位到上游配置变更，回滚并验证服务恢复正常。
+> {.dialogue .script}
+
+> [!NOTE]
+> 普通引用块与非折叠提示框内的带行号代码块同样会自动收拢行号，不会穿透左侧边界：
+>
+> ```ini
+> [server]
+> host = 192.0.2.10
+> port = 8443
+> tls = true
+> workers = 4
+> ```
