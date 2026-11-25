@@ -59,19 +59,19 @@
             <div class="stats-bar" role="toolbar" aria-label="{{ T `sitemapFilterToolbar` }}">
               <span class="filter-label">{{ T "sitemapFilterLabel" }}</span>
               <button type="button" class="stat-pill" aria-pressed="true" data-filter="post" title="{{ T `sitemapToggleType` (dict `Type` (T `contentTypePost`)) }}">
-                <span>📝 {{ T "contentTypePost" }}</span>
+                <span><span aria-hidden="true">📝 </span>{{ T "contentTypePost" }}</span>
                 <span class="stat-num"><xsl:value-of select="count(sitemap:urlset/sitemap:url[contains(sitemap:loc, '/posts/')])"/></span>
               </button>
               <button type="button" class="stat-pill" aria-pressed="true" data-filter="category" title="{{ T `sitemapToggleType` (dict `Type` (T `categories`)) }}">
-                <span>📁 {{ T "categories" }}</span>
+                <span><span aria-hidden="true">📁 </span>{{ T "categories" }}</span>
                 <span class="stat-num"><xsl:value-of select="count(sitemap:urlset/sitemap:url[contains(sitemap:loc, '/categories/')])"/></span>
               </button>
               <button type="button" class="stat-pill" aria-pressed="true" data-filter="tag" title="{{ T `sitemapToggleType` (dict `Type` (T `tags`)) }}">
-                <span>🏷️ {{ T "tags" }}</span>
+                <span><span aria-hidden="true">🏷️ </span>{{ T "tags" }}</span>
                 <span class="stat-num"><xsl:value-of select="count(sitemap:urlset/sitemap:url[contains(sitemap:loc, '/tags/')])"/></span>
               </button>
               <button type="button" class="stat-pill" aria-pressed="true" data-filter="page" title="{{ T `sitemapToggleType` (dict `Type` (T `contentTypePage`)) }}">
-                <span>📄 {{ T "contentTypePage" }}</span>
+                <span><span aria-hidden="true">📄 </span>{{ T "contentTypePage" }}</span>
                 <span class="stat-num"><xsl:value-of select="count(sitemap:urlset/sitemap:url[not(contains(sitemap:loc, '/posts/')) and not(contains(sitemap:loc, '/categories/')) and not(contains(sitemap:loc, '/tags/'))])"/></span>
               </button>
             </div>
@@ -88,12 +88,12 @@
             <table id="sitemapTable">
               <thead>
                 <tr>
-                  <th id="thPath" data-col="path" aria-sort="none">
+                  <th id="thPath" scope="col" data-col="path" aria-sort="none">
                     <button type="button" class="sort-btn" aria-label="{{ T `sortByPath` }}">
                       {{ T "sitemapColumnPath" }} <span class="sort-icon" id="iconPath" aria-hidden="true">↕</span>
                     </button>
                   </th>
-                  <th id="thTime" data-col="time" aria-sort="descending">
+                  <th id="thTime" scope="col" data-col="time" aria-sort="descending">
                     <button type="button" class="sort-btn" aria-label="{{ T `sortByTimeDescending` }}">
                       {{ T "sitemapColumnLastModified" }} <span class="sort-icon" id="iconTime" aria-hidden="true">↓</span>
                     </button>
@@ -136,16 +136,16 @@
                     <td>
                       <xsl:choose>
                         <xsl:when test="$itemType = 'post'">
-                          <span class="type-badge" data-filter-type="post" title="{{ T `sitemapOnlyType` (dict `Type` (T `contentTypePost`)) }}">{{ T "contentTypePost" }}</span>
+                          <button type="button" class="type-badge" data-filter-type="post" title="{{ T `sitemapOnlyType` (dict `Type` (T `contentTypePost`)) }}">{{ T "contentTypePost" }}</button>
                         </xsl:when>
                         <xsl:when test="$itemType = 'category'">
-                          <span class="type-badge" data-filter-type="category" title="{{ T `sitemapOnlyType` (dict `Type` (T `categories`)) }}">{{ T "categories" }}</span>
+                          <button type="button" class="type-badge" data-filter-type="category" title="{{ T `sitemapOnlyType` (dict `Type` (T `categories`)) }}">{{ T "categories" }}</button>
                         </xsl:when>
                         <xsl:when test="$itemType = 'tag'">
-                          <span class="type-badge" data-filter-type="tag" title="{{ T `sitemapOnlyType` (dict `Type` (T `tags`)) }}">{{ T "tags" }}</span>
+                          <button type="button" class="type-badge" data-filter-type="tag" title="{{ T `sitemapOnlyType` (dict `Type` (T `tags`)) }}">{{ T "tags" }}</button>
                         </xsl:when>
                         <xsl:otherwise>
-                          <span class="type-badge" data-filter-type="page" title="{{ T `sitemapOnlyType` (dict `Type` (T `contentTypePage`)) }}">{{ T "contentTypePage" }}</span>
+                          <button type="button" class="type-badge" data-filter-type="page" title="{{ T `sitemapOnlyType` (dict `Type` (T `contentTypePage`)) }}">{{ T "contentTypePage" }}</button>
                         </xsl:otherwise>
                       </xsl:choose>
 
@@ -180,11 +180,11 @@
               </tbody>
             </table>
           </div>
-
-          <footer class="page-footer">
-            <p>© {{ now.Format "2006" }} {{ site.Title }}.</p>
-          </footer>
         </main>
+
+        <footer class="page-footer">
+          <p>© {{ now.Format "2006" }} {{ site.Title }}.</p>
+        </footer>
 
         {{- /* Minified, and wrapped in CDATA because the stylesheet is XML. */ -}}
         <script><![CDATA[{{ (slice (resources.Get "js/xml-xsl-time.js") (resources.Get "js/xml-xsl-sitemap.js") | resources.Concat "js/xml-xsl-sitemap.bundle.js" | resources.ExecuteAsTemplate "js/xml-xsl-sitemap.js" . | resources.Minify).Content }}]]></script>

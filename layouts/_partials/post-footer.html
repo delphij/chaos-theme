@@ -28,12 +28,12 @@ Renders post footer metadata (tags and last modified date) at the end of an arti
   {{- end -}}
   {{- if $hasMod -}}
   <div class="post-modified">
-    <span>{{ T "lastModified" }}：{{ partial "datetime.html" $modTime }}</span>
+    <span>{{ T "lastModified" }}{{ T "labelColon" }}{{ partial "datetime.html" $modTime }}</span>
   </div>
   {{- end -}}
   {{- with $hasLicense -}}
   <div class="post-license">
-    <span>{{ T "license" }}：{{ partial "_funcs/typeset-content.html" (. | markdownify) | safeHTML }}</span>
+    <span>{{ T "license" }}{{ T "labelColon" }}{{ partial "_funcs/typeset-content.html" (. | markdownify) | safeHTML }}</span>
   </div>
   {{- end -}}
 </footer>

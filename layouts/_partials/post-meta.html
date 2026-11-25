@@ -17,7 +17,7 @@ asked for, and categories. Shared by the article and its summary card.
 <div class="meta">
   {{- if $showDate -}}{{ partial "datetime.html" $page.Date }}{{- $needSep = true -}}{{- end -}}
   {{- if $showStats -}}<span class="reading-stats">{{ if $needSep }} • {{ end }}{{ partial "reading-stats.html" $page }}</span>{{- $needSep = true -}}{{- end -}}
-  {{- with $author -}}{{ if $needSep }}<span class="meta-sep"> • </span>{{ end }}<span class="post-author">{{ $a := . }}{{ with .url }}<a href="{{ . }}">{{ $a.name }}</a>{{ else }}{{ $a.name }}{{ end }}</span>{{- $needSep = true -}}{{- end -}}
-  {{- with $cats -}}{{ if $needSep }}<span class="meta-sep"> • </span>{{ end }}{{ partial "taxonomy-links.html" (dict "page" $page "taxonomy" "categories") }}{{- end -}}
+  {{- with $author -}}{{ if $needSep }}<span class="meta-sep" aria-hidden="true"> • </span>{{ end }}<span class="post-author">{{ $a := . }}{{ with .url }}<a href="{{ . }}">{{ $a.name }}</a>{{ else }}{{ $a.name }}{{ end }}</span>{{- $needSep = true -}}{{- end -}}
+  {{- with $cats -}}{{ if $needSep }}<span class="meta-sep" aria-hidden="true"> • </span>{{ end }}{{ partial "taxonomy-links.html" (dict "page" $page "taxonomy" "categories") }}{{- end -}}
 </div>
 {{- end -}}

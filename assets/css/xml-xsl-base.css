@@ -75,13 +75,14 @@
 
 .container {
   max-width: var(--content-width);
-  margin: 28px auto;
-  padding: 0 var(--gutter) 60px;
+  margin: 28px auto 0;
+  padding: 0 var(--gutter);
 }
 
 .page-footer {
-  margin: 40px 0 0;
-  padding: 24px 0;
+  max-width: var(--max-width);
+  margin: 40px auto 60px;
+  padding: 24px var(--gutter);
   color: var(--muted);
   font-size: var(--text-sm);
   text-align: center;

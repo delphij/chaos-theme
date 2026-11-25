@@ -38,7 +38,7 @@ not read as an escape.
   {{- if $isFixed -}}
     {{- $thText = replaceRE `(（[^（）]{1,8}）)` `<wbr><span class="th-paren">$1</span>` .Text | safeHTML -}}
   {{- end }}
-<th{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ $thText }}</th>
+<th scope="col"{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ $thText }}</th>
 {{- end }}
 </tr>
 {{- end }}

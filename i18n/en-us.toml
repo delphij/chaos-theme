@@ -133,6 +133,7 @@ contentTypePage = 'Pages'
 # SEO, pagination and 404
 lastModified = 'Last updated'
 license = 'License'
+labelColon = ': '
 pageNumber = 'Page {{ .Number }}'
 pageNotFound = 'Page Not Found'
 pageNotFoundDesc = 'Sorry, the page you are looking for does not exist or has been moved.'

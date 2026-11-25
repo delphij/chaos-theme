@@ -12,10 +12,10 @@
 {{- $cssFiles := slice "css/normalize.css" "css/prose.css" "css/main.css" "css/syntax.css" -}}
 
 {{- if hugo.IsDevelopment }}
-  <link rel="stylesheet" href="{{ $tokens.RelPermalink }}"></link>
+  <link rel="stylesheet" href="{{ $tokens.RelPermalink }}">
   {{- range $cssFiles }}
     {{- with resources.Get . }}
-      <link rel="stylesheet" href="{{ .RelPermalink }}"></link>
+      <link rel="stylesheet" href="{{ .RelPermalink }}">
     {{- end }}
   {{- end }}
 {{- else }}
@@ -25,6 +25,6 @@
   {{- end -}}
 
   {{- with $cssResources | resources.Concat "css/bundle.css" | minify | fingerprint }}
-    <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></link>
+    <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
   {{- end }}
 {{- end }}

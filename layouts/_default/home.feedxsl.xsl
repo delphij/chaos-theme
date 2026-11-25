@@ -116,21 +116,21 @@
           <div class="feed-entries">
             <xsl:apply-templates select="atom:feed/atom:entry | rss/channel/item" />
           </div>
-
-          <footer class="page-footer">
-            <p>
-              © <xsl:choose>
-                <xsl:when test="$is-atom and string-length(atom:feed/atom:updated) &gt;= 4">
-                  <xsl:value-of select="substring(atom:feed/atom:updated, 1, 4)" />
-                </xsl:when>
-                <xsl:when test="string-length(rss/channel/lastBuildDate) &gt;= 16">
-                  <xsl:value-of select="substring(rss/channel/lastBuildDate, 13, 4)" />
-                </xsl:when>
-                <xsl:otherwise>{{ now.Format "2006" }}</xsl:otherwise>
-              </xsl:choose><xsl:text> </xsl:text><xsl:value-of select="$feed-title" />.
-            </p>
-          </footer>
         </main>
+
+        <footer class="page-footer">
+          <p>
+            © <xsl:choose>
+              <xsl:when test="$is-atom and string-length(atom:feed/atom:updated) &gt;= 4">
+                <xsl:value-of select="substring(atom:feed/atom:updated, 1, 4)" />
+              </xsl:when>
+              <xsl:when test="string-length(rss/channel/lastBuildDate) &gt;= 16">
+                <xsl:value-of select="substring(rss/channel/lastBuildDate, 13, 4)" />
+              </xsl:when>
+              <xsl:otherwise>{{ now.Format "2006" }}</xsl:otherwise>
+            </xsl:choose><xsl:text> </xsl:text><xsl:value-of select="$feed-title" />.
+          </p>
+        </footer>
 
         {{- /* Minified, and wrapped in CDATA because the stylesheet is XML. */ -}}
         <script><![CDATA[{{ (slice (resources.Get "js/xml-xsl-time.js") (resources.Get "js/xml-xsl-feed.js") | resources.Concat "js/xml-xsl-feed.bundle.js" | resources.ExecuteAsTemplate "js/xml-xsl-feed.js" . | resources.Minify).Content }}]]></script>
@@ -196,12 +196,12 @@
           </xsl:choose>
         </xsl:variable>
         <xsl:if test="normalize-space($author-name) != ''">
-          <span>•</span>
+          <span aria-hidden="true">•</span>
           <span><xsl:value-of select="$author-name" /></span>
         </xsl:if>
 
         <xsl:if test="atom:category | category">
-          <span>•</span>
+          <span aria-hidden="true">•</span>
           <span class="feed-entry-tags">
             {{- /* Tags are flat muted text, like .tag-link on the site; the
                    flex gap on .feed-entry-tags does the separating. */}}
