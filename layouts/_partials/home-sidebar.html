@@ -24,33 +24,6 @@ tags (falling back to site.Home when /categories/ sets build.render = "never").
 </aside>
   {{- end -}}
 {{- else -}}
-<aside class="home-sidebar toc-wrapper" aria-label="{{ T `browsingGuide` }}">
-  <div class="sidebar-card">
-    <div class="sidebar-widget">
-      <h2 class="sidebar-widget-title">{{ T "coreCategories" }}</h2>
-      <div class="sidebar-tags-cloud">
-        {{ range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "categories" "Limit" 8) }}
-        {{ partial "term-chip.html" (dict "term" . "class" "sidebar-tag-item") }}
-        {{ end }}
-      </div>
-      <div class="sidebar-widget-footer">
-        {{- $catsURL := "" -}}
-        {{- with site.GetPage "/categories" -}}{{- $catsURL = .RelPermalink -}}{{- end -}}
-        <a class="sidebar-more-link" href="{{ or $catsURL site.Home.RelPermalink }}">{{ T "allCategoriesLink" (dict "Count" (len site.Taxonomies.categories)) }}</a>
-      </div>
-    </div>
-
-    <div class="sidebar-widget">
-      <h2 class="sidebar-widget-title">{{ T "popularTags" }}</h2>
-      <div class="sidebar-tags-cloud">
-        {{ range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "tags" "Limit" 16) }}
-        {{ partial "term-chip.html" (dict "term" . "class" "sidebar-tag-item" "prefix" "#") }}
-        {{ end }}
-      </div>
-      <div class="sidebar-widget-footer">
-        <a class="sidebar-more-link" href="{{ "tags/" | relLangURL }}">{{ T "allTagsLink" (dict "Count" (len site.Taxonomies.tags)) }}</a>
-      </div>
-    </div>
-  </div>
-</aside>
+  {{- $sidebarSrc := partialCached "_funcs/get-sidebar-json.html" . site.Language.Lang -}}
+<aside class="home-sidebar toc-wrapper" aria-label="{{ T `browsingGuide` }}" data-sidebar-src="{{ $sidebarSrc }}" hidden></aside>
 {{- end -}}

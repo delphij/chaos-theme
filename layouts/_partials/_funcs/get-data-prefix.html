@@ -1,0 +1,18 @@
+{{- /*
+Returns the normalized relative path prefix for theme static data endpoints
+(e.g. "_data/v1"). The path prefix defaults to "_data" (overridable via
+`site.Params.data.prefix`); the schema version is owned by the theme in
+`assets/chaos_api.json` so site configs never need to track API versions.
+
+@returns {string} Relative path prefix without leading or trailing slashes.
+*/ -}}
+{{- $prefix := "_data" -}}
+{{- with site.Params.data -}}
+  {{- if and (reflect.IsMap .) (isset . "prefix") -}}
+    {{- $prefix = trim (string .prefix) "/" -}}
+  {{- end -}}
+{{- end -}}
+{{- $api := resources.Get "chaos_api.json" | transform.Unmarshal -}}
+{{- $ver := int ($api.version | default 1) -}}
+{{- $version := printf "v%d" $ver -}}
+{{- return (cond (ne $prefix "") (printf "%s/%s" $prefix $version) $version) -}}

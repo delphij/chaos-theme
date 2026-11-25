@@ -7,14 +7,17 @@ Only rendered when site.Params.search.enable is true.
        forever, but every page embeds the URL, so any post edit changes every
        page. Without one, the server must make browsers revalidate them. */ -}}
 {{- $fingerprint := ne site.Params.search.fingerprint false -}}
-{{- $indexURL := site.Params.search.indexURL | default "search-index.json" | relURL -}}
-{{- with resources.Get "search-index.json" -}}
+{{- $dataPrefix := partial "_funcs/get-data-prefix.html" . -}}
+{{- $defaultIndex := cond (ne $dataPrefix "") (printf "%s/search-index.json" $dataPrefix) "search-index.json" -}}
+{{- $defaultBody := cond (ne $dataPrefix "") (printf "%s/search-index-body.json" $dataPrefix) "search-index-body.json" -}}
+{{- $indexURL := site.Params.search.indexURL | default $defaultIndex | relURL -}}
+{{- with or (resources.Get $defaultIndex) (resources.Get "search-index.json") -}}
   {{- $res := . -}}
   {{- if $fingerprint }}{{ $res = . | resources.Fingerprint }}{{ end -}}
   {{- $indexURL = $res.RelPermalink -}}
 {{- end -}}
 {{- $bodyIndexURL := "" -}}
-{{- with resources.Get "search-index-body.json" -}}
+{{- with or (resources.Get $defaultBody) (resources.Get "search-index-body.json") -}}
   {{- $res := . -}}
   {{- if $fingerprint }}{{ $res = . | resources.Fingerprint }}{{ end -}}
   {{- $bodyIndexURL = $res.RelPermalink -}}
@@ -24,7 +27,7 @@ Only rendered when site.Params.search.enable is true.
   {{- end -}}
 {{- end -}}
 <dialog id="searchDialog" class="search-dialog" closedby="any" aria-label="{{ T "search" }}" data-index-url="{{ $indexURL }}"{{ with $bodyIndexURL }} data-body-index-url="{{ . }}"{{ end }} data-msg-loading="{{ T "searchLoading" }}" data-msg-empty="{{ T "searchNoResults" }}" data-msg-count="{{ T "searchResultCount" (dict "Count" "{count}") }}" data-msg-error="{{ T "searchError" }}" data-msg-deprecated="{{ T "searchDeprecated" }}">
-  <div class="search-box">
+  <search class="search-box">
     <div class="search-header">
       <span class="search-icon" aria-hidden="true">
         {{- partial "icon-search.html" . -}}
@@ -48,5 +51,5 @@ Only rendered when site.Params.search.enable is true.
       <span class="search-shortcut"><kbd>↵</kbd> {{ T "searchOpen" }}</span>
       <span class="search-shortcut"><kbd>ESC</kbd> {{ T "searchClose" }}</span>
     </div>
-  </div>
+  </search>
 </dialog>

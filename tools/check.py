@@ -325,8 +325,11 @@ def check_search_links(public):
     the comparison is against the directory names as written, not against
     what opens.
     """
-    # search-index.json, or search-index.<hash>.json when fingerprinted
-    indexes = sorted(public.glob('search-index.json')) + sorted(public.glob('search-index.*.json'))
+    # search-index.json (or search-index.<hash>.json) at root or under params.data
+    indexes = sorted(
+        p for p in public.rglob('search-index*.json')
+        if not p.name.startswith('search-index-body')
+    )
     if not indexes:
         notes.append('search-links: no search index')
         return
@@ -614,6 +617,85 @@ def check_schema_jsonld(public):
         notes.append(f'schema-jsonld: {blocks} block(s) across {pages} page(s) clean')
 
 
+_JSON_TYPES = {'int': int, 'str': str, 'list': list, 'dict': dict}
+
+
+def _check_fields(obj, spec, ctx, issues):
+    if not isinstance(obj, dict):
+        issues.append(f'{ctx}: expected object')
+        return
+    for key, tname in spec.items():
+        if key not in obj:
+            issues.append(f'{ctx}: missing required key {key!r}')
+            continue
+        val = obj[key]
+        expected = _JSON_TYPES[tname]
+        if not isinstance(val, expected) or (expected is int and isinstance(val, bool)):
+            issues.append(f'{ctx}.{key}: expected {tname}, got {type(val).__name__}')
+
+
+def check_data_api_schemas(theme: Path, public: Path):
+    """Validates published static data API JSON payloads against data/chaos_api.json.
+
+    Additive fields are allowed without bumping the version; missing or
+    retyped required fields fail the build so breaking changes cannot ship
+    silently under an old version path.
+    """
+    contract_path = theme / 'assets' / 'chaos_api.json'
+    if not contract_path.exists():
+        fail('data-api-schema', f'missing schema contract: {contract_path}')
+        return
+    contract = json.loads(contract_path.read_text(encoding='utf-8'))
+    version = int(contract['version'])
+    endpoints = contract['endpoints']
+
+    targets = []
+    for f in sorted(public.rglob('*.json')):
+        name = f.name
+        if name.startswith('sidebar') and name.endswith('.json'):
+            targets.append(('sidebar', f))
+        elif name.startswith('search-index-body') and name.endswith('.json'):
+            targets.append(('search-index-body', f))
+        elif name.startswith('search-index') and name.endswith('.json'):
+            targets.append(('search-index', f))
+
+    if not targets:
+        notes.append(f'data-api-schema: v{version}, no endpoints published')
+        return
+
+    issues = []
+    for kind, path in targets:
+        rel = path.relative_to(public).as_posix()
+        spec = endpoints[kind]
+        try:
+            data = json.loads(path.read_text(encoding='utf-8'))
+        except ValueError as e:
+            issues.append(f'{rel}: invalid JSON ({e})')
+            continue
+
+        _check_fields(data, spec['required'], rel, issues)
+        if isinstance(data, dict) and data.get('schema') != version:
+            issues.append(f'{rel}: schema={data.get("schema")!r}, expected {version}')
+
+        if kind == 'sidebar' and isinstance(data.get('widgets'), list):
+            for i, w in enumerate(data['widgets']):
+                wctx = f'{rel}#widgets[{i}]'
+                _check_fields(w, spec['widget_required'], wctx, issues)
+                if isinstance(w, dict) and isinstance(w.get('items'), list):
+                    for j, item in enumerate(w['items']):
+                        _check_fields(item, spec['item_required'], f'{wctx}.items[{j}]', issues)
+                if isinstance(w, dict) and 'more' in w:
+                    _check_fields(w['more'], spec['more_required'], f'{wctx}.more', issues)
+        elif kind == 'search-index' and isinstance(data.get('docs'), list):
+            for i, doc in enumerate(data['docs']):
+                _check_fields(doc, spec['doc_required'], f'{rel}#docs[{i}]', issues)
+
+    if issues:
+        fail('data-api-schema', f'{len(issues)} issue(s): {"; ".join(issues[:5])}')
+    else:
+        notes.append(f'data-api-schema: v{version}, {len(targets)} file(s) clean')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -640,6 +722,7 @@ def main():
         check_xsl_wellformed(public)
         check_nav_active(public)
         check_search_links(public)
+        check_data_api_schemas(theme, public)
         check_unparsed_strong(public, content)
         check_schema_jsonld(public)
     else:
@@ -647,6 +730,7 @@ def main():
         notes.append('xsl-wellformed: skipped (no --public)')
         notes.append('nav-active: skipped (no --public)')
         notes.append('search-links: skipped (no --public)')
+        notes.append('data-api-schema: skipped (no --public)')
         notes.append('unparsed-strong: skipped (no --public)')
         notes.append('schema-jsonld: skipped (no --public)')
 

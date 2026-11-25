@@ -203,8 +203,10 @@ The two added for this theme's own correctness:
   inside URL-typed attributes (`data-*-url-*`), authored script left inline in
   a template, template indentation leaking into the feeds, an XSL stylesheet
   that no longer parses as XML, a menu whose active entry is not the page's
-  own, a search result linking a page that was not published. Python 3 only,
-  exit 1 on failure, and it belongs in the build right after `hugo`
+  own, a search result linking a page that was not published, and published
+  static data API payloads (`/_data/v<N>/*.json`) conforming to
+  `assets/chaos_api.json`. Python 3 only, exit 1 on failure, and it belongs in
+  the build right after `hugo`
 - `tools/search_harness.mjs` -- runs `assets/js/search.js` against a real
   index in a stubbed DOM; `--compare <file>` checks a change against the
   version it replaces. Derives its queries from the index, so it carries no

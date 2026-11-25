@@ -19,6 +19,7 @@ import { initHeadingCopy } from './modules/heading-copy.js';
 import { initBilingualSelect } from './modules/bilingual-select.js';
 import { initLightbox } from './modules/lightbox.js';
 import { initTaskLists } from './modules/task-list.js';
+import { initSidebar } from './modules/sidebar.js';
 
 initTheme();
 initOverlays();
@@ -29,3 +30,4 @@ initHeadingCopy();
 initBilingualSelect();
 initLightbox();
 initTaskLists();
+initSidebar();

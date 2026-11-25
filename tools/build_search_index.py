@@ -300,17 +300,37 @@ def published_pages(site_dir: str, hugo: str, base_url: str) -> list:
             if row["kind"] == "page" and row["path"].endswith(".md")]
 
 
-def site_hides_post_date(site_dir: str, hugo: str) -> bool:
-    """Reports whether the site sets params.hidePostDate = true."""
+def load_site_params(site_dir: str, hugo: str) -> dict:
+    """Reads the merged Hugo site params (including theme defaults) via `hugo config`."""
     try:
         result = subprocess.run([hugo, "config", "--format", "json", "--source", site_dir],
                                 capture_output=True, text=True, encoding="utf-8")
         if result.returncode == 0:
             cfg = json.loads(result.stdout)
-            return bool((cfg.get("params") or {}).get("hidepostdate"))
+            return cfg.get("params") or {}
     except (OSError, ValueError):
         pass
-    return False
+    return {}
+
+
+def load_theme_api_version(script_dir: str) -> int:
+    """Reads the theme-owned data API schema version from assets/chaos_api.json."""
+    api_path = os.path.join(os.path.dirname(script_dir), "assets", "chaos_api.json")
+    try:
+        with open(api_path, "r", encoding="utf-8") as f:
+            return int(json.load(f).get("version", 1))
+    except (OSError, ValueError, TypeError):
+        return 1
+
+
+def data_prefix_from_params(params: dict, api_version: int) -> str:
+    """Derives the versioned static data prefix (e.g. '_data/v1') from params.data.prefix and theme API version."""
+    data_cfg = params.get("data")
+    prefix = "_data"
+    if isinstance(data_cfg, dict) and "prefix" in data_cfg:
+        prefix = str(data_cfg["prefix"]).strip("/")
+    version = f"v{api_version}"
+    return f"{prefix}/{version}" if prefix else version
 
 
 def git_lastmod_dates(site_dir: str) -> dict:
@@ -456,7 +476,7 @@ def tokenize(text: str, stop_words: set, fold: dict = None) -> set:
 def main():
     parser = argparse.ArgumentParser(description="Build offline search index for Chaos theme.")
     parser.add_argument("--content", default="content", help="Path to Hugo content directory (default: content)")
-    parser.add_argument("--output", default="assets/search-index.json", help="Path to output Tier 1 / core search-index.json (default: assets/search-index.json)")
+    parser.add_argument("--output", default="", help="Path to output Tier 1 / core search-index.json (default: assets/<params.data.prefix>/<params.data.version>/search-index.json)")
     parser.add_argument("--output-body", default="", help="Path to output Tier 2 / body search-index.json (default: auto derived as <stem>-body.json)")
     parser.add_argument("--single-file", action="store_true", help="Generate legacy monolithic single-file index instead of two-tier")
     parser.add_argument("--base-url", default="", help="baseURL to publish under, overriding the site's (default: the site's)")
@@ -473,14 +493,22 @@ def main():
         sys.stderr.write(f"Content directory not found: {content_dir}\n")
         sys.exit(1)
 
-    output_path = os.path.abspath(args.output)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    api_version = load_theme_api_version(script_dir)
+    site_dir = os.path.dirname(content_dir)
+    site_params = load_site_params(site_dir, args.hugo)
+    if args.output:
+        output_path = os.path.abspath(args.output)
+    else:
+        data_prefix = data_prefix_from_params(site_params, api_version)
+        rel_parts = ["assets", *([data_prefix] if data_prefix else []), "search-index.json"]
+        output_path = os.path.abspath(os.path.join(site_dir, *rel_parts))
     if args.output_body:
         output_body_path = os.path.abspath(args.output_body)
     else:
         root, ext = os.path.splitext(output_path)
         output_body_path = f"{root}-body{ext or '.json'}"
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
     default_stopwords_file = os.path.join(script_dir, "stopwords.txt")
 
     # --stopwords replaces the theme's list outright, so the site's own
@@ -507,9 +535,8 @@ def main():
         stop_words = {"".join(fold.get(ch, ch) for ch in word) for word in stop_words}
     fold_ords = str.maketrans(fold)
 
-    site_dir = os.path.dirname(content_dir)
     pages = published_pages(site_dir, args.hugo, args.base_url)
-    use_lastmod = args.use_lastmod or site_hides_post_date(site_dir, args.hugo)
+    use_lastmod = args.use_lastmod or bool(site_params.get("hidepostdate"))
     git_dates = git_lastmod_dates(site_dir) if use_lastmod else {}
 
     print(f"Active stop words: {len(stop_words)} terms")
@@ -622,7 +649,7 @@ def main():
     # The body index leaves out the pairs the core one has: search.js has
     # loaded the core index by the time it reads this one.
     fold_sent = set()
-    t1_size_kb = write_index(output_path, {"docs": docs, **pack_index(tier1_index, fold, fold_credit, fold_sent)})
+    t1_size_kb = write_index(output_path, {"schema": api_version, "docs": docs, **pack_index(tier1_index, fold, fold_credit, fold_sent)})
 
     if args.single_file:
         print("Successfully generated monolithic search index:")
@@ -630,7 +657,7 @@ def main():
         print(f"  - Total unique terms:  {len(tier1_index)}")
         print(f"  - Output file:         {output_path} ({t1_size_kb:.1f} KB)")
     else:
-        t2_size_kb = write_index(output_body_path, pack_index(tier2_index, fold, fold_credit, fold_sent))
+        t2_size_kb = write_index(output_body_path, {"schema": api_version, **pack_index(tier2_index, fold, fold_credit, fold_sent)})
         print("Successfully generated two-tier search index:")
         print(f"  - Total indexed posts: {len(docs)}")
         print(f"  - Tier 1 (Core):       {output_path} ({t1_size_kb:.1f} KB, {len(tier1_index)} terms)")

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "endpoints": {
+    "sidebar": {
+      "required": {
+        "schema": "int",
+        "widgets": "list"
+      },
+      "widget_required": {
+        "id": "str",
+        "title": "str",
+        "items": "list"
+      },
+      "item_required": {
+        "name": "str",
+        "url": "str",
+        "count": "int"
+      },
+      "more_required": {
+        "text": "str",
+        "url": "str"
+      }
+    },
+    "search-index": {
+      "required": {
+        "schema": "int",
+        "docs": "list",
+        "terms": "str",
+        "postings": "str"
+      },
+      "doc_required": {
+        "title": "str",
+        "url": "str",
+        "date": "str"
+      }
+    },
+    "search-index-body": {
+      "required": {
+        "schema": "int",
+        "terms": "str",
+        "postings": "str"
+      }
+    }
+  }
+}

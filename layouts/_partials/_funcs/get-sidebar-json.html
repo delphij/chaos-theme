@@ -1,0 +1,64 @@
+{{- /*
+Builds and publishes the versioned browsing-guide sidebar JSON payload once
+per language via Hugo Pipes, returning its RelPermalink.
+
+Schema v1 (additive-friendly: new widgets or optional fields keep v1;
+breaking changes bump `params.data.version` in hugo.toml):
+  {
+    "schema": 1,
+    "widgets": [
+      {
+        "id": "categories" | "tags" | ...,
+        "title": "...",
+        "prefix": "#",          // optional
+        "items": [{ "name": "...", "url": "...", "count": 42 }],
+        "more": { "text": "...", "url": "..." }  // optional
+      }
+    ]
+  }
+
+@returns {string} RelPermalink of the published sidebar JSON asset.
+*/ -}}
+{{- $cats := slice -}}
+{{- range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "categories" "Limit" 8) -}}
+  {{- $cats = $cats | append (dict "name" .Page.LinkTitle "url" .Page.RelPermalink "count" .Count) -}}
+{{- end -}}
+
+{{- $tags := slice -}}
+{{- range partial "_funcs/get-filtered-terms.html" (dict "Taxonomy" "tags" "Limit" 16) -}}
+  {{- $tags = $tags | append (dict "name" .Page.LinkTitle "url" .Page.RelPermalink "count" .Count) -}}
+{{- end -}}
+
+{{- $catsURL := "" -}}
+{{- with site.GetPage "/categories" -}}{{- $catsURL = .RelPermalink -}}{{- end -}}
+
+{{- $widgets := slice
+  (dict
+    "id" "categories"
+    "title" (T "coreCategories")
+    "items" $cats
+    "more" (dict
+      "text" (T "allCategoriesLink" (dict "Count" (len site.Taxonomies.categories)))
+      "url" (or $catsURL site.Home.RelPermalink)
+    )
+  )
+  (dict
+    "id" "tags"
+    "title" (T "popularTags")
+    "prefix" "#"
+    "items" $tags
+    "more" (dict
+      "text" (T "allTagsLink" (dict "Count" (len site.Taxonomies.tags)))
+      "url" ("tags/" | relLangURL)
+    )
+  )
+-}}
+
+{{- $api := resources.Get "chaos_api.json" | transform.Unmarshal -}}
+{{- $schemaVer := int ($api.version | default 1) -}}
+{{- $data := dict "schema" $schemaVer "widgets" $widgets -}}
+{{- $dataPrefix := partial "_funcs/get-data-prefix.html" . -}}
+{{- $name := cond hugo.IsMultilingual (printf "sidebar-%s.json" site.Language.Lang) "sidebar.json" -}}
+{{- $path := cond (ne $dataPrefix "") (printf "%s/%s" $dataPrefix $name) $name -}}
+{{- $res := resources.FromString $path ($data | jsonify) -}}
+{{- return $res.RelPermalink -}}
