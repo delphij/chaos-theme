@@ -20,10 +20,10 @@ enableGitInfo = false
 # Hugo does not inherit [outputs] from a theme -- only output format and media
 # type definitions merge -- so every site has to name the formats itself. These
 # are the ones the theme provides templates for: the Atom feed, the two XSLT
-# stylesheets that render the feeds and the sitemap as readable pages, and the
-# redirect rules.
+# stylesheets that render the feeds and the sitemap as readable pages, the
+# redirect rules, and the optional /llms.txt outline.
 [outputs]
-  home = ['HTML', 'ATOM', 'sitemapxsl', 'RSS', 'feedxsl', 'REDIR']
+  home = ['HTML', 'ATOM', 'sitemapxsl', 'RSS', 'feedxsl', 'REDIR', 'LLMS']
   section = ['HTML']
   taxonomy = ['HTML']
   term = ['HTML']

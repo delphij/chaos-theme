@@ -3,3 +3,5 @@
 resources/
 public/
 .hugo_build.lock
+exampleSite/assets/_data/
+exampleSite/assets/jsconfig.json
