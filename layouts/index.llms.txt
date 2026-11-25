@@ -40,11 +40,12 @@ Optional cap: `[params.llms] limit = 0` (0 = list all main-section pages).
   {{- $heading := or .title "Pages" -}}
   {{- $lines = $lines | append "" (printf "## %s" $heading) "" -}}
   {{- range .pages -}}
+    {{- $title := .Title | htmlUnescape -}}
     {{- $desc := partialCached "_funcs/get-meta-description.html" . .RelPermalink | htmlUnescape -}}
-    {{- if and $desc (ne $desc .Title) -}}
-      {{- $lines = $lines | append (printf "- [%s](%s): %s" .Title .Permalink $desc) -}}
+    {{- if and $desc (ne $desc $title) -}}
+      {{- $lines = $lines | append (printf "- [%s](%s): %s" $title .Permalink $desc) -}}
     {{- else -}}
-      {{- $lines = $lines | append (printf "- [%s](%s)" .Title .Permalink) -}}
+      {{- $lines = $lines | append (printf "- [%s](%s)" $title .Permalink) -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
