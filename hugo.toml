@@ -98,8 +98,10 @@
   # categoryPreviewCount = 10
 
   # Static data API path prefix (optional; default: "_data").
-  # The schema version segment (e.g. "v1") is owned by the theme itself in
-  # assets/chaos_api.json and bumped automatically on breaking schema changes.
+  # Publishes fixed-URL JSON payloads (sidebar.json, search-index*.json) under
+  # /<prefix>/v<schema>/. The schema version segment (e.g. "v1") is owned by
+  # the theme itself in assets/chaos_api.json and bumped automatically on
+  # breaking schema changes.
   # [params.data]
   #   prefix = "_data"
 
@@ -110,11 +112,11 @@
   # Client-side full-text search (optional, disabled by default)
   # When enabled, adds a search button to the header and hotkey '/' modal.
   # Generate search index with: python3 themes/chaos/tools/build_search_index.py
-  # (auto-reads params.data prefix/version from `hugo config`).
+  # (auto-reads params.data.prefix from `hugo config` and the schema version
+  # from assets/chaos_api.json).
   # [params.search]
   #   enable = true
-  #   indexURL = "/_data/v1/search-index.json"
-  #   bodyIndexURL = "/_data/v1/search-index-body.json"  # Optional; auto-detected if present in assets/
+  #   fingerprint = true  # Optional: add content hashes to index URLs (default: false)
 
 [module]
   [module.hugoVersion]

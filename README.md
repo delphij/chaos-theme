@@ -221,8 +221,7 @@ hasCJKLanguage = true
   # Client-side full-text search (optional, disabled by default)
   [params.search]
     enable = true                      # Enable search button and '/' hotkey
-    # indexURL = "/_data/v1/search-index.json"  # Default: "/_data/v1/search-index.json"
-    # fingerprint = false              # Serve the indexes from assets/ at fixed URLs (default: true)
+    # fingerprint = true               # Add content hashes to index URLs (default: false)
 
 [params.social]
   facebook_app_id = "..."
@@ -553,22 +552,31 @@ Add to `config.toml` (or `hugo.toml`):
 ```toml
 [params.search]
   enable = true
-  # Optional: auto-resolved from assets/_data/v1/search-index*.json
-  # (with fallback to legacy assets/search-index*.json)
-  # indexURL = "/_data/v1/search-index.json"
-  # bodyIndexURL = "/_data/v1/search-index-body.json"
-  # Optional: publish the indexes from assets/ without a fingerprint
-  # fingerprint = false
+  # Optional: add content hashes to index URLs (default: false)
+  # fingerprint = true
 ```
 
-Every page carries the index URLs. With the default fingerprint, adding or
-editing any post changes the index, its URL, and so every page of the site --
-which a deploy that skips unchanged files (rsync, a CDN) then has to ship in
-full. `fingerprint = false` publishes them under `/_data/v1/` (alongside the
-theme's shared `/_data/v1/sidebar.json` browsing-guide payload) at fixed URLs,
-so pages change only when their own content does. Breaking schema changes bump
-the theme-owned version in `assets/chaos_api.json` (`v1` -> `v2`) to bypass
-stale caches immediately. For nginx:
+Every page embeds the search index URLs. By default (`fingerprint = false`),
+both the search indexes (`search-index.json`, `search-index-body.json`) and the
+homepage browsing-guide payload (`sidebar.json`, or `sidebar-<lang>.json` on
+multilingual sites) are published at fixed URLs under `/_data/v1/`, so editing
+one post changes only that post's page instead of rewriting every HTML file on
+the site (which matters for incremental deploys such as `rsync` or CDN cache
+invalidation). Breaking schema changes bump the theme-owned version in
+`assets/chaos_api.json` (`v1` -> `v2`) to bypass stale caches immediately. Set
+`fingerprint = true` only if your host serves immutable long-term caches across
+the whole site and you want hashed search index URLs at the cost of updating
+every page on post edits.
+
+**Dynamic desktop sidebar (`sidebar.json`)**: Generated automatically by Hugo
+at build time (no external script required) and always served at a fixed URL
+under `/_data/v1/`. On desktop viewports (`>= 1360px`), `modules/sidebar.js`
+fetches it lazily to populate the browsing-guide card without duplicating
+sidebar markup across paginated list pages; narrow viewports where the sidebar
+is hidden never issue a request, and without JavaScript (or on fetch failure)
+the `<aside hidden>` element stays collapsed with no empty shell.
+
+For nginx, one location block covers all `/_data/` payloads:
 
 ```nginx
 location ^~ /_data/ {

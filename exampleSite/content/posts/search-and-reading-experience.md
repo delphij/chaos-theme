@@ -35,12 +35,21 @@ Chaos内置了轻量级的客户端离线全文检索，无需依赖任何第三
 在部署站点前，运行主题内置的Python脚本生成索引文件：
 
 ```bash
-python3 themes/chaos/tools/build_search_index.py \
-  --content content \
-  --output assets/search-index.json
+python3 themes/chaos/tools/build_search_index.py
 ```
 
-执行时，脚本会调用`hugo list published`读取实际发布的页面列表，默认同时生成核心索引（`assets/search-index.json`）与正文索引（`assets/search-index-body.json`）；若站点存在`data/stopwords.txt`，其中的自定义停用词会自动并入默认列表。将索引输出至`assets/`便于Hugo在构建时计算指纹（若希望增量部署时固定索引文件名、避免每篇文章随索引哈希改变而重传，可在`[params.search]`中设`fingerprint = false`并由服务器配置缓存重验证）。
+执行时，脚本会调用`hugo list published`读取实际发布的页面列表，并根据站点配置与主题的数据接口版本自动确定输出路径（默认发布在`/_data/`下的版本化目录中），同时生成核心索引与正文索引；模板也会自动解析同一路径，无需在站点配置中手写索引URL。若站点存在`data/stopwords.txt`，其中的自定义停用词会自动并入默认列表。
+
+默认情况下（`fingerprint = false`），搜索索引与桌面端侧边栏数据（`sidebar.json`，由Hugo自动生成、仅在宽度`>= 1360px`时按需加载）均以固定文件名发布在`/_data/`下，从而避免修改单篇文章时因索引哈希变化导致全站HTML重传；当数据结构发生不兼容变更时，主题会自动升级版本路径绕过旧缓存。建议在Web服务器中为`/_data/`统一配置缓存策略（例如nginx）：
+
+```nginx
+location ^~ /_data/ {
+    add_header X-Robots-Tag "noindex, nofollow" always;
+    add_header Cache-Control "public, max-age=3600, stale-while-revalidate=86400" always;
+}
+```
+
+若希望由Hugo为搜索索引文件名附加内容哈希以配合永久不可变缓存，可在`[params.search]`中显式设置`fingerprint = true`。
 
 #### 单文件索引选项（`--single-file`）
 
@@ -50,7 +59,7 @@ python3 themes/chaos/tools/build_search_index.py \
 python3 themes/chaos/tools/build_search_index.py --single-file
 ```
 
-此时脚本会将标题、标签、分类以及正文与代码的全部倒排词条合并打包进单个`assets/search-index.json`中，且不生成`-body.json`文件。页面的`search.js`脚本完全向下兼容此模式：当检测到不存在第二层索引时，会自动跳过异步请求，直接基于单文件执行全量检索。
+此时脚本会将标题、标签、分类以及正文与代码的全部倒排词条合并打包进单个核心索引文件中，且不生成`-body.json`文件。页面的`search.js`脚本完全向下兼容此模式：当检测到不存在第二层索引时，会自动跳过异步请求，直接基于单文件执行全量检索。
 
 **两种模式的工程权衡**：
 - **两层索引（默认推荐）**：

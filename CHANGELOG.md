@@ -111,12 +111,17 @@ here.
 
 ### Changed
 
-- **Search index default output path moved to `assets/_data/v1/`**:
+- **Search index default output path moved to `assets/_data/v1/` and
+  `params.search.fingerprint` now defaults to `false`**:
   `tools/build_search_index.py` now defaults to writing
   `assets/_data/v1/search-index.json` and `assets/_data/v1/search-index-body.json`
-  (with `"schema": 1`) when invoked without `--output`. Existing sites that
-  still pass `--output assets/search-index.json` continue to work via the
-  template's legacy fallback, but when upgrading it is recommended to:
+  (with `"schema": 1`) when invoked without `--output`, and templates publish
+  them at fixed URLs by default (matching `sidebar.json`) so editing one post
+  does not rewrite every HTML page on the site. Set `params.search.fingerprint
+  = true` to opt back in to content-hashed search index URLs. Existing sites
+  that still pass `--output assets/search-index.json` continue to work via the
+  template's legacy fallback (with a deprecation notice on `stderr`), but when
+  upgrading it is recommended to:
   1. Remove `--content content --output assets/search-index.json` from your
      build script and invoke `python3 themes/chaos/tools/build_search_index.py`
      with no arguments (and delete any stale root `assets/search-index*.json`).
@@ -124,9 +129,9 @@ here.
      `[params.search]` so the template resolves `/_data/v1/search-index.json`
      automatically.
   3. Add `assets/_data/` to `.gitignore`.
-  4. If using `params.search.fingerprint = false`, update your web server
-     cache/robots rule (e.g. nginx `location ^~ /_data/`) to cover `/_data/`
-     instead of `/search-index*.json`.
+  4. Configure your web server cache/robots rule (e.g. nginx
+     `location ^~ /_data/`) to cover `/_data/` (both search indexes and
+     `sidebar.json`) instead of `/search-index*.json`.
 - **Mermaid `securityLevel` tightened to `'strict'`** in `assets/js/mermaid.js`.
 - **Modern web standards & accessibility polish**: Converted screen typography
   tokens from `px` to `rem`, added progressive CSS `scroll-target-group: auto`
