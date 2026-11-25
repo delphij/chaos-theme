@@ -12,7 +12,7 @@ site can rely on:
 
 - **Configuration**: the `[params]` keys documented in README.md, and the
   output format names a site lists under `[outputs]` (`ATOM`, `feedxsl`,
-  `sitemapxsl`, `REDIR`, `SECURITY`).
+  `sitemapxsl`, `REDIR`, `SECURITY`, `LLMS`).
 - **Front matter**: the page variables documented in README.md.
 - **Shortcodes**: `x` and `x_simple`, with their arguments.
 - **Overrides**: the i18n keys, and the CSS custom properties in
@@ -96,6 +96,43 @@ here.
   double-click and touch double-tap zoom toggle, keyboard zoom (`+`/`-`/`0`),
   full-viewport mobile layout with 44px touch targets, localized controls across
   all 5 languages, `Esc`/backdrop dismiss, and a direct original-file link.
+- **Versioned static data API (`/_data/v1/`) and dynamic desktop sidebar**:
+  Static JSON endpoints now live under a versioned prefix (`/_data/v1/` by
+  default, configurable via `[params.data] prefix = "_data"` and versioned by
+  the theme-owned schema contract in `assets/chaos_api.json`). The homepage
+  browsing-guide sidebar is published once as `/_data/v1/sidebar.json` and
+  loaded on desktop viewports (`>= 1360px`) by `assets/js/modules/sidebar.js`,
+  avoiding duplicated sidebar markup across paginated pages. `tools/check.py`
+  now automatically validates all published `/_data/v1/*.json` endpoints against
+  `assets/chaos_api.json`.
+- **Opt-in `/llms.txt` outline (`LLMS` output format)**: Add `"LLMS"` to
+  `[outputs] home` to publish a `llmstxt.org`-compatible Markdown site outline
+  at `/llms.txt`, with an optional `[params.llms] limit` cap for large sites.
+
+### Changed
+
+- **Search index default output path moved to `assets/_data/v1/`**:
+  `tools/build_search_index.py` now defaults to writing
+  `assets/_data/v1/search-index.json` and `assets/_data/v1/search-index-body.json`
+  (with `"schema": 1`) when invoked without `--output`. Existing sites that
+  still pass `--output assets/search-index.json` continue to work via the
+  template's legacy fallback, but when upgrading it is recommended to:
+  1. Remove `--content content --output assets/search-index.json` from your
+     build script and invoke `python3 themes/chaos/tools/build_search_index.py`
+     with no arguments (and delete any stale root `assets/search-index*.json`).
+  2. Remove any hardcoded `indexURL = "/search-index.json"` under
+     `[params.search]` so the template resolves `/_data/v1/search-index.json`
+     automatically.
+  3. Add `assets/_data/` to `.gitignore`.
+  4. If using `params.search.fingerprint = false`, update your web server
+     cache/robots rule (e.g. nginx `location ^~ /_data/`) to cover `/_data/`
+     instead of `/search-index*.json`.
+- **Mermaid `securityLevel` tightened to `'strict'`** in `assets/js/mermaid.js`.
+- **Modern web standards & accessibility polish**: Converted screen typography
+  tokens from `px` to `rem`, added progressive CSS `scroll-target-group: auto`
+  TOC scrollspy with `IntersectionObserver` fallback, added `<search>` landmark
+  and `labelColon` i18n punctuation across all 5 locales, and hardened HTML/XSL
+  table and landmark semantics.
 
 ### Fixed
 

@@ -577,6 +577,15 @@ location ^~ /_data/ {
 }
 ```
 
+> **Upgrading from an older Chaos release (`assets/search-index*.json`)**: The
+> templates still fall back to legacy `assets/search-index*.json` if present,
+> so existing builds will not break. To adopt `/_data/v1/`, drop `--output
+> assets/search-index.json` from your build script (run
+> `build_search_index.py` with no arguments), remove any hardcoded `indexURL =
+> "/search-index.json"` from `[params.search]`, delete stale
+> `assets/search-index*.json`, add `assets/_data/` to `.gitignore`, and point
+> your server cache rule at `/_data/` as shown above.
+
 #### 2. Generate Search Index During Build
 
 Run the offline indexing tool against your Hugo content directory (with no
@@ -1159,6 +1168,8 @@ python3 themes/chaos/tools/check.py --public public
   name as written, so a miscased link fails even on a case-insensitive file
   system, and an index built for another `baseURL` fails too (needs
   `--public`)
+- every published versioned data API file under `/_data/v<N>/` conforms to
+  the theme-owned schema contract in `assets/chaos_api.json` (needs `--public`)
 
 Exit status is 1 on failure, so a build script can stop on it.
 
@@ -1187,12 +1198,12 @@ version it replaces:
 ```bash
 # What does this query match?
 node themes/chaos/tools/search_harness.mjs \
-  --index assets/search-index.json --query "some term"
+  --index assets/_data/v1/search-index.json --query "some term"
 
 # Did a change to search.js alter any ranking?
 git -C themes/chaos show HEAD:assets/js/search.js > /tmp/search-old.js
 node themes/chaos/tools/search_harness.mjs \
-  --index assets/search-index.json --body assets/search-index-body.json \
+  --index assets/_data/v1/search-index.json --body assets/_data/v1/search-index-body.json \
   --compare /tmp/search-old.js
 ```
 
