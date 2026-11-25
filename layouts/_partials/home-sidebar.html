@@ -15,7 +15,7 @@ tags (falling back to site.Home when /categories/ sets build.render = "never").
         {{- range site.Taxonomies.categories.ByCount }}
           {{- $count := len (partial "_funcs/filter-listed-pages.html" .Pages) -}}
           {{- if gt $count 0 }}
-        <a class="sidebar-tag-item" href="#category-{{ path.Base .Page.Path }}">{{ .Page.LinkTitle }} ({{ $count }})</a>
+        <a class="sidebar-tag-item" href="#category-{{ path.Base .Page.Path }}" data-count="{{ $count }}">{{ .Page.LinkTitle }}</a>
           {{- end }}
         {{- end }}
       </div>

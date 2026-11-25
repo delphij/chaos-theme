@@ -251,6 +251,16 @@
     color: var(--muted);
   }
 
+  /* Inline post-count suffix for taxonomy and sidebar links (screen-only,
+     0.9em, tabular numerals, zero extra DOM nodes; omitted in print) */
+  @media screen {
+    :is(.tag-link, .sidebar-tag-item, .tag-flat-item)[data-count]::after {
+      content: " (" attr(data-count) ")";
+      font-size: 0.9em;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
   /* Separators inherit the muted colour of the metadata they sit in */
   .meta-sep {
     -webkit-user-select: none;

@@ -1,0 +1,27 @@
+{{- /*
+Builds and publishes the versioned tag-counts JSON payload once per language
+via Hugo Pipes, returning its RelPermalink.
+
+Schema v1:
+  {
+    "schema": 1,
+    "counts": {
+      "FreeBSD": 42,
+      "ZFS": 12
+    }
+  }
+
+Only tags with count > 1 are serialized: any tag rendered on a published post
+has at least 1 post (itself), so the client defaults missing keys to 1, cutting
+payload size substantially on blogs with many single-use tags.
+
+@returns {string} RelPermalink of the published tag-counts JSON asset.
+*/ -}}
+{{- $s := newScratch -}}
+{{- $s.Set "counts" (dict) -}}
+{{- range site.Taxonomies.tags -}}
+  {{- if gt .Count 1 -}}
+    {{- $s.SetInMap "counts" .Page.LinkTitle .Count -}}
+  {{- end -}}
+{{- end -}}
+{{- return (partial "_funcs/publish-data-json.html" (dict "name" "tag-counts" "payload" (dict "counts" ($s.Get "counts")))) -}}

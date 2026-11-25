@@ -22,7 +22,8 @@ Renders post footer metadata (tags and last modified date) at the end of an arti
 {{- if or $hasTags $hasMod $hasLicense -}}
 <footer class="post-footer">
   {{- if $hasTags -}}
-  <div class="post-tags" role="group" aria-label="{{ T "tags" }}">
+  {{- $tagCountsSrc := partialCached "_funcs/get-tag-counts-json.html" . site.Language.Lang -}}
+  <div class="post-tags" role="group" aria-label="{{ T "tags" }}" data-tag-counts-src="{{ $tagCountsSrc }}">
     {{- partial "taxonomy-links.html" (dict "page" . "taxonomy" "tags") -}}
   </div>
   {{- end -}}

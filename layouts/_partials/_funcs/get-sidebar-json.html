@@ -3,7 +3,7 @@ Builds and publishes the versioned browsing-guide sidebar JSON payload once
 per language via Hugo Pipes, returning its RelPermalink.
 
 Schema v1 (additive-friendly: new widgets or optional fields keep v1;
-breaking changes bump `params.data.version` in hugo.toml):
+breaking changes bump `version` in `assets/chaos_api.json`):
   {
     "schema": 1,
     "widgets": [
@@ -54,11 +54,4 @@ breaking changes bump `params.data.version` in hugo.toml):
   )
 -}}
 
-{{- $api := resources.Get "chaos_api.json" | transform.Unmarshal -}}
-{{- $schemaVer := int ($api.version | default 1) -}}
-{{- $data := dict "schema" $schemaVer "widgets" $widgets -}}
-{{- $dataPrefix := partial "_funcs/get-data-prefix.html" . -}}
-{{- $name := cond hugo.IsMultilingual (printf "sidebar-%s.json" site.Language.Lang) "sidebar.json" -}}
-{{- $path := cond (ne $dataPrefix "") (printf "%s/%s" $dataPrefix $name) $name -}}
-{{- $res := resources.FromString $path ($data | jsonify) -}}
-{{- return $res.RelPermalink -}}
+{{- return (partial "_funcs/publish-data-json.html" (dict "name" "sidebar" "payload" (dict "widgets" $widgets))) -}}

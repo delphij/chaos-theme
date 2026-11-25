@@ -27,7 +27,8 @@ function buildWidget(section) {
     const a = document.createElement('a');
     a.className = 'sidebar-tag-item';
     a.href = item.url;
-    a.textContent = `${prefix}${item.name} (${item.count})`;
+    a.textContent = `${prefix}${item.name}`;
+    a.dataset.count = item.count;
     cloud.append(a);
   }
 

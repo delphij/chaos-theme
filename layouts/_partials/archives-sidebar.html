@@ -14,7 +14,7 @@ Provides sticky jump navigation: by year in chronological mode, or by group
       <h2 class="sidebar-widget-title">{{ T "indexQuickJump" }}</h2>
       <div class="sidebar-tags-cloud sidebar-cat-nav">
         {{- range $groups }}
-        <a class="sidebar-tag-item" href="#{{ .id }}">{{ .title }} ({{ len .pages }})</a>
+        <a class="sidebar-tag-item" href="#{{ .id }}" data-count="{{ len .pages }}">{{ .title }}</a>
         {{- end }}
       </div>
     </div>

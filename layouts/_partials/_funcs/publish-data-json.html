@@ -1,0 +1,17 @@
+{{- /*
+Publishes a versioned JSON data payload under the theme's static data API
+prefix (`/_data/v<N>/` by default), injecting `"schema": <version>` from
+`assets/chaos_api.json` and adding a language suffix on multilingual sites.
+
+@param {string} name    Endpoint stem (e.g. "sidebar", "tag-counts").
+@param {map}    payload JSON fields to merge with `"schema"`.
+@returns {string} RelPermalink of the published JSON asset.
+*/ -}}
+{{- $api := resources.Get "chaos_api.json" | transform.Unmarshal -}}
+{{- $schemaVer := int ($api.version | default 1) -}}
+{{- $data := merge .payload (dict "schema" $schemaVer) -}}
+{{- $dataPrefix := partial "_funcs/get-data-prefix.html" . -}}
+{{- $filename := cond hugo.IsMultilingual (printf "%s-%s.json" .name site.Language.Lang) (printf "%s.json" .name) -}}
+{{- $path := cond (ne $dataPrefix "") (printf "%s/%s" $dataPrefix $filename) $filename -}}
+{{- $res := resources.FromString $path ($data | jsonify) -}}
+{{- return $res.RelPermalink -}}

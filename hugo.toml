@@ -98,8 +98,8 @@
   # categoryPreviewCount = 10
 
   # Static data API path prefix (optional; default: "_data").
-  # Publishes fixed-URL JSON payloads (sidebar.json, search-index*.json) under
-  # /<prefix>/v<schema>/. The schema version segment (e.g. "v1") is owned by
+  # Publishes fixed-URL JSON payloads (sidebar.json, tag-counts.json, search-index*.json)
+  # under /<prefix>/v<schema>/. The schema version segment (e.g. "v1") is owned by
   # the theme itself in assets/chaos_api.json and bumped automatically on
   # breaking schema changes.
   # [params.data]

@@ -96,15 +96,18 @@ here.
   double-click and touch double-tap zoom toggle, keyboard zoom (`+`/`-`/`0`),
   full-viewport mobile layout with 44px touch targets, localized controls across
   all 5 languages, `Esc`/backdrop dismiss, and a direct original-file link.
-- **Versioned static data API (`/_data/v1/`) and dynamic desktop sidebar**:
-  Static JSON endpoints now live under a versioned prefix (`/_data/v1/` by
-  default, configurable via `[params.data] prefix = "_data"` and versioned by
-  the theme-owned schema contract in `assets/chaos_api.json`). The homepage
-  browsing-guide sidebar is published once as `/_data/v1/sidebar.json` and
-  loaded on desktop viewports (`>= 1360px`) by `assets/js/modules/sidebar.js`,
-  avoiding duplicated sidebar markup across paginated pages. `tools/check.py`
-  now automatically validates all published `/_data/v1/*.json` endpoints against
-  `assets/chaos_api.json`.
+- **Versioned static data API (`/_data/v1/`) with dynamic desktop sidebar and
+  article tag counts**: Static JSON endpoints now live under a versioned prefix
+  (`/_data/v1/` by default, configurable via `[params.data] prefix = "_data"`
+  and versioned by the theme-owned schema contract in `assets/chaos_api.json`).
+  The homepage browsing-guide sidebar is published once as
+  `/_data/v1/sidebar.json` and loaded on desktop viewports (`>= 1360px`) by
+  `assets/js/modules/sidebar.js`, avoiding duplicated sidebar markup across
+  paginated pages; article-footer tag counts are published as
+  `/_data/v1/tag-counts.json` (omitting `count == 1` entries for compactness)
+  and appended during browser idle time by `assets/js/modules/tag-counts.js`
+  without churning older article HTML on new posts. `tools/check.py` now automatically validates
+  all published `/_data/v1/*.json` endpoints against `assets/chaos_api.json`.
 - **Opt-in `/llms.txt` outline (`LLMS` output format)**: Add `"LLMS"` to
   `[outputs] home` to publish a `llmstxt.org`-compatible Markdown site outline
   at `/llms.txt`, with an optional `[params.llms] limit` cap for large sites.

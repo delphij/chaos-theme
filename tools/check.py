@@ -650,14 +650,18 @@ def check_data_api_schemas(theme: Path, public: Path):
     endpoints = contract['endpoints']
 
     targets = []
+    version_dir = f'v{version}'
     for f in sorted(public.rglob('*.json')):
         name = f.name
-        if name.startswith('sidebar') and name.endswith('.json'):
+        in_api_dir = f.parent == public or f.parent.name == version_dir
+        if in_api_dir and re.fullmatch(r'sidebar(?:-[a-z0-9-]+)?\.json', name):
             targets.append(('sidebar', f))
         elif name.startswith('search-index-body') and name.endswith('.json'):
             targets.append(('search-index-body', f))
         elif name.startswith('search-index') and name.endswith('.json'):
             targets.append(('search-index', f))
+        elif in_api_dir and re.fullmatch(r'tag-counts(?:-[a-z0-9-]+)?\.json', name):
+            targets.append(('tag-counts', f))
 
     if not targets:
         notes.append(f'data-api-schema: v{version}, no endpoints published')
@@ -689,6 +693,10 @@ def check_data_api_schemas(theme: Path, public: Path):
         elif kind == 'search-index' and isinstance(data.get('docs'), list):
             for i, doc in enumerate(data['docs']):
                 _check_fields(doc, spec['doc_required'], f'{rel}#docs[{i}]', issues)
+        elif kind == 'tag-counts' and isinstance(data.get('counts'), dict):
+            for k, v in data['counts'].items():
+                if not isinstance(v, int) or isinstance(v, bool) or v < 2:
+                    issues.append(f'{rel}#counts[{k!r}]: expected int >= 2, got {v!r}')
 
     if issues:
         fail('data-api-schema', f'{len(issues)} issue(s): {"; ".join(issues[:5])}')

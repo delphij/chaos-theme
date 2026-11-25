@@ -19,4 +19,4 @@ name is Chinese but the number still is not.
 
 @example: {{ partial "term-chip.html" (dict "term" . "class" "tag-flat-item") }}
 */ -}}
-<a class="{{ .class }}" href="{{ .term.Page.RelPermalink }}">{{ with .prefix }}{{ . }}{{ end }}{{ .term.Page.LinkTitle }} ({{ .term.Count }})</a>
+<a class="{{ .class }}" href="{{ .term.Page.RelPermalink }}" data-count="{{ .term.Count }}">{{ with .prefix }}{{ . }}{{ end }}{{ .term.Page.LinkTitle }}</a>

@@ -20,6 +20,7 @@ import { initBilingualSelect } from './modules/bilingual-select.js';
 import { initLightbox } from './modules/lightbox.js';
 import { initTaskLists } from './modules/task-list.js';
 import { initSidebar } from './modules/sidebar.js';
+import { initTagCounts } from './modules/tag-counts.js';
 
 initTheme();
 initOverlays();
@@ -31,3 +32,4 @@ initBilingualSelect();
 initLightbox();
 initTaskLists();
 initSidebar();
+initTagCounts();

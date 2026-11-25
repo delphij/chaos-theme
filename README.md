@@ -569,13 +569,18 @@ invalidation). Breaking schema changes bump the theme-owned version in
 the whole site and you want hashed search index URLs at the cost of updating
 every page on post edits.
 
-**Dynamic desktop sidebar (`sidebar.json`)**: Generated automatically by Hugo
-at build time (no external script required) and always served at a fixed URL
-under `/_data/v1/`. On desktop viewports (`>= 1360px`), `modules/sidebar.js`
-fetches it lazily to populate the browsing-guide card without duplicating
-sidebar markup across paginated list pages; narrow viewports where the sidebar
-is hidden never issue a request, and without JavaScript (or on fetch failure)
-the `<aside hidden>` element stays collapsed with no empty shell.
+**Dynamic desktop sidebar (`sidebar.json`) & article tag counts (`tag-counts.json`)**:
+Both payloads are generated automatically by Hugo at build time (no external
+script required) and served at fixed URLs under `/_data/v1/` (with a language
+suffix on multilingual sites). On desktop viewports (`>= 1360px`),
+`modules/sidebar.js` fetches `sidebar.json` lazily to populate the
+browsing-guide card without duplicating sidebar markup across paginated list
+pages; narrow viewports never issue a request, and without JavaScript (or on
+fetch failure) the `<aside hidden>` element stays collapsed with no empty
+shell. On article pages with tags, `modules/tag-counts.js` fetches
+`tag-counts.json` during idle time (omitting single-use tags to stay compact,
+defaulting missing keys to `1`) and appends ` (N)` to each footer tag link so
+publishing one post never rewrites older articles' HTML.
 
 For nginx, one location block covers all `/_data/` payloads:
 

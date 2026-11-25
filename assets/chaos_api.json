@@ -40,6 +40,12 @@
         "terms": "str",
         "postings": "str"
       }
+    },
+    "tag-counts": {
+      "required": {
+        "schema": "int",
+        "counts": "dict"
+      }
     }
   }
 }
