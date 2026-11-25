@@ -33,7 +33,7 @@ function render(isDark) {
   return (rendered[key] ||= (async () => {
     mermaid.initialize({
       startOnLoad: false,
-      securityLevel: 'loose',
+      securityLevel: 'strict',
       theme: isDark ? 'dark' : 'neutral',
       themeVariables: {
         fontFamily: 'inherit',
