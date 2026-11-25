@@ -22,7 +22,6 @@
   .chroma {
     color: var(--syntax-text);
     background-color: var(--code-bg);
-    -webkit-text-size-adjust: none;
   }
 
   .chroma .hl { background-color: var(--syntax-line-hl); }

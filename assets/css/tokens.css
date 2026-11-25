@@ -432,6 +432,7 @@
        at the bottom of :root mirror back onto CSS color-scheme so light-dark()
        and native UI stay in sync. Print overrides to light in main.css. */
     color-scheme: light dark;
+    accent-color: var(--accent);
 
     /* Color palette - Light / Dark pairs via light-dark()
        Traditional colours at their published values (和色大辞典,
@@ -518,23 +519,24 @@
     --radius: var(--radius-card);      /* Compatibility alias */
     --radius-sm: 4px;                  /* Small border radius */
     --radius-md: 6px;                  /* Medium border radius */
-    --radius-lg: 8px;                  /* Large border radius */
+    --radius-lg: var(--radius-card);   /* Large border radius (alias of --radius-card) */
 
-    /* Typography scale - Consistent font sizing system */
-    --font-size-base: 16px;            /* Base font size */
+    /* Typography scale - Consistent font sizing system in rem so user browser
+       font-size preferences are respected (WCAG 1.4.4). */
+    --font-size-base: 1rem;            /* Base font size (16px at default root) */
     --line-height: 1.7;                /* Line height optimized for compact CJK reading texture */
     --ruby-leading: 0.15;              /* Added to a block's leading when it holds ruby (prose.css) */
-    --h1-size: 28px;                   /* Article titles */
-    --h2-size: 22px;                   /* Section headings */
-    --h3-size: 18px;                   /* Sub-section headings */
+    --h1-size: 1.75rem;                /* Article titles (28px) */
+    --h2-size: 1.375rem;               /* Section headings (22px) */
+    --h3-size: 1.125rem;               /* Sub-section headings (18px) */
 
     /* UI type scale - every non-body size resolves to one of these five steps,
        so components stop inventing half-pixel values of their own. */
-    --text-2xs: 11px;                  /* Badges, keycaps */
-    --text-xs: 12px;                   /* Dense secondary UI */
-    --text-sm: 13px;                   /* Sidebar rows, dates, footer */
-    --text-md: 14px;                   /* Default small text */
-    --text-lg: 15px;                   /* Slightly reduced body */
+    --text-2xs: 0.6875rem;             /* Badges, keycaps (11px) */
+    --text-xs: 0.75rem;                /* Dense secondary UI (12px) */
+    --text-sm: 0.8125rem;              /* Sidebar rows, dates, footer (13px) */
+    --text-md: 0.875rem;               /* Default small text (14px) */
+    --text-lg: 0.9375rem;              /* Slightly reduced body (15px) */
     --small-size: var(--text-md);      /* Small text, captions */
 
     /* Body sans-serif stack - Noto Sans SC first, with platform UI and CJK
@@ -556,10 +558,11 @@
        while full-width CJK punctuation skips both and lands on body CJK
        sans-serif with working halt/chws trimming. Sites that self-host a CJK
        webfont can prepend it or override --font-em without restyling em. */
+    --font-em-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                     "Noto Sans", "Liberation Sans", "DejaVu Sans";
     --font-em: "Chaos Kai", "Chaos Kai Fallback",
                "Chaos Serif", "Chaos Serif Fallback",
-               -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-               "Noto Sans", "Liberation Sans", "DejaVu Sans",
+               var(--font-em-latin),
                "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
                "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 
@@ -606,8 +609,7 @@
   :is(:lang(zh-TW), :lang(zh-HK), :lang(zh-MO), :lang(zh-Hant)) {
     --font-em: "Chaos Kai TC", "Chaos Kai TC Fallback",
                "Chaos Serif TC", "Chaos Serif TC Fallback",
-               -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-               "Noto Sans", "Liberation Sans", "DejaVu Sans",
+               var(--font-em-latin),
                "Noto Sans TC", "PingFang TC", "PingFang HK",
                "Microsoft JhengHei", sans-serif;
     --font-mizige: "Chaos Mizige WenKai TC", "Chaos Mizige BiauKai",
@@ -616,16 +618,14 @@
 
   :lang(ja) {
     --font-em: "Chaos Mincho", "Chaos Mincho Fallback",
-               -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-               "Noto Sans", "Liberation Sans", "DejaVu Sans",
+               var(--font-em-latin),
                "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
                "Yu Gothic", "Meiryo", sans-serif;
     --font-mizige: "Chaos Mizige JA", var(--font-sans);
   }
 
   :lang(ko) {
-    --font-em: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-               "Noto Sans", "Liberation Sans", "DejaVu Sans",
+    --font-em: var(--font-em-latin),
                "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic",
                sans-serif;
   }
@@ -636,9 +636,9 @@
     :root {
       --max-width: 100%;
       --gutter: 16px;
-      --h1-size: 24px;
-      --h2-size: 20px;
-      --h3-size: 17px;
+      --h1-size: 1.5rem;
+      --h2-size: 1.25rem;
+      --h3-size: 1.0625rem;
     }
   }
 }

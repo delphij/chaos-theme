@@ -356,7 +356,7 @@ async function main() {
           if (!target) return 'no #' + id + ' in posts/math-with-katex/';
           target.scrollIntoView({ behavior: 'instant', block: 'start' });
           for (let i = 0; i < 40; i++) {
-            const active = document.querySelector('#tableOfContents a.active');
+            const active = document.querySelector('#tableOfContents a:is(:target-current, .active)');
             if (active && decodeURIComponent(active.getAttribute('href')) === '#' + id) return '';
             await new Promise(r => setTimeout(r, 50));
           }

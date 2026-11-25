@@ -6,13 +6,30 @@
 // navigation and the /archives/ timeline. Extracted from main.js.
 
 const root = document.documentElement;
+const supportsScrollTargetGroup = CSS.supports('scroll-target-group: auto');
 
-// ScrollSpy - Active section highlighting with IntersectionObserver
-// Reused across Article TOC, /tags/ A-Z navigation, and /archives/ timeline
+// ScrollSpy - Active section highlighting.
+// Uses native CSS `scroll-target-group: auto` + `:target-current` where
+// supported (syncing `aria-current` on scrollend for assistive technology),
+// falling back to IntersectionObserver for browsers without it.
 function setupScrollSpy(navContainer, targetSelector) {
   if (!navContainer) return;
   const targets = document.querySelectorAll(targetSelector);
   if (targets.length === 0) return;
+
+  if (supportsScrollTargetGroup) {
+    let currentActive = null;
+    const syncAriaCurrent = () => {
+      const next = navContainer.querySelector('a:target-current');
+      if (next === currentActive) return;
+      currentActive?.removeAttribute('aria-current');
+      next?.setAttribute('aria-current', 'true');
+      currentActive = next;
+    };
+    syncAriaCurrent();
+    document.addEventListener('scrollend', syncAriaCurrent, { passive: true });
+    return;
+  }
 
   let currentActive = null;
   const navHeight = getComputedStyle(root).getPropertyValue('--nav-height').trim() || '80px';

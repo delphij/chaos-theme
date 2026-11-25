@@ -136,11 +136,21 @@
     background: var(--paper);
   }
 
-  .sidebar-tag-item.active,
-  .sidebar-nav-jump.active,
-  .sidebar-az-item.active,
-  .sidebar-year-item.active,
-  .toc-content a.active,
+  /* Native CSS Scrollspy (Chrome 140+ / Edge 140+): groups fragment links so
+     the browser tracks their targets via :target-current; browsers without
+     scroll-target-group fall back to modules/scrollspy.js (.active). */
+  .toc-content,
+  .sidebar-tag-nav,
+  .sidebar-year-list,
+  .sidebar-cat-nav {
+    scroll-target-group: auto;
+  }
+
+  .sidebar-tag-item:is(:target-current, .active),
+  .sidebar-nav-jump:is(:target-current, .active),
+  .sidebar-az-item:is(:target-current, .active),
+  .sidebar-year-item:is(:target-current, .active),
+  .toc-content a:is(:target-current, .active),
   .series-nav-link.active {
     color: var(--primary);
     font-weight: 600;
@@ -196,7 +206,7 @@
     text-align: start;
 
     @media screen and (max-width: 768px) {
-      font-size: 22px;
+      font-size: 1.375rem;
     }
   }
 
@@ -390,7 +400,7 @@
     min-height: 44px;
     padding: 8px;
     border-radius: var(--radius-md);
-    font-size: 18px;
+    font-size: 1.125rem;
     color: var(--heading);
     transition: background var(--transition-fast), color var(--transition-fast);
   }
@@ -398,7 +408,7 @@
   /* Menu toggle button - Hamburger menu for mobile */
   .menu-toggle {
     display: none;                     /* Hidden by default on desktop */
-    font-size: 20px;
+    font-size: 1.25rem;
     line-height: 1;
 
     /* Show hamburger menu toggle on mobile */
@@ -1251,7 +1261,6 @@
       font-size: var(--text-lg);
       line-height: 1.65;
       margin: 0 0 12px 0;
-      word-break: break-word;
       overflow-wrap: break-word;
       text-align: left;
 
@@ -1412,36 +1421,14 @@
     }
   }
 
+  .code-vars-details {
+    --alert-chevron: var(--muted);
+  }
+
   .code-vars-header {
-    display: flex;
     align-items: center;
-    gap: 6px 10px;
     flex-wrap: wrap;
-    padding: 8px 16px;
     background: var(--ground-head);
-    cursor: pointer;
-    -webkit-user-select: none;
-    user-select: none;
-    list-style: none;
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-  }
-
-  .code-vars-chevron {
-    inline-size: 0.75rem;
-    block-size: 0.75rem;
-    flex-shrink: 0;
-    color: var(--muted);
-
-    @media screen and (prefers-reduced-motion: no-preference) {
-      transition: transform var(--transition-fast);
-    }
-  }
-
-  .code-vars-details[open] > .code-vars-header .code-vars-chevron {
-    transform: rotate(90deg);
   }
 
   .code-vars-title {
@@ -1821,9 +1808,7 @@
      ========================================================================== */
 
   /* Shared modal dialog scroll containment: prevents wheel/touch scroll
-     chaining to the underlying page in Chromium/Firefox (via overscroll-behavior
-     on :modal and ::backdrop) and Safari (via html:has(dialog:modal); html
-     already has scrollbar-gutter: stable, so hiding the scrollbar shifts nothing). */
+     chaining to the underlying page without locking html/body overflow. */
   dialog:modal {
     overscroll-behavior: contain;
 
@@ -1831,10 +1816,6 @@
       overflow: hidden;
       overscroll-behavior: contain;
     }
-  }
-
-  html:has(dialog:modal) {
-    overflow: hidden;
   }
 
   dialog.search-dialog {
@@ -2045,6 +2026,7 @@
   /* System colours suppress the tinted grounds; retain clear boundaries there. */
   @media (forced-colors: active) {
     dialog.search-dialog,
+    dialog.image-lightbox,
     .search-input {
       border: 1px solid CanvasText;
     }
@@ -2068,7 +2050,7 @@
     margin: auto;
     padding: 0;
     border: var(--border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-card);
     background-color: var(--bg);
     color: var(--text);
     box-shadow: var(--shadow-dialog);
@@ -2081,6 +2063,7 @@
 
     &::backdrop {
       background-color: rgba(0, 0, 0, 0.72);
+      -webkit-backdrop-filter: blur(4px);
       backdrop-filter: blur(4px);
     }
   }
@@ -2115,8 +2098,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    min-width: 2rem;
+    min-height: 2rem;
     padding: 0;
     border: none;
     border-radius: var(--radius-sm);
@@ -2129,7 +2112,7 @@
 
     &:hover,
     &:focus-visible {
-      background-color: var(--hover-bg);
+      background-color: var(--paper);
       color: var(--heading);
     }
   }
