@@ -1,0 +1,82 @@
+{{- /*
+Applies CJK spacing and punctuation binding around inline KaTeX formulas
+(`<span class="math-inline">`):
+  - Strips author-typed CJK spaces around `.math-inline` when `strip` is true.
+  - Adds `.math-gap-start` / `.math-gap-end` next to CJK ideographs/kana
+    (where CSS `text-autospace` cannot cross KaTeX's `inline-block` boundary).
+  - Wraps short formulas (1 `.katex-base`, or 2 bases up to 10 visible chars)
+    with adjacent CJK opening/closing punctuation in `.math-bind`.
+
+Called by `_funcs/typeset-content.html` while KaTeX subtrees are held in
+`\x00\x02<idx>\x00` placeholders.
+
+@param {string} .seg       HTML segment containing `<span class="math-inline">`.
+@param {slice}  .katexHeld Held raw `<span class="katex">...</span>` subtrees.
+@param {bool}   .strip     Whether to strip author-typed CJK spaces.
+@returns {string} Segment with inline math spacing and binding applied.
+*/ -}}
+{{- $seg := .seg -}}
+{{- $katexHeld := .katexHeld -}}
+{{- $strip := .strip -}}
+{{- $cjk := `[\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{3000}-\x{303f}\x{ff00}-\x{ffef}]` -}}
+{{- $cjkChar := `[\x{3005}\x{3041}-\x{3096}\x{309d}\x{309e}\x{30a1}-\x{30fe}\x{3400}-\x{4dbf}\x{4e00}-\x{9fff}\x{f900}-\x{faff}\x{20000}-\x{323af}]` -}}
+{{- $cjkEndPunct := `[\x{3001}\x{3002}\x{ff0c}\x{ff0e}\x{ff1b}\x{ff1a}\x{ff01}\x{ff1f}\x{ff09}\x{3009}\x{300b}\x{300d}\x{300f}\x{3011}\x{3015}\x{3017}\x{3019}\x{301b}\x{301e}\x{301f}\x{ff3d}\x{ff5d}\x{2019}\x{201d}]` -}}
+{{- $openPunct := `[\x{3008}\x{300a}\x{300c}\x{300e}\x{3010}\x{3014}\x{3016}\x{3018}\x{301a}\x{301d}\x{ff08}\x{ff3b}\x{ff5b}\x{2018}\x{201c}]` -}}
+
+{{- $mathParts := split $seg `<span class="math-inline">` -}}
+{{- $mathOut := slice -}}
+{{- $prev := index $mathParts 0 -}}
+{{- $mathInlineTags := `(?:</?(?:strong|em|del|mark|a|ruby|b|i|u)\b[^>]*>)*` -}}
+{{- $reStripLeft := printf `(%s%s)\s+$` $cjk $mathInlineTags -}}
+{{- $reStripRight := printf `^\s+(%s%s)` $mathInlineTags $cjk -}}
+{{- $reGapStart := printf `%s%s$` $cjkChar $mathInlineTags -}}
+{{- $reGapEnd := printf `^%s%s` $mathInlineTags $cjkChar -}}
+{{- $reLeadOpen := printf `%s+$` $openPunct -}}
+{{- $reTrailClose := printf `^%s+` $cjkEndPunct -}}
+{{- range after 1 $mathParts -}}
+  {{- $mp := split . "</span>" -}}
+  {{- $mathInner := index $mp 0 -}}
+  {{- $after := delimit (after 1 $mp) "</span>" -}}
+  {{- $mathRaw := $mathInner -}}
+  {{- if and (hasPrefix $mathInner "\x00\x02") (hasSuffix $mathInner "\x00") -}}
+    {{- $idx := int (strings.TrimSuffix "\x00" (strings.TrimPrefix "\x00\x02" $mathInner)) -}}
+    {{- $mathRaw = index $katexHeld $idx -}}
+  {{- end -}}
+  {{- if $strip -}}
+    {{- $prev = replaceRE $reStripLeft "$1" $prev -}}
+    {{- $after = replaceRE $reStripRight "$1" $after -}}
+  {{- end -}}
+  {{- $mathClasses := "math-inline" -}}
+  {{- if findRE $reGapStart $prev -}}
+    {{- $mathClasses = printf "%s math-gap-start" $mathClasses -}}
+  {{- end -}}
+  {{- if findRE $reGapEnd $after -}}
+    {{- $mathClasses = printf "%s math-gap-end" $mathClasses -}}
+  {{- end -}}
+  {{- $mathEl := printf `<span class="%s">%s</span>` $mathClasses $mathInner -}}
+  {{- $baseCount := strings.Count `<span class="katex-base">` $mathRaw -}}
+  {{- $isShortMath := le $baseCount 1 -}}
+  {{- if eq $baseCount 2 -}}
+    {{- $mathHtml := index (after 1 (split $mathRaw `class="katex-html"`)) 0 | default "" -}}
+    {{- $mathVisible := replaceRE `^[^>]*>|<[^>]+>|\x{200b}` "" $mathHtml -}}
+    {{- $isShortMath = le (strings.RuneCount $mathVisible) 10 -}}
+  {{- end -}}
+  {{- if $isShortMath -}}
+    {{- $leadOpen := "" -}}
+    {{- $trailClose := "" -}}
+    {{- with findRE $reLeadOpen $prev 1 -}}
+      {{- $leadOpen = index . 0 -}}
+      {{- $prev = strings.TrimSuffix $leadOpen $prev -}}
+    {{- end -}}
+    {{- with findRE $reTrailClose $after 1 -}}
+      {{- $trailClose = index . 0 -}}
+      {{- $after = strings.TrimPrefix $trailClose $after -}}
+    {{- end -}}
+    {{- if or $leadOpen $trailClose -}}
+      {{- $mathEl = printf `<span class="math-bind">%s%s%s</span>` $leadOpen $mathEl $trailClose -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $mathOut = $mathOut | append $prev $mathEl -}}
+  {{- $prev = $after -}}
+{{- end -}}
+{{- return (delimit ($mathOut | append $prev) "") -}}
