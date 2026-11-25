@@ -8,6 +8,7 @@
  */
 
 import { addLightDismissFallback } from './modules/dialog-dismiss.js';
+import { createAnnouncer } from './modules/announce.js';
 
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
 
@@ -145,45 +146,14 @@ function initSearch() {
   // Localised strings, from the dialog's data-* attributes (see search.html).
   const { msgLoading, msgEmpty, msgCount, msgError, msgDeprecated } = dialog.dataset;
 
-  // Screen-reader announcements for the dialog. The results list is not a
-  // live region: as one it read out every title and summary on each
-  // keystroke, and the role="status" its loading, empty and error messages
-  // once carried did nothing, since a live region inserted together with its
-  // text is often not read. Instead each outcome is written, as one short
-  // sentence, to #searchStatus, which is in the dialog from the start.
-  //
-  // The same sentence is not written twice in a row: when the body index
-  // arrives the current query is searched again, and announcing an unchanged
-  // count would only interrupt. The key is the query as well as the
-  // sentence, so a new query with the same number of results is still read.
-  // A cleared key (resetAnnouncement) lets the next one through.
-  //
-  // This is a copy of modules/announce.js, not an import of it: search.js is
-  // run as a classic script by tools/search_harness.mjs, where an import
-  // statement is a syntax error.
-  let lastAnnouncement = '';
-  let announceTimer = null;
-  function announceStatus(message, query = '') {
-    if (!statusRegion || !message) return;
-    const key = `${query}\n${message}`;
-    if (key === lastAnnouncement) return;
-    lastAnnouncement = key;
-    clearTimeout(announceTimer);
-    // Cleared first and written a moment later (the same 100 ms as
-    // ANNOUNCE_DELAY in announce.js, and a timer for the same reason), so
-    // that the region sees a change even when the text is the same as the
-    // one before the reset.
-    statusRegion.textContent = '';
-    announceTimer = setTimeout(() => {
-      statusRegion.textContent = message;
-    }, 100);
-  }
-  function resetAnnouncement() {
-    lastAnnouncement = '';
-    if (!statusRegion) return;
-    clearTimeout(announceTimer);
-    statusRegion.textContent = '';
-  }
+  // Screen-reader announcements for the dialog through #searchStatus (inside
+  // the modal <dialog>, since showModal() makes #theme-announcement inert).
+  // Keyed by query + message so merging the body index does not re-announce
+  // an unchanged count for the same query, while a new query with the same
+  // count still speaks.
+  const statusAnnouncer = createAnnouncer(statusRegion);
+  const announceStatus = (message, query = '') => statusAnnouncer.announce(message, `${query}\n${message}`);
+  const resetAnnouncement = () => statusAnnouncer.reset();
 
   function resetCombobox() {
     selectedIndex = -1;

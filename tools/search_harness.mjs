@@ -101,6 +101,10 @@ export async function run({ script, index, body, queries }) {
   const context = {
     document: { getElementById: id => elements[id] ?? null, addEventListener() {} },
     window: {},                       // no requestIdleCallback: takes the setTimeout path
+    HTMLButtonElement: { prototype: {} },
+    HTMLDialogElement: { prototype: {} },
+    addLightDismissFallback() {},
+    createAnnouncer: () => ({ announce() {}, reset() {} }),
     setTimeout, clearTimeout, console, structuredClone,
     Math, Object, Array, String, Number, RegExp, Set, Map, JSON, Error, Promise,
     fetch: async url => {
@@ -118,7 +122,10 @@ export async function run({ script, index, body, queries }) {
   };
   context.globalThis = context;
   vm.createContext(context);
-  vm.runInContext(fs.readFileSync(script, 'utf8'), context, { filename: script });
+  // Strip top-level ES module imports so both current ES-module search.js and
+  // older classic-script snapshots (--compare) run cleanly inside vm.
+  const source = fs.readFileSync(script, 'utf8').replace(/^import\s+[^\n;]+;\s*$/gm, '');
+  vm.runInContext(source, context, { filename: script });
 
   elements.searchToggle.dispatch('click');
   await settle(20);
