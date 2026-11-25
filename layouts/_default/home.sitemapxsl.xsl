@@ -89,12 +89,12 @@
               <thead>
                 <tr>
                   <th id="thPath" scope="col" data-col="path" aria-sort="none">
-                    <button type="button" class="sort-btn" aria-label="{{ T `sortByPath` }}">
+                    <button type="button" class="sort-btn">
                       {{ T "sitemapColumnPath" }} <span class="sort-icon" id="iconPath" aria-hidden="true">↕</span>
                     </button>
                   </th>
                   <th id="thTime" scope="col" data-col="time" aria-sort="descending">
-                    <button type="button" class="sort-btn" aria-label="{{ T `sortByTimeDescending` }}">
+                    <button type="button" class="sort-btn">
                       {{ T "sitemapColumnLastModified" }} <span class="sort-icon" id="iconTime" aria-hidden="true">↓</span>
                     </button>
                   </th>
@@ -187,7 +187,7 @@
         </footer>
 
         {{- /* Minified, and wrapped in CDATA because the stylesheet is XML. */ -}}
-        <script><![CDATA[{{ (slice (resources.Get "js/xml-xsl-time.js") (resources.Get "js/xml-xsl-sitemap.js") | resources.Concat "js/xml-xsl-sitemap.bundle.js" | resources.ExecuteAsTemplate "js/xml-xsl-sitemap.js" . | resources.Minify).Content }}]]></script>
+        <script><![CDATA[{{ (slice (resources.Get "js/xml-xsl-time.js") (resources.Get "js/xml-xsl-sitemap.js") | resources.Concat "js/xml-xsl-sitemap.bundle.js" | resources.Minify).Content }}]]></script>
       </body>
     </html>
   </xsl:template>

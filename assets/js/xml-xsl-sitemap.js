@@ -1,23 +1,10 @@
 // Type filters, column sorting and the visible-count readout of the page
-//
 // sitemap.xsl renders.
 //
-// Executed as a template (resources.ExecuteAsTemplate) for the localised
-// strings, then minified and inlined into an XML document inside a CDATA
-// section -- so nothing here may contain the string that would close one.
+// Minified and inlined into an XML document inside a CDATA section -- so
+// nothing here may contain the string that would close one.
 
 (function() {
-  // Localised strings the script sets at runtime. Fully resolved at build
-  // time so no sentence is assembled from fragments in JavaScript.
-  var I18N = {
-    sortByPath: {{ T "sortByPath" | jsonify }},
-    sortByPathAsc: {{ T "sortByPathAscending" | jsonify }},
-    sortByPathDesc: {{ T "sortByPathDescending" | jsonify }},
-    sortByTime: {{ T "sortByTime" | jsonify }},
-    sortByTimeAsc: {{ T "sortByTimeAscending" | jsonify }},
-    sortByTimeDesc: {{ T "sortByTimeDescending" | jsonify }}
-  };
-
   var activeTypes = {
     post: true,
     category: true,
@@ -34,8 +21,8 @@
   var thPath = document.getElementById('thPath');
   var thTime = document.getElementById('thTime');
   var headers = [
-    { col: 'path', th: thPath, btn: thPath && thPath.querySelector('.sort-btn'), icon: document.getElementById('iconPath'), label: I18N.sortByPath, asc: I18N.sortByPathAsc, desc: I18N.sortByPathDesc },
-    { col: 'time', th: thTime, btn: thTime && thTime.querySelector('.sort-btn'), icon: document.getElementById('iconTime'), label: I18N.sortByTime, asc: I18N.sortByTimeAsc, desc: I18N.sortByTimeDesc }
+    { col: 'path', th: thPath, btn: thPath && thPath.querySelector('.sort-btn'), icon: document.getElementById('iconPath') },
+    { col: 'time', th: thTime, btn: thTime && thTime.querySelector('.sort-btn'), icon: document.getElementById('iconTime') }
   ];
 
   // 1. Toggle & filter logic
@@ -150,9 +137,6 @@
       var on = h.col === col;
       h.th.setAttribute('aria-sort', on ? (newDir === 'asc' ? 'ascending' : 'descending') : 'none');
       h.icon.textContent = on ? (newDir === 'asc' ? '↑' : '↓') : '↕';
-      if (h.btn) {
-        h.btn.setAttribute('aria-label', on ? (newDir === 'asc' ? h.asc : h.desc) : h.label);
-      }
     });
   }
 

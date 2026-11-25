@@ -1,6 +1,6 @@
 # Chaos
 
-A minimalist Hugo theme designed for clarity, performance, and excellent Chinese typography support.
+A minimalist Hugo theme for personal blogs, wikis, and knowledge bases — designed for clarity, performance, and excellent CJK typography support.
 
 | Light | Dark |
 | --- | --- |
@@ -11,6 +11,7 @@ Screenshots are taken from the bundled [example site](#example-site).
 ## Features
 
 - **Performance-focused**: Lightweight with minimal dependencies, no JavaScript frameworks
+- **Blog & Wiki / Reference Modes**: Supports both chronological blog feeds and compact directory-style wikis or cheatsheets (`listStyle = "index"`, `alwaysShowLastmod`, `hidePostDate`, auto-titled internal links `[](/path/)`, collapsible `[!DETAILS]` blocks, interactive `code_vars`, and opt-in `/llms.txt`)
 - **Dark/Light/Auto Mode**: Three-state toggle (🌓 Auto / ☀️ Light / 🌙 Dark) with live real-time OS preference synchronization
 - **Japanese Traditional Color Palette**: Built from classical 和色 (*Wairo*) at their published values — 生成り色 (*Kinari-iro*), 墨 (*Sumi*), 蘇芳 (*Suō*), 藍色 (*Ai-iro*) and 練色 (*Neri-iro*) by day; 白鼠 (*Shiro-nezumi*), 退紅 (*Arazome*) and 浅縹 (*Asa-hanada*) by night — with WCAG AA contrast targets
 - **Responsive Design**: Mobile-first layout with hamburger menu and restrained overlays

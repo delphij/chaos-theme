@@ -41,7 +41,7 @@ listStyle = "index".
         </div>
         {{- if and (gt $limit 0) (gt $total $limit) }}
         <div class="archive-section-more">
-          <a href="{{ .Page.RelPermalink }}" aria-label="{{ T `moreCategoryPostsAbout` (dict `Name` .Page.LinkTitle `Count` $total) }}">{{ T "moreCategoryPosts" }}</a>
+          <a href="{{ .Page.RelPermalink }}">{{ T "moreCategoryPosts" }}<span class="sr-only">{{ T "labelColon" }}{{ .Page.LinkTitle }} ({{ $total }})</span></a>
         </div>
         {{- end }}
       </div>

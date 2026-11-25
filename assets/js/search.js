@@ -158,6 +158,7 @@ function initSearch() {
   function resetCombobox() {
     selectedIndex = -1;
     input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-controls');
     input.removeAttribute('aria-activedescendant');
   }
 
@@ -618,6 +619,7 @@ function initSearch() {
 
     resultsContainer.innerHTML = `<div id="searchListbox" role="listbox">${items.join('')}</div>`;
     selectedIndex = -1;
+    input.setAttribute('aria-controls', 'searchListbox');
     input.setAttribute('aria-expanded', 'true');
     input.removeAttribute('aria-activedescendant');
   }

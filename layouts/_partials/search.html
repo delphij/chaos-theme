@@ -33,7 +33,7 @@ Only rendered when site.Params.search.enable is true.
       <span class="search-icon" aria-hidden="true">
         {{- partial "icon-search.html" . -}}
       </span>
-      <input type="search" id="searchInput" class="search-input" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="searchListbox" placeholder="{{ T "searchPlaceholder" }}" autocomplete="off" spellcheck="false" aria-label="{{ T "search" }}">
+      <input type="search" id="searchInput" class="search-input" role="combobox" aria-autocomplete="list" aria-expanded="false" placeholder="{{ T "searchPlaceholder" }}" autocomplete="off" spellcheck="false" aria-label="{{ T "search" }}">
       <button type="button" class="btn-icon search-close" id="searchClose" commandfor="searchDialog" command="close" aria-label="{{ T "searchClose" }}" title="{{ T "searchClose" }}">✕</button>
     </div>
     {{- /* The dialog's own live region: what search.js announces (loading,

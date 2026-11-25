@@ -1,10 +1,10 @@
 name = "Chaos"
 license = "Apache-2.0"
 licenselink = "https://github.com/delphij/chaos-theme/blob/main/LICENSE"
-description = "A minimalist Hugo theme designed for clarity, performance, and excellent Chinese typography support."
+description = "A minimalist Hugo theme for personal blogs, wikis, and knowledge bases — designed for clarity, performance, and excellent CJK typography support."
 homepage = "https://github.com/delphij/chaos-theme"
 demosite = "https://blog.delphij.net/"
-tags = ["blog", "minimal", "responsive", "dark-mode", "chinese", "cjk", "typography", "accessible", "multilingual", "mathematics"]
+tags = ["blog", "wiki", "knowledge-base", "minimal", "responsive", "dark-mode", "chinese", "cjk", "typography", "accessible", "multilingual", "mathematics"]
 features = ["responsive", "dark-mode", "multilingual", "mathematics", "comments", "seo", "performance"]
 min_version = "0.158.0"
 

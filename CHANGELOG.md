@@ -136,8 +136,13 @@ here.
 - **Modern web standards & accessibility polish**: Converted screen typography
   tokens from `px` to `rem`, added progressive CSS `scroll-target-group: auto`
   TOC scrollspy with `IntersectionObserver` fallback, added `<search>` landmark
-  and `labelColon` i18n punctuation across all 5 locales, and hardened HTML/XSL
-  table and landmark semantics.
+  and `labelColon` i18n punctuation across all 5 locales, stripped duplicate
+  summary-image links in list cards, replaced `aria-label` overrides on
+  "Read more" / "More posts" links with `.sr-only` suffixes for WCAG 2.5.3
+  Label in Name compliance, linked "Join discussion" to `#comments`, bound
+  search combobox `aria-controls` dynamically, added explicit `for`/`id` labels
+  in `code_vars`, and removed redundant role/sort words from `<nav>` and
+  sitemap table header labels.
 
 ### Fixed
 

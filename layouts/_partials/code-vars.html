@@ -33,9 +33,10 @@ percent-encodes non-ASCII characters.
       {{- if $def }}
       {{- $name := or .name $def }}
       {{- $desc := or .desc $name }}
-      <label class="code-vars-field">
+      {{- $id := printf "code-var-%s" ($name | anchorize) }}
+      <label class="code-vars-field" for="{{ $id }}">
         <span class="code-vars-label">{{ $desc }}</span>
-        <input type="text" class="code-vars-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+        <input type="text" id="{{ $id }}" class="code-vars-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
           name="{{ $name }}" value="{{ $def }}" placeholder="{{ $def }}"
           data-modified-tip="{{ T "codeVarModified" (dict "Desc" $desc "Default" $def) }}">
       </label>

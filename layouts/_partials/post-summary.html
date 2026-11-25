@@ -13,16 +13,28 @@ Displays post title, date, taxonomy links, summary text, and optional
   <h2 class="post-title"><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
   {{ partial "post-meta.html" (dict "page" .) }}
   {{- $summary := partial "_funcs/typeset-content.html" (dict "content" .Summary "stripOrphanFootnotes" true) -}}
-  {{- $summary = $summary | replaceRE `<a\b[^>]*>(\s*<img\b[^>]*>\s*)</a>` (printf `<a href="%s">$1</a>` .RelPermalink) -}}
+  {{- /* Strip outer <a> wrappers around summary images so they render as plain
+         <img> elements (preserving alt text without adding a duplicate Tab stop
+         or mismatched link entry alongside the post title). */ -}}
+  {{- $summary = $summary | replaceRE `<a\b[^>]*>(\s*<img\b[^>]*>\s*)</a>` "$1" -}}
   <div class="post-summary-content">
     {{ $summary | safeHTML }}
   </div>
   {{- /* A truncated summary leads on to the rest of the post; a complete one
-         has nothing more to read, so it leads to the discussion instead. */}}
-  {{- $more := cond .Truncated (slice "readMore" "readMoreAbout") (slice "joinDiscussion" "joinDiscussionAbout") }}
+         has nothing more to read, so it jumps straight to #comments when
+         comments are enabled (and is omitted otherwise). Visually hidden
+         context keeps the accessible name starting with the visible label
+         (WCAG 2.5.3 Label in Name) while disambiguating links in a screen
+         reader's link list. */}}
+  {{- if .Truncated }}
   <div class="post-more">
-    <a class="read-more" href="{{ .RelPermalink }}" aria-label="{{ T (index $more 1) (dict `Title` .LinkTitle) }}">{{ T (index $more 0) }}</a>
-    {{- if and .Truncated (not site.Params.hideReadingStats) }}<span class="meta reading-stats">{{ T "readingStatsParen" (dict "Stats" (partial "reading-stats.html" .)) }}</span>{{ end }}
+    <a class="read-more" href="{{ .RelPermalink }}">{{ T "readMore" }}<span class="sr-only">{{ T "labelColon" }}{{ .LinkTitle }}</span></a>
+    {{- if not site.Params.hideReadingStats }}<span class="meta reading-stats">{{ T "readingStatsParen" (dict "Stats" (partial "reading-stats.html" .)) }}</span>{{ end }}
   </div>
+  {{- else if site.Params.remarkURL }}
+  <div class="post-more">
+    <a class="read-more" href="{{ .RelPermalink }}#comments">{{ T "joinDiscussion" }}<span class="sr-only">{{ T "labelColon" }}{{ .LinkTitle }}</span></a>
+  </div>
+  {{- end }}
 </article>
 
