@@ -476,7 +476,7 @@ def tokenize(text: str, stop_words: set, fold: dict = None) -> set:
 def main():
     parser = argparse.ArgumentParser(description="Build offline search index for Chaos theme.")
     parser.add_argument("--content", default="content", help="Path to Hugo content directory (default: content)")
-    parser.add_argument("--output", default="", help="Path to output Tier 1 / core search-index.json (default: assets/<params.data.prefix>/<params.data.version>/search-index.json)")
+    parser.add_argument("--output", default="", help="Path to output Tier 1 / core search-index.json (default: assets/<params.data.prefix>/v<schema>/search-index.json)")
     parser.add_argument("--output-body", default="", help="Path to output Tier 2 / body search-index.json (default: auto derived as <stem>-body.json)")
     parser.add_argument("--single-file", action="store_true", help="Generate legacy monolithic single-file index instead of two-tier")
     parser.add_argument("--base-url", default="", help="baseURL to publish under, overriding the site's (default: the site's)")
@@ -497,12 +497,22 @@ def main():
     api_version = load_theme_api_version(script_dir)
     site_dir = os.path.dirname(content_dir)
     site_params = load_site_params(site_dir, args.hugo)
+    data_prefix = data_prefix_from_params(site_params, api_version)
+    default_output_path = os.path.abspath(
+        os.path.join(site_dir, "assets", *([data_prefix] if data_prefix else []), "search-index.json")
+    )
     if args.output:
         output_path = os.path.abspath(args.output)
+        legacy_output_path = os.path.abspath(os.path.join(site_dir, "assets", "search-index.json"))
+        if output_path == legacy_output_path and output_path != default_output_path:
+            rel_default = os.path.relpath(default_output_path, site_dir)
+            sys.stderr.write(
+                f"Warning (deprecated): --output {args.output} writes to the legacy root assets/ path. "
+                f"Drop --output (and --content content) so the index is written to {rel_default} "
+                f"(and remove any hardcoded params.search.indexURL in your site config).\n"
+            )
     else:
-        data_prefix = data_prefix_from_params(site_params, api_version)
-        rel_parts = ["assets", *([data_prefix] if data_prefix else []), "search-index.json"]
-        output_path = os.path.abspath(os.path.join(site_dir, *rel_parts))
+        output_path = default_output_path
     if args.output_body:
         output_body_path = os.path.abspath(args.output_body)
     else:
