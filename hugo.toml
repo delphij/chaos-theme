@@ -97,13 +97,24 @@
   # index-style homepages (default: 10; 0 shows all posts)
   # categoryPreviewCount = 10
 
+  # Static data API path prefix (optional; default: "_data").
+  # The schema version segment (e.g. "v1") is owned by the theme itself in
+  # assets/chaos_api.json and bumped automatically on breaking schema changes.
+  # [params.data]
+  #   prefix = "_data"
+
+  # /llms.txt outline (opt-in via `[outputs] home = [..., "LLMS"]`)
+  # [params.llms]
+  #   limit = 0  # Maximum pages to list (0 = all main-section pages)
+
   # Client-side full-text search (optional, disabled by default)
   # When enabled, adds a search button to the header and hotkey '/' modal.
-  # Generate search index with: python3 themes/chaos/tools/build_search_index.py --output assets/search-index.json
+  # Generate search index with: python3 themes/chaos/tools/build_search_index.py
+  # (auto-reads params.data prefix/version from `hugo config`).
   # [params.search]
   #   enable = true
-  #   indexURL = "/search-index.json"
-  #   bodyIndexURL = "/search-index-body.json"  # Optional; auto-detected if search-index-body.json exists in assets/
+  #   indexURL = "/_data/v1/search-index.json"
+  #   bodyIndexURL = "/_data/v1/search-index-body.json"  # Optional; auto-detected if present in assets/
 
 [module]
   [module.hugoVersion]

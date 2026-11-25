@@ -209,10 +209,19 @@ hasCJKLanguage = true
   # categoryPreviewCount = 10            # Preview posts per category on /categories/ and index-style homepages
                                          # (default: 10; 0 shows all posts)
 
+  # Static data API path prefix (optional; default: "_data")
+  # The schema version segment (e.g. "v1") is owned by the theme in assets/chaos_api.json.
+  # [params.data]
+  #   prefix = "_data"
+
+  # /llms.txt Markdown outline (opt-in via `[outputs] home = [..., "LLMS"]`)
+  # [params.llms]
+  #   limit = 0                        # Max pages to list (0 = all main-section pages)
+
   # Client-side full-text search (optional, disabled by default)
   [params.search]
     enable = true                      # Enable search button and '/' hotkey
-    indexURL = "/search-index.json"    # Default: "/search-index.json"
+    # indexURL = "/_data/v1/search-index.json"  # Default: "/_data/v1/search-index.json"
     # fingerprint = false              # Serve the indexes from assets/ at fixed URLs (default: true)
 
 [params.social]
@@ -544,10 +553,10 @@ Add to `config.toml` (or `hugo.toml`):
 ```toml
 [params.search]
   enable = true
-  indexURL = "/search-index.json"
-  # Optional: Hugo automatically fingerprints search-index-body.json
-  # if placed in assets/. Explicit path override is also supported:
-  # bodyIndexURL = "/search-index-body.json"
+  # Optional: auto-resolved from assets/_data/v1/search-index*.json
+  # (with fallback to legacy assets/search-index*.json)
+  # indexURL = "/_data/v1/search-index.json"
+  # bodyIndexURL = "/_data/v1/search-index-body.json"
   # Optional: publish the indexes from assets/ without a fingerprint
   # fingerprint = false
 ```
@@ -555,32 +564,35 @@ Add to `config.toml` (or `hugo.toml`):
 Every page carries the index URLs. With the default fingerprint, adding or
 editing any post changes the index, its URL, and so every page of the site --
 which a deploy that skips unchanged files (rsync, a CDN) then has to ship in
-full. `fingerprint = false` publishes them as `/search-index.json` and
-`/search-index-body.json` instead, and pages change only when their own content
-does. The server must then make browsers revalidate those two files, or readers
-keep searching a stale index. For nginx:
+full. `fingerprint = false` publishes them under `/_data/v1/` (alongside the
+theme's shared `/_data/v1/sidebar.json` browsing-guide payload) at fixed URLs,
+so pages change only when their own content does. Breaking schema changes bump
+the theme-owned version in `assets/chaos_api.json` (`v1` -> `v2`) to bypass
+stale caches immediately. For nginx:
 
 ```nginx
-location ~* ^/search-index(-body)?\.json$ {
-    add_header Cache-Control "no-cache" always;
+location ^~ /_data/ {
+    add_header X-Robots-Tag "noindex, nofollow" always;
+    add_header Cache-Control "public, max-age=3600, stale-while-revalidate=86400" always;
 }
 ```
 
 #### 2. Generate Search Index During Build
 
-Run the offline indexing tool against your Hugo content directory:
+Run the offline indexing tool against your Hugo content directory (with no
+`--output` flag, it reads `params.data.prefix` from `hugo config` and the
+theme's schema version from `assets/chaos_api.json`):
 
 ```bash
-# Recommended: Output to assets/ so Hugo can fingerprint both index files
-python3 themes/chaos/tools/build_search_index.py --content content --output assets/search-index.json
+python3 themes/chaos/tools/build_search_index.py
 ```
 
 **Tool Options:**
 | Option | Default | Description |
 | :--- | :--- | :--- |
 | `--content` | `content` | Path to Hugo content directory |
-| `--output` | `assets/search-index.json` | Path to Tier 1 core search index |
-| `--output-body` | `<stem>-body.json` | Path to Tier 2 body search index (defaults to `assets/search-index-body.json`) |
+| `--output` | `assets/_data/v1/search-index.json` | Path to Tier 1 core search index (auto-derived from `params.data.prefix` and `assets/chaos_api.json`) |
+| `--output-body` | `<stem>-body.json` | Path to Tier 2 body search index (defaults to `assets/_data/v1/search-index-body.json`) |
 | `--single-file` | `false` | Generate a legacy single monolithic index file instead of two-tier |
 | `--max-body-chars` | `0` | Maximum body characters to index per post; `0` indexes the whole body. A limit makes the index smaller, and words past it unfindable |
 | `--base-url` | the site's `baseURL` | `baseURL` to link posts under, for a build that overrides the site's own (`hugo -b`). A path such as `/blog/` is enough |
@@ -786,6 +798,7 @@ The theme provides multiple output formats:
 - **Sitemap**: XML sitemap with XSLT
 - **Redirects**: Redirect mapping for aliases
 - **Security.txt**: RFC 9116 security vulnerability disclosure metadata (`/.well-known/security.txt`)
+- **LLMS**: Opt-in `/llms.txt` Markdown site outline following `llmstxt.org` (add `"LLMS"` to `[outputs] home`; optionally cap entries with `[params.llms] limit`)
 
 Configure in `config.toml`:
 

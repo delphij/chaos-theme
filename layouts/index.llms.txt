@@ -1,0 +1,64 @@
+{{- /*
+Generates /llms.txt following the llmstxt.org Markdown outline convention.
+Opt-in per site by adding "LLMS" to `[outputs] home` in hugo.toml.
+Optional cap: `[params.llms] limit = 0` (0 = list all main-section pages).
+*/ -}}
+{{- $lines := slice (printf "# %s" site.Title) -}}
+
+{{- $summary := or site.Params.description site.Params.subtitle "" -}}
+{{- with ($summary | markdownify | plainify | strings.TrimSpace) -}}
+  {{- $lines = $lines | append "" (printf "> %s" .) -}}
+{{- end -}}
+
+{{- $meta := slice -}}
+{{- with site.Params.author.name -}}
+  {{- $meta = $meta | append (printf "- Author: %s" .) -}}
+{{- end -}}
+{{- with site.Language.Locale -}}
+  {{- $meta = $meta | append (printf "- Language: %s" .) -}}
+{{- end -}}
+{{- $feeds := slice -}}
+{{- with .OutputFormats.Get "ATOM" -}}
+  {{- $feeds = $feeds | append (printf "[Atom](%s)" .Permalink) -}}
+{{- end -}}
+{{- with .OutputFormats.Get "RSS" -}}
+  {{- $feeds = $feeds | append (printf "[RSS](%s)" .Permalink) -}}
+{{- end -}}
+{{- $feeds = $feeds | append (printf "[Sitemap](%s)" ("sitemap.xml" | absURL)) -}}
+{{- $meta = $meta | append (printf "- Feeds: %s" (delimit $feeds ", ")) -}}
+{{- $lines = $lines | append "" | append $meta -}}
+
+{{- $posts := partial "_funcs/get-main-pages.html" . -}}
+{{- $limit := int (site.Params.llms.limit | default 0) -}}
+{{- if and (gt $limit 0) (gt (len $posts) $limit) -}}
+  {{- $posts = first $limit $posts -}}
+{{- end -}}
+
+{{- $order := cond (gt (len site.Taxonomies.categories) 0) "category" "date" -}}
+{{- $groups := partial "_funcs/get-index-groups.html" (dict "pages" $posts "order" $order) -}}
+{{- range $groups -}}
+  {{- $heading := or .title "Pages" -}}
+  {{- $lines = $lines | append "" (printf "## %s" $heading) "" -}}
+  {{- range .pages -}}
+    {{- $desc := partialCached "_funcs/get-meta-description.html" . .RelPermalink | htmlUnescape -}}
+    {{- if and $desc (ne $desc .Title) -}}
+      {{- $lines = $lines | append (printf "- [%s](%s): %s" .Title .Permalink $desc) -}}
+    {{- else -}}
+      {{- $lines = $lines | append (printf "- [%s](%s)" .Title .Permalink) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $optional := slice -}}
+{{- range slice "/categories" "/tags" "/series" "/archives" -}}
+  {{- with site.GetPage . -}}
+    {{- $title := partial "_funcs/get-page-title.html" . -}}
+    {{- if and .Permalink $title -}}
+      {{- $optional = $optional | append (printf "- [%s](%s)" $title .Permalink) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if gt (len $optional) 0 -}}
+  {{- $lines = $lines | append "" "## Optional" "" | append $optional -}}
+{{- end -}}
+{{ delimit $lines "\n" }}

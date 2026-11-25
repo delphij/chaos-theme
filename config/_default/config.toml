@@ -35,3 +35,9 @@
   isPlainText = true
   notAlternative = true
   path = ".well-known"
+
+[outputFormats.LLMS]
+  mediaType = "text/plain"
+  baseName = "llms"
+  isPlainText = true
+  notAlternative = true
