@@ -1,0 +1,94 @@
+{{- /*
+Typesets a vertical CJK block (`blockquote.vertical` or `p.vertical`).
+
+Called by `typeset-content.html` before CJK whitespace stripping so full-width
+ideographic spaces (U+3000, used for 挪抬) are preserved. Supports:
+
+  1. Standard inline Chaos extensions (emphasis dots, ruby, color swatches)
+     delegated back to `typeset-content.html` with `keepSpace: true`.
+  2. Hollow circle emphasis (`[文字]{o}`) -> `<em class="em-circle">文字</em>`,
+     matching traditional Chinese commentary circle marks, plus inline size
+     shifts `[文字]{+}` (`.v-large`) and `[文字]{-}` (`.v-small`, subtle
+     right-offset side-script for humble self-references such as 「臣亮」).
+  3. 抬头 (honorific line elevation): a `<p>` opening with `^^` becomes
+     `<p class="taitou-2">` (双抬, 2em into top margin) and `^` becomes
+     `<p class="taitou-1">` (单抬, 1em into top margin).
+  4. 双行夹注 & 行间旁批: `((注釈))` (1–80 chars, no nested parentheses)
+     splits into two balanced sub-columns (`<span class="jiazhu">`), keeping
+     closing punctuation attached to the first sub-column; `((:批注))` (or
+     any `((...))` inside `.side-notes`) renders as right-gutter interlinear
+     commentary (`<span class="pangpi">`). Both emit hidden `.jiazhu-rp`
+     parentheses so feeds without CSS degrade cleanly to `（注釈）`.
+
+@param {string} . Rendered HTML of a single `.vertical` block.
+@returns {string} Transformed HTML.
+*/ -}}
+{{- $html := . -}}
+
+{{- /* Hollow circle marks and inline size shifts (尊称大字 / 谦称小字).
+     Run before delegating to typeset-content.html so [text]{o}/{+}/{-} are
+     not captured as ruby annotations (<rt>o</rt>). */ -}}
+{{- if in $html "]{o}" -}}
+  {{- $html = $html | replaceRE `\[([^\[\]<\n]{1,32})\]\{o\}` `<em class="em-circle">$1</em>` -}}
+{{- end -}}
+{{- if in $html "]{+}" -}}
+  {{- $html = $html | replaceRE `\[([^\[\]<\n]{1,32})\]\{\+\}` `<span class="v-large">$1</span>` -}}
+{{- end -}}
+{{- if in $html "]{-}" -}}
+  {{- $html = $html | replaceRE `\[([^\[\]<\n]{1,32})\]\{-\}` `<span class="v-small">$1</span>` -}}
+{{- end -}}
+
+{{- $html = partial "_funcs/typeset-content.html" (dict "content" $html "keepSpace" true) -}}
+
+{{- /* 抬头: leading ^^ (双抬) or ^ (单抬) inside <p> */ -}}
+{{- if findRE `<p\b[^>]*>\^` $html -}}
+  {{- $html = $html | replaceRE `<p>\^\^` `<p class="taitou-2">` -}}
+  {{- $html = $html | replaceRE `<p>\^` `<p class="taitou-1">` -}}
+  {{- $html = $html | replaceRE `(<p\b[^>]*\bclass="[^"]*)"([^>]*>)\^\^` `$1 taitou-2"$2` -}}
+  {{- $html = $html | replaceRE `(<p\b[^>]*\bclass="[^"]*)"([^>]*>)\^` `$1 taitou-1"$2` -}}
+{{- end -}}
+
+{{- /* 双行夹注 & 行间旁批:
+     - `((:批注))` (or any `((...))` inside `.side-notes`) renders as an
+       interlinear side commentary (`.pangpi`) in the right-hand gutter.
+     - `((注释))` otherwise renders as a balanced two-sub-column warichu
+       note (`.jiazhu`). Both emit hidden `.jiazhu-rp` parentheses for feeds. */ -}}
+{{- if in $html "((" -}}
+  {{- $isSideNotes := gt (len (findRE `^<(?:blockquote|p)\b[^>]*\bclass="[^"]*\bside-notes\b` $html)) 0 -}}
+  {{- $noLeadPunct := `^[，。、；：！？）》」』】〉》.,;:!?)]` -}}
+  {{- range $m := findRE `\(\(([^()\n<]{1,80})\)\)` $html -}}
+    {{- $inner := strings.TrimPrefix "((" (strings.TrimSuffix "))" $m) -}}
+    {{- $isPangpi := or $isSideNotes (hasPrefix $inner ":") -}}
+    {{- if hasPrefix $inner ":" -}}
+      {{- $inner = strings.TrimPrefix ":" $inner -}}
+    {{- end -}}
+    {{- if $isPangpi -}}
+      {{- $rep := printf `<span class="pangpi"><span class="jiazhu-rp">（</span><span class="pangpi-text">%s</span><span class="jiazhu-rp">）</span></span>` $inner -}}
+      {{- $html = replace $html $m $rep 1 -}}
+    {{- else -}}
+      {{- $chars := split $inner "" -}}
+      {{- $n := len $chars -}}
+      {{- if le $n 1 -}}
+        {{- $rep := printf `<span class="jiazhu"><span class="jiazhu-rp">（</span><span class="jiazhu-col">%s</span><span class="jiazhu-rp">）</span></span>` $inner -}}
+        {{- $html = replace $html $m $rep 1 -}}
+      {{- else -}}
+        {{- $half := div (add $n 1) 2 -}}
+        {{- $right := delimit (first $half $chars) "" -}}
+        {{- $left := delimit (after $half $chars) "" -}}
+        {{- /* Avoid starting the second sub-column with closing punctuation
+             (including consecutive pairs such as 「…」 followed by ，). */ -}}
+        {{- range seq 3 -}}
+          {{- if and (gt (len (split $left "")) 1) (findRE $noLeadPunct $left) -}}
+            {{- $half = add $half 1 -}}
+            {{- $right = delimit (first $half $chars) "" -}}
+            {{- $left = delimit (after $half $chars) "" -}}
+          {{- end -}}
+        {{- end -}}
+        {{- $rep := printf `<span class="jiazhu"><span class="jiazhu-rp">（</span><span class="jiazhu-col">%s</span><span class="jiazhu-col">%s</span><span class="jiazhu-rp">）</span></span>` $right $left -}}
+        {{- $html = replace $html $m $rep 1 -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return $html -}}

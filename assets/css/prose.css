@@ -982,6 +982,267 @@
     }
   }
 
+  /* ==========================================================================
+     VERTICAL CJK BLOCKS
+     Traditional top-to-bottom, right-to-left vertical typesetting (`{.vertical}`
+     on `blockquote` or `p`), with optional column rules (`{.vertical .ruled}`
+     for 乌丝栏 or `{.vertical .ruled .red-ruled}` for 朱丝栏), honorific
+     elevation (抬头 `.taitou-1` / `.taitou-2`), hollow circle marks
+     (`.em-circle`), and inline double-column notes (双行夹注 `.jiazhu`).
+     Scoped to an independent container so surrounding horizontal prose,
+     navigation, code, and feeds stay untouched.
+     ========================================================================== */
+
+  .vertical-book {
+    --vertical-bleed: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.75em;
+    margin: 1.75em calc(-1 * var(--vertical-bleed));
+    width: calc(100% + 2 * var(--vertical-bleed));
+
+    @media screen and (min-width: 900px) {
+      --vertical-bleed: calc(var(--prose-outdent, 1) * 1.75em);
+    }
+
+    > .vertical {
+      margin: 0;
+    }
+
+    &.is-paged {
+      align-items: flex-end;
+
+      > .vertical {
+        width: 100%;
+        height: var(--vertical-height, calc(var(--vertical-rows, 22) * 1.06em + var(--vertical-pad-top) + 2em));
+      }
+    }
+
+    &:has(.taitou-1) > .vertical {
+      --vertical-pad-top: 3em;
+    }
+
+    &:has(.taitou-2) > .vertical {
+      --vertical-pad-top: 4em;
+    }
+  }
+
+  .vertical {
+    --vertical-col: 2.3em;
+    --vertical-pad-top: 2em;
+    --vertical-rule: color-mix(in srgb, var(--muted) 28%, transparent);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: "Songti SC", "Songti TC", "Noto Serif CJK SC", "Source Han Serif SC",
+                 "STSong", "PMingLiU", Georgia, serif;
+    font-size: 1.25rem;
+    color: var(--fg);
+    background-color: var(--blockquote-bg);
+    border-radius: var(--radius-card);
+    font-feature-settings: "vert" 1, "vrt2" 1, "chws" 1;
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: 100%;
+    max-height: var(--vertical-height, calc(var(--vertical-rows, 22) * 1.06em + var(--vertical-pad-top) + 2em));
+    margin: 1.5em auto;
+    padding: var(--vertical-pad-top) 1.75em 2em;
+    overflow-x: auto;
+    overflow-y: hidden;
+    line-height: var(--vertical-col);
+    letter-spacing: 0.06em;
+    text-align: start;
+
+    @media screen and (max-width: 768px) {
+      font-size: 1.125rem;
+      padding: var(--vertical-pad-top) 1.1em 1.5em;
+    }
+
+    &:has(.taitou-1) {
+      --vertical-pad-top: 3em;
+    }
+
+    &:has(.taitou-2) {
+      --vertical-pad-top: 4em;
+    }
+
+    &.ruled {
+      /* Two layers so the column rules clip strictly to content-box (below
+         the 天头 top margin and inside the generous side margins) while the
+         paper tint fills the entire border-box card. */
+      background-image:
+        repeating-linear-gradient(
+          to left,
+          transparent 0,
+          transparent calc(var(--vertical-col) - 1px),
+          var(--vertical-rule) calc(var(--vertical-col) - 1px),
+          var(--vertical-rule) var(--vertical-col)
+        ),
+        linear-gradient(var(--blockquote-bg), var(--blockquote-bg));
+      background-position: right top, 0 0;
+      background-size: calc(100% - 1px) 100%, 100% 100%;
+      background-repeat: no-repeat, no-repeat;
+      background-origin: content-box, border-box;
+      background-clip: content-box, border-box;
+      background-attachment: local, scroll;
+    }
+
+    &.red-ruled {
+      --vertical-rule: var(--mizige-border);
+    }
+
+    &.side-notes,
+    &:has(.pangpi) {
+      --vertical-col: 2.75em;
+
+      &.ruled {
+        /* Shift the column rules right by 0.25em so they center optically
+           between each column's (text + right-gutter note) unit and the
+           neighboring column's main text, scaling cleanly across screen
+           and print font sizes without JavaScript. */
+        background-position: calc(100% + 0.25em) 0, 0 0;
+      }
+    }
+
+    > p {
+      margin: 0;
+      /* Explicit line-height overrides `:is(p, dd):has(ruby)` (prose.css) so
+         paragraphs with ruby keep the exact `--vertical-col` column pitch. */
+      line-height: var(--vertical-col);
+    }
+
+    > p.v-title {
+      margin: 0;
+      color: var(--heading);
+      font-size: 1.2em;
+      font-weight: 600;
+      line-height: calc(var(--vertical-col) / 1.2);
+      letter-spacing: 0.12em;
+      text-indent: 1.75em;
+    }
+
+    &.title-flush > p.v-title {
+      text-indent: 0;
+    }
+
+    > p.quote-by {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85em;
+      line-height: calc(var(--vertical-col) / 0.85);
+      text-align: end;
+    }
+
+    /* Vertical Chinese puts ruby and emphasis marks on the right, so link
+       underlines sit on the left (matching traditional 专名号). */
+    a {
+      text-underline-position: left;
+    }
+
+    sup {
+      position: relative;
+      inset-block-start: -0.35em;
+      vertical-align: baseline;
+      text-combine-upright: all;
+      font-size: 0.6em;
+      line-height: 1;
+      letter-spacing: 0;
+
+      a {
+        text-decoration: none;
+      }
+    }
+
+    ruby {
+      position: relative;
+      display: inline;
+      white-space: nowrap;
+      line-height: inherit;
+    }
+
+    rt {
+      position: absolute;
+      inset-inline: 0;
+      inset-block-start: -0.58em;
+      font-size: 0.42em;
+      line-height: 1;
+      letter-spacing: 0;
+      text-align: center;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .taitou-1 {
+      text-indent: -1em;
+    }
+
+    .taitou-2 {
+      text-indent: -2em;
+    }
+
+    .v-large {
+      font-size: 1.12em;
+      line-height: 1;
+    }
+
+    .v-small {
+      position: relative;
+      inset-block-start: -0.12em;
+      font-size: 0.72em;
+      line-height: 1;
+    }
+
+    .em-dot {
+      text-emphasis-position: over right;
+    }
+
+    .em-circle {
+      font-family: inherit;
+      font-style: normal;
+      line-height: inherit;
+      text-emphasis: open circle;
+      text-emphasis-position: over right;
+    }
+
+    .jiazhu {
+      display: inline-grid;
+      grid-template-rows: auto auto;
+      grid-auto-flow: row;
+      row-gap: 0.08em;
+      font-size: 0.52em;
+      line-height: 1.05;
+      letter-spacing: 0.02em;
+      vertical-align: middle;
+      margin-inline: 0.15em;
+    }
+
+    .jiazhu-rp {
+      display: none;
+    }
+
+    .pangpi {
+      position: relative;
+      display: inline-block;
+      width: 0;
+      height: 0;
+      vertical-align: middle;
+    }
+
+    .pangpi-text {
+      position: absolute;
+      inset-inline-start: 0;
+      /* 1.15em at 0.5em font-size = 0.575 parent em (~11.5px from centerline),
+         hugging the annotated glyph closely while paintRules() shifts the
+         column rule right to balance both sides of the (text + note) unit. */
+      inset-block-end: 1.15em;
+      color: var(--primary);
+      font-size: 0.5em;
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+  }
+
   /* Bounded prose containers (quotes, callouts, [!DETAILS] cards) have no outer
      page margin to hang gutters into (and details.alert clips overflow). Flip
      --prose-outdent to 0 once here so every hanging component (code line

@@ -2316,9 +2316,18 @@
       break-inside: avoid;
     }
 
-    /* Images, diagrams, copybook grids and blockquotes should not break */
-    img, blockquote, .mermaid, p.mizige {
+    /* Images, diagrams, copybook grids, vertical blocks and blockquotes should not break */
+    img, blockquote, .mermaid, p.mizige, .vertical {
       break-inside: avoid;
+    }
+
+    .vertical-book {
+      gap: 1.25em;
+    }
+
+    .vertical {
+      overflow: visible;
+      font-size: 11pt;
     }
 
     p.mizige {

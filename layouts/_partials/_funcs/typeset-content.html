@@ -151,6 +151,16 @@ the match can then run to the next "]...{...}" anywhere in the feed.
 {{- end -}}
 {{- $ruby := `<ruby>$1<rp>（</rp><rt>$2</rt><rp>）</rp></ruby>` -}}
 {{- $kept := slice -}}
+{{- if and $strip (in $content "vertical") -}}
+  {{- $vertRE := slice -}}
+  {{- range slice "blockquote" "p" -}}
+    {{- $vertRE = $vertRE | append (printf `(?s)<%s\b[^>]*\bclass="(?:[^"]*\s)?vertical(?:\s[^"]*)?"[^>]*>.*?</%s>` . .) -}}
+  {{- end -}}
+  {{- range findRE (delimit $vertRE "|") $content -}}
+    {{- $content = replace $content . (printf "\x00\x03%d\x00" (len $kept)) 1 -}}
+    {{- $kept = $kept | append (partial "_funcs/typeset-vertical.html" .) -}}
+  {{- end -}}
+{{- end -}}
 {{- if and $strip (in $content "mizige") -}}
   {{- range $pBlock := findRE `(?s)<p\b[^>]*\bclass="(?:[^"]*\s)?mizige(?:\s[^"]*)?"[^>]*>.*?</p>` $content -}}
     {{- $content = replace $content $pBlock (printf "\x00\x03%d\x00" (len $kept)) 1 -}}

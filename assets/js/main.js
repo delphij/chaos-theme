@@ -21,10 +21,15 @@ import { initLightbox } from './modules/lightbox.js';
 import { initTaskLists } from './modules/task-list.js';
 import { initSidebar } from './modules/sidebar.js';
 import { initTagCounts } from './modules/tag-counts.js';
+import { initVerticalSheets } from './modules/vertical-sheets.js';
 
 initTheme();
 initOverlays();
 initScrollSpy();
+// Must register before initPrintFootnotes() so beforeprint re-paginates vertical
+// sheets first and print-footnotes then rewrites footnote/link anchors on the
+// final print DOM instead of getting wiped by a subsequent relayout.
+initVerticalSheets();
 initPrintFootnotes();
 initCodeCopy();
 initHeadingCopy();

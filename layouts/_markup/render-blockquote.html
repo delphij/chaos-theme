@@ -100,12 +100,40 @@ gave it.
      the author's own mark, so a quote of several paragraphs without one is
      left alone. The last paragraph's body may hold inline tags but no <p>,
      which keeps an earlier dash-led paragraph from matching. */ -}}
-  {{- if in (split (string (or .Attributes.class "")) " ") "quote" -}}
+  {{- $classes := split (string (or .Attributes.class "")) " " -}}
+  {{- $isVertical := in $classes "vertical" -}}
+  {{- if or (in $classes "quote") $isVertical -}}
     {{- $text = replaceRE `(?s)^(.+</p>\s*)<p>((?:—|―|--)(?:[^<]|<(?:[^p]|p[^>\s]))*</p>\s*)$` `${1}<p class="quote-by">${2}` $text | safeHTML -}}
+  {{- end -}}
+  {{- $vStyle := "" -}}
+  {{- $vCols := 0 -}}
+  {{- if $isVertical -}}
+    {{- with .Attributes.title -}}
+      {{- $text = printf `<p class="v-title">%s</p>%s` (htmlEscape (string .)) $text | safeHTML -}}
+    {{- end -}}
+    {{- with .Attributes.height -}}
+      {{- $vStyle = printf "--vertical-height: %s" (string .) -}}
+    {{- else with .Attributes.rows -}}
+      {{- $r := int . -}}
+      {{- if gt $r 0 -}}
+        {{- $vStyle = printf "--vertical-rows: %d" $r -}}
+      {{- end -}}
+    {{- end -}}
+    {{- with .Attributes.cols -}}
+      {{- $c := int . -}}
+      {{- if gt $c 0 }}{{- $vCols = $c -}}{{- end -}}
+    {{- end -}}
   {{- end -}}
   <blockquote
   {{- range $k, $v := .Attributes -}}
+    {{- if and $isVertical (or (eq $k "rows") (eq $k "height") (eq $k "cols") (eq $k "title")) -}}{{- continue -}}{{- end -}}
+    {{- if and $vStyle (eq $k "style") -}}
+      {{- $vStyle = printf "%s; %s" (strings.TrimRight "; " (string $v)) $vStyle -}}
+      {{- continue -}}
+    {{- end -}}
     {{- if $v }} {{ printf `%s="%s"` $k (htmlEscape $v) | safeHTMLAttr }}{{ end -}}
   {{- end -}}
+  {{- if $vCols }} {{ printf `data-cols="%d"` $vCols | safeHTMLAttr }}{{ end -}}
+  {{- if $vStyle }} {{ printf `style="%s"` (htmlEscape $vStyle) | safeHTMLAttr }}{{ end -}}
   >{{ $text }}</blockquote>
 {{- end -}}
