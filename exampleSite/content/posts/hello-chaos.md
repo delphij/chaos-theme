@@ -81,7 +81,8 @@ hasCJKLanguage = true
 9. **[对谈与剧本：对话体排版示例](../dialogue-and-scripts/)**：基于定义列表与`{.dialogue}` / `{.dialogue .script}`的访谈与剧本版式。
 10. **[双语对照：两栏平行文本排版示例](../bilingual-parallel-text/)**：基于`{.bilingual}`（含`.even`与`.wide-ref`变体）的中外文平行对照与单栏防误选。
 11. **[米字格与注音：字词展示排版示例](../mizige-copybook/)**：`{.mizige}`朱砂米字格字帖与整词/跨格义训注音。
-12. **[少即是多：静态博客的依赖取舍](../on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
+12. **[竖排与古籍引文：直排、界栏、抬头与双行夹注](../vertical-typesetting/)**：`{.vertical}`独立竖排容器、乌丝栏/朱丝栏、篇名、双行夹注、行间旁批、圈点、抬头与自动分叶，附《岳阳楼记》与《前出师表》全文示例。
+13. **[少即是多：静态博客的依赖取舍](../on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
 
 如需一页对照全部组件的视觉效果，可查阅[组件一览样张](../specimen/)与[中西文混排样张](../typography-specimen/)。
 
