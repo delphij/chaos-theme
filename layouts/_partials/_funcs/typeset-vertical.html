@@ -40,6 +40,23 @@ ideographic spaces (U+3000, used for 挪抬) are preserved. Supports:
 
 {{- $html = partial "_funcs/typeset-content.html" (dict "content" $html "keepSpace" true) -}}
 
+{{- /* Vertical Bopomofo (CLREQ 3.3.3.2): wrap each syllable and isolate
+     trailing tone marks (ˊ ˇ ˋ) and leading neutral tone (˙) so prose.css can
+     keep them upright and place 2nd/3rd/4th tones to the right of the final
+     symbol without affecting horizontal prose or feeds outside .vertical. */ -}}
+{{- if in $html "<rt>" -}}
+  {{- $bpmfChar := `[\x{3105}-\x{312f}\x{31a0}-\x{31bf}]` -}}
+  {{- $bpmfRtRE := printf `<rt>([\x{3105}-\x{312f}\x{31a0}-\x{31bf}\x{02c7}\x{02c9}\x{02ca}\x{02cb}\x{02d9}\s]*%s[\x{3105}-\x{312f}\x{31a0}-\x{31bf}\x{02c7}\x{02c9}\x{02ca}\x{02cb}\x{02d9}\s]*)</rt>` $bpmfChar -}}
+  {{- $bpmfSylRE := printf `(\x{02d9})?(%s+)([\x{02c7}\x{02c9}\x{02ca}\x{02cb}])?` $bpmfChar -}}
+  {{- range $m := findRE $bpmfRtRE $html -}}
+    {{- $rtText := strings.TrimPrefix "<rt>" (strings.TrimSuffix "</rt>" $m) -}}
+    {{- $formatted := $rtText | replaceRE $bpmfSylRE `<span class="rt-bpmf-body"><span class="rt-tone-neutral">$1</span>$2<span class="rt-tone">$3</span></span>` -}}
+    {{- $formatted = replace $formatted `<span class="rt-tone-neutral"></span>` "" -}}
+    {{- $formatted = replace $formatted `<span class="rt-tone"></span>` "" -}}
+    {{- $html = replace $html $m (printf `<rt class="rt-bopomofo">%s</rt>` $formatted) 1 -}}
+  {{- end -}}
+{{- end -}}
+
 {{- /* 抬头: leading ^^ (双抬) or ^ (单抬) inside <p> */ -}}
 {{- if findRE `<p\b[^>]*>\^` $html -}}
   {{- $html = $html | replaceRE `<p>\^\^` `<p class="taitou-2">` -}}

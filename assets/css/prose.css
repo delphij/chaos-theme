@@ -625,6 +625,13 @@
     text-emphasis: none;               /* Never draw emphasis marks on ruby glosses */
   }
 
+  /* Bopomofo ruby annotations - Keep letters and all four tone marks (ˊ ˇ ˋ ˙)
+     on the same CJK sans-serif face so Latin UI fonts do not hijack
+     U+02C7 / U+02D9 (font-variant-east-asian: ruby is inherited from ruby). */
+  rt.rt-bopomofo {
+    font-family: var(--font-bopomofo);
+  }
+
   /* Give blocks that contain ruby annotations slightly taller uniform leading
      so a single annotated line does not open a noticeably wider gap above it.
      Added to the block's own leading rather than fixed, so print's tighter
@@ -844,7 +851,6 @@
       display: block;
       margin-bottom: 0.35rem;
       padding: 0 0.15em;
-      font-family: var(--font-sans);
       font-size: var(--text-lg);
       font-style: normal;
       font-weight: 400;
@@ -1302,6 +1308,35 @@
       text-align: center;
       white-space: nowrap;
       pointer-events: none;
+
+      /* Traditional vertical Bopomofo (CLREQ 3.3.3.2): keep letters and tone
+         marks upright (UAX #50 classifies U+02C7/02CA/02CB/02D9 as R, which
+         would otherwise rotate ˊ into ˋ and ˋ into ˊ under mixed orientation),
+         place 2nd/3rd/4th tone marks to the right of the final symbol, and keep
+         neutral tone (˙) upright above the first symbol. */
+      &.rt-bopomofo {
+        inset-block-start: -0.62em;
+        font-size: 0.34em;
+        text-orientation: upright;
+
+        .rt-bpmf-body {
+          position: relative;
+          display: inline-block;
+          line-height: 1;
+        }
+
+        .rt-tone {
+          position: absolute;
+          inset-inline-end: 0;
+          inset-block-start: -0.95em;
+          line-height: 1;
+        }
+
+        .rt-tone-neutral {
+          display: inline-block;
+          line-height: 0.65;
+        }
+      }
     }
 
     .taitou-1 {

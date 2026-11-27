@@ -448,6 +448,13 @@ the match can then run to the next "]...{...}" anywhere in the feed.
     {{- $content = replace $content (printf "\x00\x03%d\x00" $k) (index $kept $k) -}}
   {{- end -}}
 {{- end -}}
+{{- /* Mark Bopomofo <rt> annotations across prose, keep-space, and mizige
+     blocks in one pass so CSS keeps letters and tone marks on --font-bopomofo.
+     Vertical blocks already tag and split their own Bopomofo <rt> inside
+     typeset-vertical.html, so <rt class="rt-bopomofo"> is skipped here. */ -}}
+{{- if and $strip (in $content "<rt>") -}}
+  {{- $content = $content | replaceRE `<rt>([\x{3105}-\x{312f}\x{31a0}-\x{31bf}\x{02c7}\x{02c9}\x{02ca}\x{02cb}\x{02d9}\s]*[\x{3105}-\x{312f}\x{31a0}-\x{31bf}][\x{3105}-\x{312f}\x{31a0}-\x{31bf}\x{02c7}\x{02c9}\x{02ca}\x{02cb}\x{02d9}\s]*)</rt>` `<rt class="rt-bopomofo">$1</rt>` -}}
+{{- end -}}
 {{- /* Summaries truncated at <!--more--> carry footnote references whose
      definitions live at the end of the post; drop them when no footnote list
      is present so list pages and descriptions do not emit dead anchors,

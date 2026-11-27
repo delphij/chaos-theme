@@ -568,6 +568,14 @@
                  Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
                  "WenQuanYi Micro Hei", sans-serif;
 
+    /* Bopomofo ruby stack - CJK sans-serif ahead of Latin UI fonts so
+       -apple-system / Segoe UI cannot intercept U+02C7 (ˇ) and U+02D9 (˙)
+       as high Latin diacritics while U+02CA (ˊ) and U+02CB (ˋ) fall through
+       to the CJK face's centered OpenType ruby tone glyphs. */
+    --font-bopomofo: "Noto Sans SC", "Noto Sans TC", "PingFang SC", "PingFang TC",
+                     "Hiragino Sans GB", "Microsoft YaHei", "Microsoft JhengHei",
+                     "WenQuanYi Micro Hei", var(--font-sans);
+
     /* Monospace stack - used by code, taxonomy count pills and archive dates.
        The bundled Noto Sans Mono face covers Latin and digits only; everything
        else, CJK included, falls through to the platform fonts listed after it. */
@@ -633,6 +641,9 @@
   /* Locale-specific emphasis stacks so Traditional Chinese, Japanese and Korean
      pages (or lang-tagged passages) never mix regional glyph forms. */
   :is(:lang(zh-TW), :lang(zh-HK), :lang(zh-MO), :lang(zh-Hant)) {
+    --font-bopomofo: "Noto Sans TC", "PingFang TC", "PingFang HK",
+                     "Microsoft JhengHei", "Noto Sans SC", "PingFang SC",
+                     var(--font-sans);
     --font-em: "Chaos Kai TC", "Chaos Kai TC Fallback",
                "Chaos Serif TC", "Chaos Serif TC Fallback",
                var(--font-em-latin),
