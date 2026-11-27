@@ -64,14 +64,32 @@ jobs:
         run: python3 tools/check.py --public "$RUNNER_TEMP/public"
 
       # The demo site on GitHub Pages: built as a real site is, with the
-      # search index and the post-build steps, and under the repository's
-      # subpath, which checks that every URL the theme emits respects it.
-      # Published from every push to main, and from a manual run.
+      # search index, opt-in self-hosted webfonts, and the post-build steps,
+      # and under the repository's subpath, which checks that every URL the
+      # theme emits respects it. Published from every push to main, and from
+      # a manual run.
+      - name: Restore demo webfonts cache
+        id: webfonts-cache
+        if: matrix.hugo == 'latest' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+        uses: actions/cache@v4
+        with:
+          path: |
+            exampleSite/static/_fonts
+            exampleSite/assets/_fonts
+          key: webfonts-${{ hashFiles('assets/data/webfonts.json', 'tools/fetch_webfonts.py') }}
+
       - name: Build demo site
         if: matrix.hugo == 'latest' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q --no-install-recommends xsltproc
+          pkgs="xsltproc"
+          if [ '${{ steps.webfonts-cache.outputs.cache-hit }}' != 'true' ]; then
+            pkgs="$pkgs python3-fonttools python3-brotli"
+          fi
+          sudo apt-get install -y -q --no-install-recommends $pkgs
+          python3 tools/fetch_webfonts.py \
+            --out exampleSite/static/_fonts \
+            --css-out exampleSite/assets/_fonts
           python3 tools/build_search_index.py --content exampleSite/content \
             --base-url "/${{ github.event.repository.name }}/"
           hugo --source exampleSite --destination "$RUNNER_TEMP/pages" \

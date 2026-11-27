@@ -99,3 +99,6 @@ enableGitInfo = false
   [params.search]
     enable = true
 
+  [params.webfonts]
+    enable = true
+
