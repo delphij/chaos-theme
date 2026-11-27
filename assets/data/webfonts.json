@@ -6,7 +6,7 @@
       "family": "Kaiyuan Kai SC",
       "role": "kai",
       "type": "otf",
-      "version": "0.0.1",
+      "version": "0",
       "sizeAdjust": "108%",
       "emSizeAdjust": "112%",
       "url": "https://github.com/daizhige-org/kaiyuan-kai/releases/download/v0.0.1/kaiyuan-kai-sc.ttf",
@@ -18,7 +18,7 @@
       "family": "Source Han Serif SC Web",
       "role": "serif",
       "type": "otf",
-      "version": "2.003R",
+      "version": "0",
       "url": "https://github.com/adobe-fonts/source-han-serif/raw/2.003R/SubsetOTF/CN/SourceHanSerifCN-Regular.otf",
       "sha512": "sha512-A3bsO23mT7gvlr6ps+GDQ7CXoe/LVP7tPX6kUJcwLB8XRNWKjnTMabyuso2G+rPkU09Wb8jEi5e/kdWsOhMAUw==",
       "licenseUrl": "https://github.com/adobe-fonts/source-han-serif/raw/2.003R/LICENSE.txt"

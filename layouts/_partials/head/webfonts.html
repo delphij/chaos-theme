@@ -1,23 +1,40 @@
 {{- /* Opt-in self-hosted CJK webfonts (enabled via `[params.webfonts] enable = true`).
      Reads the pinned descriptor in `assets/data/webfonts.json` (shared with
-     `tools/fetch_webfonts.py`), fingerprints each `assets/_fonts/<slug>/<version>/font.css`
-     via Hugo Pipes (publishing `font.<sha256>.css` alongside the `.woff2` slices
-     with SRI `integrity`), and fills the `--webfont-*` slots in `tokens.css` /
-     `prose.css` so font stacks stay DRY and locale `:lang()` rules stay intact. */ -}}
+     `tools/fetch_webfonts.py`), loads each `assets/_fonts/<slug>/<version>/font.css`
+     non-blocking via Hugo Pipes `fingerprint` + SRI `integrity` ONLY on pages
+     that actually use its role (`serif` -> `.vertical`; `kai` -> `<em>`/`<i>`/`.mizige`),
+     and fills the `--webfont-*` slots in `tokens.css` / `prose.css` so font
+     stacks stay DRY and locale `:lang()` rules stay intact. */ -}}
 {{- if site.Params.webfonts.enable -}}
+  {{- $page := . -}}
   {{- with resources.Get "data/webfonts.json" -}}
     {{- with . | transform.Unmarshal -}}
       {{- $assetPrefix := strings.Trim (or .urlPrefix "_fonts") "/" -}}
+      {{- $needSerif := partial "_funcs/has-feature.html" (dict "page" $page "markup" `class="vertical`) -}}
+      {{- $needKai := or
+            (partial "_funcs/has-feature.html" (dict "page" $page "markup" "<em"))
+            (partial "_funcs/has-feature.html" (dict "page" $page "markup" "<i>"))
+            (partial "_funcs/has-feature.html" (dict "page" $page "markup" `class="mizige"`)) -}}
       {{- $decls := slice -}}
       {{- range .fonts -}}
+        {{- $needed := true -}}
         {{- if eq .role "kai" -}}
-          {{- $decls = $decls | append (printf `--webfont-kai:%q` .family) (printf `--webfont-kai-em:"%s Em"` .family) -}}
+          {{- $needed = $needKai -}}
+          {{- if $needed -}}
+            {{- $decls = $decls | append (printf `--webfont-kai:%q` .family) (printf `--webfont-kai-em:"%s Em"` .family) -}}
+          {{- end -}}
         {{- else if eq .role "serif" -}}
-          {{- $decls = $decls | append (printf `--webfont-serif:%q` .family) (printf `--webfont-serif-em:"%s Em"` .family) -}}
+          {{- $needed = $needSerif -}}
+          {{- if $needed -}}
+            {{- $decls = $decls | append (printf `--webfont-serif:%q` .family) (printf `--webfont-serif-em:"%s Em"` .family) -}}
+          {{- end -}}
         {{- end -}}
-        {{- with resources.Get (printf "%s/%s/%s/font.css" $assetPrefix .slug .version) -}}
-          {{- with . | fingerprint -}}
-<link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+        {{- if $needed -}}
+          {{- with resources.Get (printf "%s/%s/%s/font.css" $assetPrefix .slug .version) -}}
+            {{- with . | fingerprint -}}
+<link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></noscript>
+            {{- end -}}
           {{- end -}}
         {{- end -}}
       {{- end -}}

@@ -203,11 +203,12 @@ def is_cjk_ideograph(cp: int) -> bool:
 
 
 def is_core_punct_or_ascii(cp: int) -> bool:
-    """Core ASCII and CJK/vertical punctuation locked into slice 0."""
+    """Core ASCII, CJK/vertical punctuation, and emphasis marks locked into slice 0."""
     return (
         0x0020 <= cp <= 0x007E
         or cp == 0x00B7  # middle dot ·
         or 0x2000 <= cp <= 0x206F  # general punctuation (—, …, “”, etc.)
+        or cp in (0x25CB, 0x25CF, 0x25E6)  # circle/dot emphasis marks (○, ●, ◦)
         or 0x3000 <= cp <= 0x303F  # CJK symbols & punctuation (、。「」『』《》)
         or 0xFE10 <= cp <= 0xFE1F  # vertical forms
         or 0xFE30 <= cp <= 0xFE4F  # CJK compatibility forms
@@ -281,8 +282,9 @@ def build_tiered_slices(all_cps: list[int], corpus_freq: dict[int, int]) -> list
         slices.append(sorted(tier2[i : i + 128]))
     for i in range(0, len(tier3), 64):
         slices.append(sorted(tier3[i : i + 64]))
-    if other_non_han:
-        slices.append(sorted(other_non_han))
+    other_non_han.sort()
+    for i in range(0, len(other_non_han), 128):
+        slices.append(other_non_han[i : i + 128])
     return slices
 
 
@@ -407,7 +409,8 @@ def assemble_from_npm(
         raise ValueError(f"Incomplete npm descriptor entry for {spec.get('slug')!r}")
 
     label = f"{spec['slug']}@{spec['version']}"
-    cache_path = cache_dir / f"{spec['slug']}-{spec['version']}.tgz"
+    sha_tag = re.sub(r"[^A-Za-z0-9]", "", sha512.partition("-")[2])[:12]
+    cache_path = cache_dir / f"{spec['slug']}-{sha_tag}.tgz"
     tar_bytes = fetch_verified_bytes(tarball_url, sha512, cache_path, label)
 
     with tarfile.open(fileobj=io.BytesIO(tar_bytes), mode="r:gz") as tf:
@@ -512,7 +515,8 @@ def assemble_from_otf(
 
     label = f"{spec['slug']}@{spec['version']}"
     ext = Path(posixpath.basename(otf_url)).suffix or ".otf"
-    source_path = cache_dir / f"{spec['slug']}-{spec['version']}{ext}"
+    sha_tag = re.sub(r"[^A-Za-z0-9]", "", sha512.partition("-")[2])[:12]
+    source_path = cache_dir / f"{spec['slug']}-{sha_tag}{ext}"
     fetch_verified_bytes(otf_url, sha512, source_path, label)
 
     base_font = TTFont(str(source_path))

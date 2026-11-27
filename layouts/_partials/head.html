@@ -49,7 +49,7 @@
   {{- end -}}
 {{- end -}}
 {{ partialCached "head/css.html" . }}
-{{- partialCached "head/webfonts.html" . }}
+{{- partial "head/webfonts.html" . }}
 {{- /* Syncs <meta name="color-scheme"> with any stored override before first
        paint. main.js is deferred, so leaving this to it paints one wrong-scheme
        frame first. Without JS, the meta stays "light dark" and CSS follows the
@@ -69,7 +69,7 @@
   {{ end -}}
 {{ end -}}
 {{ if and (eq .Kind "page") site.Params.remarkURL -}}
-<link rel="preconnect" href="{{ site.Params.remarkURL }}" crossorigin>
+<link rel="preconnect" href="{{ site.Params.remarkURL }}">
 {{ end -}}
 {{ partial "schema.html" . }}
 {{ partial "opengraph.html" . }}
