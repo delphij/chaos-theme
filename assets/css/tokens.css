@@ -428,6 +428,20 @@
   line-gap-override: 0%;
 }
 
+/* Source Han Serif / Noto Serif CJK draw U+2022 (`filled dot` emphasis) at
+   only 0.116em (~1px at 50% emphasis scale), whereas Songti SC omits U+2022
+   and falls through to Georgia's 0.258em bullet. Scoping U+2022 to standard
+   serif bullets restores a crisp ~0.26em filled dot for both local and webfont
+   Source Han Serif without touching any other glyph. */
+@font-face {
+  font-family: "Chaos Emphasis Dot";
+  src: local("Georgia"), local("Times New Roman"), local("Times-Roman"),
+       local("Liberation Serif"), local("DejaVu Serif");
+  font-weight: 400;
+  font-style: normal;
+  unicode-range: U+2022;
+}
+
 @layer chaos.tokens {
   /* ==========================================================================
      CSS VARIABLES

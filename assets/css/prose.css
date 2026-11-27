@@ -612,6 +612,7 @@
 
   /* Ruby text - The small pronunciation guide */
   rt {
+    font-family: var(--font-sans);
     font-size: 0.55em;
     line-height: 1;
     margin-bottom: -0.1em;
@@ -654,6 +655,10 @@
 
   sup {
     top: -0.45em;
+  }
+
+  a.footnote-ref {
+    font-family: var(--font-sans);
   }
 
   sub {
@@ -995,7 +1000,7 @@
 
   .vertical-book {
     --vertical-bleed: 0px;
-    --vertical-font: "Source Han Serif SC", "Noto Serif CJK SC",
+    --vertical-font: "Chaos Emphasis Dot", "Source Han Serif SC", "Noto Serif CJK SC",
                      var(--webfont-serif, "Songti SC"),
                      "Songti SC", "Songti TC", "STSong", "PMingLiU", Georgia, serif;
     display: flex;
@@ -1109,18 +1114,10 @@
       text-indent: 0;
     }
 
-    .v-large {
-      font-size: 1.08em;
-    }
-
-    .v-small {
-      font-size: 0.85em;
-    }
-
     .em-circle {
       font-family: inherit;
       font-style: normal;
-      text-emphasis: open circle;
+      text-emphasis: open dot;
       text-emphasis-position: under;
     }
 
@@ -1138,14 +1135,12 @@
       display: inline;
       color: var(--muted);
       font-size: 0.88em;
+    }
 
-      &::before {
-        content: '（';
-      }
-
-      &::after {
-        content: '）';
-      }
+    /* Pull a footnote marker snug against the trailing full-width closing
+       parenthesis of a degraded inline note (half-em built-in right bearing). */
+    :is(.jiazhu, .pangpi) + sup {
+      margin-inline-start: -0.35em;
     }
 
     .pangpi-text {
@@ -1162,7 +1157,7 @@
     --vertical-rule: color-mix(in srgb, var(--muted) 28%, transparent);
     writing-mode: vertical-rl;
     text-orientation: mixed;
-    font-family: var(--vertical-font, "Source Han Serif SC", "Noto Serif CJK SC",
+    font-family: var(--vertical-font, "Chaos Emphasis Dot", "Source Han Serif SC", "Noto Serif CJK SC",
                  var(--webfont-serif, "Songti SC"),
                  "Songti SC", "Songti TC", "STSong", "PMingLiU", Georgia, serif);
     font-size: 1.25rem;
@@ -1274,12 +1269,14 @@
 
     sup {
       position: relative;
-      inset-block-start: -0.35em;
+      inset-block-start: -0.9em;
       vertical-align: baseline;
       text-combine-upright: all;
-      font-size: 0.6em;
+      font-family: var(--font-sans);
+      font-size: 0.48em;
       line-height: 1;
       letter-spacing: 0;
+      margin-inline: 0.15em 0.05em;
 
       a {
         text-decoration: none;
@@ -1333,19 +1330,26 @@
       font-family: inherit;
       font-style: normal;
       line-height: inherit;
-      text-emphasis: open circle;
+      text-emphasis: open dot;
       text-emphasis-position: over right;
     }
 
     .jiazhu {
+      position: relative;
       display: inline-grid;
       grid-template-rows: auto auto;
       grid-auto-flow: row;
-      row-gap: 0.08em;
-      font-size: 0.52em;
-      line-height: 1.05;
+      row-gap: 0.04em;
+      /* Two 0.48em columns (line-height 1.04 + 0.04em gap) span ~1.02 parent em,
+         matching one big character's width. In vertical-rl, `vertical-align:
+         middle` aligns the box midpoint to `central + 0.5 parent ex` (shifted
+         right); offsetting `inset-block-start: 1ex` (~0.48 parent ex at 0.48em)
+         pulls the gutter back onto the big character's exact centerline. */
+      font-size: 0.48em;
+      line-height: 1.04;
       letter-spacing: 0.02em;
       vertical-align: middle;
+      inset-block-start: 1ex;
       margin-inline: 0.15em;
     }
 
