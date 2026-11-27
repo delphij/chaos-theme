@@ -70,19 +70,20 @@ hasCJKLanguage = true
 
 本系列文章分别介绍主题的各项功能与对应配置方法：
 
-1. **[中文排版：汉字、西文与标点的混排处理](../chinese-typography/)**：中西文间距、标点挤压与悬挂、楷体与着重号、振假名与拼音注音、源码断行空格净化。
-2. **[提示框的语义类型与语法](../alerts-and-callouts/)**：NOTE、TIP、IMPORTANT、WARNING、CAUTION、HISTORICAL与DISCLAIMER，以及自定义标题支持。
-3. **[代码语法高亮、交互参数与Mermaid图表](../code-and-diagrams/)**：静态语法高亮、行号悬停联动、可交互代码参数（`code_vars`）、代码一键复制与Mermaid图表。
-4. **[用KaTeX书写数学公式](../math-with-katex/)**：行内与块级公式、Goldmark passthrough配置与洛伦兹方程组。
-5. **[文章元数据与内容控制](../front-matter-and-metadata/)**：`deprecated`（过时降权）、`searchHidden`（隐藏检索）、`noindex`（避免收录）、`series`（系列导航与时间线）与标题段落链接。
-6. **[全文检索与阅读交互](../search-and-reading-experience/)**：两层离线全文检索（支持繁简互通）、快捷键、打印注释与文末二维码、页面即时预渲染。
-7. **[引用外部数据：YouTube与X静态嵌入](../external-embeds/)**：响应式YouTube短代码与打印二维码降级，以及静态缓存零追踪脚本的X帖文卡片。
-8. **[行内色卡与独立语录卡片](../color-swatches-and-quotes/)**：`[label]{#hex}` / `[]{#hex}` 行内十六进制色卡，以及带出处右对齐署名的`{.quote}`语录卡片。
-9. **[对谈与剧本：对话体排版示例](../dialogue-and-scripts/)**：基于定义列表与`{.dialogue}` / `{.dialogue .script}`的访谈与剧本版式。
-10. **[双语对照：两栏平行文本排版示例](../bilingual-parallel-text/)**：基于`{.bilingual}`（含`.even`与`.wide-ref`变体）的中外文平行对照与单栏防误选。
-11. **[米字格与注音：字词展示排版示例](../mizige-copybook/)**：`{.mizige}`朱砂米字格字帖与整词/跨格义训注音。
-12. **[竖排与古籍引文：直排、界栏、抬头与双行夹注](../vertical-typesetting/)**：`{.vertical}`独立竖排容器、乌丝栏/朱丝栏、篇名、双行夹注、行间旁批、圈点、抬头与自动分叶，附《岳阳楼记》与《前出师表》全文示例。
-13. **[少即是多：静态博客的依赖取舍](../on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
+1. **[快速安装与部署：配置、构建脚本与上线指南](../quick-start/)**：三种安装方式、必选与可选`hugo.toml`配置、示例`build.sh`构建脚本，以及Nginx/`rsync`、GitHub Pages与Cloudflare Pages部署流程。
+2. **[中文排版：汉字、西文与标点的混排处理](../chinese-typography/)**：中西文间距、标点挤压与悬挂、楷体与着重号、振假名与拼音注音、源码断行空格净化。
+3. **[提示框的语义类型与语法](../alerts-and-callouts/)**：NOTE、TIP、IMPORTANT、WARNING、CAUTION、HISTORICAL、DISCLAIMER、可折叠的`DETAILS`卡片与`TAB`选项卡切换，以及自定义标题支持。
+4. **[代码语法高亮、交互参数与Mermaid图表](../code-and-diagrams/)**：静态语法高亮、行号悬停联动、可交互代码参数（`code_vars`）、代码一键复制与Mermaid图表。
+5. **[用KaTeX书写数学公式](../math-with-katex/)**：行内与块级公式、Goldmark passthrough配置与洛伦兹方程组。
+6. **[文章元数据与内容控制](../front-matter-and-metadata/)**：`deprecated`（过时降权）、`searchHidden`（隐藏检索）、`noindex`（避免收录）、`series`（系列导航与时间线）与标题段落链接。
+7. **[全文检索与阅读交互](../search-and-reading-experience/)**：两层离线全文检索（支持繁简互通）、快捷键、打印注释与文末二维码、页面即时预渲染。
+8. **[引用外部数据：YouTube与X静态嵌入](../external-embeds/)**：响应式YouTube短代码与打印二维码降级，以及静态缓存零追踪脚本的X帖文卡片。
+9. **[行内色卡与独立语录卡片](../color-swatches-and-quotes/)**：`[label]{#hex}` / `[]{#hex}` 行内十六进制色卡，以及带出处右对齐署名的`{.quote}`语录卡片。
+10. **[对谈与剧本：对话体排版示例](../dialogue-and-scripts/)**：基于定义列表与`{.dialogue}` / `{.dialogue .script}`的访谈与剧本版式。
+11. **[双语对照：两栏平行文本排版示例](../bilingual-parallel-text/)**：基于`{.bilingual}`（含`.even`与`.wide-ref`变体）的中外文平行对照与单栏防误选。
+12. **[米字格与注音：字词展示排版示例](../mizige-copybook/)**：`{.mizige}`朱砂米字格字帖与整词/跨格义训注音。
+13. **[竖排与古籍引文：直排、界栏、抬头与双行夹注](../vertical-typesetting/)**：`{.vertical}`独立竖排容器、乌丝栏/朱丝栏、篇名、双行夹注、行间旁批、圈点、抬头与自动分叶，附《岳阳楼记》与《前出师表》全文示例。
+14. **[少即是多：静态博客的依赖取舍](../on-minimalism/)**：尽量不引入冗余外界依赖的工程取舍，以及各项特性在Gzip与Brotli下的真实尺寸对比。
 
 如需一页对照全部组件的视觉效果，可查阅[组件一览样张](../specimen/)与[中西文混排样张](../typography-specimen/)。
 
