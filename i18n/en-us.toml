@@ -169,6 +169,11 @@ lightboxResetZoom = 'Reset zoom'
 lightboxOpenOriginal = 'Open original'
 lightboxClose = 'Close'
 
+
+# Vertical typesetting toggle
+verticalToHorizontal = 'Switch to horizontal'
+verticalToVertical = 'Switch to vertical'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   one = '{{ .Name }} ({{ .Count }} post)'

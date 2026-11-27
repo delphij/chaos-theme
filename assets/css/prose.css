@@ -995,10 +995,12 @@
 
   .vertical-book {
     --vertical-bleed: 0px;
+    --vertical-font: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "Songti TC",
+                     "STSong", "PMingLiU", Georgia, serif;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.75em;
+    gap: 0.5em;
     margin: 1.75em calc(-1 * var(--vertical-bleed));
     width: calc(100% + 2 * var(--vertical-bleed));
 
@@ -1006,25 +1008,150 @@
       --vertical-bleed: calc(var(--prose-outdent, 1) * 1.75em);
     }
 
+    &:has(.taitou-1) .vertical {
+      --vertical-pad-top: 3em;
+    }
+
+    &:has(.taitou-2) .vertical {
+      --vertical-pad-top: 4em;
+    }
+  }
+
+  .vertical-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.75em;
+    width: 100%;
+
     > .vertical {
       margin: 0;
     }
 
-    &.is-paged {
+    .vertical-book.is-paged > & {
       align-items: flex-end;
 
       > .vertical {
         width: 100%;
         height: var(--vertical-height, calc(var(--vertical-rows, 22) * 1.06em + var(--vertical-pad-top) + 2em));
+        overflow-x: hidden;
       }
     }
 
-    &:has(.taitou-1) > .vertical {
-      --vertical-pad-top: 3em;
+    .vertical-book.is-horizontal > & {
+      align-items: stretch;
+    }
+  }
+
+  .vertical-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .vertical-mode-toggle {
+    appearance: none;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.2em 0.65em;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--fg);
+      background-color: var(--surface);
+      border-color: var(--muted);
+    }
+  }
+
+  /* Horizontal fallback view toggled by the reader: keeps the same geometry,
+     paper tint, serif font, and type size as `.vertical` so toggling never
+     shifts the button or jars the eye, while degrading jiazhu / pangpi into
+     quiet inline parentheticals. */
+  blockquote.vertical-as-quote {
+    margin: 0;
+    padding: 2em 1.75em;
+    font-family: var(--vertical-font);
+    font-size: 1.25rem;
+    color: var(--fg);
+    background-color: var(--blockquote-bg);
+    border-radius: var(--radius-card);
+    box-sizing: border-box;
+
+    @media screen and (max-width: 768px) {
+      font-size: 1.125rem;
+      padding: 1.5em 1.1em;
     }
 
-    &:has(.taitou-2) > .vertical {
-      --vertical-pad-top: 4em;
+    > p.v-title {
+      color: var(--heading);
+      font-weight: 600;
+      font-size: 1.08em;
+      margin-bottom: 0.75em;
+    }
+
+    > p.quote-by {
+      color: var(--muted);
+      font-size: 0.85em;
+      text-align: right;
+      margin-top: 1em;
+    }
+
+    .taitou-1,
+    .taitou-2 {
+      text-indent: 0;
+    }
+
+    .v-large {
+      font-size: 1.08em;
+    }
+
+    .v-small {
+      font-size: 0.85em;
+    }
+
+    .em-circle {
+      font-family: inherit;
+      font-style: normal;
+      text-emphasis: open circle;
+      text-emphasis-position: under;
+    }
+
+    .jiazhu {
+      display: inline;
+      font-size: 0.88em;
+      color: var(--muted);
+    }
+
+    .jiazhu-rp {
+      display: inline;
+    }
+
+    .pangpi {
+      display: inline;
+      color: var(--muted);
+      font-size: 0.88em;
+
+      &::before {
+        content: '（';
+      }
+
+      &::after {
+        content: '）';
+      }
+    }
+
+    .pangpi-text {
+      display: inline;
+      color: inherit;
+      font-size: inherit;
+      white-space: normal;
     }
   }
 
@@ -1034,13 +1161,14 @@
     --vertical-rule: color-mix(in srgb, var(--muted) 28%, transparent);
     writing-mode: vertical-rl;
     text-orientation: mixed;
-    font-family: "Songti SC", "Songti TC", "Noto Serif CJK SC", "Source Han Serif SC",
-                 "STSong", "PMingLiU", Georgia, serif;
+    font-family: var(--vertical-font, "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "Songti TC",
+                 "STSong", "PMingLiU", Georgia, serif);
     font-size: 1.25rem;
     color: var(--fg);
     background-color: var(--blockquote-bg);
     border-radius: var(--radius-card);
-    font-feature-settings: "vert" 1, "vrt2" 1, "chws" 1;
+    text-spacing-trim: normal;
+    font-feature-settings: "vert" 1, "vrt2" 1, "vchw" 1;
     box-sizing: border-box;
     width: fit-content;
     max-width: 100%;

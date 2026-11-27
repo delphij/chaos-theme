@@ -454,6 +454,11 @@ the match can then run to the next "]...{...}" anywhere in the feed.
      duplicate fnref IDs, or stray numbers. */ -}}
 {{- if and $stripOrphanFootnotes (not (in $content `class="footnotes"`)) -}}
   {{- $content = $content | replaceRE `<sup id="fnref[0-9]*:[^"]*"><a\b[^>]*class="footnote-ref"[^>]*>.*?</a></sup>` "" -}}
+{{- else -}}
+  {{- /* Bind footnote markers to their preceding character with Word Joiner
+       (U+2060) so browsers never orphan a superscript reference at the start of
+       a new line or vertical column (e.g. "中日以后" / "^3，"). */ -}}
+  {{- $content = $content | replaceRE `(<sup id="fnref[0-9]*:[^"]*"><a\b[^>]*class="footnote-ref"[^>]*>.*?</a></sup>)` "&#x2060;$1" -}}
 {{- end -}}
 
 {{- return $content -}}

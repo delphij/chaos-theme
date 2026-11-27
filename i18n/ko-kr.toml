@@ -166,6 +166,11 @@ lightboxResetZoom = '확대/축소 재설정'
 lightboxOpenOriginal = '원본 열기'
 lightboxClose = '닫기'
 
+
+# Vertical typesetting toggle
+verticalToHorizontal = '가로쓰기로 전환'
+verticalToVertical = '세로쓰기로 전환'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }} ({{ .Count }}개의 글)'

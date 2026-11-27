@@ -166,6 +166,11 @@ lightboxResetZoom = '重設縮放'
 lightboxOpenOriginal = '開啟原圖'
 lightboxClose = '關閉'
 
+
+# Vertical typesetting toggle
+verticalToHorizontal = '切換為橫排閱讀'
+verticalToVertical = '切換為直排閱讀'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }}（{{ .Count }}篇文章）'

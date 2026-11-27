@@ -2321,8 +2321,16 @@
       break-inside: avoid;
     }
 
-    .vertical-book {
+    .vertical-stage {
       gap: 1.25em;
+    }
+
+    .vertical-toolbar {
+      display: none;
+    }
+
+    blockquote.vertical-as-quote {
+      break-inside: auto;
     }
 
     .vertical {
