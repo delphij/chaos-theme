@@ -66,7 +66,7 @@
    - CJK serif fallback steps multi-weight Noto/Source Han Serif up to Medium,
      while two-weight Songti SC uses Regular (400) for 100-500 and Bold (700)
      for 600-900 so normal emphasis never jumps to a 700 bold face.
-   - Single-weight faces (WenKai Screen, Windows KaiTi, SimSun, Linux UKai /
+   - Single-weight faces (Kaiyuan Kai, Windows KaiTi, SimSun, Linux UKai /
      Fandol) sit in 400-only fallback families so browsers synthesize bold on
      top of the 106% face at 600-900 instead of switching families.
    - unicode-range covers Han ideographs only (radicals, 々/〇/〻, Unified and
@@ -83,12 +83,22 @@
      Some entries below look like family names but are Full Names, so keep
      them: Adobe-style CJK fonts drop "Regular" from the Regular face's Full
      Name ("Noto Serif CJK SC", "Source Han Serif" name that one face). Where
-     a vendor's choice is not certain, both forms are listed ("LXGW WenKai" and
-     "LXGW WenKai Regular"); an unmatched name costs nothing. */
+     a vendor's choice is not certain, both forms are listed ("Kaiyuan Kai SC"
+     and "Kaiyuan Kai SC Regular"); an unmatched name costs nothing. */
+@font-face {
+  font-family: "Chaos Kai Kaiyuan";
+  src: local("KaiyuanKaiSC-Regular"), local("Kaiyuan Kai SC"),
+       local("Kaiyuan Kai SC Regular");
+  font-weight: 400;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
 @font-face {
   font-family: "Chaos Kai";
-  src: local("LXGWWenKai-Medium"), local("LXGW WenKai Medium"),
-       local("STKaitiSC-Bold"), local("Kaiti SC Bold");
+  src: local("STKaitiSC-Bold"), local("Kaiti SC Bold");
   font-weight: 100 500;
   font-style: italic;
   size-adjust: 106%;
@@ -98,8 +108,7 @@
 
 @font-face {
   font-family: "Chaos Kai";
-  src: local("LXGWWenKai-Bold"), local("LXGW WenKai Bold"),
-       local("STKaitiSC-Black"), local("Kaiti SC Black");
+  src: local("STKaitiSC-Black"), local("Kaiti SC Black");
   font-weight: 600 900;
   font-style: italic;
   size-adjust: 106%;
@@ -109,9 +118,7 @@
 
 @font-face {
   font-family: "Chaos Kai Fallback";
-  src: local("LXGWWenKaiScreen"), local("LXGW WenKai Screen"),
-       local("LXGWWenKai-Regular"), local("LXGW WenKai"), local("LXGW WenKai Regular"),
-       local("KaiTi"), local("SimKai"), local("STKaiti"),
+  src: local("KaiTi"), local("SimKai"), local("STKaiti"),
        local("AR PL UKai CN"), local("FandolKai-Regular");
   font-weight: 400;
   font-style: italic;
@@ -127,8 +134,7 @@
        local("Noto Serif SC Medium"), local("NotoSerifSC-Medium"),
        local("Noto Serif CJK SC"), local("NotoSerifCJKsc-Regular"),
        local("Source Han Serif SC"), local("SourceHanSerifSC-Regular"),
-       local("Noto Serif SC"), local("NotoSerifSC-Regular"),
-       local("STSongti-SC-Regular"), local("Songti SC Regular");
+       local("Noto Serif SC"), local("NotoSerifSC-Regular");
   font-weight: 100 500;
   font-style: italic;
   size-adjust: 106%;
@@ -140,8 +146,27 @@
   font-family: "Chaos Serif";
   src: local("Noto Serif CJK SC Bold"), local("NotoSerifCJKsc-Bold"),
        local("Source Han Serif SC Bold"), local("SourceHanSerifSC-Bold"),
-       local("Noto Serif SC Bold"), local("NotoSerifSC-Bold"),
-       local("STSongti-SC-Bold"), local("Songti SC Bold");
+       local("Noto Serif SC Bold"), local("NotoSerifSC-Bold");
+  font-weight: 600 900;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Songti";
+  src: local("STSongti-SC-Regular"), local("Songti SC Regular");
+  font-weight: 100 500;
+  font-style: italic;
+  size-adjust: 106%;
+  unicode-range: U+2E80-2FDF, U+3005-3007, U+3021-3029, U+3038-303B,
+                 U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-323AF;
+}
+
+@font-face {
+  font-family: "Chaos Songti";
+  src: local("STSongti-SC-Bold"), local("Songti SC Bold");
   font-weight: 600 900;
   font-style: italic;
   size-adjust: 106%;
@@ -162,9 +187,7 @@
 
 @font-face {
   font-family: "Chaos Kai TC";
-  src: local("LXGWWenKaiTC-Medium"), local("LXGW WenKai TC Medium"),
-       local("LXGWWenKaiMonoTC-Medium"), local("LXGW WenKai Mono TC Medium"),
-       local("STKaitiTC-Bold"), local("Kaiti TC Bold");
+  src: local("STKaitiTC-Bold"), local("Kaiti TC Bold");
   font-weight: 100 500;
   font-style: italic;
   size-adjust: 106%;
@@ -174,9 +197,7 @@
 
 @font-face {
   font-family: "Chaos Kai TC";
-  src: local("LXGWWenKaiTC-Bold"), local("LXGW WenKai TC Bold"),
-       local("LXGWWenKaiMonoTC-Bold"), local("LXGW WenKai Mono TC Bold"),
-       local("STKaitiTC-Black"), local("Kaiti TC Black");
+  src: local("STKaitiTC-Black"), local("Kaiti TC Black");
   font-weight: 600 900;
   font-style: italic;
   size-adjust: 106%;
@@ -186,8 +207,7 @@
 
 @font-face {
   font-family: "Chaos Kai TC Fallback";
-  src: local("LXGWWenKaiTC-Regular"), local("LXGW WenKai TC"), local("LXGW WenKai TC Regular"),
-       local("BiauKaiTC-Regular"), local("BiauKaiTC Regular"),
+  src: local("BiauKaiTC-Regular"), local("BiauKaiTC Regular"),
        local("BiauKaiHK-Regular"), local("BiauKaiHK Regular"), local("BiauKai"),
        local("DFKai-SB"), local("TW-Kai"),
        local("AR PL UKai TW"), local("AR PL UKai HK");
@@ -315,10 +335,9 @@
    unicode-range exclusion keep U+0020 in the matched face so CSS Inline 3 uses
    its ascent-override / descent-override directly as the cell's strut. */
 @font-face {
-  font-family: "Chaos Mizige WenKai";
-  src: local("LXGWWenKai-Regular"), local("LXGW WenKai"),
-       local("LXGW WenKai Regular"), local("LXGWWenKaiScreen"),
-       local("LXGW WenKai Screen");
+  font-family: "Chaos Mizige Kaiyuan";
+  src: local("KaiyuanKaiSC-Regular"), local("Kaiyuan Kai SC"),
+       local("Kaiyuan Kai SC Regular");
   font-weight: 400;
   font-style: normal;
   ascent-override: 88%;
@@ -367,17 +386,6 @@
   font-style: normal;
   ascent-override: 80%;
   descent-override: 20%;
-  line-gap-override: 0%;
-}
-
-@font-face {
-  font-family: "Chaos Mizige WenKai TC";
-  src: local("LXGWWenKaiTC-Regular"), local("LXGW WenKai TC"),
-       local("LXGW WenKai TC Regular");
-  font-weight: 400;
-  font-style: normal;
-  ascent-override: 88%;
-  descent-override: 12%;
   line-gap-override: 0%;
 }
 
@@ -560,8 +568,8 @@
        webfont can prepend it or override --font-em without restyling em. */
     --font-em-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                      "Noto Sans", "Liberation Sans", "DejaVu Sans";
-    --font-em: "Chaos Kai", "Chaos Kai Fallback",
-               "Chaos Serif", "Chaos Serif Fallback",
+    --font-em: "Chaos Kai Kaiyuan", "Chaos Kai", "Chaos Kai Fallback",
+               "Chaos Serif", "Chaos Songti", "Chaos Serif Fallback",
                var(--font-em-latin),
                "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
                "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
@@ -569,9 +577,10 @@
     /* Copybook grid stack & cinnabar rules (p.mizige in prose.css).
        Derived from --primary (蘇芳 Suō by day, 退紅 Arazome by night) so dark
        mode automatically shifts to a muted rose grid without glaring. */
-    --font-mizige: "Chaos Mizige WenKai", "Chaos Mizige Kaiti",
+    --font-mizige: "Chaos Mizige Kaiyuan", "Chaos Mizige Kaiti",
                    "Chaos Mizige SimKai", "Chaos Mizige Serif",
-                   "Chaos Mizige Songti", var(--font-sans);
+                   "Chaos Mizige Songti",
+                   var(--font-sans);
     --mizige-border: color-mix(in srgb, var(--primary) 45%, transparent);
     --mizige-guide: color-mix(in srgb, var(--primary) 26%, transparent);
 
@@ -612,8 +621,8 @@
                var(--font-em-latin),
                "Noto Sans TC", "PingFang TC", "PingFang HK",
                "Microsoft JhengHei", sans-serif;
-    --font-mizige: "Chaos Mizige WenKai TC", "Chaos Mizige BiauKai",
-                   "Chaos Mizige Kaiti TC", var(--font-sans);
+    --font-mizige: "Chaos Mizige BiauKai", "Chaos Mizige Kaiti TC",
+                   var(--font-sans);
   }
 
   :lang(ja) {
