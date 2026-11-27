@@ -1,7 +1,7 @@
 ---
 title: "提示框的语义类型与语法"
 date: 2026-05-04
-description: "介绍Chaos主题支持的提示框类型：NOTE、TIP、IMPORTANT、WARNING、CAUTION、HISTORICAL、DISCLAIMER与可折叠的DETAILS，以及自定义标题与多语言适配。"
+description: "介绍Chaos主题支持的提示框类型：NOTE、TIP、IMPORTANT、WARNING、CAUTION、HISTORICAL、DISCLAIMER、可折叠的DETAILS与选项卡TAB，以及自定义标题与多语言适配。"
 categories: ["指南"]
 tags: ["Chaos", "Markdown", "提示框"]
 series: "Chaos 主题指南"
@@ -181,3 +181,129 @@ Chaos支持[GitHub风格的提示框语法](https://docs.github.com/en/get-start
 > tls = true
 > workers = 4
 > ```
+
+## 选项卡切换：`TAB` {#tabs}
+
+当同一项配置或操作步骤存在多种等价写法（例如`TOML` / `YAML` / `JSON`，或不同操作系统的安装命令）时，将多个`> [!TAB] 标题`块连续写出即可自动编组为选项卡面板。
+
+### 基本用法
+
+只需要按顺序写出相邻的`> [!TAB] 标题`块（中间不穿插其他段落）；可选在首个块末尾附加`{group="组名" label="无障碍名称"}`：
+
+````markdown {.wrap}
+> [!TAB] TOML
+> ```toml
+> [params.search]
+>   enable = true
+> ```
+{label="配置格式"}
+
+> [!TAB] YAML
+> ```yaml
+> params:
+>   search:
+>     enable: true
+> ```
+
+> [!TAB] JSON
+> ```json
+> {
+>   "params": {
+>     "search": { "enable": true }
+>   }
+> }
+> ```
+````
+
+渲染效果：
+
+> [!TAB] TOML
+> ```toml
+> [params.search]
+>   enable = true
+> ```
+{label="配置格式"}
+
+> [!TAB] YAML
+> ```yaml
+> params:
+>   search:
+>     enable: true
+> ```
+
+> [!TAB] JSON
+> ```json
+> {
+>   "params": {
+>     "search": { "enable": true }
+>   }
+> }
+> ```
+
+### 自动联动、`.nogroup` 与嵌套能力
+
+同一篇文章里，只要多组选项卡拥有相同的标签标题集合（顺序无关），就会**自动联动**，无需手写组名：切换其中任意一处时，其余同集合选项卡会同步切到同名标签。如果某组恰好使用了通用标题（如「方案一 / 方案二」）但不希望与页面其他选项卡联动，在首个`> [!TAB]`末尾加`{.nogroup}`即可退出；若两组标签互为子集（例如三选一与二选一）仍想联动，可显式附加`{group="组名"}`（选中对方不存在的标签时，对方保持原状不动）。
+
+由于`> [!TAB]`与正文共享单次Goldmark主解析，选项卡内可自由嵌套带行号代码块、标准脚注与`> > [!NOTE]`提示框，且行号与列表编号同样自动收拢在卡片内部。试着在下面两组未声明`group`的选项卡之间点击切换（或用键盘左右方向键、`Home`、`End`切换）：
+
+> [!TAB] macOS (Homebrew)
+> 使用Homebrew安装Hugo与`xsltproc`（macOS已自带`xsltproc`）：
+>
+> ```sh
+> brew install hugo
+> hugo version
+> ```
+{label="安装 Hugo"}
+
+> [!TAB] Debian / Ubuntu
+> 从官方Release下载标准版二进制并安装`xsltproc`[^tab-xslt]：
+>
+> ```sh
+> sudo apt-get update
+> sudo apt-get install -y xsltproc
+> ```
+
+> [!TAB] FreeBSD
+> 通过`pkg`直接安装：
+>
+> ```sh
+> pkg install gohugo libxslt
+> ```
+
+第二步验证构建（未写`group`属性，切换上方系统标签时此处自动同步联动）：
+
+> [!TAB] macOS (Homebrew)
+> 本地预览并检查构建：
+>
+> ```sh
+> hugo --gc --minify --panicOnWarning
+> sh themes/chaos/tools/post_build.sh public
+> python3 themes/chaos/tools/check.py --public public
+> ```
+>
+> > [!NOTE]
+> > 选项卡内的嵌套提示框、文末脚注与五行及以上带行号代码块均原生正常，行号不会穿透卡片左缘。
+{label="验证构建"}
+
+> [!TAB] Debian / Ubuntu
+> 在Debian / Ubuntu上执行相同构建流程：
+>
+> ```sh
+> hugo --gc --minify --panicOnWarning
+> sh themes/chaos/tools/post_build.sh public
+> python3 themes/chaos/tools/check.py --public public
+> ```
+
+> [!TAB] FreeBSD
+> 在FreeBSD上执行相同构建流程：
+>
+> ```sh
+> hugo --gc --minify --panicOnWarning
+> sh themes/chaos/tools/post_build.sh public
+> python3 themes/chaos/tools/check.py --public public
+> ```
+
+> [!TIP]
+> **溢出跳转、搜索、打印与订阅源降级**：当选项较多超出容器宽度时，标签栏保持单行横向滚动并在截断边缘呈现柔和渐隐，同时在右侧显示`⋯`弹出菜单方便一键跳转；隐藏面板使用`hidden="until-found"`并监听`beforematch`事件，浏览器页内查找（`Cmd+F` / `Ctrl+F`）命中非当前标签内容时会自动切换展开；打印页面（`@media print`）与RSS/Atom订阅源则会将全部标签按各自标题顺序平铺展开，不遗漏任何方案。更多实战用法参见[](../quick-start/)。
+
+[^tab-xslt]: 现代浏览器正逐步移除原生XSLT支持，`xsltproc`用于在构建后为`sitemap.xml`生成静态HTML伴生页，详见[快速安装与部署](../quick-start/#build-script)。

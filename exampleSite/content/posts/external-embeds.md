@@ -23,6 +23,9 @@ Chaos为YouTube与X（Twitter）分别设计了兼顾屏幕阅读、打印与订
 
 <!--more-->
 
+> [!TIP]
+> X（Twitter）静态卡片需要在构建前运行`python3 themes/chaos/tools/fetch_x_embed.py`将目标帖文抓取并清洗到站点的`data/x_embeds/`目录（依赖Python 3与外网访问）；未缓存对应帖文时短代码仅输出降级链接。YouTube嵌入无需构建期工具，播放时按需加载官方播放器。
+
 ## YouTube视频嵌入（`youtube`）
 
 主题内置的`youtube`短代码支持位置参数与命名参数两种写法：

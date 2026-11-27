@@ -13,6 +13,9 @@ series: "Chaos 主题指南"
 
 <!--more-->
 
+> [!TIP]
+> 本文演示的楷体强调（Markdown的`*...*`语法）在无额外配置时会自动选用系统自带楷体或宋体；若希望在Linux、Android等缺少中文字体的环境下保持一致字形，可在构建前运行`python3 themes/chaos/tools/fetch_webfonts.py --cleanup`拉取自托管字体切片（详见[准备自托管中文字体](../quick-start/#webfonts)）。
+
 ## 中西文混排与标点悬挂
 
 在支持[`text-autospace`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-autospace)

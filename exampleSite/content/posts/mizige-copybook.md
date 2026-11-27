@@ -16,6 +16,9 @@ RSS/Atom订阅与纯文本阅读器也能平稳退化为自然的括号注记。
 
 <!--more-->
 
+> [!TIP]
+> 米字格默认优先使用开源楷体（`fetch_webfonts.py`拉取的自托管切片）或系统楷体，缺字或未安装字体切片时自动回退至系统衬线体。若需在各平台呈现一致的楷书字帖效果，请先运行`python3 themes/chaos/tools/fetch_webfonts.py --cleanup`（详见[准备自托管中文字体](../quick-start/#webfonts)）。
+
 ## 基本写法与整词自动拆格 {#syntax}
 
 在启用`[markup.goldmark.parser.attribute] block = true`（主题默认已开启）

@@ -16,6 +16,9 @@ Chaos通过`{.vertical}`块属性将竖排严格限定在独立容器内——
 
 <!--more-->
 
+> [!TIP]
+> 竖排古籍容器优先采用思源宋体等中文衬线体排印，未拉取自托管字体时自动回退至系统宋体。若希望跨平台呈现一致的刻本字形与竖排标点，可在构建前运行`python3 themes/chaos/tools/fetch_webfonts.py --cleanup`（详见[准备自托管中文字体](../quick-start/#webfonts)）。
+
 ## 示例：范仲淹《岳阳楼记》 {#yueyanglouji}
 
 下面以北宋范仲淹《岳阳楼记》全文为例，演示乌丝栏（`.ruled`）、朱色行间旁批（`.side-notes`）、每栏约二十二字（`rows=22`）与默认低二格篇名（`title="岳陽樓記"`）的配合；完整Markdown源码如下：

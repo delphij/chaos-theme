@@ -11,9 +11,12 @@ tags: ["Chaos", "Markdown", "样张"]
 
 <!--more-->
 
+> [!TIP]
+> 本页涵盖楷体强调、米字格、竖排古籍与X静态卡片等全部组件。若直接运行`hugo server --source exampleSite`，未拉取自托管中文字体切片时会自动回退至系统字体；如需完整检验自托管楷体/宋体与站内检索，可先按[快速安装与部署](../quick-start/#webfonts)运行`fetch_webfonts.py`与`build_search_index.py`。
+
 ## 正文与行内元素 {#inline}
 
-正文段落使用**粗体**、*斜体（楷体与Latin italic）*、***粗斜体***与[着重号]{.}，也可以~~删除~~一段文字。
+正文段落使用**粗体**、*楷体与Latin italic*、***加粗楷体与Bold italic***与[着重号]{.}，也可以~~删除~~一段文字。
 行内代码如`errno`和`printf("%d\n", x)`使用等宽字体，
 链接分为[站内链接](../../archives/)与[站外链接](https://gohugo.io/ "Hugo官方网站")两种。
 中文与English、数字2026之间不手动加空格，由CSS自动留出间距。
@@ -180,6 +183,94 @@ p2
 > [!TIP]- 带色可折叠提示框（默认折叠）
 > 在任意提示框类型后加`-`（折叠）或`+`（展开），保留对应和色卡片与图标。更多用法参见[](../alerts-and-callouts/)。
 
+多方案切换使用相邻的`> [!TAB] 标题`块自动编组（支持键盘左右方向键切换、浏览器页内查找自动展开、脚注与嵌套提示框原生解析，打印与RSS平铺降级；详例见[](../alerts-and-callouts/#tabs)）：
+
+> [!TAB] TOML
+> ```toml
+> [params.search]
+>   enable = true
+> ```
+{label="配置格式"}
+
+> [!TAB] YAML
+> ```yaml
+> params:
+>   search:
+>     enable: true
+> ```
+
+> [!TAB] JSON
+> ```json
+> {
+>   "params": {
+>     "search": { "enable": true }
+>   }
+> }
+> ```
+
+标签数量超出容器宽度时，标签栏保持单行横向滚动并在截断边缘渐隐，同时在右侧显示`⋯`弹出菜单以便一键跳转；使用键盘方向键或`End`跳至末项时自动将当前标签滚入视口：
+
+> [!TAB] FreeBSD (pkg)
+> ```sh
+> pkg install gohugo
+> ```
+{label="各系统安装 Hugo"}
+
+> [!TAB] macOS (Homebrew)
+> ```sh
+> brew install hugo
+> ```
+
+> [!TAB] macOS (MacPorts)
+> ```sh
+> sudo port install hugo
+> ```
+
+> [!TAB] Debian / Ubuntu
+> ```sh
+> sudo apt-get install hugo
+> ```
+
+> [!TAB] Fedora / RHEL
+> ```sh
+> sudo dnf install hugo
+> ```
+
+> [!TAB] Arch Linux
+> ```sh
+> sudo pacman -S hugo
+> ```
+
+> [!TAB] Alpine Linux
+> ```sh
+> apk add hugo
+> ```
+
+> [!TAB] openSUSE
+> ```sh
+> sudo zypper install hugo
+> ```
+
+> [!TAB] OpenBSD
+> ```sh
+> doas pkg_add hugo
+> ```
+
+> [!TAB] NetBSD (pkgsrc)
+> ```sh
+> pkgin install go-hugo
+> ```
+
+> [!TAB] Windows (winget)
+> ```sh
+> winget install Hugo.Hugo
+> ```
+
+> [!TAB] Nix
+> ```sh
+> nix-shell -p hugo
+> ```
+
 ## 表格 {#tables}
 
 | 色名 | 读音 | 色值 | 用途 |
@@ -196,6 +287,16 @@ p2
 | :--- | ---: | ---: | ---: | :---: | :--- |
 | `vfs.zfs.arc_max` | 0 | 67108864 | 物理内存 | 字节 | ARC缓存的上限，0表示由系统自动决定 |
 | `kern.maxfiles` | 自动 | 1024 | 2147483647 | 个 | 系统范围内可同时打开的文件数 |
+
+若列数较多但每格内容简短、适合折行，可附加`{.fixed}`启用等宽列与折行表头（表头中的括号限定词会自动允许换行并挤压标点），并用`caption`指定表题：
+
+| 压缩算法 | 压缩比（典型） | 压缩速度（相对） | 解压速度（相对） | 适用场景（建议） |
+| :--- | :---: | :---: | :---: | :--- |
+| `lz4` | 2.1× | 极快 | 极快 | ZFS默认、热数据 |
+| `zstd-3` | 3.1× | 快 | 极快 | 归档与常规日志 |
+| `gzip-9` | 3.3× | 慢 | 快 | 静态资源预压缩 |
+| `brotli-11` | 3.8× | 极慢 | 快 | Web文本离线分发 |
+{.fixed caption="常见压缩算法特征速查"}
 
 ## 代码 {#code}
 
