@@ -1168,7 +1168,10 @@
     background-color: var(--blockquote-bg);
     border-radius: var(--radius-card);
     text-spacing-trim: normal;
-    font-feature-settings: "vert" 1, "vrt2" 1, "vchw" 1;
+    /* Let the shaper apply `vert` automatically to upright/transformed runs only;
+       forcing `"vert" 1` or `"vrt2" 1` here also hits sideways-rotated (`vo=R`)
+       runs like U+2014 (—) and double-rotates them back to horizontal. */
+    font-feature-settings: "vchw" 1;
     box-sizing: border-box;
     width: fit-content;
     max-width: 100%;
