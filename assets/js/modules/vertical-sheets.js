@@ -329,7 +329,7 @@ function layoutBook(entry) {
   }
   for (const s of sheets) {
     s.style.removeProperty('max-width');
-    if (sheets.length > 1 && hasColCap) {
+    if (sheets.length > 1) {
       s.style.width = `${maxW}px`;
     } else {
       s.style.removeProperty('width');
