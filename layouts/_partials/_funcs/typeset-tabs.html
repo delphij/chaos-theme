@@ -1,0 +1,74 @@
+{{- /*
+Groups consecutive `<section class="tab-item" ...>...</section>` blocks
+(emitted by `render-blockquote.html` for `> [!TAB] Title` alerts) into ARIA
+`.tabs` containers with a `.tab-list` bar and `hidden="until-found"` panels.
+
+Called by `typeset-content.html` for HTML output only; RSS/Atom feeds skip this
+pass so every tab renders flat as a visible titled `<section>` with no hidden
+attributes or interactive buttons.
+
+@param {string} . Rendered HTML containing at least one `<section class="tab-item"`.
+@returns {string} HTML with adjacent `.tab-item` runs grouped into `.tabs`.
+*/ -}}
+{{- $html := . -}}
+{{- $defaultLabel := T "tabsLabel" | default "Options" -}}
+{{- $moreLabel := T "tabsMore" | default "More tabs" -}}
+{{- $parts := split $html `<section class="tab-item"` -}}
+{{- $out := slice (index $parts 0) -}}
+{{- $groupItems := slice -}}
+{{- $groupIdx := 0 -}}
+
+{{- range $idx, $chunk := after 1 $parts -}}
+  {{- $pair := split $chunk "</section>" -}}
+  {{- if ge (len $pair) 2 -}}
+    {{- $itemRaw := index $pair 0 -}}
+    {{- $after := delimit (after 1 $pair) "</section>" -}}
+    {{- $gtPair := split $itemRaw ">" -}}
+    {{- $attrs := index $gtPair 0 -}}
+    {{- $body := delimit (after 1 $gtPair) ">" -}}
+    {{- $title := "" -}}
+    {{- with findRE `data-tab-title="([^"]*)"` $attrs 1 -}}
+      {{- $title = replaceRE `^data-tab-title="(.*)"$` "$1" (index . 0) -}}
+    {{- end -}}
+    {{- $group := "" -}}
+    {{- with findRE `data-tab-group="([^"]*)"` $attrs 1 -}}
+      {{- $group = replaceRE `^data-tab-group="(.*)"$` "$1" (index . 0) -}}
+    {{- end -}}
+    {{- $label := "" -}}
+    {{- with findRE `data-tab-label="([^"]*)"` $attrs 1 -}}
+      {{- $label = replaceRE `^data-tab-label="(.*)"$` "$1" (index . 0) -}}
+    {{- end -}}
+    {{- $nogroup := in $attrs `data-tab-nogroup="true"` -}}
+    {{- $groupItems = $groupItems | append (dict "title" $title "group" $group "label" $label "nogroup" $nogroup "body" $body) -}}
+    {{- $isLast := eq (add $idx 1) (sub (len $parts) 1) -}}
+    {{- $breaksGroup := or $isLast (ne (trim $after " \t\r\n") "") -}}
+    {{- if $breaksGroup -}}
+      {{- $first := index $groupItems 0 -}}
+      {{- $gName := $first.group -}}
+      {{- $gLabel := $first.label | default $defaultLabel -}}
+      {{- $cls := cond $first.nogroup "tabs nogroup" "tabs" -}}
+      {{- $btns := slice -}}
+      {{- $menuItems := slice -}}
+      {{- $panels := slice -}}
+      {{- range $ti, $it := $groupItems -}}
+        {{- $tid := printf "tab-%d-%d" $groupIdx $ti -}}
+        {{- $sel := cond (eq $ti 0) "true" "false" -}}
+        {{- $tidx := cond (eq $ti 0) "0" "-1" -}}
+        {{- $btns = $btns | append (printf `<button type="button" class="tab-btn" role="tab" id="%s" aria-selected="%s" tabindex="%s">%s</button>` $tid $sel $tidx $it.title) -}}
+        {{- $menuItems = $menuItems | append (printf `<button type="button" class="tab-menu-item" role="menuitemradio" aria-checked="%s" data-tab-index="%d">%s</button>` $sel $ti $it.title) -}}
+        {{- $pAttr := cond (eq $ti 0) ` tabindex="0"` ` hidden="until-found"` -}}
+        {{- $panels = $panels | append (printf `<div class="tab-panel" role="tabpanel" aria-labelledby="%s"%s><div class="tab-panel-body">%s</div></div>` $tid $pAttr $it.body) -}}
+      {{- end -}}
+      {{- $gAttr := cond (ne $gName "") (printf ` data-tab-group="%s"` $gName) "" -}}
+      {{- $moreId := printf "tab-more-%d" $groupIdx -}}
+      {{- $menuId := printf "tab-menu-%d" $groupIdx -}}
+      {{- $bar := printf `<div class="tab-bar"><div class="tab-list" role="tablist" aria-label="%s">%s</div><button type="button" class="tab-more" id="%s" hidden aria-label="%s" aria-haspopup="menu" aria-expanded="false" commandfor="%s" command="toggle-popover">⋯</button><div class="tab-menu" id="%s" popover="auto"><div class="tab-menu-list" focusgroup="menu nomemory" aria-labelledby="%s">%s</div></div></div>` $gLabel (delimit $btns "") $moreId $moreLabel $menuId $menuId $moreId (delimit $menuItems "") -}}
+      {{- $out = $out | append (printf `<div class="%s"%s>%s%s</div>` $cls $gAttr $bar (delimit $panels "")) $after -}}
+      {{- $groupItems = slice -}}
+      {{- $groupIdx = add $groupIdx 1 -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $out = $out | append (printf `<section class="tab-item"%s` $chunk) -}}
+  {{- end -}}
+{{- end -}}
+{{- return (delimit $out "") -}}

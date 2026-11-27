@@ -1,2 +1,6 @@
-{{- /* The logic lives in the partial, shared with the feed variants. */ -}}
+{{- /* The logic lives in the partial, shared with the feed variants.
+       HTML wraps the table in .table-wrap so wide tables scroll horizontally
+       on narrow viewports instead of overflowing the article measure. */ -}}
+<div class="table-wrap" tabindex="0">
 {{- partial "table.html" . -}}
+</div>

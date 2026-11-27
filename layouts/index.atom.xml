@@ -60,7 +60,7 @@
     <published>{{ .Date.UTC.Format "2006-01-02T15:04:05Z" | safeHTML }}</published>
     {{- /* type="html" is not a CDATA section: the markup must stay escaped here. */}}
     <summary type="html">{{ partial "_funcs/typeset-content.html" (dict "content" (trim .Summary "\n") "stripOrphanFootnotes" true) }}</summary>
-    <content type="html" xml:base="{{ site.Home.Permalink }}">{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" .Content | safeHTML }}{{ "]]>" | safeHTML }}</content>
+    <content type="html" xml:base="{{ site.Home.Permalink }}">{{ "<![CDATA[" | safeHTML }}{{ partial "_funcs/typeset-content.html" (dict "content" .Content "feed" true) | safeHTML }}{{ "]]>" | safeHTML }}</content>
   </entry>
   {{- end }}
 </feed>

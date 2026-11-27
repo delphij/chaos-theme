@@ -144,10 +144,12 @@ the match can then run to the next "]...{...}" anywhere in the feed.
 {{- $content := . -}}
 {{- $strip := true -}}
 {{- $stripOrphanFootnotes := false -}}
+{{- $feed := false -}}
 {{- if reflect.IsMap . -}}
   {{- $content = .content -}}
   {{- $strip = not .keepSpace -}}
   {{- $stripOrphanFootnotes = .stripOrphanFootnotes | default false -}}
+  {{- $feed = .feed | default false -}}
 {{- end -}}
 {{- $ruby := `<ruby>$1<rp>（</rp><rt>$2</rt><rp>）</rp></ruby>` -}}
 {{- $kept := slice -}}
@@ -454,6 +456,9 @@ the match can then run to the next "]...{...}" anywhere in the feed.
      typeset-vertical.html, so <rt class="rt-bopomofo"> is skipped here. */ -}}
 {{- if and $strip (in $content "<rt>") -}}
   {{- $content = $content | replaceRE `<rt>([\x{3105}-\x{312f}\x{31a0}-\x{31bf}\x{02c7}\x{02c9}\x{02ca}\x{02cb}\x{02d9}\s]*[\x{3105}-\x{312f}\x{31a0}-\x{31bf}][\x{3105}-\x{312f}\x{31a0}-\x{31bf}\x{02c7}\x{02c9}\x{02ca}\x{02cb}\x{02d9}\s]*)</rt>` `<rt class="rt-bopomofo">$1</rt>` -}}
+{{- end -}}
+{{- if and (not $feed) (in $content `<section class="tab-item"`) -}}
+  {{- $content = partial "_funcs/typeset-tabs.html" $content -}}
 {{- end -}}
 {{- /* Summaries truncated at <!--more--> carry footnote references whose
      definitions live at the end of the post; drop them when no footnote list

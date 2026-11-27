@@ -13,6 +13,18 @@
    and breakpoints follow the conventions at the top of main.css.
    ========================================================================== */
 
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
 @layer chaos.base {
   /* ==========================================================================
      BASE STYLES
@@ -532,11 +544,12 @@
     font-feature-settings: normal;
   }
 
-  /* Inline code - no backdrop of its own: the monospace face already separates
-     it from running CJK text, and a tint would only add noise mid-paragraph.
-     The block-level background on .highlight stays, since a block is its own
-     unit. Size is an optical adjustment (mono x-height runs large next to CJK),
-     set in em so it tracks its context: body, heading or list item. */
+  /* Inline code - whisper-light tint derived from --text so short tokens
+     (`-`, `/`, `x`) and CJK markup snippets (`*...*`) separate cleanly from
+     prose on any ground (body, callouts, tables, dark mode) without turning
+     code-heavy paragraphs into noisy pills. Size is an optical adjustment
+     (mono x-height runs large next to CJK), set in em so it tracks its
+     context: body, heading or list item. */
   code,
   kbd,
   samp {
@@ -544,6 +557,35 @@
     overflow-wrap: break-word;
     hyphens: none;                      /* Never insert hyphens into code identifiers */
     text-emphasis: none;                /* Never inherit emphasis dots/sesame into code */
+  }
+
+  :not(pre) > code,
+  :not(pre) > samp {
+    /* Calibrated to Apple HIG quaternarySystemFill / GitHub Primer neutral-muted:
+       dark surfaces need ~1.8x the alpha of light surfaces for the same
+       perceived contrast step (~1.08:1 light, ~1.14:1 dark). */
+    background: light-dark(
+      color-mix(in srgb, var(--text) 4.5%, transparent),
+      color-mix(in srgb, var(--text) 8%, transparent)
+    );
+    padding: 0.14em 0.35em;
+    border-radius: var(--radius-sm);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+
+    @media print {
+      background: none;
+      padding: 0;
+    }
+  }
+
+  /* Headings, callout/table/tab titles, and navigation/TOC are structural
+     labels rather than running prose: keep inline code in monospace without
+     backdrop chips. */
+  :is(h1, h2, h3, h4, h5, h6, nav, summary, caption, .alert-heading, .tab-btn, .tab-print-heading) :is(code, samp),
+  thead th :is(code, samp) {
+    background: none;
+    padding: 0;
   }
 
   /* Code inside a block inherits the block's size, not the inline adjustment */
@@ -682,6 +724,85 @@
 }
 
 @layer chaos.components {
+  /* Shared scroll-driven horizontal edge fade and overscroll containment for
+     inline scrollers (.table-wrap and .tabs > .tab-bar > .tab-list). */
+  @keyframes scroll-fade-start {
+    to {
+      --fade-start: var(--fade-size);
+    }
+  }
+
+  @keyframes scroll-fade-end {
+    from {
+      --fade-end: var(--fade-size);
+    }
+  }
+
+  .table-wrap,
+  .tabs > .tab-bar > .tab-list {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    --fade-dir: right;
+    --fade-start-pos: 0;
+    --fade-end-pos: 100%;
+    mask:
+      linear-gradient(black, black) no-clip subtract,
+      linear-gradient(to var(--fade-dir), black, transparent) var(--fade-start-pos) 0 / var(--fade-start) 100% no-repeat no-clip,
+      linear-gradient(to var(--fade-dir), transparent, black) var(--fade-end-pos) 0 / var(--fade-end) 100% no-repeat no-clip;
+    animation: scroll-fade-start linear both, scroll-fade-end linear both;
+    animation-timeline: scroll(self inline);
+    animation-range: 0 var(--fade-size), calc(100% - var(--fade-size)) 100%;
+
+    &:dir(rtl) {
+      --fade-dir: left;
+      --fade-start-pos: 100%;
+      --fade-end-pos: 0;
+    }
+  }
+
+  /* Horizontal scroll container for Markdown tables (render-table.html).
+     Keeps narrow tables at 100% width while letting wide tables scroll inside
+     the article measure on narrow screens instead of overflowing the page. */
+  .table-wrap {
+    max-inline-size: 100%;
+    margin: 1em 0;
+    --fade-size: 2rem;
+
+    > table {
+      margin: 0;
+
+      &:not(.fixed) {
+        @media screen and (max-width: 768px) {
+          font-size: var(--text-md);
+
+          th,
+          td {
+            padding: 0.5rem 0.65rem;
+          }
+
+          /* Wide 5+ column tables scroll horizontally inside .table-wrap; give
+             the trailing description column enough room so CJK prose never
+             crushes into a 2-character vertical strip. */
+          &:has(thead th:nth-child(5)) td:last-child {
+            min-inline-size: 12em;
+          }
+        }
+      }
+    }
+
+    &:focus-visible {
+      outline: var(--focus-outline);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    @media print {
+      overflow: visible;
+      mask: none;
+      animation: none;
+    }
+  }
+
   /* Emphasis marks ([text]{.} in typeset-content.html) - Upright body type at
      normal weight, decoupled from bold and italic. Each language puts the
      marks where its own convention does, which is also the preferred
@@ -1417,12 +1538,14 @@
     }
   }
 
-  /* Bounded prose containers (quotes, callouts, [!DETAILS] cards) have no outer
-     page margin to hang gutters into (and details.alert clips overflow). Flip
-     --prose-outdent to 0 once here so every hanging component (code line
-     numbers, wrapped code counters, dl.dialogue) stays inside the card. */
+  /* Bounded prose containers (quotes, callouts, [!DETAILS] cards, tabs) have no
+     outer page margin to hang gutters into (and details.alert / .tabs clip
+     overflow). Flip --prose-outdent to 0 once here so every hanging component
+     (code line numbers, wrapped code counters, dl.dialogue) stays inside the
+     card. */
   blockquote,
-  details.alert {
+  details.alert,
+  .tabs {
     --prose-outdent: 0;
     --code-ln-bg: var(--code-bg);
   }
@@ -1605,6 +1728,300 @@
 
       &.alert-details > summary.alert-heading {
         border-bottom: 1px solid var(--border-color);
+      }
+    }
+  }
+
+  /* Tabbed content panels (consecutive `> [!TAB] Title` blocks grouped by
+     typeset-tabs.html). Styled as a sibling of .alert-details and
+     .code-vars-panel (--ground-head tab bar, --ground body). Padding and
+     backgrounds live on .tab-panel-body rather than .tab-panel itself so
+     `hidden="until-found"` never leaves an empty strip. */
+  .tabs {
+    margin: 1.25em 0;
+    border-radius: var(--radius-card);
+    background: var(--ground);
+    overflow: hidden;
+
+    @media (forced-colors: active) {
+      border: 1px solid CanvasText;
+    }
+
+    > .tab-bar {
+      display: flex;
+      align-items: stretch;
+      background: var(--ground-head);
+
+      @media (forced-colors: active) {
+        border-bottom: 1px solid CanvasText;
+      }
+
+      > .tab-list {
+        flex: 1 1 auto;
+        min-inline-size: 0;
+        display: flex;
+        gap: 4px;
+        padding: 0 8px;
+        scrollbar-width: none;
+        scroll-snap-type: inline proximity;
+        --fade-size: 2.5rem;
+        scroll-padding-inline: var(--fade-size);
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        @supports not (animation-timeline: scroll()) {
+          transition: --fade-start 0.2s, --fade-end 0.2s;
+
+          &.more-start {
+            --fade-start: var(--fade-size);
+          }
+
+          &.more-end {
+            --fade-end: var(--fade-size);
+          }
+        }
+      }
+
+      > .tab-list > .tab-btn {
+        position: relative;
+        flex: none;
+        scroll-snap-align: start;
+        appearance: none;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        padding: 9px 12px;
+        font-family: var(--font-sans);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        line-height: 1.4;
+        color: var(--muted);
+        white-space: nowrap;
+
+        @media screen and (prefers-reduced-motion: no-preference) {
+          transition: color var(--transition-fast);
+        }
+
+        &:hover {
+          color: var(--heading);
+        }
+
+        &:focus-visible {
+          outline: var(--focus-outline);
+          outline-offset: -3px;
+          border-radius: var(--radius-sm);
+        }
+
+        &[aria-selected="true"] {
+          color: var(--heading);
+
+          /* Border on a pseudo-element survives forced-colors mode and adds no
+             dimensions that would shift adjacent tabs. */
+          &::after {
+            content: "";
+            position: absolute;
+            inset: auto 8px 0;
+            border-block-end: 2px solid var(--primary);
+          }
+        }
+      }
+
+      /* Overflow jump menu trigger: sits outside role="tablist" and stays
+         hidden unless the tablist actually overflows. */
+      > .tab-more {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-inline-size: 36px;
+        padding: 0 10px;
+        border: 0;
+        border-inline-start: 1px solid var(--border-color);
+        background: none;
+        color: var(--muted);
+        font-family: var(--font-sans);
+        font-size: var(--text-md);
+        line-height: 1;
+        cursor: pointer;
+
+        &[hidden] {
+          display: none;
+        }
+
+        @media screen and (prefers-reduced-motion: no-preference) {
+          transition: color var(--transition-fast), background-color var(--transition-fast);
+        }
+
+        &:hover,
+        &[aria-expanded="true"] {
+          color: var(--heading);
+          background: var(--paper);
+        }
+
+        &:focus-visible {
+          outline: var(--focus-outline);
+          outline-offset: -3px;
+          border-radius: var(--radius-sm);
+        }
+      }
+    }
+
+    > .tab-panel > .tab-panel-body {
+      padding: 14px 16px;
+
+      > :first-child {
+        margin-top: 0;
+      }
+
+      > :last-child {
+        margin-bottom: 0;
+      }
+
+      > ol,
+      > ul {
+        padding-left: 1.5em;
+      }
+
+      > .tab-print-heading {
+        display: none;
+      }
+    }
+
+    @media print {
+      background: none;
+      border: 1px solid var(--border-color);
+      overflow: visible;
+
+      > .tab-bar {
+        display: none;
+      }
+
+      > .tab-panel[hidden] {
+        display: block !important;
+        content-visibility: visible !important;
+      }
+
+      > .tab-panel + .tab-panel > .tab-panel-body {
+        border-top: 1px solid var(--border-color);
+      }
+
+      > .tab-panel > .tab-panel-body > .tab-print-heading {
+        display: block;
+        margin: 0 0 0.5em;
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: var(--heading);
+        break-after: avoid;
+      }
+    }
+  }
+
+  /* Overflow tab menu popover (top-layer, anchored to .tab-more). */
+  .tab-menu {
+    margin: 4px 0 0;
+    padding: 4px;
+    border: var(--border);
+    border-radius: var(--radius-md);
+    background: var(--ground);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+    min-inline-size: 10rem;
+    max-inline-size: min(18rem, calc(100vw - 24px));
+    max-block-size: min(20rem, 60dvh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    @supports not selector(:popover-open) {
+      display: none;
+    }
+
+    @supports (position-area: block-end) {
+      position-area: block-end span-inline-start;
+      position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+      inset: auto;
+    }
+
+    @supports not (position-area: block-end) {
+      position: fixed;
+      inset: auto;
+      margin: 0;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      opacity: 0;
+      transition: opacity, translate, display, overlay;
+      transition-duration: 0.15s;
+      transition-behavior: allow-discrete;
+
+      @supports selector(:popover-open) {
+        translate: 0 -0.25rem;
+      }
+
+      &:popover-open {
+        opacity: 1;
+        translate: 0 0;
+        transition-duration: 0.1s;
+
+        @starting-style {
+          opacity: 0;
+          translate: 0 -0.25rem;
+        }
+      }
+    }
+
+    > .tab-menu-list {
+      --menu-icon-size: 1.125rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+
+      > .tab-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        inline-size: 100%;
+        padding: 6px 10px 6px 8px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: none;
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: var(--text-sm);
+        line-height: 1.4;
+        text-align: start;
+        cursor: pointer;
+
+        &::before {
+          content: "";
+          flex: none;
+          inline-size: var(--menu-icon-size);
+          text-align: center;
+          color: var(--primary);
+          font-weight: 600;
+        }
+
+        &[aria-checked="true"] {
+          color: var(--heading);
+          font-weight: 600;
+
+          &::before {
+            content: "✓";
+          }
+        }
+
+        &:hover {
+          background: var(--paper);
+          color: var(--heading);
+        }
+
+        &:focus-visible {
+          outline: var(--focus-outline);
+          outline-offset: -2px;
+          background: var(--paper);
+          color: var(--heading);
+        }
       }
     }
   }

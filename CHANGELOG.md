@@ -44,6 +44,22 @@ here.
   uncategorized pages at the end, and alphabetical by title within each group),
   or `"title"` (alphabetical by title across the scope), switching ARIA labels
   to neutral previous/next wording for non-chronological orders.
+- **Pure-Markdown tabbed panels (`> [!TAB]`)**: Consecutive `> [!TAB] Title`
+  blocks are grouped at build time (`_funcs/typeset-tabs.html`) into a single-row
+  ARIA tablist with `hidden="until-found"` panels (`beforematch` sync for
+  Find-in-Page), automatic synchronization across groups sharing the same sorted
+  title set (opt out with `{.nogroup}`, or link subsets with `{group="..."}`),
+  CSS scroll-driven edge fades (`overscroll-behavior-x: contain`), an external
+  `⋯` native `popover` jump menu when tabs overflow, and flat titled sections in
+  print and Atom/RSS feeds.
+- **Responsive table wrapper (`.table-wrap`)**: HTML Markdown tables are wrapped
+  in a focusable horizontal scroll container with `overscroll-behavior-x: contain`
+  and scroll-driven edge fades so wide tables stay within the article measure on
+  narrow screens without affecting `{.fixed}` equal-width tables or feeds.
+- **Subtle inline code tint**: Inline `<code>` / `<samp>` in running prose now
+  carry an adaptive backdrop (`4.5%` light / `8%` dark of `--text`) so short
+  tokens and CJK markup snippets read clearly on any ground, while headings,
+  navigation/TOC, callout/table/tab labels, and print stay unboxed.
 - **Table `caption` and `.fixed` layout**: Markdown tables now support
   `{caption="..."}` (emitted as a styled `<caption>` above the table rather than
   an HTML attribute) and `{.fixed}` (`table-layout: fixed` equal-width columns

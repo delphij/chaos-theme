@@ -171,6 +171,10 @@ lightboxClose = '닫기'
 verticalToHorizontal = '가로쓰기로 전환'
 verticalToVertical = '세로쓰기로 전환'
 
+# Tabs
+tabsLabel = '옵션'
+tabsMore = '더 많은 탭'
+
 # Pluralised messages (must stay last: TOML tables capture every key below them)
 [termPostCount]
   other = '{{ .Name }} ({{ .Count }}개의 글)'

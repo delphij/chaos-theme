@@ -22,6 +22,7 @@ import { initTaskLists } from './modules/task-list.js';
 import { initSidebar } from './modules/sidebar.js';
 import { initTagCounts } from './modules/tag-counts.js';
 import { initVerticalSheets } from './modules/vertical-sheets.js';
+import { initTabs } from './modules/tabs.js';
 
 initTheme();
 initOverlays();
@@ -30,6 +31,7 @@ initScrollSpy();
 // sheets first and print-footnotes then rewrites footnote/link anchors on the
 // final print DOM instead of getting wiped by a subsequent relayout.
 initVerticalSheets();
+initTabs();
 initPrintFootnotes();
 initCodeCopy();
 initHeadingCopy();
