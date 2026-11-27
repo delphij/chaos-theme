@@ -607,19 +607,21 @@
      Used for showing pronunciation above Chinese characters */
   ruby {
     ruby-position: over;               /* Position annotations above base text */
+    ruby-align: center;                /* Keep multi-char bases together instead of space-around */
+    ruby-overhang: auto;               /* Allow wide glosses to overhang unannotated neighbors */
     font-variant-east-asian: ruby;
   }
 
   /* Ruby text - The small pronunciation guide */
   rt {
     font-family: var(--font-sans);
-    font-size: 0.55em;
+    font-size: 0.58em;
     line-height: 1;
     margin-bottom: -0.1em;
-    color: var(--muted);
+    color: color-mix(in srgb, var(--text) 78%, var(--muted));
     font-weight: normal;
-    letter-spacing: 0.05em;
-    padding: 0 0.1em;
+    letter-spacing: 0;
+    padding: 0;
     text-emphasis: none;               /* Never draw emphasis marks on ruby glosses */
   }
 
