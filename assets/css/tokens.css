@@ -568,8 +568,10 @@
        webfont can prepend it or override --font-em without restyling em. */
     --font-em-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                      "Noto Sans", "Liberation Sans", "DejaVu Sans";
-    --font-em: "Chaos Kai Kaiyuan", "Chaos Kai", "Chaos Kai Fallback",
-               "Chaos Serif", "Chaos Songti", "Chaos Serif Fallback",
+    --font-em: "Chaos Kai Kaiyuan", var(--webfont-kai-em, "Chaos Kai"),
+               "Chaos Kai", "Chaos Kai Fallback",
+               "Chaos Serif", var(--webfont-serif-em, "Chaos Songti"),
+               "Chaos Songti", "Chaos Serif Fallback",
                var(--font-em-latin),
                "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
                "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
@@ -577,9 +579,9 @@
     /* Copybook grid stack & cinnabar rules (p.mizige in prose.css).
        Derived from --primary (蘇芳 Suō by day, 退紅 Arazome by night) so dark
        mode automatically shifts to a muted rose grid without glaring. */
-    --font-mizige: "Chaos Mizige Kaiyuan", "Chaos Mizige Kaiti",
-                   "Chaos Mizige SimKai", "Chaos Mizige Serif",
-                   "Chaos Mizige Songti",
+    --font-mizige: "Chaos Mizige Kaiyuan", var(--webfont-kai, "Chaos Mizige Kaiti"),
+                   "Chaos Mizige Kaiti", "Chaos Mizige SimKai",
+                   "Chaos Mizige Serif", "Chaos Mizige Songti",
                    var(--font-sans);
     --mizige-border: color-mix(in srgb, var(--primary) 45%, transparent);
     --mizige-guide: color-mix(in srgb, var(--primary) 26%, transparent);

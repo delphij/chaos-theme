@@ -1,0 +1,25 @@
+{
+  "urlPrefix": "/_fonts",
+  "fonts": [
+    {
+      "slug": "kai",
+      "family": "Kaiyuan Kai SC",
+      "role": "kai",
+      "type": "otf",
+      "version": "0.0.1",
+      "url": "https://github.com/daizhige-org/kaiyuan-kai/releases/download/v0.0.1/kaiyuan-kai-sc.ttf",
+      "sha512": "sha512-bys426halxguMaw4oFkULEbVhT43j7k1TK8T6f2G8TsF6YH1B0SpE32LG3LYFDDqOKtXWsCqEN1429+GSMXALQ==",
+      "licenseUrl": "https://raw.githubusercontent.com/daizhige-org/kaiyuan-kai/v0.0.1/ARPHICPL.TXT"
+    },
+    {
+      "slug": "serif",
+      "family": "Source Han Serif SC Web",
+      "role": "serif",
+      "type": "otf",
+      "version": "2.003R",
+      "url": "https://github.com/adobe-fonts/source-han-serif/raw/2.003R/SubsetOTF/CN/SourceHanSerifCN-Regular.otf",
+      "sha512": "sha512-A3bsO23mT7gvlr6ps+GDQ7CXoe/LVP7tPX6kUJcwLB8XRNWKjnTMabyuso2G+rPkU09Wb8jEi5e/kdWsOhMAUw==",
+      "licenseUrl": "https://github.com/adobe-fonts/source-han-serif/raw/2.003R/LICENSE.txt"
+    }
+  ]
+}

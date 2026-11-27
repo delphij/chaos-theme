@@ -995,8 +995,9 @@
 
   .vertical-book {
     --vertical-bleed: 0px;
-    --vertical-font: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "Songti TC",
-                     "STSong", "PMingLiU", Georgia, serif;
+    --vertical-font: "Source Han Serif SC", "Noto Serif CJK SC",
+                     var(--webfont-serif, "Songti SC"),
+                     "Songti SC", "Songti TC", "STSong", "PMingLiU", Georgia, serif;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1161,8 +1162,9 @@
     --vertical-rule: color-mix(in srgb, var(--muted) 28%, transparent);
     writing-mode: vertical-rl;
     text-orientation: mixed;
-    font-family: var(--vertical-font, "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "Songti TC",
-                 "STSong", "PMingLiU", Georgia, serif);
+    font-family: var(--vertical-font, "Source Han Serif SC", "Noto Serif CJK SC",
+                 var(--webfont-serif, "Songti SC"),
+                 "Songti SC", "Songti TC", "STSong", "PMingLiU", Georgia, serif);
     font-size: 1.25rem;
     color: var(--fg);
     background-color: var(--blockquote-bg);

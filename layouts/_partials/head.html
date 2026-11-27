@@ -49,6 +49,7 @@
   {{- end -}}
 {{- end -}}
 {{ partialCached "head/css.html" . }}
+{{- partialCached "head/webfonts.html" . }}
 {{- /* Syncs <meta name="color-scheme"> with any stored override before first
        paint. main.js is deferred, so leaving this to it paints one wrong-scheme
        frame first. Without JS, the meta stays "light dark" and CSS follows the
