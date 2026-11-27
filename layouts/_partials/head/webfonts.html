@@ -1,13 +1,13 @@
 {{- /* Opt-in self-hosted CJK webfonts (enabled via `[params.webfonts] enable = true`).
      Reads the pinned descriptor in `assets/data/webfonts.json` (shared with
-     `tools/fetch_webfonts.py`), links same-origin `/_fonts/.../font.css`
-     sheets, and fills the `--webfont-*` slots in `tokens.css` / `prose.css`
-     so font stacks stay single-source-of-truth and locale-specific `:lang()`
-     overrides in `@layer chaos.tokens` are never clobbered. */ -}}
+     `tools/fetch_webfonts.py`), fingerprints each `assets/_fonts/<slug>/<version>/font.css`
+     via Hugo Pipes (publishing `font.<sha256>.css` alongside the `.woff2` slices
+     with SRI `integrity`), and fills the `--webfont-*` slots in `tokens.css` /
+     `prose.css` so font stacks stay DRY and locale `:lang()` rules stay intact. */ -}}
 {{- if site.Params.webfonts.enable -}}
   {{- with resources.Get "data/webfonts.json" -}}
     {{- with . | transform.Unmarshal -}}
-      {{- $prefix := strings.TrimRight "/" (or .urlPrefix "/_fonts") -}}
+      {{- $assetPrefix := strings.Trim (or .urlPrefix "_fonts") "/" -}}
       {{- $decls := slice -}}
       {{- range .fonts -}}
         {{- if eq .role "kai" -}}
@@ -15,7 +15,11 @@
         {{- else if eq .role "serif" -}}
           {{- $decls = $decls | append (printf `--webfont-serif:%q` .family) (printf `--webfont-serif-em:"%s Em"` .family) -}}
         {{- end -}}
-<link rel="stylesheet" href="{{ printf "%s/%s/%s/font.css" $prefix .slug .version | relURL }}">
+        {{- with resources.Get (printf "%s/%s/%s/font.css" $assetPrefix .slug .version) -}}
+          {{- with . | fingerprint -}}
+<link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+          {{- end -}}
+        {{- end -}}
       {{- end -}}
       {{- if $decls }}
 <style>{{ printf `:root{%s}` (delimit $decls ";") | safeCSS }}</style>

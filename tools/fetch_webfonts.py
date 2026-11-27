@@ -321,8 +321,8 @@ def intersect_unicode_range(urange_str: str, allowed: tuple[tuple[int, int], ...
     )
 
 
-def build_em_alias_rules(rules: list[str], family: str) -> list[str]:
-    """Emit Han-only `italic` + `size-adjust: 106%` `@font-face` aliases reusing
+def build_em_alias_rules(rules: list[str], family: str, em_size_adjust: str = "106%") -> list[str]:
+    """Emit Han-only `italic` + `size-adjust` `@font-face` aliases reusing
     the same `.woff2` slice URLs for `--font-em` (zero extra network/disk cost)."""
     em_family = f"{family} Em"
     em_rules: list[str] = []
@@ -336,7 +336,7 @@ def build_em_alias_rules(rules: list[str], family: str) -> list[str]:
             continue
         em_rules.append(
             f"@font-face{{font-family:'{em_family}';font-style:italic;font-weight:400;"
-            f"size-adjust:106%;font-display:swap;src:{src_m.group(1)};unicode-range:{han_ur}}}"
+            f"size-adjust:{em_size_adjust};font-display:swap;src:{src_m.group(1)};unicode-range:{han_ur}}}"
         )
     return em_rules
 
@@ -399,7 +399,7 @@ def process_css(
 
 def assemble_from_npm(
     spec: dict, tmp_dir: Path, url_base: str, cache_dir: Path
-) -> tuple[int, int, list[str]]:
+) -> tuple[int, int, list[str], str]:
     css_entry = str(spec.get("css", ""))
     tarball_url = str(spec.get("tarball", ""))
     sha512 = str(spec.get("sha512", ""))
@@ -422,7 +422,6 @@ def assemble_from_npm(
         css_dir = posixpath.dirname(css_member)
         em_family = str(spec.get("family", "")) if spec.get("role") in ("kai", "serif") else ""
         minified_css, woff2_map = process_css(css_text, css_dir, url_base, em_family=em_family)
-        (tmp_dir / "font.css").write_text(minified_css, encoding="utf-8")
 
         total_bytes = 0
         for tar_path, filename in sorted(woff2_map.items()):
@@ -439,7 +438,7 @@ def assemble_from_npm(
                 (tmp_dir / lic).write_bytes(tf.extractfile(members[lic_member]).read())
                 licenses_saved.append(lic)
 
-    return len(woff2_map), total_bytes, licenses_saved
+    return len(woff2_map), total_bytes, licenses_saved, minified_css
 
 
 _WORKER_FONT_BYTES: bytes = b""
@@ -455,11 +454,11 @@ def _init_slice_worker(source_path: str, features: list[str]) -> None:
     _WORKER_FEATURES = list(features)
 
 
-def _slice_one_chunk(task: tuple[int, list[int], str, str, str]) -> tuple[int, int, str]:
+def _slice_one_chunk(task: tuple[int, list[int], str, str, str, str]) -> tuple[int, int, str]:
     from fontTools import subset as ft_subset
     from fontTools.ttLib import TTFont
 
-    idx, cps, tmp_dir_str, family, filename = task
+    idx, cps, tmp_dir_str, family, filename, size_adjust = task
     out_woff2 = Path(tmp_dir_str) / filename
     options = ft_subset.Options(
         flavor="woff2",
@@ -477,9 +476,10 @@ def _slice_one_chunk(task: tuple[int, list[int], str, str, str]) -> tuple[int, i
 
     size = out_woff2.stat().st_size
     urange = format_unicode_range(cps)
+    sa = f"size-adjust:{size_adjust};" if size_adjust else ""
     rule = (
         f"@font-face{{font-family:'{family}';font-style:normal;font-weight:400;"
-        f"font-display:swap;src:url('{filename}') format('woff2');unicode-range:{urange}}}"
+        f"{sa}font-display:swap;src:url('{filename}') format('woff2');unicode-range:{urange}}}"
     )
     return idx, size, rule
 
@@ -490,7 +490,7 @@ def assemble_from_otf(
     url_base: str,
     cache_dir: Path,
     jobs: int,
-) -> tuple[int, int, list[str]]:
+) -> tuple[int, int, list[str], str]:
     try:
         import logging
 
@@ -529,8 +529,10 @@ def assemble_from_otf(
         f"ranked Han: {len(han_freq)}, jobs: {worker_count})"
     )
 
+    size_adjust = str(spec.get("sizeAdjust", ""))
+    em_size_adjust = str(spec.get("emSizeAdjust", "106%"))
     tasks = [
-        (idx, cps, str(tmp_dir), family, f"{encode_base32hex(idx)}.woff2")
+        (idx, cps, str(tmp_dir), family, f"{encode_base32hex(idx)}.woff2", size_adjust)
         for idx, cps in enumerate(slices)
     ]
 
@@ -550,9 +552,9 @@ def assemble_from_otf(
     rules = [rule for _, _, rule in results]
 
     if spec.get("role") in ("kai", "serif"):
-        rules.extend(build_em_alias_rules(rules, family))
+        rules.extend(build_em_alias_rules(rules, family, em_size_adjust=em_size_adjust))
 
-    (tmp_dir / "font.css").write_text("\n".join(rules) + "\n", encoding="utf-8")
+    css_text = "\n".join(rules) + "\n"
 
     licenses_saved: list[str] = []
     lic_url = str(spec.get("licenseUrl", ""))
@@ -567,7 +569,7 @@ def assemble_from_otf(
         (tmp_dir / "LICENSE.txt").write_bytes(lic_bytes)
         licenses_saved.append("LICENSE.txt")
 
-    return len(slices), total_bytes, licenses_saved
+    return len(slices), total_bytes, licenses_saved, css_text
 
 
 def build_readme_txt(spec: dict, slice_count: int, licenses_saved: list[str]) -> str:
@@ -593,6 +595,7 @@ def build_readme_txt(spec: dict, slice_count: int, licenses_saved: list[str]) ->
 def install_font(
     spec: dict,
     out_dir: Path,
+    css_out_dir: Path,
     url_prefix: str,
     force: bool,
     cache_dir: Path,
@@ -602,12 +605,15 @@ def install_font(
     version = validate_segment("version", str(spec.get("version", "")))
     kind = str(spec.get("type", "npm"))
     sha512 = str(spec.get("sha512", ""))
+    size_adjust = str(spec.get("sizeAdjust", ""))
+    em_size_adjust = str(spec.get("emSizeAdjust", "106%"))
 
     target_dir = out_dir / slug / version
+    css_path = css_out_dir / slug / version / "font.css"
     marker_path = target_dir / ".ready"
     url_base = f"{url_prefix.rstrip('/')}/{slug}/{version}" if url_prefix else ""
 
-    if not force and marker_path.is_file():
+    if not force and marker_path.is_file() and css_path.is_file():
         try:
             existing = json.loads(marker_path.read_text(encoding="utf-8"))
             if (
@@ -616,6 +622,8 @@ def install_font(
                 and existing.get("type") == kind
                 and existing.get("url_base") == url_base
                 and existing.get("css_schema") == CSS_SCHEMA
+                and existing.get("size_adjust") == size_adjust
+                and existing.get("em_size_adjust") == em_size_adjust
             ):
                 print(f"SKIP {slug}@{version} (verified at {target_dir})")
                 return existing
@@ -627,11 +635,11 @@ def install_font(
     tmp_dir = Path(tempfile.mkdtemp(prefix=f".{slug}-{version}-", dir=out_dir / slug))
     try:
         if kind == "npm":
-            slice_count, total_bytes, licenses_saved = assemble_from_npm(
+            slice_count, total_bytes, licenses_saved, css_text = assemble_from_npm(
                 spec, tmp_dir, url_base, cache_dir
             )
         elif kind == "otf":
-            slice_count, total_bytes, licenses_saved = assemble_from_otf(
+            slice_count, total_bytes, licenses_saved, css_text = assemble_from_otf(
                 spec, tmp_dir, url_base, cache_dir, jobs
             )
         else:
@@ -642,6 +650,16 @@ def install_font(
             encoding="utf-8",
         )
 
+        css_path.parent.mkdir(parents=True, exist_ok=True)
+        fd, css_tmp = tempfile.mkstemp(prefix=".font-", suffix=".css", dir=css_path.parent)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(css_text)
+            os.replace(css_tmp, css_path)
+        except Exception:
+            Path(css_tmp).unlink(missing_ok=True)
+            raise
+
         info = {
             "slug": slug,
             "family": spec.get("family", ""),
@@ -651,7 +669,9 @@ def install_font(
             "sha512": sha512,
             "url_base": url_base,
             "css_schema": CSS_SCHEMA,
-            "css_url": f"{url_base}/font.css" if url_base else f"{slug}/{version}/font.css",
+            "size_adjust": size_adjust,
+            "em_size_adjust": em_size_adjust,
+            "css_path": str(css_path),
             "slices": slice_count,
             "woff2_bytes": total_bytes,
             "licenses": licenses_saved,
@@ -666,8 +686,8 @@ def install_font(
         os.replace(tmp_dir, target_dir)
         print(
             f"OK   {slug}@{version}: {slice_count} woff2 slices "
-            f"({total_bytes / 1024 / 1024:.2f} MiB), font.css "
-            f"({(target_dir / 'font.css').stat().st_size / 1024:.1f} KiB)"
+            f"({total_bytes / 1024 / 1024:.2f} MiB), {css_path} "
+            f"({css_path.stat().st_size / 1024:.1f} KiB)"
         )
         return info
     except Exception:
@@ -689,7 +709,13 @@ def main(argv: list[str] | None = None) -> int:
         "--out",
         type=Path,
         default=Path("static/_fonts"),
-        help="Output directory (default: static/_fonts)",
+        help="Output directory for .woff2 slices and licenses (default: static/_fonts)",
+    )
+    parser.add_argument(
+        "--css-out",
+        type=Path,
+        default=Path("assets/_fonts"),
+        help="Output directory for Hugo Pipes font.css sheets (default: assets/_fonts)",
     )
     parser.add_argument(
         "--url-prefix",
@@ -729,6 +755,7 @@ def main(argv: list[str] | None = None) -> int:
             install_font(
                 spec=spec,
                 out_dir=args.out,
+                css_out_dir=args.css_out,
                 url_prefix=url_prefix,
                 force=args.force,
                 cache_dir=args.cache_dir,

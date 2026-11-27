@@ -3,5 +3,9 @@
 resources/
 public/
 .hugo_build.lock
+assets/_fonts/
+static/_fonts/
 exampleSite/assets/_data/
+exampleSite/assets/_fonts/
 exampleSite/assets/jsconfig.json
+exampleSite/static/_fonts/

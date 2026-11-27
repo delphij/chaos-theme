@@ -7,6 +7,8 @@
       "role": "kai",
       "type": "otf",
       "version": "0.0.1",
+      "sizeAdjust": "108%",
+      "emSizeAdjust": "112%",
       "url": "https://github.com/daizhige-org/kaiyuan-kai/releases/download/v0.0.1/kaiyuan-kai-sc.ttf",
       "sha512": "sha512-bys426halxguMaw4oFkULEbVhT43j7k1TK8T6f2G8TsF6YH1B0SpE32LG3LYFDDqOKtXWsCqEN1429+GSMXALQ==",
       "licenseUrl": "https://raw.githubusercontent.com/daizhige-org/kaiyuan-kai/v0.0.1/ARPHICPL.TXT"
