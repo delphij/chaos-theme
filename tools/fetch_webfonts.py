@@ -98,6 +98,21 @@ WOFF2_URL_RE = re.compile(
 SAFE_NAME_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 
 
+def encode_b32(raw: bytes) -> str:
+    return base64.b32encode(raw).decode("ascii").rstrip("=").lower()
+
+
+def cache_key_from_sha512(sha512: str) -> str:
+    """Derive a full 103-char lowercase RFC 4648 base32 key from `sha512-...`."""
+    _, _, b64 = sha512.partition("-")
+    return encode_b32(base64.b64decode(b64))
+
+
+def cache_key_from_url(url: str) -> str:
+    """Derive a full 103-char lowercase RFC 4648 base32 key from a URL's SHA-512."""
+    return encode_b32(hashlib.sha512(url.encode("utf-8")).digest())
+
+
 def default_cache_dir() -> Path:
     xdg = os.environ.get("XDG_CACHE_HOME")
     base = Path(xdg) if xdg else Path.home() / ".cache"
@@ -409,8 +424,7 @@ def assemble_from_npm(
         raise ValueError(f"Incomplete npm descriptor entry for {spec.get('slug')!r}")
 
     label = f"{spec['slug']}@{spec['version']}"
-    sha_tag = re.sub(r"[^A-Za-z0-9]", "", sha512.partition("-")[2])[:12]
-    cache_path = cache_dir / f"{spec['slug']}-{sha_tag}.tgz"
+    cache_path = cache_dir / cache_key_from_sha512(sha512)
     tar_bytes = fetch_verified_bytes(tarball_url, sha512, cache_path, label)
 
     with tarfile.open(fileobj=io.BytesIO(tar_bytes), mode="r:gz") as tf:
@@ -514,9 +528,7 @@ def assemble_from_otf(
         raise ValueError(f"Incomplete otf descriptor entry for {spec.get('slug')!r}")
 
     label = f"{spec['slug']}@{spec['version']}"
-    ext = Path(posixpath.basename(otf_url)).suffix or ".otf"
-    sha_tag = re.sub(r"[^A-Za-z0-9]", "", sha512.partition("-")[2])[:12]
-    source_path = cache_dir / f"{spec['slug']}-{sha_tag}{ext}"
+    source_path = cache_dir / cache_key_from_sha512(sha512)
     fetch_verified_bytes(otf_url, sha512, source_path, label)
 
     base_font = TTFont(str(source_path))
@@ -563,7 +575,7 @@ def assemble_from_otf(
     licenses_saved: list[str] = []
     lic_url = str(spec.get("licenseUrl", ""))
     if lic_url:
-        lic_cache = cache_dir / f"{spec['slug']}-{spec['version']}-LICENSE.txt"
+        lic_cache = cache_dir / cache_key_from_url(lic_url)
         if lic_cache.is_file() and lic_cache.stat().st_size > 0:
             lic_bytes = lic_cache.read_bytes()
         else:
@@ -699,6 +711,45 @@ def install_font(
         raise
 
 
+def cleanup_stale(
+    specs: list[dict],
+    out_dir: Path,
+    css_out_dir: Path,
+) -> int:
+    """Remove any files or directories under `out_dir` and `css_out_dir` that do
+    not belong to the active `(slug, version)` entries in the descriptor."""
+    expected: dict[str, set[str]] = {}
+    for spec in specs:
+        slug = validate_segment("slug", str(spec.get("slug", "")))
+        version = validate_segment("version", str(spec.get("version", "")))
+        expected.setdefault(slug, set()).add(version)
+
+    removed = 0
+    for root, keep_top_files in ((out_dir, {"manifest.json"}), (css_out_dir, set())):
+        if not root.is_dir():
+            continue
+        for entry in sorted(root.iterdir()):
+            if entry.name in keep_top_files and entry.is_file():
+                continue
+            if entry.name not in expected or not entry.is_dir():
+                if entry.is_dir() and not entry.is_symlink():
+                    shutil.rmtree(entry)
+                else:
+                    entry.unlink()
+                print(f"CLEAN {entry}")
+                removed += 1
+                continue
+            for sub in sorted(entry.iterdir()):
+                if sub.name not in expected[entry.name] or not sub.is_dir():
+                    if sub.is_dir() and not sub.is_symlink():
+                        shutil.rmtree(sub)
+                    else:
+                        sub.unlink()
+                    print(f"CLEAN {sub}")
+                    removed += 1
+    return removed
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Fetch and assemble pinned woff2 webfont slices from a JSON descriptor."
@@ -744,6 +795,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Rebuild slices even if target directory is already verified (reuses SHA-512 verified cache)",
     )
+    parser.add_argument(
+        "--cleanup",
+        action="store_true",
+        help="Remove stale font directories/files under --out and --css-out not in the descriptor",
+    )
     args = parser.parse_args(argv)
 
     descriptor = json.loads(args.descriptor.read_text(encoding="utf-8"))
@@ -773,6 +829,8 @@ def main(argv: list[str] | None = None) -> int:
         + "\n",
         encoding="utf-8",
     )
+    if args.cleanup:
+        cleanup_stale(specs, args.out, args.css_out)
     return 0
 
 
