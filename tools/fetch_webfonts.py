@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+from concurrent.futures import ProcessPoolExecutor
 import hashlib
 import io
 import json
@@ -47,6 +48,7 @@ from pathlib import Path
 
 USER_AGENT = "chaos-fetch-webfonts/1.0 (+https://github.com/delphij/chaos-theme)"
 DEFAULT_DESCRIPTOR = Path(__file__).resolve().parent.parent / "assets" / "data" / "webfonts.json"
+DEFAULT_FREQ_DICT = Path(__file__).resolve().parent / "vendor" / "jieba" / "dict.txt"
 CSS_SCHEMA = 1
 BASE32HEX = "0123456789abcdefghijklmnopqrstuv"
 
@@ -227,20 +229,23 @@ def gb2312_tier(cp: int) -> int:
     return 3
 
 
-def count_corpus_han_freq(corpus_dir: Path | None) -> dict[int, int]:
-    """Count Han character frequencies across Markdown files in `corpus_dir`."""
-    if not corpus_dir or not corpus_dir.is_dir():
+def load_static_han_freq(dict_path: Path = DEFAULT_FREQ_DICT) -> dict[int, int]:
+    """Load deterministic Han character frequencies from the theme's vendored
+    `tools/vendor/jieba/dict.txt` (word frequencies aggregated per Han char).
+    Guarantees reproducible, immutable-cache-safe slices across all machines."""
+    if not dict_path.is_file():
         return {}
     freq: dict[int, int] = {}
-    for md in corpus_dir.rglob("*.md"):
-        try:
-            text = md.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
-            continue
-        for ch in text:
-            cp = ord(ch)
-            if is_cjk_ideograph(cp):
-                freq[cp] = freq.get(cp, 0) + 1
+    with dict_path.open("r", encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            parts = line.split()
+            if len(parts) < 2 or not parts[1].isdigit():
+                continue
+            weight = int(parts[1])
+            for ch in parts[0]:
+                cp = ord(ch)
+                if is_cjk_ideograph(cp):
+                    freq[cp] = freq.get(cp, 0) + weight
     return freq
 
 
@@ -437,17 +442,59 @@ def assemble_from_npm(
     return len(woff2_map), total_bytes, licenses_saved
 
 
+_WORKER_FONT_BYTES: bytes = b""
+_WORKER_FEATURES: list[str] = []
+
+
+def _init_slice_worker(source_path: str, features: list[str]) -> None:
+    import logging
+
+    global _WORKER_FONT_BYTES, _WORKER_FEATURES
+    logging.getLogger("fontTools").setLevel(logging.ERROR)
+    _WORKER_FONT_BYTES = Path(source_path).read_bytes()
+    _WORKER_FEATURES = list(features)
+
+
+def _slice_one_chunk(task: tuple[int, list[int], str, str, str]) -> tuple[int, int, str]:
+    from fontTools import subset as ft_subset
+    from fontTools.ttLib import TTFont
+
+    idx, cps, tmp_dir_str, family, filename = task
+    out_woff2 = Path(tmp_dir_str) / filename
+    options = ft_subset.Options(
+        flavor="woff2",
+        layout_features=_WORKER_FEATURES,
+        desubroutinize=False,
+        drop_tables=["DSIG"],
+        hinting=False,
+    )
+    font = TTFont(io.BytesIO(_WORKER_FONT_BYTES))
+    subsetter = ft_subset.Subsetter(options=options)
+    subsetter.populate(unicodes=cps)
+    subsetter.subset(font)
+    font.save(str(out_woff2))
+    font.close()
+
+    size = out_woff2.stat().st_size
+    urange = format_unicode_range(cps)
+    rule = (
+        f"@font-face{{font-family:'{family}';font-style:normal;font-weight:400;"
+        f"font-display:swap;src:url('{filename}') format('woff2');unicode-range:{urange}}}"
+    )
+    return idx, size, rule
+
+
 def assemble_from_otf(
     spec: dict,
     tmp_dir: Path,
     url_base: str,
-    corpus_dir: Path | None,
     cache_dir: Path,
+    jobs: int,
 ) -> tuple[int, int, list[str]]:
     try:
         import logging
 
-        from fontTools import subset as ft_subset
+        from fontTools import subset as ft_subset  # noqa: F401
         from fontTools.ttLib import TTFont
 
         logging.getLogger("fontTools").setLevel(logging.ERROR)
@@ -472,42 +519,35 @@ def assemble_from_otf(
     all_cps = sorted(base_font.getBestCmap().keys())
     base_font.close()
 
-    corpus_freq = count_corpus_han_freq(corpus_dir)
-    slices = build_tiered_slices(all_cps, corpus_freq)
+    han_freq = load_static_han_freq()
+    slices = build_tiered_slices(all_cps, han_freq)
+    worker_count = max(1, min(jobs, len(slices)))
 
     print(
         f"SLICE {label}: {len(all_cps)} codepoints -> "
         f"{len(slices)} woff2 slices (slice 0: {len(slices[0])} core punct/ASCII, "
-        f"corpus chars ranked: {len(corpus_freq)})"
+        f"ranked Han: {len(han_freq)}, jobs: {worker_count})"
     )
 
-    options = ft_subset.Options(
-        flavor="woff2",
-        layout_features=list(PRESERVED_OT_FEATURES),
-        desubroutinize=False,
-        drop_tables=["DSIG"],
-        hinting=False,
-    )
+    tasks = [
+        (idx, cps, str(tmp_dir), family, f"{encode_base32hex(idx)}.woff2")
+        for idx, cps in enumerate(slices)
+    ]
 
-    rules: list[str] = []
-    total_bytes = 0
-    for idx, cps in enumerate(slices):
-        filename = f"{encode_base32hex(idx)}.woff2"
-        out_woff2 = tmp_dir / filename
+    if worker_count == 1:
+        _init_slice_worker(str(source_path), PRESERVED_OT_FEATURES)
+        results = [_slice_one_chunk(t) for t in tasks]
+    else:
+        with ProcessPoolExecutor(
+            max_workers=worker_count,
+            initializer=_init_slice_worker,
+            initargs=(str(source_path), PRESERVED_OT_FEATURES),
+        ) as pool:
+            results = list(pool.map(_slice_one_chunk, tasks, chunksize=4))
 
-        font = TTFont(str(source_path))
-        subsetter = ft_subset.Subsetter(options=options)
-        subsetter.populate(unicodes=cps)
-        subsetter.subset(font)
-        font.save(str(out_woff2))
-        font.close()
-
-        total_bytes += out_woff2.stat().st_size
-        urange = format_unicode_range(cps)
-        rules.append(
-            f"@font-face{{font-family:'{family}';font-style:normal;font-weight:400;"
-            f"font-display:swap;src:url('{filename}') format('woff2');unicode-range:{urange}}}"
-        )
+    results.sort(key=lambda item: item[0])
+    total_bytes = sum(size for _, size, _ in results)
+    rules = [rule for _, _, rule in results]
 
     if spec.get("role") in ("kai", "serif"):
         rules.extend(build_em_alias_rules(rules, family))
@@ -555,8 +595,8 @@ def install_font(
     out_dir: Path,
     url_prefix: str,
     force: bool,
-    corpus_dir: Path | None,
     cache_dir: Path,
+    jobs: int,
 ) -> dict:
     slug = validate_segment("slug", str(spec.get("slug", "")))
     version = validate_segment("version", str(spec.get("version", "")))
@@ -592,7 +632,7 @@ def install_font(
             )
         elif kind == "otf":
             slice_count, total_bytes, licenses_saved = assemble_from_otf(
-                spec, tmp_dir, url_base, corpus_dir, cache_dir
+                spec, tmp_dir, url_base, cache_dir, jobs
             )
         else:
             raise ValueError(f"Unsupported font descriptor type: {kind!r}")
@@ -657,10 +697,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Override descriptor urlPrefix (default: descriptor's urlPrefix, usually /_fonts)",
     )
     parser.add_argument(
-        "--corpus",
-        type=Path,
-        default=Path("content"),
-        help="Optional Markdown corpus directory for frequency-tiered OTF slicing (default: content)",
+        "--jobs",
+        "-j",
+        type=int,
+        default=os.cpu_count() or 1,
+        help="Parallel worker processes for OTF/TTF slicing (default: CPU count)",
     )
     parser.add_argument(
         "--cache-dir",
@@ -690,8 +731,8 @@ def main(argv: list[str] | None = None) -> int:
                 out_dir=args.out,
                 url_prefix=url_prefix,
                 force=args.force,
-                corpus_dir=args.corpus if args.corpus.is_dir() else None,
                 cache_dir=args.cache_dir,
+                jobs=args.jobs,
             )
         )
 
