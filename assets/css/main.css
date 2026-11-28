@@ -371,7 +371,7 @@
       right: 0;
       gap: 4px;
       padding: 16px var(--gutter);
-      background: var(--surface);
+      background: var(--ground);
       border-top: var(--border);
       border-bottom: var(--border);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
