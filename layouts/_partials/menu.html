@@ -13,9 +13,10 @@ and active state indicators using aria-current. Supports i18n via menu identifie
 {{- $page := .page }}
 {{- range index site.Menus .menuID }}
   {{- $attrs := dict "href" .URL }}
+  {{- $isHome := and .Page .Page.IsHome }}
   {{- if $page.IsMenuCurrent .Menu . }}
     {{- $attrs = merge $attrs (dict "class" "active" "aria-current" "page") }}
-  {{- else if $page.HasMenuCurrent .Menu . }}
+  {{- else if and (not $isHome) (or ($page.HasMenuCurrent .Menu .) (and .Page ($page.IsDescendant .Page))) }}
     {{- $attrs = merge $attrs (dict "class" "ancestor" "aria-current" "true") }}
   {{- end }}
   {{- $name := .Name }}

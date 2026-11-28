@@ -10,7 +10,17 @@
 
 const DESKTOP_QUERY = '(min-width: 1360px)';
 
-function buildWidget(section) {
+function normalizePath(url) {
+  if (!url) return '';
+  try {
+    const { pathname } = new URL(url, window.location.href);
+    return pathname.replace(/\/page\/\d+\/?$/, '/').replace(/\/?$/, '/');
+  } catch {
+    return '';
+  }
+}
+
+function buildWidget(section, currentPath) {
   if (!section || !Array.isArray(section.items)) return null;
 
   const widget = document.createElement('div');
@@ -29,6 +39,10 @@ function buildWidget(section) {
     a.href = item.url;
     a.textContent = `${prefix}${item.name}`;
     a.dataset.count = item.count;
+    if (currentPath && normalizePath(item.url) === currentPath) {
+      a.classList.add('active');
+      a.setAttribute('aria-current', 'page');
+    }
     cloud.append(a);
   }
 
@@ -64,8 +78,9 @@ export function initSidebar() {
       if (!Array.isArray(data?.widgets)) return;
       const card = document.createElement('div');
       card.className = 'sidebar-card';
+      const currentPath = normalizePath(window.location.href);
       for (const section of data.widgets) {
-        const widget = buildWidget(section);
+        const widget = buildWidget(section, currentPath);
         if (widget) card.append(widget);
       }
       if (card.childElementCount > 0) {

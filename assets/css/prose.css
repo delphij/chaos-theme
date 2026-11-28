@@ -760,6 +760,22 @@
     }
   }
 
+  /* Shared active bottom-indicator bar for horizontal tabs (.tab-btn) and
+     desktop top navigation links (nav.main-links a). Border on ::after
+     survives forced-colors mode and adds no dimensions that would shift
+     adjacent items. */
+  .tabs > .tab-bar > .tab-list > .tab-btn[aria-selected="true"],
+  nav.main-links a:is(.active, .ancestor) {
+    color: var(--heading);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: auto 8px 0;
+      border-block-end: 2px solid var(--primary);
+    }
+  }
+
   /* Horizontal scroll container for Markdown tables (render-table.html).
      Keeps narrow tables at 100% width while letting wide tables scroll inside
      the article measure on narrow screens instead of overflowing the page. */
@@ -1837,19 +1853,6 @@
           outline: var(--focus-outline);
           outline-offset: -3px;
           border-radius: var(--radius-sm);
-        }
-
-        &[aria-selected="true"] {
-          color: var(--heading);
-
-          /* Border on a pseudo-element survives forced-colors mode and adds no
-             dimensions that would shift adjacent tabs. */
-          &::after {
-            content: "";
-            position: absolute;
-            inset: auto 8px 0;
-            border-block-end: 2px solid var(--primary);
-          }
         }
       }
 
