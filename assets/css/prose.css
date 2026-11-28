@@ -1420,21 +1420,34 @@
       }
     }
 
+    /* WebKit/Safari forces <rt> to position: static in Style::Adjuster even
+       with !important, so absolute positioning on <rt> is ignored there.
+       Instead, make <ruby> a 1em-wide column inline-flex (whose baseline comes
+       from its FIRST item -- the base text -- unlike inline-block which uses
+       the LAST line box and shifts the base right in Blink/Chrome), collapse
+       <rt> to zero block-size and zero inline-size (so long glosses neither
+       widen the column nor stretch base character spacing), center its content
+       symmetrically along the inline axis, and shift it into the right-hand
+       gutter via translateX(). */
     ruby {
-      position: relative;
-      display: inline;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
       white-space: nowrap;
-      line-height: inherit;
+      line-height: 1;
     }
 
     rt {
-      position: absolute;
-      inset-inline: 0;
-      inset-block-start: -0.58em;
-      font-size: 0.42em;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      block-size: 0;
+      inline-size: 0;
+      margin: 0;
+      transform: translateX(3.25em);
+      font-size: 0.48em;
       line-height: 1;
       letter-spacing: 0;
-      text-align: center;
       white-space: nowrap;
       pointer-events: none;
 
@@ -1444,8 +1457,8 @@
          place 2nd/3rd/4th tone marks to the right of the final symbol, and keep
          neutral tone (˙) upright above the first symbol. */
       &.rt-bopomofo {
-        inset-block-start: -0.62em;
-        font-size: 0.34em;
+        transform: translateX(3.95em);
+        font-size: 0.36em;
         text-orientation: upright;
 
         .rt-bpmf-body {
@@ -1457,7 +1470,7 @@
         .rt-tone {
           position: absolute;
           inset-inline-end: 0;
-          inset-block-start: -0.95em;
+          inset-block-start: -0.88em;
           line-height: 1;
         }
 
@@ -1534,12 +1547,16 @@
     .pangpi-text {
       position: absolute;
       inset-inline-start: 0;
-      /* 1.15em at 0.5em font-size = 0.575 parent em (~11.5px from centerline),
-         hugging the annotated glyph closely while paintRules() shifts the
-         column rule right to balance both sides of the (text + note) unit. */
-      inset-block-end: 1.15em;
+      /* 0.98em at 0.62em font-size = ~0.61 parent em from centerline (~0.11em
+         clear of the 1em base glyph), using --font-em KaiTi as the commentator's
+         second voice (matching traditional cinnabar brush-annotated woodblocks)
+         while keeping small characters legible (~12.4px desktop / 11.2px mobile). */
+      inset-block-end: 0.98em;
       color: var(--primary);
-      font-size: 0.5em;
+      font-family: var(--font-em);
+      font-style: italic;
+      font-synthesis-style: none;
+      font-size: 0.62em;
       line-height: 1.15;
       letter-spacing: 0.02em;
       white-space: nowrap;
