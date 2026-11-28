@@ -770,6 +770,10 @@
 
     > table {
       margin: 0;
+      /* Keep WebKit glyph overhang (e.g. trailing full-width CJK punctuation)
+         inside the table box so it does not leak a few phantom pixels into
+         .table-wrap and trigger a spurious scrollbar / edge-fade mask. */
+      overflow-x: clip;
 
       &:not(.fixed) {
         @media screen and (max-width: 768px) {
@@ -800,6 +804,10 @@
       overflow: visible;
       mask: none;
       animation: none;
+
+      > table {
+        overflow: visible;
+      }
     }
   }
 
